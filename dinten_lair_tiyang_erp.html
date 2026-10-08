@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+    <meta content="width=device-width, initial-scale=1 maximum-scale=1 minimum-scale=1" name="viewport"/>
+    <title>Dintên Lair (ꦢꦶꦤ꧀ꦠꦼꦤ꧀ꦭꦲꦶꦂ) Tiyang ERP</title>
+    <link href='/img/pk.ico' rel='shortcut icon'>
+    <link crossorigin="anonymous"
+          href="https://cdnjs.cloudflare.com/ajax/libs/jquery-mobile/1.4.2/jquery.mobile.min.css"
+          rel="stylesheet">
+    <link crossorigin="anonymous"
+          href="https://cdnjs.cloudflare.com/ajax/libs/jqwidgets/18.0.0/jqwidgets/styles/jqx.base.min.css"
+          rel="stylesheet">
+    <style>
+        @font-face {
+            font-display: swap;
+            font-family: "nyk Ngayogyan Jejeg";
+            font-style: normal;
+            font-weight: normal;
+            src: url(/fonts/ngayogyan.woff2) format('woff2'),
+            url(/fonts/ngayogyan.woff) format('woff'),
+            url(/fonts/ngayogyan.ttf) format('truetype');
+            unicode-range: U+A980-A9DF;
+        }
+
+        :lang(jv-Java) {
+            font-family: "nyk Ngayogyan Jejeg", serif;
+        }
+    </style>
+</head>
+<body class='default'>
+<div data-role="page">
+    <div data-role="header">
+        <h1>Dintên Lair (<span lang="jv-Java-ID">ꦢꦶꦤ꧀ꦠꦼꦤ꧀ꦭꦲꦶꦂ</span>) Tiyang ERP</h1>
+    </div>
+    <div class="ui-grid-a my-breakpoint">
+        <div id="grid">
+        </div>
+    </div>
+</div>
+
+<script crossorigin="anonymous" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script crossorigin="anonymous"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery-mobile/1.4.2/jquery.mobile.min.js"></script>
+<script crossorigin="anonymous"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jqwidgets/18.0.0/jqwidgets/jqxcore.min.js"></script>
+<script crossorigin="anonymous"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jqwidgets/18.0.0/jqwidgets/jqxdata.min.js"></script>
+<script crossorigin="anonymous"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jqwidgets/18.0.0/jqwidgets/jqxbuttons.min.js"></script>
+<script crossorigin="anonymous"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jqwidgets/18.0.0/jqwidgets/jqxscrollbar.min.js"></script>
+<script crossorigin="anonymous"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jqwidgets/18.0.0/jqwidgets/jqxmenu.min.js"></script>
+<script crossorigin="anonymous"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jqwidgets/18.0.0/jqwidgets/jqxcheckbox.min.js"></script>
+<script crossorigin="anonymous"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jqwidgets/18.0.0/jqwidgets/jqxlistbox.min.js"></script>
+<script crossorigin="anonymous"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jqwidgets/18.0.0/jqwidgets/jqxdropdownlist.min.js"></script>
+<script crossorigin="anonymous"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jqwidgets/18.0.0/jqwidgets/jqxgrid.min.js"></script>
+<script crossorigin="anonymous"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jqwidgets/18.0.0/jqwidgets/jqxgrid.sort.min.js"></script>
+<script crossorigin="anonymous"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jqwidgets/18.0.0/jqwidgets/jqxgrid.pager.min.js"></script>
+<script crossorigin="anonymous"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jqwidgets/18.0.0/jqwidgets/jqxgrid.selection.min.js"></script>
+<script crossorigin="anonymous"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jqwidgets/18.0.0/jqwidgets/jqxgrid.edit.min.js"></script>
+<script crossorigin="anonymous"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jqwidgets/18.0.0/jqwidgets/jqxgrid.filter.min.js"></script>
+<script src="/js/demos.js"></script>
+<script>
+    "use strict";
+    $(() => {
+        var source = {
+            datatype: "json",
+            datafields: [
+                {
+                    name: 'tanggalLahirTeks', type: 'string'
+                },
+                {
+                    name: 'tanggalLahir8601', type: 'date', hidden: true
+                },
+                {
+                    name: 'nama', type: 'string'
+                },
+                {
+                    name: 'empid', type: 'string'
+                },
+                {
+                    name: 'waktu', type: 'string'
+                },
+                {
+                    name: 'tanggalNantiTeks', type: 'string'
+                },
+                {
+                    name: 'tanggalNanti8601', type: 'date', hidden: true
+                },
+                {
+                    name: 'empid', type: 'string'
+                }
+            ],
+            url: '/twoisys/daftar-ulang-tahun',
+            sortcolumn: 'tanggalNanti8601',
+            sortdirection: 'asc'
+        };
+        var dataAdapter = new $.jqx.dataAdapter(source, {
+            downloadComplete: (data, status, xhr) => {
+            },
+            loadComplete: (data) => {
+            },
+            loadError: (xhr, status, error) => {
+            }
+        });
+        $("#grid").jqxGrid({
+            width: '100%',
+            height: '100%',
+            source: dataAdapter,
+            pagesize: 25,
+            pagesizeoptions: ['25', '50', '100'],
+            pageable: true,
+            sortable: true,
+            altrows: true,
+            filterable: true,
+            columns: [
+                {
+                    text: 'Dintên Lair',
+                    width: '20%',
+                    datafield: 'tanggalLahirTeks',
+                    renderer: function (defaultText, alignment, height) {
+                        return '<div style="padding-bottom: 2px; overflow: hidden; text-overflow: ellipsis; text-align: left; margin-left: 4px; margin-right: 2px; line-height: 48px;"><span style="text-overflow: ellipsis; cursor: default;">Dintên Lair (<span lang="jv-Java-ID">ꦢꦶꦤ꧀ꦠꦼꦤ꧀ꦭꦲꦶꦂ</span>)</span></div>';
+                    },
+                    cellsrenderer: function (row, columnfield, value, defaulthtml, columnproperties, rowdata) {
+                        var dateObj = rowdata.tanggalLahir8601;
+                        var dd = String(dateObj.getUTCDate()).padStart(2, '0');
+                        var mm = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+                        var yyyy = dateObj.getUTCFullYear();
+                        var formatted = dd + '-' + mm + '-' + yyyy;
+                        var combined = rowdata.tanggalLahirTeks + ', ' + formatted;
+                        return '<div style="padding: 4px; line-height: 48px; overflow: hidden; text-overflow: ellipsis;">' + combined + '</div>';
+                    }
+                },
+                {
+                    text: 'NIK', width: '10%', datafield: 'empid'
+                },
+                {
+                    text: 'Nama', width: '28%', datafield: 'nama', renderer: function (defaultText, alignment, height) {
+                        return '<div style="padding-bottom: 2px; overflow: hidden; text-overflow: ellipsis; text-align: left; margin-left: 4px; margin-right: 2px; line-height: 48px;"><span style="text-overflow: ellipsis; cursor: default;">Asmå Jangkêp (<span lang="jv-Java-ID">ꦲꦱ꧀ꦩꦗꦁꦏꦼꦥ꧀</span>)</span></div>';
+                    }
+                },
+                {
+                    text: 'Dumugi Dintên-D', width: '22%', datafield: 'waktu'
+                },
+                {
+                    text: 'Dintên-D', width: '20%', datafield: 'tanggalNantiTeks',
+                    renderer: function (defaultText, alignment, height) {
+                        return '<div style="padding-bottom: 2px; overflow: hidden; text-overflow: ellipsis; text-align: left; margin-left: 4px; margin-right: 2px; line-height: 48px;"><span style="text-overflow: ellipsis; cursor: default;">Dintên-D</span></div>';
+                    },
+                    cellsrenderer: function (row, columnfield, value, defaulthtml, columnproperties, rowdata) {
+                        var dateObj = rowdata.tanggalNanti8601;
+                        var dd = String(dateObj.getUTCDate()).padStart(2, '0');
+                        var mm = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+                        var yyyy = dateObj.getUTCFullYear();
+                        var formatted = dd + '-' + mm + '-' + yyyy;
+                        var combined = rowdata.tanggalNantiTeks + ', ' + formatted;
+                        return '<div style="padding: 4px; line-height: 48px; overflow: hidden; text-overflow: ellipsis;">' + combined + '</div>';
+                    }
+                }
+            ]
+        })
+    })
+</script>
+</body>
+</html>

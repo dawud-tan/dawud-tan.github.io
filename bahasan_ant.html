@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Bahasan Ant</title>
+    <meta content="Bahasan Ant" name="description">
+    <meta content="website" property="og:type">
+    <meta content="Bahasan Ant" property="og:title">
+    <meta content="http://pkrms.pungkookid.com/cari/jdbc-jsp/bahasan_ant.jsp" property="og:url">
+    <meta content="Bahasan Ant" property="og:description">
+    <meta content="summary_large_image" property="twitter:card">
+    <meta content="http://pkrms.pungkookid.com/cari/jdbc-jsp/bahasan_ant.jsp" property="twitter:url">
+    <meta content="Bahasan Ant" property="twitter:title">
+    <meta content="Bahasan Ant" property="twitter:description">
+    <link as="style" href="/css/bootstrap.min.css"
+          rel="preload" type="text/css">
+    <link href="/css/bootstrap.min.css"
+          rel="stylesheet">
+    <link href="/img/pk.ico" rel="icon" type="image/x-icon"/>
+    <style>
+        @font-face {
+            font-display: swap;
+            font-family: "Charis SIL";
+            font-style: normal;
+            font-weight: normal;
+            src: url(/fonts/CharisSIL-Regular.woff2) format("woff2"),
+            url(/fonts/CharisSIL-Regular.woff) format("woff"),
+            url(/fonts/CharisSIL-Regular.ttf) format("truetype");
+        }
+
+        html {
+            font-size: 2.4vw;
+        }
+
+        @media all and (min-width: 1000px) {
+            html {
+                font-size: 24px;
+            }
+        }
+
+        @media all and (max-width: 520px) {
+            html {
+                font-size: 18px;
+            }
+        }
+
+        body {
+            font-family: "Charis SIL", serif;
+            line-height: 1.5;
+            font-size: 0.9rem;
+            -webkit-font-smoothing: subpixel-antialiased;
+        }
+    </style>
+</head>
+<body class="container-fluid">
+<div class="row row-cols-1 row-cols-sm-2 g-2 g-lg-3">
+    <div class="col mt-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Satu</h5>
+                <p class="card-text">Projek <em>generate</em>'an <em>Eclipse</em> (1) dan <em>Netbeans</em> (2)
+                    sama-sama pakai <code>Ant</code>, tapi isinya folder berbeda-beda, itu di <em>VSCode</em> juga
+                    tersedia <em>plugin</em> <code>Ant</code> (3).</p>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">1. Cara <em>import</em> projek <em>Netbeans</em> ke <em>Eclipse</em>: <a
+                        href="https://stackoverflow.com/questions/21535023/how-to-get-your-netbeans-project-into-eclipse/33407417#33407417"><em>How
+                    to get your Netbeans project into Eclipse</em></a></li>
+                <li class="list-group-item">2. Cara <em>import</em> projek <em>Eclipse</em> ke <em>Netbeans</em>: <a
+                        href="https://chanmingman.wordpress.com/2015/03/22/import-eclipse-project-into-netbeans/#post-4436"><em>Import
+                    Eclipse project into NetBeans</em></a></li>
+                <li class="list-group-item">3. Link <em>Plugin</em> <code>Ant</code> di <em>VSCode</em>: <a
+                        href="https://marketplace.visualstudio.com/items?itemName=nickheap.vscode-ant#vscode-command-inputq">NickHeap
+                    VSCode <code>Ant</code></a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="col mt-3 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Dua</h5>
+                <p class="card-text">Caranya mencari <em>library</em> untuk <code>Ant</code> di pusat <em>library</em>
+                    <code>mvnrepository.com</code>, dipilih yang tab <code>ivy</code>, bukan tab <code>gradle</code>,
+                    bukan tab <code>maven</code>: <a
+                            href="https://stackoverflow.com/questions/26650590/how-to-add-dependency-to-ant-project/26651455#26651455"><em>How
+                        to add dependency to <code>Ant</code> project</em></a>.</p>
+                <p class="card-text">Namun, <em>plugin</em> <code>IvyDE</code> untuk <em>Eclipse</em> terakhir cuman
+                    sampai versi <code>2018-09</code>, sedangkan versi <code>2018-12</code> dan seterusnya, tim Apache
+                    <a href="https://whimsy.apache.org/board/minutes/Ant.html#2019-11-20">kurang tahu</a> caranya
+                    membuat <em>plugin</em> mengikuti versi-versi <em>Eclipse</em>.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col mt-3 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Tiga</h5>
+                <p class="card-text">Tutorial dari <em>Spring</em>, kalau <em>recruit</em> akan pakai <code>Ant</code>,
+                    bukan <code>maven</code>: <a
+                            href="https://docs.spring.io/spring-boot/docs/2.1.18.RELEASE/reference/html/using-boot-build-systems.html#using-boot-ant"><em>Part
+                        III. Using Spring Boot. 14. Build System</em></a>.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col mt-3 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Empat</h5>
+                <p class="card-text">Lha, yang <code>apk</code> pemesanan mobil, dari <em>JetBrains</em>nya tidak ingin
+                    membuatkan <em>plugin</em> untuk <code>Ant</code> (1, 2), sudah ada yang usul ke <em>JetBrains</em>
+                    agar mendukung <code>Ant</code> (3) dulu <code>2010</code>, tapi malah di <em>decline</em> <em>JetBrains</em>.
+                </p>
+                <p class="card-text">Kalau membuat <code>apk</code> Android pakai <code>Ant</code> di <em>Eclipse</em>,
+                    <code>2022</code> kemarin masih ada yang bisa (4), pakai <em>Android SDK Tools</em> versi <code>25.2.5</code>,
+                    keluaran <code>2017</code>, tapi sejak versi <code>25.3.0</code> dan seterusnya, cuma bisa dengan
+                    <code>gradle</code> saja.</p>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">1. <a
+                        href="https://stackoverflow.com/questions/16618395/doing-an-ant-build-on-android-studio/16672583#16672583"><em>Doing
+                    an <code>Ant</code> Build on Android Studio</em></a></li>
+                <li class="list-group-item">2. <a
+                        href="https://intellij-support.jetbrains.com/hc/en-us/community/posts/206932225-How-to-create-an-Ant-build-for-an-Android-project-using-IntelliJ-"><em>How
+                    to create an <code>Ant</code> build for an Android project using IntelliJ?</em></a></li>
+                <li class="list-group-item">3. <a href="https://youtrack.jetbrains.com/issue/IDEA-53006"><em>Generating
+                    an <code>Ant</code> build file in IntelliJ IDEA Maia 94.539 (<code>2010</code>) does not generate
+                    targets to create android apk</em></a></li>
+                <li class="list-group-item">4. <a
+                        href="https://zenofx.com/snippets/android/build-android-apps-with-ant/"><em>(Still) Build
+                    Android 12.0 Snow Cone (API level 31) Apps With <code>Ant</code> and Eclipse</em></a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+</body>
+</html>

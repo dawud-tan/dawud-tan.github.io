@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- The guide to adya-anomaly-probe.jsh, which is served beside this page. The two are one piece:
+     the probe names, seat plan, messages and exit codes quoted here are the script's own, and the
+     sample output below is a real run of it (against a local copy -- see the note on it). Change
+     the script, re-run it, and paste the new output rather than editing the old one by hand. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Adya's Isolation Anomalies, Tried Against a Live Cinema Booking App</title>
+<meta name="description" content="A jshell script that tries each of Atul Adya's isolation anomalies (G0, G1a, G1b, G1c, G-cursor, G-single, G2-item, G2) against a live cinema seat-booking app over HTTP, reports that none occurs, and a step-by-step guide explaining why PostgreSQL READ COMMITTED plus an EXCLUDE constraint and row locks rule each one out.">
+<meta name="keywords" content="Adya anomalies, G0, G1a, G1b, G1c, G-single, G2-item, G2, write skew, read skew, lost update, dirty write, PostgreSQL READ COMMITTED, EXCLUDE constraint, SELECT FOR UPDATE, jshell, double booking, seat reservation, transaction isolation">
+<meta name="author" content="Claude Opus 5.5">
+<link rel="canonical" href="https://dawud-tan.github.io/adya-anomaly-probe.html">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Adya's Isolation Anomalies, Tried Against a Live Cinema Booking App">
+<meta property="og:description" content="Every anomaly in Adya's taxonomy, attempted through a cinema's public booking API, and why none of them can happen: READ COMMITTED, one EXCLUDE constraint, three row locks and conditional UPDATEs.">
+<meta property="og:url" content="https://dawud-tan.github.io/adya-anomaly-probe.html">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Adya's Isolation Anomalies, Tried Against a Live Cinema Booking App">
+<meta name="twitter:description" content="A jshell probe for G0 through G2 against tiketbioskop.xyz, and why each anomaly cannot occur there.">
+<meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#131518" media="(prefers-color-scheme: dark)">
+<style>
+  :root{
+    color-scheme: light dark;
+    --bg:#f7f6f2; --panel:#ffffff; --ink:#1a1c20; --ink-soft:#50566a; --line:#e2dfd7;
+    --accent:#9b3a12; --accent-soft:#f6ebe4; --ok:#276b43; --ok-soft:#e5f2ea;
+    --warn:#8a5b0c; --warn-soft:#f8f0dd;
+    --code-bg:#1c1f25; --code-ink:#e8e5de; --code-dim:#9aa3b0; --code-key:#f0b27a;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,"Liberation Mono",monospace;
+    --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --measure:72ch;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#131518; --panel:#1a1d22; --ink:#e8e6e1; --ink-soft:#a8aebb; --line:#2d323b;
+      --accent:#ef9a66; --accent-soft:#2a221d; --ok:#7fcf9d; --ok-soft:#1b2a21;
+      --warn:#e6b561; --warn-soft:#2a2418; --code-bg:#0e1013;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#131518; --panel:#1a1d22; --ink:#e8e6e1; --ink-soft:#a8aebb; --line:#2d323b;
+    --accent:#ef9a66; --accent-soft:#2a221d; --ok:#7fcf9d; --ok-soft:#1b2a21;
+    --warn:#e6b561; --warn-soft:#2a2418; --code-bg:#0e1013;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 var(--sans);
+       padding:0 max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left))}
+  main{max-width:880px;margin:0 auto;padding:44px 0 72px}
+  p,li{max-width:var(--measure)}
+  a{color:var(--accent);text-underline-offset:2px}
+  h1{font-size:clamp(27px,4.4vw,38px);line-height:1.18;letter-spacing:-.012em;margin:10px 0 16px}
+  h2{font-size:23px;line-height:1.3;margin:56px 0 10px;padding-top:6px;border-top:1px solid var(--line)}
+  h3{font-size:18px;margin:30px 0 6px}
+  code{font-family:var(--mono);font-size:.9em;background:var(--accent-soft);padding:.08em .32em;border-radius:4px;
+       overflow-wrap:anywhere}
+  pre{position:relative;background:var(--code-bg);color:var(--code-ink);font:13.5px/1.55 var(--mono);
+      padding:14px 16px;border-radius:8px;overflow-x:auto;margin:12px 0 18px;max-width:100%}
+  pre.has-copy{padding-top:38px}
+  pre code{background:none;padding:0;font-size:inherit;overflow-wrap:normal;color:inherit}
+  pre .c{color:var(--code-dim)}
+  pre .k{color:var(--code-key)}
+  .eyebrow{font:12.5px/1.4 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft)}
+  .lede{font-size:18px;color:var(--ink);max-width:68ch}
+  .muted{color:var(--ink-soft)}
+  .small{font-size:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:16px 0}
+  .callout{border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 8px 8px 0;
+           padding:14px 18px;margin:18px 0}
+  .callout.ok{border-color:var(--ok);background:var(--ok-soft)}
+  .callout.warn{border-color:var(--warn);background:var(--warn-soft)}
+  .callout p{margin:.35em 0}
+  .toc{columns:2 240px;column-gap:28px;padding-left:1.2em;margin:8px 0 0}
+  .toc li{break-inside:avoid;margin:2px 0}
+  .scroll{overflow-x:auto;margin:14px 0 20px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;line-height:1.5}
+  th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--line)}
+  th{font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);background:var(--bg)}
+  tr:last-child td{border-bottom:0}
+  td code{white-space:normal;overflow-wrap:normal}
+  .grid5 th:first-child,.grid5 td:first-child{min-width:7.5em}
+  .grid5 th:nth-child(n+2),.grid5 td:nth-child(n+2){min-width:10.5em}
+  .code-tag{font:600 13px var(--mono);color:var(--accent);white-space:nowrap}
+  .anomaly{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px 20px 14px;margin:20px 0}
+  .anomaly h3{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;margin-top:16px}
+  .anomaly h3 .code-tag{font-size:15px}
+  .anomaly dl{margin:8px 0 0;display:grid;grid-template-columns:9.5em 1fr;gap:6px 16px}
+  .anomaly dt{font-size:13px;letter-spacing:.03em;text-transform:uppercase;color:var(--ink-soft);padding-top:3px}
+  .anomaly dd{margin:0;max-width:var(--measure)}
+  @media (max-width:640px){
+    .anomaly{padding:2px 14px 12px}
+    .anomaly dl{grid-template-columns:1fr;gap:2px}
+    .anomaly dt{padding-top:10px}
+  }
+  ol.steps{padding-left:0;list-style:none;counter-reset:step}
+  ol.steps>li{counter-increment:step;position:relative;padding-left:44px;margin:0 0 22px;max-width:none}
+  ol.steps>li::before{content:counter(step);position:absolute;left:0;top:0;width:30px;height:30px;border-radius:50%;
+       background:var(--accent);color:var(--bg);font:600 15px/30px var(--sans);text-align:center}
+  ol.steps>li>strong:first-child{display:block;font-size:17px;margin-bottom:2px}
+  figure{margin:22px 0}
+  figcaption{font-size:14px;color:var(--ink-soft);margin-top:6px;max-width:var(--measure)}
+  svg.dsg{width:100%;max-width:440px;margin:0 auto;height:auto;display:block;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:10px}
+  svg.dsg .node{fill:var(--bg);stroke:currentColor;stroke-width:1.5}
+  svg.dsg .dep{fill:none;stroke:var(--ink-soft);stroke-width:1.8}
+  svg.dsg .anti{fill:none;stroke:var(--accent);stroke-width:1.8;stroke-dasharray:5 4}
+  svg.dsg .head-dep{fill:var(--ink-soft)}
+  svg.dsg .head-anti{fill:var(--accent)}
+  svg.dsg text{fill:currentColor;font:13px var(--sans)}
+  svg.dsg .lbl{font:600 12.5px var(--mono)}
+  svg.dsg .lbl-anti{fill:var(--accent)}
+  svg.dsg .cap{font:600 13.5px var(--mono);fill:var(--accent)}
+  svg.dsg .sub{font-size:12px;fill:var(--ink-soft)}
+  details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 16px;margin:14px 0}
+  details>summary{cursor:pointer;font-weight:600}
+  details pre{margin-bottom:6px}
+  .copy{position:absolute;top:7px;right:8px;font:12px var(--sans);color:var(--code-ink);background:rgba(255,255,255,.08);
+        border:1px solid rgba(255,255,255,.18);border-radius:6px;padding:3px 9px;cursor:pointer}
+  .copy:hover{background:rgba(255,255,255,.16)}
+  footer{margin-top:64px;padding-top:16px;border-top:1px solid var(--line);font-size:14px;color:var(--ink-soft)}
+</style>
+</head>
+<body>
+<main>
+
+<p class="eyebrow">tiketbioskop.xyz &middot; PostgreSQL 18 &middot; READ COMMITTED &middot; jshell</p>
+<h1>Adya's isolation anomalies, tried against a live cinema booking app</h1>
+<p class="lede">A jshell script that tries to provoke every anomaly in Atul Adya's taxonomy through the
+public booking API of <a href="https://www.tiketbioskop.xyz:8443/">www.tiketbioskop.xyz:8443</a>, and
+reports that none of them happens. This page is the manual: what each anomaly is, what it would look like
+at a cinema, why this app cannot produce it, and how to run the script yourself.</p>
+
+<div class="card">
+  <p style="margin-top:0"><strong>The script:</strong> <a href="adya-anomaly-probe.jsh">adya-anomaly-probe.jsh</a>
+  (plain Java run by jshell, JDK&nbsp;17 or newer). The fast path, once you have an empty showing and a signed-in cookie
+  (<a href="#steps">steps below</a>):</p>
+<pre><code>curl -fO https://dawud-tan.github.io/adya-anomaly-probe.jsh &amp;&amp; chmod +x adya-anomaly-probe.jsh
+export ADYA_SHOWING='https://www.tiketbioskop.xyz:8443/halls/&lt;hall-id&gt;/showings/&lt;showing-id&gt;'
+read -rs ADYA_COOKIE &amp;&amp; export ADYA_COOKIE        <span class="c"># paste the Cookie header, press Enter</span>
+./adya-anomaly-probe.jsh</code></pre>
+</div>
+
+<nav aria-label="Contents">
+<ol class="toc">
+  <li><a href="#short">The short answer</a></li>
+  <li><a href="#table">All the anomalies in one table</a></li>
+  <li><a href="#adya">Adya in five minutes</a></li>
+  <li><a href="#why">Why each one cannot happen here</a></li>
+  <li><a href="#not-adya">The race that is not an Adya anomaly</a></li>
+  <li><a href="#steps">Step by step: running the script</a></li>
+  <li><a href="#output">Reading the output</a></li>
+  <li><a href="#footprint">What a run leaves behind, and its load</a></li>
+  <li><a href="#limits">What a live probe can and cannot show</a></li>
+  <li><a href="#trouble">Troubleshooting</a></li>
+</ol>
+</nav>
+
+<h2 id="short">The short answer</h2>
+<p>The booking application never sets an isolation level, so every transaction runs at PostgreSQL's default,
+<strong>READ COMMITTED</strong>. That level alone rules out the first half of Adya's list: dirty writes
+(<span class="code-tag">G0</span>) and the three kinds of dirty read (<span class="code-tag">G1a</span>,
+<span class="code-tag">G1b</span>, <span class="code-tag">G1c</span>). It does <em>not</em> rule out the
+second half: lost updates (<span class="code-tag">G-cursor</span>), read skew
+(<span class="code-tag">G-single</span>), write skew (<span class="code-tag">G2-item</span>) and phantoms
+(<span class="code-tag">G2</span>). Those four are closed by the design, at each place where a booking
+depends on them:</p>
+<ul>
+  <li>an <code>EXCLUDE</code> constraint that makes a second live claim on a seat impossible to write;</li>
+  <li>three row locks: <code>FOR UPDATE</code> on the showing, <code>FOR SHARE</code> on the seats being
+  booked, and <code>FOR UPDATE</code> on the customer before counting their seats;</li>
+  <li>state changes written as a single conditional <code>UPDATE … WHERE status = …</code>, never as a read followed by a write;</li>
+  <li>the seat map read in one SQL statement.</li>
+</ul>
+<div class="callout">
+  <p><strong>Why "loosening the isolation level" cannot make them appear here.</strong> The app already runs
+  at the loosest level PostgreSQL has: <code>READ UNCOMMITTED</code> is accepted but behaves as
+  <code>READ COMMITTED</code>. So the tests in the repository make an anomaly happen by removing the
+  <em>design</em> protection instead, such as the constraint or the lock. For <span class="code-tag">G0</span> and
+  the <span class="code-tag">G1</span> family nothing can make them happen, because PostgreSQL has no setting that
+  permits them.</p>
+</div>
+
+<h2 id="table">All the anomalies in one table</h2>
+<p class="muted small">"Made to happen in" names the place where the anomaly actually occurs once its protection
+is removed. Test classes are in <code>src/test/java/com/protek/booking/concurrency/</code> of the booking
+platform's repository.</p>
+<div class="scroll">
+<table class="grid5">
+  <thead>
+    <tr><th>Anomaly</th><th>At the cinema</th><th>What the script does</th><th>What stops it</th><th>Made to happen in</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><span class="code-tag">G0</span><br>write cycle</td><td>Two couples book the same pair; each goes home with one seat of it</td><td><code>A3+A4</code> and <code>A4+A3</code>, twice each, released at the same instant</td><td>Row write locks (every PostgreSQL level); all-or-nothing holds</td><td>Nowhere: no PostgreSQL setting allows it</td></tr>
+    <tr><td><span class="code-tag">G1a</span><br>aborted read</td><td>The seat map shows a claim from a booking that never went through</td><td>24 holds on a seat that is already held, each one's claim rolled back, while 3 viewers poll</td><td>MVCC: a rolled-back version is invisible</td><td>Nowhere</td></tr>
+    <tr><td><span class="code-tag">G1b</span><br>intermediate read</td><td>Seats flicker to "held" during someone's failed block booking</td><td>24 five-seat holds whose last seat is taken, so four seats are written and withdrawn</td><td>MVCC: only the final committed version is visible</td><td>Nowhere</td></tr>
+    <tr><td><span class="code-tag">G1c</span><br>circular information flow</td><td>Two couples see each other's half-made booking, both give up, the pair goes unsold</td><td><code>A5+A6</code> and <code>A6+A5</code> at the same instant</td><td>The constraint check waits for an in-flight claim instead of reading it</td><td>Nowhere</td></tr>
+    <tr><td><span class="code-tag">G-cursor</span><br>lost update (P4)</td><td>A customer cancels a seat and it stays sold; one barcode admits two people</td><td>Confirm an order and cancel one of its seats within a few ms, six rounds sweeping the offset</td><td>Conditional <code>UPDATE … WHERE status = …</code>, re-checked after the lock wait</td><td>A read-then-write in two statements; <code>Admission<wbr>Rescan<wbr>Concurrency<wbr>Test</code> guards the scanner. No weakened twin in the tree</td></tr>
+    <tr><td><span class="code-tag">G-single</span><br>read skew</td><td>The seat map shows half of someone's two-seat order</td><td>Hold a pair, then confirm it, while 3 viewers poll</td><td>The seat map is one SQL statement: one snapshot</td><td>Reading the pair with two statements at READ COMMITTED. No test in the tree</td></tr>
+    <tr><td><span class="code-tag">G2-item</span><br>write skew</td><td>Two customers turn up with tickets for the same seat</td><td>8 holds on one seat at the same instant, three rounds</td><td><code>EXCLUDE</code> constraint <code>reservation_<wbr>no_<wbr>overlap</code> (SQLSTATE <code>23P01</code>)</td><td><code>SeatBooking<wbr>Concurrency<wbr>Differential<wbr>Test</code>: constraint dropped, all 8 succeed</td></tr>
+    <tr><td><span class="code-tag">G2</span><br>phantom / predicate</td><td>One scalper with two tabs gets past the 10-seats-a-day cap</td><td>One customer, two 5-seat holds on two showings of one day, at the same instant</td><td>The customer's row locked <code>FOR UPDATE</code> before counting</td><td><code>Daily<wbr>Purchase<wbr>Cap<wbr>Concurrency<wbr>Differential<wbr>Test</code>: customer lock removed, all four holds land, 12 seats against a cap of 10</td></tr>
+    <tr><td><span class="muted">not Adya</span><br>no cycle</td><td>A ticket sold for a showing that had already been cancelled</td><td>Not probed (needs a staff account)</td><td><code>FOR UPDATE</code> on the showing row</td><td><code>Session<wbr>Cancellation<wbr>Race<wbr>Differential<wbr>Test</code>: plain <code>SELECT</code>, orphaned hold</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="adya">Adya in five minutes</h2>
+<p>The ANSI SQL isolation levels are defined by three "phenomena": dirty read, non-repeatable read and phantom.
+These are worded in terms of locks, and they do not fit multiversion databases such as PostgreSQL. Atul Adya's 1999
+MIT thesis, and the ICDE&nbsp;2000 paper <em>Generalized Isolation Level Definitions</em> he wrote with Barbara Liskov
+and Patrick O'Neil, replaced them with conditions on the <strong>history of committed transactions</strong>. Any
+implementation can be checked against those conditions, whether it uses locking, MVCC or optimistic concurrency.</p>
+<p>The history is drawn as a graph, the <em>direct serialization graph</em>. There is one node per committed
+transaction, and an edge from <em>T1</em> to <em>T2</em> whenever <em>T2</em> depends on <em>T1</em> in one of three
+ways:</p>
+<ul>
+  <li><strong><code>ww</code> write-dependency.</strong> <em>T2</em> overwrote a version that <em>T1</em> wrote.</li>
+  <li><strong><code>wr</code> read-dependency.</strong> <em>T2</em> read a version that <em>T1</em> wrote, or
+  <em>T1</em>'s write changed which rows <em>T2</em>'s <code>WHERE</code> clause matched.</li>
+  <li><strong><code>rw</code> anti-dependency.</strong> <em>T1</em> read a version and <em>T2</em> then wrote the
+  next one, or <em>T2</em>'s write would have changed what <em>T1</em>'s <code>WHERE</code> clause matched.
+  <em>T1</em> did not see <em>T2</em>, so <em>T1</em> must come first.</li>
+</ul>
+<p>A history is serializable when its graph has no cycle: there is some order in which each transaction saw only the
+ones before it. Each anomaly is a particular kind of cycle, or a read of data that should never have been seen.</p>
+
+<figure>
+<svg class="dsg" viewBox="0 0 360 370" role="img" aria-labelledby="dsg-title dsg-desc">
+  <title id="dsg-title">The four cycle shapes</title>
+  <desc id="dsg-desc">Four pairs of transactions T1 and T2. G0: write-dependency edges both ways. G1c:
+  read-dependency edges both ways. G-single: one anti-dependency and one read-dependency. G2-item and G2:
+  anti-dependencies both ways.</desc>
+  <defs>
+    <marker id="h-dep" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="head-dep" d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="h-anti" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="head-anti" d="M0,0 L10,5 L0,10 z"/></marker>
+  </defs>
+  <g>
+    <path class="dep" d="M68,64 Q90,26 112,64" marker-end="url(#h-dep)"/>
+    <path class="dep" d="M112,86 Q90,124 68,86" marker-end="url(#h-dep)"/>
+    <circle class="node" cx="50" cy="75" r="19"/><text x="50" y="80" text-anchor="middle">T1</text>
+    <circle class="node" cx="130" cy="75" r="19"/><text x="130" y="80" text-anchor="middle">T2</text>
+    <text class="lbl" x="90" y="30" text-anchor="middle">ww</text><text class="lbl" x="90" y="130" text-anchor="middle">ww</text>
+    <text class="cap" x="90" y="156" text-anchor="middle">G0</text><text class="sub" x="90" y="172" text-anchor="middle">write cycle</text>
+  </g>
+  <g transform="translate(180 0)">
+    <path class="dep" d="M68,64 Q90,26 112,64" marker-end="url(#h-dep)"/>
+    <path class="dep" d="M112,86 Q90,124 68,86" marker-end="url(#h-dep)"/>
+    <circle class="node" cx="50" cy="75" r="19"/><text x="50" y="80" text-anchor="middle">T1</text>
+    <circle class="node" cx="130" cy="75" r="19"/><text x="130" y="80" text-anchor="middle">T2</text>
+    <text class="lbl" x="90" y="30" text-anchor="middle">wr</text><text class="lbl" x="90" y="130" text-anchor="middle">wr</text>
+    <text class="cap" x="90" y="156" text-anchor="middle">G1c</text><text class="sub" x="90" y="172" text-anchor="middle">circular information flow</text>
+  </g>
+  <g transform="translate(0 185)">
+    <path class="anti" d="M68,64 Q90,26 112,64" marker-end="url(#h-anti)"/>
+    <path class="dep" d="M112,86 Q90,124 68,86" marker-end="url(#h-dep)"/>
+    <circle class="node" cx="50" cy="75" r="19"/><text x="50" y="80" text-anchor="middle">T1</text>
+    <circle class="node" cx="130" cy="75" r="19"/><text x="130" y="80" text-anchor="middle">T2</text>
+    <text class="lbl lbl-anti" x="90" y="30" text-anchor="middle">rw</text><text class="lbl" x="90" y="130" text-anchor="middle">wr</text>
+    <text class="cap" x="90" y="156" text-anchor="middle">G-single</text><text class="sub" x="90" y="172" text-anchor="middle">read skew</text>
+  </g>
+  <g transform="translate(180 185)">
+    <path class="anti" d="M68,64 Q90,26 112,64" marker-end="url(#h-anti)"/>
+    <path class="anti" d="M112,86 Q90,124 68,86" marker-end="url(#h-anti)"/>
+    <circle class="node" cx="50" cy="75" r="19"/><text x="50" y="80" text-anchor="middle">T1</text>
+    <circle class="node" cx="130" cy="75" r="19"/><text x="130" y="80" text-anchor="middle">T2</text>
+    <text class="lbl lbl-anti" x="90" y="30" text-anchor="middle">rw</text><text class="lbl lbl-anti" x="90" y="130" text-anchor="middle">rw</text>
+    <text class="cap" x="90" y="156" text-anchor="middle">G2-item / G2</text><text class="sub" x="90" y="172" text-anchor="middle">write skew, phantoms</text>
+  </g>
+</svg>
+<figcaption>The four cycle shapes. Solid arrows are dependencies (<code>ww</code>, <code>wr</code>) and dashed arrows are
+anti-dependencies (<code>rw</code>). <span class="code-tag">G1a</span> and <span class="code-tag">G1b</span> are not
+cycles: they are reads of a version that was rolled back, or that its writer overwrote before committing.
+<span class="code-tag">G-cursor</span> is the <span class="code-tag">G-single</span> shape on a single row,
+with write-dependencies where the read-dependency is.</figcaption>
+</figure>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>Phenomenon</th><th>Adya's condition on the committed history</th><th>First level that forbids it</th></tr></thead>
+  <tbody>
+    <tr><td><span class="code-tag">G0</span> write cycle</td><td>A cycle made only of <code>ww</code> edges</td><td>PL-1</td></tr>
+    <tr><td><span class="code-tag">G1a</span> aborted read</td><td>A committed transaction read a version written by one that aborted</td><td>PL-2 (read committed)</td></tr>
+    <tr><td><span class="code-tag">G1b</span> intermediate read</td><td>A committed transaction read a version that its writer later overwrote itself</td><td>PL-2</td></tr>
+    <tr><td><span class="code-tag">G1c</span> circular information flow</td><td>A cycle made only of <code>ww</code> and <code>wr</code> edges</td><td>PL-2</td></tr>
+    <tr><td><span class="code-tag">G-cursor</span> lost update</td><td>On a single item, a cycle of one <code>rw</code> edge and <code>ww</code> edges</td><td>PL-CS (cursor stability)</td></tr>
+    <tr><td><span class="code-tag">G-single</span> read skew</td><td>A cycle with exactly one <code>rw</code> edge</td><td>PL-2+ (and snapshot isolation)</td></tr>
+    <tr><td><span class="code-tag">G2-item</span> write skew</td><td>A cycle with one or more item <code>rw</code> edges</td><td>PL-2.99 (repeatable read)</td></tr>
+    <tr><td><span class="code-tag">G2</span> anti-dependency cycle</td><td>A cycle with one or more <code>rw</code> edges, including ones from <code>WHERE</code> clauses (phantoms)</td><td>PL-3 (serializable)</td></tr>
+  </tbody>
+</table>
+</div>
+<p>The difference between <span class="code-tag">G-single</span> and <span class="code-tag">G2</span> is the number of
+anti-dependencies, and the two are easy to confuse. The textbook write skew (two on-call doctors who each see the
+other still on call and both go home) closes its cycle with <em>two</em> <code>rw</code> edges. That makes it
+<span class="code-tag">G2</span>, not <span class="code-tag">G-single</span>.</p>
+
+<h3>Where PostgreSQL's four levels sit</h3>
+<div class="scroll">
+<table>
+  <thead><tr><th>PostgreSQL level</th><th>Rules out</th><th>Still allows</th></tr></thead>
+  <tbody>
+    <tr><td><code>READ UNCOMMITTED</code></td><td colspan="2">Accepted, but runs exactly as <code>READ COMMITTED</code></td></tr>
+    <tr><td><code>READ COMMITTED</code>, <strong>this app</strong></td><td>G0, G1a, G1b, G1c</td><td>G-cursor*, G-single, G2-item, G2</td></tr>
+    <tr><td><code>REPEATABLE READ</code> (snapshot isolation)</td><td>…plus G-cursor and G-single</td><td>G2-item, G2</td></tr>
+    <tr><td><code>SERIALIZABLE</code> (SSI)</td><td>All of them, by aborting a transaction with <code>40001</code></td><td>None</td></tr>
+  </tbody>
+</table>
+</div>
+<p class="muted small">* A lost update at READ COMMITTED needs the read and the write in separate statements. A single
+<code>UPDATE … WHERE</code> that has to wait for a row lock re-evaluates its <code>WHERE</code> clause against the row
+that was just committed, so it cannot overwrite a change it did not see. That is the whole of the
+<span class="code-tag">G-cursor</span> defence below.</p>
+
+<h2 id="why">Why each one cannot happen here</h2>
+<p>These are the anomalies in the script's order, which is Adya's order: weakest level first. Seat labels are the ones
+the script picks on a fresh 40-seat hall.</p>
+
+<section class="anomaly" id="g0">
+<h3><span class="code-tag">G0</span> Write cycle (dirty write)</h3>
+<dl>
+  <dt>Definition</dt><dd>Two transactions each overwrite something the other wrote, so the final state mixes both.
+  <em>T1</em> writes <em>x</em> and <em>T2</em> overwrites it, while <em>T2</em> writes <em>y</em> and <em>T1</em> overwrites that.</dd>
+  <dt>At the cinema</dt><dd>Two couples book the same pair at the same moment, one clicking left to right and the other
+  right to left. Each goes home with one seat of the pair.</dd>
+  <dt>The probe</dt><dd>Four holds, <code>A3+A4</code> and <code>A4+A3</code> twice each, released at the same instant
+  on four separate connections, three rounds. It checks that exactly one order has both seats, that the others have
+  neither, and that the seat map shows each seat taken once.</dd>
+  <dt>Why not here</dt><dd>A claim on a seat is a write. PostgreSQL never lets two transactions hold uncommitted writes to
+  the same row or the same pending constraint entry: the second one waits until the first commits or rolls back.
+  That is how writes work at every level, not an isolation setting. On top of that, a hold is all-or-nothing.
+  <code>Booking<wbr>Service.<wbr>hold<wbr>Internal</code> inserts seat by seat under a <code>SAVEPOINT</code>. On a
+  <code>23P01</code> it rolls back to the savepoint, withdraws the seats it already inserted, marks the order failed,
+  and commits that record, so no hold ever commits part of a pair. Every hold also opens with
+  <code>SELECT … FOR UPDATE</code> on the showing row, so holds on one showing run one at a time.</dd>
+  <dt>Made to happen in</dt><dd>Nowhere. There is no PostgreSQL setting under which it can occur.</dd>
+</dl>
+</section>
+
+<section class="anomaly" id="g1a">
+<h3><span class="code-tag">G1a</span> Aborted read</h3>
+<dl>
+  <dt>Definition</dt><dd>A transaction reads a version written by a transaction that then aborts.</dd>
+  <dt>At the cinema</dt><dd>The seat map shows a seat claimed by a booking that never went through.</dd>
+  <dt>The probe</dt><dd>24 one-seat holds, on two lanes, on a seat the script already holds (<code>A1</code>).
+  Each claim is written into the table, then rejected with <code>23P01</code> and undone by
+  <code>ROLLBACK TO SAVEPOINT</code>, while three anonymous viewers read the seat map continuously. A read of a
+  rolled-back claim would show <code>A1</code> twice, because the seat map joins seats to their live claims. The
+  probe checks that no read shows any seat twice.</dd>
+  <dt>Why not here</dt><dd>MVCC. A reader sees only versions whose transaction had committed when its statement
+  began. A rolled-back version is invisible to everybody, forever. PostgreSQL has no dirty reads to switch on.
+  The application adds its own version of the rule: seat-availability push notifications are sent only
+  <em>after</em> a booking commits, so nobody is told about a change that could still roll back.</dd>
+  <dt>Made to happen in</dt><dd>Nowhere. PostgreSQL has no setting that permits it.</dd>
+</dl>
+</section>
+
+<section class="anomaly" id="g1b">
+<h3><span class="code-tag">G1b</span> Intermediate read</h3>
+<dl>
+  <dt>Definition</dt><dd>A transaction reads a version that its writer later overwrote before committing: a
+  half-finished state.</dd>
+  <dt>At the cinema</dt><dd>During somebody's failed block booking, four seats flicker to "held" and back.</dd>
+  <dt>The probe</dt><dd>24 holds of <code>A8+A9+A10+B1+A1</code>. The first four are written as <code>held</code>.
+  Then <code>A1</code>, already taken, fails, and the four are rewritten <code>cancelled</code> before the
+  transaction commits. Three viewers poll meanwhile. The probe checks that no read ever shows those four as taken,
+  and that they are free afterwards.</dd>
+  <dt>Why not here</dt><dd>The same MVCC rule. Each row is read as of the last commit before the statement began,
+  never as a version its writer replaced before committing. The <code>held</code> versions existed only inside the
+  doomed transaction.</dd>
+  <dt>Made to happen in</dt><dd>Nowhere.</dd>
+</dl>
+</section>
+
+<section class="anomaly" id="g1c">
+<h3><span class="code-tag">G1c</span> Circular information flow</h3>
+<dl>
+  <dt>Definition</dt><dd>A cycle of dependencies with no anti-dependency in it: each transaction read something the
+  other wrote.</dd>
+  <dt>At the cinema</dt><dd>Two couples reach for one pair from opposite ends. Each sees the other's half-made booking,
+  both are told the seats are gone, and the pair goes unsold.</dd>
+  <dt>The probe</dt><dd><code>A5+A6</code> and <code>A6+A5</code> at the same instant, three rounds. Each hold writes
+  its first seat and then goes for the seat the other wrote first. For both to be refused, each must have read the
+  other's uncommitted claim, which is a <code>wr</code> edge each way. The probe checks that exactly one of the two
+  gets the pair every time, and never neither.</dd>
+  <dt>Why not here</dt><dd>A hold only ever meets someone else's claim through the <code>EXCLUDE</code> check, and
+  PostgreSQL's check never acts on an uncommitted claim. It waits for the claiming transaction to commit or roll
+  back, then decides. So one of the two always finds either nothing or a finished booking, and gets the pair.
+  READ COMMITTED, PostgreSQL's floor, forbids <span class="code-tag">G1c</span> by definition. On one showing the
+  two holds also queue on the showing's row lock, so the second does not even start until the first has finished.</dd>
+  <dt>Made to happen in</dt><dd>Nowhere.</dd>
+</dl>
+</section>
+
+<section class="anomaly" id="gcursor">
+<h3><span class="code-tag">G-cursor</span> Lost update (ANSI P4)</h3>
+<dl>
+  <dt>Definition</dt><dd>Two transactions read the same row, and both write it based on what they read. The first write
+  is silently overwritten.</dd>
+  <dt>At the cinema</dt><dd>A customer cancels a seat while the order is being confirmed, and the cancellation is
+  swallowed: the seat stays sold. At the door, the same shape would let one barcode admit two people.</dd>
+  <dt>The probe</dt><dd>Hold <code>B4+B5</code>. Then confirm the order and cancel <code>B4</code> within a few
+  milliseconds of each other, six rounds. A lost update needs the cancel to commit <em>inside</em> the confirm's
+  read-then-write window, and that window's width is unknown from outside the server. So instead of one fixed
+  timing, the rounds sweep an offset of up to 20&nbsp;ms either way: together; each side 20&nbsp;ms ahead; each
+  side 5&nbsp;ms ahead; the confirm 10&nbsp;ms ahead. Released exactly together, one side tends to win every time. The probe checks that <code>B4</code> always ends cancelled, and that
+  the order ends in one of the two states a serial order produces:
+  <br>&bull; <em>confirm, then cancel</em>: order confirmed, <code>B5</code> confirmed;
+  <br>&bull; <em>cancel, then confirm</em>: the confirm is refused because a seat is no longer held, so the order
+  stays pending and <code>B5</code> stays held.</dd>
+  <dt>Why not here</dt><dd>READ COMMITTED <em>does</em> allow lost updates when an application reads in one statement
+  and writes in the next. This app never does that. Each change is one conditional <code>UPDATE</code>:
+  <br>&bull; confirm is <code>… WHERE status = 'held'</code>;
+  <br>&bull; cancel is <code>… WHERE status IN ('held','confirmed')</code>;
+  <br>&bull; the admission scanner is <code>… AND admitted_at IS NULL</code>.
+  <br>When two collide, the second waits for the first's row lock and then re-evaluates its <code>WHERE</code> clause
+  against the row that was just committed. It cannot overwrite a change it did not see.</dd>
+  <dt>Made to happen in</dt><dd>Any read-then-write split over two statements. <code>Admission<wbr>Rescan<wbr>Concurrency<wbr>Test</code>
+  races eight scans of one ticket and asserts exactly one admission. The tree has no weakened twin of it that
+  shows the double admission.</dd>
+</dl>
+</section>
+
+<section class="anomaly" id="gsingle">
+<h3><span class="code-tag">G-single</span> Single anti-dependency cycle (read skew)</h3>
+<dl>
+  <dt>Definition</dt><dd>A reader sees part of the database from before a commit and part from after it: a state that
+  never existed. The cycle has exactly one anti-dependency: the reader read <em>x</em> before the writer changed it,
+  and read <em>y</em> after.</dd>
+  <dt>At the cinema</dt><dd>The seat map shows one seat of a two-seat order as held and the other as free.</dd>
+  <dt>The probe</dt><dd>Three rounds of: hold <code>B2+B3</code>, then confirm the order, while three viewers poll. It
+  checks that every read shows the two seats in the same state. The script also reports how many reads saw them free,
+  held and confirmed, which shows that the reads really did span both commits.</dd>
+  <dt>Why not here</dt><dd>READ COMMITTED <em>does</em> permit read skew, but only across statements. The seat map is one SQL
+  statement (every seat left-joined to its live claim), and each statement reads one snapshot, so a commit is
+  seen whole or not at all. Where a hold decides from several reads, it locks what it read: the showing
+  <code>FOR UPDATE</code>, the seats <code>FOR SHARE</code>, and the customer <code>FOR UPDATE</code>.</dd>
+  <dt>Made to happen in</dt><dd>Reading the two seats with two statements at READ COMMITTED. The tree has no test
+  for it.</dd>
+</dl>
+<p class="muted small">Where read skew is still possible, and harmless: an order's own page reads the order and then its
+seats in two statements. A reload that lands exactly between them during a confirmation can show "pending" above seats
+that are already confirmed. That render decides nothing, and the next one is right.</p>
+</section>
+
+<section class="anomaly" id="g2item">
+<h3><span class="code-tag">G2-item</span> Item anti-dependency cycle (write skew): the double booking</h3>
+<dl>
+  <dt>Definition</dt><dd>Two transactions each read something the other is about to change, and both act on what they
+  read. That makes two anti-dependencies, one each way.</dd>
+  <dt>At the cinema</dt><dd>Two customers turn up with tickets for F7.</dd>
+  <dt>The probe</dt><dd>Eight holds on <code>A7</code> at the same instant, three rounds, alternating between two
+  accounts if you give it two. It checks that exactly one wins each round, that every loser is refused
+  "just taken", and that the seat map shows the seat taken once.</dd>
+  <dt>Why not here</dt><dd>A booking that asked "is F7 free?" and then inserted a claim would be classic write skew.
+  Both see the seat free and both claim it, and READ COMMITTED and REPEATABLE READ both let that through. This app
+  never asks. A hold just inserts its claim, and
+  <br><code>reservation_no_overlap EXCLUDE USING gist (resource_unit_id WITH =, period WITH &amp;&amp;) WHERE (status IN ('held','confirmed'))</code>
+  <br>rejects a second live claim on the same seat for an overlapping time at write time, the way a unique index
+  would. It works at any isolation level and surfaces as <code>23P01</code>, which is never retried. "Just taken" is
+  the message that <code>23P01</code> path produces and nothing else produces, so every loser in the probe was refused
+  by the constraint itself.</dd>
+  <dt>Made to happen in</dt><dd><code>Seat<wbr>Booking<wbr>Concurrency<wbr>Differential<wbr>Test</code> builds the schema from the real
+  migration with the constraint stripped out, runs the same eight-way race, and all eight succeed. Note that it
+  removes the constraint rather than weakening isolation, because there is no weaker isolation to go to.</dd>
+</dl>
+<p class="muted small">A precise footnote. A claim is a new row, found by a predicate (this seat, an overlapping time, a
+live status), not a new version of an existing row. So in the "ask, then insert" version the read is a predicate read,
+and its cycle strictly meets Adya's <span class="code-tag">G2</span> condition. The project's design notes file it under
+<span class="code-tag">G2-item</span> because it concerns one known seat. Either way, the constraint closes it by
+turning the predicate conflict into a write conflict on an index entry.</p>
+</section>
+
+<section class="anomaly" id="g2">
+<h3><span class="code-tag">G2</span> Anti-dependency cycle over a predicate (phantom)</h3>
+<dl>
+  <dt>Definition</dt><dd>Each transaction's <code>COUNT</code> or <code>WHERE</code> clause would have come out
+  differently had it seen the other's insert, and both act on their count.</dd>
+  <dt>At the cinema</dt><dd>One person with two tabs gets past the 10-seats-a-day limit. That limit exists for
+  exactly this person: a scalper.</dd>
+  <dt>The probe</dt><dd>One account already holds 2 anchor seats that day. It sends two holds of 5 seats, on two
+  showings of the same day, at the same instant. One hold fits (2 + 5 = 7). Both do not (2 + 5 + 5 = 12). The probe
+  checks that one succeeds and the other is refused by the daily cap, whose message counts the first one's seats:
+  "You already have 7 seats for showings on …, and the limit is 10 a day."</dd>
+  <dt>Why not here</dt><dd>The rows that would breach the cap do not exist yet, so there is nothing to lock.
+  READ COMMITTED, and REPEATABLE READ too, would let both holds count 2 and both insert. So the hold locks the
+  customer's own row, with <code>SELECT … FOR UPDATE</code> in
+  <code>Customer<wbr>Repository.<wbr>find<wbr>By<wbr>Id<wbr>For<wbr>Update</code>, before counting. That serialises one customer's holds and nothing
+  else. SERIALIZABLE would also catch it, at the price of <code>40001</code> retries on every hold, and the lock does it
+  at READ COMMITTED. The first-booking rule ("the first booking on a showing must be for at least 2 seats") is
+  also a count, and it is serialised by the showing's <code>FOR UPDATE</code>.</dd>
+  <dt>Made to happen in</dt><dd><code>Daily<wbr>Purchase<wbr>Cap<wbr>Concurrency<wbr>Differential<wbr>Test</code> runs
+  four holds on four showings of one day, so that their showing locks do not overlap, with the customer lock left out.
+  All four pass the count, and the day ends at 12 seats against a cap of 10. Its twin with the lock,
+  <code>Daily<wbr>Purchase<wbr>Cap<wbr>Concurrency<wbr>Test</code>, lets exactly three through. Like the other
+  differential tests, it removes the protection rather than weakening isolation.</dd>
+</dl>
+</section>
+
+<h2 id="not-adya">The race that is not an Adya anomaly</h2>
+<p>A booking reads the showing as on sale. Staff cancel the showing. The booking commits afterwards anyway. That is a
+ticket for a showing that had already been cancelled, the last row of the
+<a href="#table">table</a>. It has one anti-dependency and no edge back, so it is not a cycle. "Book, then cancel"
+is a perfectly valid serial order, and no isolation level objects, not even SERIALIZABLE. What is wrong is that the
+booking's check went stale before it committed: the cancellation committed in between. The business rule is that
+nothing may be sold once a cancellation has taken effect. That is a rule about <em>when</em> things commit, and
+serializability of any flavour, strict or not, says nothing about it for two transactions that overlap in time.</p>
+<p>The fix is <code>SELECT … FOR UPDATE</code> on the showing row as every hold's first statement. Whichever of the two
+reaches the row first, the other waits, then reads the current status. <code>Session<wbr>Cancellation<wbr>Race<wbr>Differential<wbr>Test</code>
+reverts it to a plain <code>SELECT</code> and gets the orphaned hold. The script does not probe it because cancelling
+a showing needs a staff account, and because it is not on Adya's list. It belongs on this page anyway: knowing where
+the taxonomy stops is part of knowing it.</p>
+
+<h2 id="steps">Step by step: running the script</h2>
+<ol class="steps">
+  <li><strong>Check the tools.</strong>
+  You need JDK&nbsp;17 or newer (for <code>jshell</code>), <code>bash</code>, an <code>env</code> that understands
+  <code>-S</code> (GNU coreutils 8.30+, or macOS/BSD), and outbound access to port 8443.
+<pre><code>jshell --version        <span class="c"># jshell 17 or newer</span>
+env --version | head -1 <span class="c"># GNU coreutils 8.30 or newer (macOS: env -S is built in)</span></code></pre></li>
+
+  <li><strong>Download the script, and read it.</strong>
+  It is one file of plain Java. It sends only what a customer's browser sends, and it cancels everything it books.
+  Reading it before giving it your session cookie is the right instinct.
+<pre><code>curl -fO https://dawud-tan.github.io/adya-anomaly-probe.jsh
+chmod +x adya-anomaly-probe.jsh
+less adya-anomaly-probe.jsh</code></pre></li>
+
+  <li><strong>Make two showings for it (staff).</strong>
+  Signed in as staff, open <a href="https://www.tiketbioskop.xyz:8443/admin">/admin</a>, pick a hall of about
+  <strong>30 seats or more</strong>, and use <em>Create showing</em> twice:
+  <ul>
+    <li>both on the <strong>same day</strong>, at least <strong>an hour from now</strong>, and not overlapping (for example
+    13:00–15:00 and 17:00–19:00);</li>
+    <li>with a <strong>label</strong> such as <code>Adya probe 1</code>, and <strong>no film</strong>. A film with an age rating
+    makes every hold record an age attestation for your account, and the script refuses such a showing.</li>
+  </ul>
+  A new showing is on sale immediately. Use fresh, empty ones: the script only ever touches free seats, but on an
+  empty showing the final seat map shows at a glance that everything was given back.</li>
+
+  <li><strong>Copy the two seat-map addresses.</strong>
+  Open the hall's public page, <code>https://www.tiketbioskop.xyz:8443/halls/&lt;hall-id&gt;</code>. The hall id is the
+  one in the admin page's address. Press <em>View seat map</em> on each showing and copy the address bar. It looks
+  like this:
+<pre><code>https://www.tiketbioskop.xyz:8443/halls/&lt;hall-id&gt;/showings/&lt;showing-id&gt;</code></pre></li>
+
+  <li><strong>Sign in as a customer.</strong>
+  In a browser, open <a href="https://www.tiketbioskop.xyz:8443/login">/login</a> with an <strong>ordinary Google
+  account</strong>. The platform-admin account cannot hold seats. Use one that has <strong>no other bookings on that
+  day</strong>, because the daily cap counts them. The sign-in lasts about an hour, which is plenty; the run itself
+  takes one or two minutes.</li>
+
+  <li><strong>Copy the session cookie.</strong>
+  Open developer tools (<kbd>F12</kbd>), go to <em>Network</em>, and reload. Click the first request (the page
+  itself), then <em>Headers</em>, then <em>Request Headers</em>, then <code>Cookie</code>. Copy the whole value. The
+  important part is <code>q_session=…</code>. A large session is split into <code>q_session_chunk_1</code>,
+  <code>_2</code> and so on, and copying the whole header takes them all. The cookie is <code>HttpOnly</code>, so
+  <code>document.cookie</code> in the console will not show it. The script drops <code>booking_lang</code> by itself,
+  because it reads the refusal messages in English.</li>
+
+  <li><strong>Hand both to the script, keeping the cookie out of your shell history.</strong>
+<pre><code>export ADYA_SHOWING='https://www.tiketbioskop.xyz:8443/halls/…/showings/…'
+export ADYA_SHOWING_2='https://www.tiketbioskop.xyz:8443/halls/…/showings/…'
+read -rs ADYA_COOKIE &amp;&amp; export ADYA_COOKIE   <span class="c"># paste, then Enter; nothing is echoed</span></code></pre>
+  Settings are environment variables because jshell passes no arguments to a script. A cookie on a command line
+  would also be visible to every user of the machine through <code>ps</code>.</li>
+
+  <li><strong>Dry-run first.</strong>
+  This reads the two seat maps and <code>/orders</code>, checks the rules and your session, prints the seat plan,
+  and writes nothing:
+<pre><code>ADYA_DRY_RUN=1 ./adya-anomaly-probe.jsh</code></pre></li>
+
+  <li><strong>Run it.</strong>
+<pre><code>./adya-anomaly-probe.jsh; echo "exit status: $?"</code></pre>
+  To make the races between two <em>people</em>, sign in with a second Google account in a private window, copy its
+  cookie the same way, and <code>export ADYA_COOKIE_2</code>. To run a subset:
+  <code>ADYA_ONLY=G0,G2-item ./adya-anomaly-probe.jsh</code>.</li>
+
+  <li><strong>Tidy up.</strong>
+  The showing is empty again when the script ends; it prints the final seat map to prove it. Close or cancel the two
+  probe showings in <code>/admin</code> so customers do not find them, and
+  <a href="https://www.tiketbioskop.xyz:8443/logout">sign out</a>. The cookie you copied stays a working credential
+  until it expires, so treat the terminal it is in accordingly.</li>
+</ol>
+
+<h3>All settings</h3>
+<div class="scroll">
+<table>
+  <thead><tr><th>Variable</th><th></th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td><code>ADYA_SHOWING</code></td><td>required</td><td>Seat-map address of an empty, on-sale, label-only showing at least an hour away</td></tr>
+    <tr><td><code>ADYA_COOKIE</code></td><td>required</td><td>Cookie header of a browser signed in as a customer (at least <code>q_session=…</code>; a bare value is taken to be <code>q_session</code>)</td></tr>
+    <tr><td><code>ADYA_SHOWING_2</code></td><td>optional</td><td>A second empty showing on the same day. Without it, G2's two holds also queue on one showing's lock (see <a href="#limits">limits</a>)</td></tr>
+    <tr><td><code>ADYA_COOKIE_2</code></td><td>optional</td><td>A second customer, so every race alternates between two people</td></tr>
+    <tr><td><code>ADYA_ONLY</code></td><td>optional</td><td>Comma-separated subset: <code>G0,G1a,G1b,G1c,G-cursor,G-single,G2-item,G2</code> (<code>P4</code> also means G-cursor)</td></tr>
+    <tr><td><code>ADYA_ROUNDS</code></td><td>optional</td><td>Rounds per race, default 3, at most 10. G1a/G1b send 8 doomed holds per round, and G-cursor runs twice this many rounds</td></tr>
+    <tr><td><code>ADYA_DRY_RUN</code></td><td>optional</td><td><code>1</code>: read-only preflight</td></tr>
+    <tr><td><code>ADYA_NAME</code>, <code>ADYA_PHONE</code></td><td>optional</td><td>Contact details sent with each hold. The app only stores them for an account that has never booked</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="output">Reading the output</h2>
+<p>Each probe prints what it did, round by round; one line on what it would look like at the cinema; a
+<strong>why not here</strong> paragraph; and a verdict:</p>
+<ul>
+  <li><strong>NOT OBSERVED:</strong> every attempt ended the way a serial order would have ended.</li>
+  <li><strong>OBSERVED:</strong> the anomaly happened. The script then exits with status 1.</li>
+  <li><strong>INCONCLUSIVE:</strong> an attempt was refused for a reason other than the one being probed, such as a
+  cap you had already reached, so the attempt says nothing.</li>
+  <li><strong>SKIPPED:</strong> the probe does not apply. For example, G2 is skipped if the deployment has no daily
+  cap, or if the two showings fall on different days.</li>
+</ul>
+<p>Exit status: <code>0</code> no anomaly observed, <code>1</code> an anomaly observed, <code>2</code> could not run or
+not clean. For G1a, G1b and G-single the script also reports how many seat-map reads were in flight <em>alongside</em> a
+write that could have leaked. That count uses client-side timing, so it is an upper bound on how hard the window was
+actually tried.</p>
+
+<details>
+<summary>Sample output: a full run against a local copy of the app</summary>
+<p class="muted small">This run used the booking platform's own code on a local machine, with PostgreSQL 18.6 in a
+container and a test customer identity injected in place of the Google sign-in. There was no second account, and the
+two showings were on one day. A live run prints the same shape. Its counts and its duration differ, because every
+round trip to the office server takes longer.</p>
+<pre><code>Adya anomaly probe -&gt; http://localhost:8081
+------------------------------------------------------------------------------
+Showing   Test Showing | 2099-12-03 13:00 WIB | 40 seats, all free
+          rules: 8 seats per booking, 10 per customer per day, first booking at least 2 seats
+Showing 2 Test Showing | 2099-12-03 17:00 WIB | 40 seats, all free
+          rules: 8 seats per booking, 10 per customer per day, first booking at least 2 seats
+Accounts  customer 1: signed in (GET /orders -&gt; 200)
+Accounts  customer 2 not given: customer 1 plays both parts in every race.
+Seats     A1+A2 anchor | A3+A4 G0 | A8+A9+A10+B1 G1b | A5+A6 G1c | B4+B5 G-cursor
+          B2+B3 G-single | A7 G2-item | B6+B7+B8+B9+B10 + C1+C2+C3+C4+C5 (showing 2) G2
+------------------------------------------------------------------------------
+
+[anchor] seats held from the first probe to the last
+   at the cinema: the showing is never empty, so the first-booking rule never refuses a one-seat hold
+   A1+A2 held (order dfcfa9b8)
+
+[G0] write cycle
+   at the cinema: two couples book the same pair and each goes home with one seat of it
+   round 1: A3+A4 and A4+A3, twice each, at once -&gt; 1 of 4 succeeded, 3 refused, just taken; order e82da440 has A3 held, A4 held
+   round 2: A3+A4 and A4+A3, twice each, at once -&gt; 1 of 4 succeeded, 3 refused, just taken; order 97a701e7 has A3 held, A4 held
+   round 3: A3+A4 and A4+A3, twice each, at once -&gt; 1 of 4 succeeded, 3 refused, just taken; order 171e0bc7 has A3 held, A4 held
+   =&gt; NOT OBSERVED: in all 3 rounds one order got both seats and the other three got neither
+
+[G1a] aborted read
+   at the cinema: the seat map shows a claim from a booking that never went through
+   24 doomed one-seat holds on A1 (already held): each claim was written, then undone by ROLLBACK TO SAVEPOINT after 23P01 -&gt; 24 refused, just taken
+   26 seat-map reads meanwhile, 14 of them in flight alongside a doomed hold; a seat shown twice (or the grid changing size): 0x
+   =&gt; NOT OBSERVED: 24 rolled-back claims, 26 reads (14 overlapping), none saw a claim that was rolled back
+
+[G1b] intermediate read
+   at the cinema: seats flicker to 'held' during someone's failed block booking
+   24 doomed holds of A8+A9+A10+B1+A1: A8+A9+A10+B1 written as 'held', then A1 fails and they are rewritten 'cancelled' before commit
+   28 seat-map reads meanwhile, 16 in flight alongside a doomed hold; A8+A9+A10+B1 seen held: 0x; all free afterwards: true
+   =&gt; NOT OBSERVED: 24 doomed block holds, 28 reads (16 overlapping), no intermediate 'held' ever visible
+
+[G1c] circular information flow
+   at the cinema: two couples reach for one pair from opposite ends; each sees the other's half-made booking, both give up, and the pair goes unsold
+   round 1: A5+A6 and A6+A5 at once -&gt; 1 of 2 succeeded, 1 refused, just taken; order 12116a9d has A5 held, A6 held
+   round 2: A5+A6 and A6+A5 at once -&gt; 1 of 2 succeeded, 1 refused, just taken; order 263c7f98 has A5 held, A6 held
+   round 3: A5+A6 and A6+A5 at once -&gt; 1 of 2 succeeded, 1 refused, just taken; order e0d5ac26 has A6 held, A5 held
+   =&gt; NOT OBSERVED: in all 3 rounds exactly one of the two got the pair; never neither
+
+[G-cursor] lost update
+   at the cinema: a customer cancels a seat and it stays sold anyway (each round: hold two seats, then confirm the order and cancel one of them within a few ms)
+   round 1 (together): B4 cancelled, B5 confirmed, order confirmed  = confirm, then cancel
+   round 2 (cancel 20 ms ahead): B4 cancelled, B5 held, order pending  = cancel, then confirm (refused: a seat was no longer held)
+   round 3 (confirm 20 ms ahead): B4 cancelled, B5 confirmed, order confirmed  = confirm, then cancel
+   round 4 (confirm 5 ms ahead): B4 cancelled, B5 confirmed, order confirmed  = confirm, then cancel
+   round 5 (cancel 5 ms ahead): B4 cancelled, B5 confirmed, order confirmed  = confirm, then cancel
+   round 6 (confirm 10 ms ahead): B4 cancelled, B5 confirmed, order confirmed  = confirm, then cancel
+   =&gt; NOT OBSERVED: the cancel was never lost; every round matched a serial order {cancel, then confirm (refused: a seat was no longer held)=1, confirm, then cancel=5}
+
+[G-single] single anti-dependency cycle
+   at the cinema: the seat map shows half of somebody's two-seat order
+   round 1: hold B2+B3, confirm, while 3 viewers poll -&gt; 29 reads
+   round 2: hold B2+B3, confirm, while 3 viewers poll -&gt; 30 reads
+   round 3: hold B2+B3, confirm, while 3 viewers poll -&gt; 30 reads
+   what the reads saw: both available x36, both confirmed x26, both held x27
+   =&gt; NOT OBSERVED: 89 reads across 3 hold+confirm rounds; the pair was always in one state
+
+[G2-item] item anti-dependency cycle
+   at the cinema: two customers turn up with tickets for the same seat
+   round 1: 8 holds on A7 at once -&gt; 1 held it, 7 refused, just taken; the seat map shows it taken 1x
+   round 2: 8 holds on A7 at once -&gt; 1 held it, 7 refused, just taken; the seat map shows it taken 1x
+   round 3: 8 holds on A7 at once -&gt; 1 held it, 7 refused, just taken; the seat map shows it taken 1x
+   =&gt; NOT OBSERVED: 24 simultaneous holds, exactly one winner in each of 3 rounds; every other one refused, just taken
+
+[G2] anti-dependency cycle over a predicate
+   at the cinema: one customer with two tabs gets past the 10-seats-a-day limit
+   customer 1 already holds 2 seats that day; two holds of 5 at once -&gt; refused by the daily cap | held (order 2b2c1fce)
+   the refusal: "You already have 7 seats for showings on Thu 3 Dec, and the limit is 10 a day. You can add 3 more — untick 2 and try again."
+   =&gt; NOT OBSERVED: one hold of 5 succeeded; the other was refused by the daily cap, having counted the first one's seats
+
+[anchor] A1+A2 given back.
+
+==============================================================================
+Showing 1 after the run: every seat free again.
+  G0        Write cycle (dirty write)                          NOT OBSERVED
+  G1a       Aborted read                                       NOT OBSERVED
+  G1b       Intermediate read                                  NOT OBSERVED
+  G1c       Circular information flow                          NOT OBSERVED
+  G-cursor  Lost update (P4)                                   NOT OBSERVED
+  G-single  Single anti-dependency cycle (read skew)           NOT OBSERVED
+  G2-item   Item anti-dependency cycle (double booking)        NOT OBSERVED
+  G2        Anti-dependency cycle over a predicate (phantom)   NOT OBSERVED
+  8 probe(s) ran; no anomaly was observed.
+  151 writes (POST) and 255 reads (GET) in 12 s.
+  Not probed: a showing cancelled mid-checkout. It is not an Adya anomaly (one
+  anti-dependency edge, no cycle) and needs a staff account; see the guide.</code></pre>
+<p class="muted small">Verbatim, except that each probe's "why not here" paragraph is left out; the cards above quote them.</p>
+</details>
+
+<h2 id="footprint">What a run leaves behind, and its load</h2>
+<ul>
+  <li><strong>Seats.</strong> Every hold the script makes, it cancels again. The final seat map is printed to prove
+  it. If a run is interrupted, a hold expires by itself within 10 minutes. A <em>confirmed</em> seat (the G-single and
+  G-cursor probes confirm some) does not expire, so cancel anything left over at
+  <a href="https://www.tiketbioskop.xyz:8443/orders">/orders</a>. The script prints each order's id as it goes.</li>
+  <li><strong>History.</strong> Your account's order history keeps the probe's cancelled and failed orders, and the
+  tenant's audit log keeps a row for every change. Both are append-only by design; the audit log is a hash chain, and
+  it is meant to be impossible to tidy up. Run it on a demo tenant, not on a cinema's live catalogue.</li>
+  <li><strong>Load.</strong> A default run sends about 150 writes and a few hundred reads over a minute or two; the
+  script prints the exact counts at the end. Most reads go to the seat-map fragment, the endpoint every open seat-map
+  tab already polls every three seconds. The three seat-map viewers pause 100&nbsp;ms between reads, and only watch
+  while a probe is writing. The office server shares its CPU with another production application, which is why the
+  repository's load-test harness refuses to target it at all. This is a correctness probe, not a load test, so keep
+  <code>ADYA_ROUNDS</code> modest.</li>
+  <li><strong>Notifications.</strong> Every hold, confirmation and cancellation that succeeds sends a
+  seat-availability push to anyone watching that showing's seat map with notifications allowed. A run makes dozens
+  of them, and they are not throttled. Keep the probe showings' seat maps closed in any browser where you have allowed
+  notifications. The script's own viewers are anonymous and subscribe to nothing.</li>
+  <li><strong>Identification.</strong> Every request carries
+  <code>User-Agent: adya-anomaly-probe/1 (jshell; +https://dawud-tan.github.io/adya-anomaly-probe.html)</code>, so an
+  operator reading the logs can see what it was.</li>
+</ul>
+
+<h2 id="limits">What a live probe can and cannot show</h2>
+<div class="callout warn">
+<p><strong>A probe shows absence in the attempts it made. It does not prove impossibility.</strong> The windows it aims at are
+milliseconds wide, and the reads that happen to land in them are a sample. What makes each anomaly impossible is the
+mechanism named in its card. The script's job is to show that behaviour on the real server, over the real network,
+with the real configuration, which no unit test can do.</p>
+</div>
+<ul>
+  <li><strong>On one showing, holds queue on the showing's row lock.</strong> So the races on one showing (G0, G1c,
+  G2-item) exercise that lock as much as the constraint. The losers are still refused by the constraint itself:
+  "just taken" is only ever produced by the <code>23P01</code> path. The lock decides the order they arrive in, and
+  the constraint decides who gets the seat. A race between two phones is a demonstration. The proof is the
+  differential test.</li>
+  <li><strong>G2 needs two showings to mean what it says.</strong> With only <code>ADYA_SHOWING</code>, both holds also
+  queue on that showing's lock, and the per-customer lock is never the only thing between them.</li>
+  <li><strong>One customer by default.</strong> Without <code>ADYA_COOKIE_2</code>, "two customers" are two
+  connections of one account. The constraint does not care who asks. With a second account, the races are between
+  two people.</li>
+  <li><strong>Not covered:</strong> the counter channel, QRIS payments, the admission scanner and seat-map relayouts.
+  Each needs staff credentials or money. They have their own tests in the repository
+  (<code>Seat<wbr>Retirement<wbr>Race<wbr>Test</code> for relayouts, <code>Admission<wbr>Rescan<wbr>Concurrency<wbr>Test</code> for the scanner).</li>
+</ul>
+
+<h2 id="trouble">Troubleshooting</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th>You see</th><th>Why</th><th>Do</th></tr></thead>
+  <tbody>
+    <tr><td><code>illegal character: '#'</code></td><td>You ran <code>jshell adya-anomaly-probe.jsh</code>; jshell does not skip a <code>#!</code> line</td><td>Run <code>./adya-anomaly-probe.jsh</code>. The error is harmless otherwise: the rest still runs</td></tr>
+    <tr><td><code>env: invalid option -- 'S'</code></td><td>An <code>env</code> older than coreutils 8.30</td><td><code>tail -n +2 adya-anomaly-probe.jsh &gt; probe.jsh &amp;&amp; jshell probe.jsh</code></td></tr>
+    <tr><td><code>NoClassDefFoundError: java/net/http/HttpClient</code></td><td>jshell was started with <code>--execution local</code></td><td>Leave that flag off</td></tr>
+    <tr><td><code>cookie is not a live session … sign-in at accounts.google.com</code></td><td>The sign-in is over (about an hour), or the wrong cookie was copied</td><td>Sign in again and copy the whole <code>Cookie</code> header again</td></tr>
+    <tr><td><code>may not book seats (HTTP 403)</code></td><td>A platform-admin account</td><td>Use an ordinary Google account</td></tr>
+    <tr><td><code>the showing is not on sale</code></td><td>Closed, cancelled or still scheduled</td><td>Open it for sale in <code>/admin</code>, or make a new one</td></tr>
+    <tr><td><code>film carries an age rating</code></td><td>The showing has a rated film</td><td>Make a label-only showing</td></tr>
+    <tr><td><code>showing starts at … at least an hour away</code></td><td>Too soon: an under-sold showing is cancelled 15 minutes after its start</td><td>Use a later showing</td></tr>
+    <tr><td><code>daily limit is already used up</code></td><td>The account already has seats that day</td><td>Another day, or another account</td></tr>
+    <tr><td><code>the hall is too small for the plan</code></td><td>Fewer than about 30 free seats</td><td>A bigger hall, or fewer probes with <code>ADYA_ONLY</code></td></tr>
+    <tr><td>G2 <code>SKIPPED … cannot race</code></td><td>The two showings are on different days</td><td>Put both on the same day</td></tr>
+  </tbody>
+</table>
+</div>
+
+<footer>
+<p>Written 25 September 2026 for the booking platform's pitch demo. The design notes behind it are §I.5 of the
+platform plan ("A full audit against Adya's anomaly taxonomy"). The references are Atul Adya, <em>Weak Consistency: A
+Generalized Theory and Optimistic Implementations for Distributed Transactions</em> (MIT, 1999), and Adya, Liskov
+and O'Neil, <em>Generalized Isolation Level Definitions</em> (ICDE 2000).</p>
+</footer>
+
+</main>
+<script>
+  // A copy button on every code block. Clipboard access needs a secure context, which this page
+  // is not (it is served over plain HTTP on :8080), so the fallback is a hidden textarea and the
+  // old execCommand path. Selecting by hand still works where neither does.
+  document.querySelectorAll('pre').forEach(function (pre) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'copy'; b.textContent = 'Copy';
+    b.addEventListener('click', function () {
+      var text = pre.querySelector('code').innerText;
+      var done = function () { b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy'; }, 1400); };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done, function () {});
+      } else {
+        var t = document.createElement('textarea');
+        t.value = text; t.setAttribute('readonly', ''); t.style.position = 'fixed'; t.style.opacity = '0';
+        document.body.appendChild(t); t.select();
+        try { document.execCommand('copy'); done(); } catch (e) {}
+        document.body.removeChild(t);
+      }
+    });
+    pre.classList.add('has-copy');
+    pre.appendChild(b);
+  });
+</script>
+</body>
+</html>

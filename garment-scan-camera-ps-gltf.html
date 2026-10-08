@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Camera, Lights and Polarisers for Garment Photogrammetry, Photometric Stereo and glTF Albedo</title>
+<meta name="description" content="A garment-scanning rig for photogrammetry, photometric stereo and glTF: camera, LEDs and drivers, polarisers, colour, GPU, fabrics, and where the .glb opens.">
+<meta name="keywords" content="garment 3D scanning, photogrammetry camera, photometric stereo, near-light photometric stereo, Gaussian Wrapping, COLMAP, cross-polarization, polarized light, glTF 2.0 baseColor, normal map baking, KHR_materials_sheen, ColorChecker colour correction, albedo, Canon EOS R8, Canon EOS R8 Mark II IBIS, Nikon Z6 III, Voigtlander APO-Lanthar 50mm, TTArtisan 50mm RF, libgphoto2, gphoto2 tethering, in-body image stabilization photogrammetry, depth of field diffraction, RAW linearity, high CRI COB LED, Mean Well NLDD-1400H, Raspberry Pi Pico 2 LED controller, aluminium T-slot frame, GPU for Gaussian splatting, RTX A6000 rental, Scene Viewer glTF limits, AR Quick Look USDZ, HTML model element Safari 27, HarmonyOS ArkGraphics 3D glTF, fabric suitability 3D scanning, virtual try-on, fabric digitization">
+<meta name="author" content="Claude Opus 5.5">
+<link rel="canonical" href="https://dawud-tan.github.io/garment-scan-camera-ps-gltf.html">
+<link rel="alternate" hreflang="en-US" href="https://dawud-tan.github.io/garment-scan-camera-ps-gltf.html">
+<link rel="alternate" hreflang="x-default" href="https://dawud-tan.github.io/garment-scan-camera-ps-gltf.html">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Camera, Lights and Polarisers for Garment Photogrammetry, Photometric Stereo and glTF Albedo">
+<meta property="og:description" content="One camera rig for three goals: COLMAP/Gaussian-Wrapping geometry, calibrated near-light photometric stereo and colour-accurate glTF textures, with the parts, the GPU, the fabrics it suits and where the .glb opens.">
+<meta property="og:url" content="https://dawud-tan.github.io/garment-scan-camera-ps-gltf.html">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2026-09-27T11:18:44+07:00">
+<meta property="article:modified_time" content="2026-09-29T10:25:00+07:00">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="One rig, three goals: photogrammetry, photometric stereo and glTF albedo">
+<meta name="twitter:description" content="Camera body and lens, 8 LEDs, cross-polarisation, colour calibration and glTF conventions for garment scanning, with the evidence behind each choice.">
+<meta name="theme-color" content="#fbfaf8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14161a" media="(prefers-color-scheme: dark)">
+<style>
+  :root{
+    --bg:#fbfaf8; --panel:#ffffff; --ink:#16181d; --ink-soft:#4b5162;
+    --line:#e3e0da; --accent:#1f5f6b; --accent-soft:#e7f1f2;
+    --warn:#8a5a10;
+    --measure:74ch;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#14161a; --panel:#1a1d23; --ink:#e9e7e2; --ink-soft:#a7adbb;
+      --line:#2c313a; --accent:#6fc0cc; --accent-soft:#1f2a2e;
+      --warn:#e0b25f;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:16px/1.65 ui-sans-serif,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+       -webkit-text-size-adjust:100%}
+  .wrap{max-width:980px;margin:0 auto;padding:0 16px 96px}
+  header.hero{border-bottom:1px solid var(--line);margin-bottom:32px;padding:52px 0 28px;
+              background:radial-gradient(1200px 320px at 12% -40%, var(--accent-soft), transparent 70%)}
+  header.hero .wrap{padding-bottom:0}
+  h1{font-size:clamp(1.65rem,4.2vw,2.45rem);line-height:1.15;margin:0 0 .6rem;letter-spacing:-.02em}
+  .sub{font-size:1.06rem;color:var(--ink-soft);max-width:var(--measure);margin:0 0 1.1rem}
+  .meta{font-size:.84rem;color:var(--ink-soft);display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;margin:0}
+  .meta b{font-weight:600;color:var(--ink)}
+  h2{font-size:1.42rem;margin:2.6rem 0 .7rem;letter-spacing:-.01em;scroll-margin-top:1rem}
+  h2 .num{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:.45rem;font-weight:700}
+  h3{font-size:1.08rem;margin:1.6rem 0 .45rem;scroll-margin-top:1rem}
+  p,li{max-width:var(--measure)}
+  a{color:var(--accent)}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9em;
+       background:var(--accent-soft);padding:.1em .34em;border-radius:4px;overflow-wrap:anywhere}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:1.4rem 0}
+  .panel h3:first-child{margin-top:0}
+  .panel p:last-child{margin-bottom:0}
+  .keyfacts{border-left:4px solid var(--accent)}
+  .keyfacts ul{margin:.4rem 0 0;padding-left:1.15rem}
+  .keyfacts li{margin:.35rem 0}
+  .callout{border-left:4px solid var(--warn)}
+  .defs dt{font-weight:650;margin-top:.7rem}
+  .defs dt:first-child{margin-top:0}
+  .defs dd{margin:.15rem 0 0 0;color:var(--ink-soft);max-width:var(--measure)}
+  table{border-collapse:collapse;width:100%;font-size:.9rem;margin:1rem 0;display:block;overflow-x:auto}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--accent-soft);font-weight:650}
+  nav.toc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:1.6rem 0 2rem}
+  nav.toc h2{margin:0 0 .5rem;font-size:.95rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft)}
+  nav.toc ol{margin:0;padding-left:1.3rem;columns:2;column-gap:2rem}
+  nav.toc li{margin:.2rem 0;break-inside:avoid}
+  nav.toc a{text-decoration:none}
+  details{border:1px solid var(--line);border-radius:10px;padding:0 16px;margin:.6rem 0;background:var(--panel)}
+  details[open]{padding-bottom:8px}
+  summary{cursor:pointer;padding:13px 0;font-weight:600}
+  summary::marker{color:var(--accent)}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px}
+  .grid2 .panel{margin:0}
+  figure{margin:1.4rem 0}
+  figcaption{font-size:.85rem;color:var(--ink-soft);margin-top:.5rem;max-width:var(--measure)}
+  ol.flow{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+  ol.flow li{max-width:none;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  ol.flow li b{display:block;font-size:.95rem}
+  ol.flow li span{display:block;font-size:.82rem;color:var(--ink-soft);margin-top:2px}
+  ol.flow li.hi{background:var(--accent-soft);border-color:var(--accent)}
+  ol.steps li{margin:.45rem 0}
+  footer{border-top:1px solid var(--line);margin-top:56px;padding-top:20px;font-size:.85rem;color:var(--ink-soft)}
+  .refs li{margin:.45rem 0;overflow-wrap:anywhere}
+  .skip{position:absolute;left:-9999px}
+  .skip:focus{left:12px;top:12px;background:var(--panel);padding:8px 12px;border:1px solid var(--accent);border-radius:6px;z-index:9}
+  @media (max-width:640px){nav.toc ol{columns:1}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>One rig, three goals: the camera, lights and polarisers for garment photogrammetry, photometric stereo and glTF albedo</h1>
+    <p class="sub">A garment on a turntable is scanned for three things at once: <b>geometry</b> (COLMAP and Gaussian Wrapping), <b>fine surface detail</b> (calibrated near-light photometric stereo) and <b>colour</b> (the base colour of a glTF 2.0 material). This page gives the recommended camera body, lens, lighting and polarisation for that rig, and the evidence behind each choice.</p>
+    <p class="meta">
+      <span><b>Status</b> 28 September 2026: the chain from capture to the .glb built and tested on synthetic data, including meshes of Gaussian Wrapping's size; rig not yet provisioned</span>
+      <span><b>Stack</b> COLMAP · Gaussian Wrapping · Python · glTF 2.0</span>
+      <span><b>Reading time</b> ~22 min</span>
+    </p>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+
+<div class="panel keyfacts">
+  <h3>The short answer</h3>
+  <ul>
+    <li><b>Body:</b> a full-frame mirrorless camera <b>without in-body stabilisation</b>, tethered with gphoto2. First choice: <b>Canon EOS R8</b> (24.2 MP, no IBIS, supported by libgphoto2 2.5.33); its Mark II, announced on 15 September 2026, adds IBIS, so buy the original while it is sold. Alternative: Nikon Z6 III or Z5 with IBIS permanently off.</li>
+    <li><b>Lens:</b> a ~50 mm prime with a <b>mechanical focus ring</b>, taped. Focus-by-wire lenses can lose their focus position at power-off, or get it back only approximately. On Nikon Z, the Voigtländer APO-Lanthar 50 mm f/2 is fully manual.</li>
+    <li><b>Settings:</b> RAW, ISO 100, <b>f/11</b> (a garment on a mannequin is roughly ±15 cm deep), everything locked. Stabilisation, auto power-off and sensor cleaning off. 24 MP is enough: at f/11, diffraction already blurs about 2.5 pixels.</li>
+    <li><b>Lights:</b> 8 bare LEDs, 30–45° off the camera axis, wide beam, CRI &gt; 95, constant-current drivers, with <b>calibrated positions</b>. With lights 1.5 m away, a distant-light model errs by 20.6° (median); a near-light model with 5 mm position error, by 0.33°.</li>
+    <li><b>Cross-polarisation:</b> linear film on every light, each tuned to extinguish its own highlight on a chrome ball. It costs about 3 stops of light. Whether the fabric needs it is measured, not assumed.</li>
+    <li><b>Colour:</b> a ColorChecker under the rig's own lights, a 3×3 or root-polynomial colour correction on <b>linear</b> albedo, and an sRGB-encoded <code>baseColorTexture</code>. Fabric sheen goes in <code>KHR_materials_sheen</code>.</li>
+    <li><b>Light hardware:</b> 5600 K, CRI 97 COB LEDs with a 12.5 mm emitter on Mean Well NLDD-1400H constant-current drivers. A Raspberry Pi Pico 2 switches them, never dims them. They share one aluminium frame with the camera. Expect about 0.4 s exposures at f/11, or 3 s cross-polarised.</li>
+    <li><b>Backdrop:</b> a backdrop lit from behind and switched on its own, filling the frame behind the garment. One silhouette frame per turntable step gives each view's object mask, whatever the garment's colour. Unmasked, the static studio stopped COLMAP's default settings from reconstructing anything in a synthetic test.</li>
+    <li><b>GPU:</b> rent a 48 GB card (RTX A6000 or L40S) for Gaussian Wrapping first. GPU prices in September 2026 are about double launch prices.</li>
+    <li><b>Fabrics and delivery:</b> matte, opaque fabrics scan well; sheer, metallic and sequinned ones don't. The .glb opens in every modern browser, in Safari 27 on iPhone, in Android's Scene Viewer (up to 15 MB) and in HarmonyOS apps. It shows the garment on a mannequin; it is not a try-on on the shopper's body.</li>
+  </ul>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#what">What we are doing</a></li>
+    <li><a href="#pipeline">The pipeline and its gates</a></li>
+    <li><a href="#camera">Camera body and lens</a></li>
+    <li><a href="#lights">Lights, controller and mount</a></li>
+    <li><a href="#polarisation">Cross-polarisation</a></li>
+    <li><a href="#albedo">Albedo and the glTF material</a></li>
+    <li><a href="#fabrics">Which fabrics work</a></li>
+    <li><a href="#delivery">Where the .glb opens</a></li>
+    <li><a href="#gpu">GPU for Gaussian Wrapping</a></li>
+    <li><a href="#pilot">The pilot capture session</a></li>
+    <li><a href="#verified">What is built, verified and still open</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#refs">References</a></li>
+  </ol>
+</nav>
+
+<section id="what">
+<h2><span class="num">1</span>What we are doing</h2>
+<p><b>Gaussian Wrapping</b> reconstructs a watertight mesh from photographs. <b>Photometric stereo</b> (PS) recovers surface normals from one viewpoint under several known lights. The project has to decide which of three verdicts applies to a garment scan:</p>
+<div class="grid2">
+  <div class="panel"><h3>BAKE</h3><p>The mesh is right at mid and low surface scales (5 mm and up). PS normals only add fine detail, so bake them into a normal map on a decimated mesh and stop.</p></div>
+  <div class="panel"><h3>BUILD</h3><p>The mesh is wrong at those scales in a way PS can see, and it isn't PS bias. That would justify building training-time PS supervision into Gaussian Wrapping.</p></div>
+  <div class="panel"><h3>INCONCLUSIVE</h3><p>PS on this fabric and rig is too biased to judge: its error on the same fabric mounted flat (the fabric floor) exceeds 3° at 5 mm and above. Fix PS first.</p></div>
+</div>
+<p>The verdict compares mesh normals and PS normals after low-passing both, as vectors, at scales of 1–50 mm. A disagreement counts only if it stands out above the error measured on a control: the same fabric on a flat board of known pose. It must also point the same way on the garment in every view. A real shape error is fixed to the garment, while PS bias turns with the lights. For this test, views are grouped into 30° bins of turntable angle, so fine 10° steps don't weaken it: see <a href="#step-angle">why</a>.</p>
+<dl class="defs panel">
+  <dt>Near-light photometric stereo</dt>
+  <dd>PS that models each light as a point at a calibrated position. The light direction and the 1/r² falloff are computed per pixel from the surface position, instead of assuming one distant direction per light.</dd>
+  <dt>Fabric floor</dt>
+  <dd>The 95th percentile of the PS normal error, at each scale, on the garment's own fabric mounted flat on a ChArUco board. A disagreement smaller than the floor means nothing for that fabric.</dd>
+  <dt>Cross-polarisation</dt>
+  <dd>Polarising filters on the lights and a crossed one on the lens. Specular reflection keeps the light's polarisation and is blocked. Diffuse, subsurface-scattered light is depolarised, and half of it passes.</dd>
+</dl>
+</section>
+
+<section id="pipeline">
+<h2><span class="num">2</span>The pipeline and its gates</h2>
+<figure>
+  <ol class="flow" aria-label="Pipeline stages">
+    <li class="hi"><b>C · Calibration</b><span>lights, noise, lens, colour</span></li>
+    <li><b>1 · Gaussian Wrapping mesh</b><span>principal-point gate, raw mesh</span></li>
+    <li><b>2 · Frame gates</b><span>reprojection, depth, lit-image alignment</span></li>
+    <li><b>3 · Mesh maps</b><span>embree ray casting per view</span></li>
+    <li><b>4 · Near-light PS</b><span>per-pixel solve, shadow rejection</span></li>
+    <li><b>5 · Compare</b><span>vector low-pass, 1–50 mm</span></li>
+    <li><b>6 · Controls</b><span>fabric and sphere floors</span></li>
+    <li class="hi"><b>7 · Verdict</b><span>BAKE → glTF 2.0, or BUILD</span></li>
+  </ol>
+  <figcaption>Stage C and stage 6 come from a pilot session without a garment. On BAKE, the PS normals and the colour-corrected albedo are baked into a glTF 2.0 binary (.glb). Before stage 1, a COLMAP step with object masks puts the model in metres in the turntable's frame (<a href="#masks-colmap">below</a>).</figcaption>
+</figure>
+<p>Stages 1 and 2 stop the run if the geometry or the image alignment is off by more than fractions of a pixel: a principal point more than 0.5 px off centre, reprojection more than 0.2 px off COLMAP's own error, mesh depth off by more than 5 mm, or a lit frame shifted by more than 0.2 px.</p>
+<p>Every stage is a small command-line script with written data contracts. Each is tested on synthetic turntable scenes with known geometry, lights and noise before any real capture. The gates and tests target mistakes found in earlier drafts of this pipeline: rays cast half a pixel off, a normal pass in the wrong frame, JPEG values treated as linear (10.7° median error) and a distant-light model (20.6°).</p>
+<h3 id="masks-colmap">Masks and COLMAP</h3>
+<p>The camera and the studio stay still while the garment turns, so the backdrop, the floor and the turntable's base look the same in every photo. That contradicts the camera orbit COLMAP has to find, and Gaussian Wrapping would turn it into floating geometry. So every turntable step also takes a backlit silhouette frame (backdrop on, lights off), which gives that view's object mask; a mask painted once removes static parts in front of the backdrop, such as the turntable's base. Gaussian Wrapping takes the mask as each image's alpha channel.</p>
+<p>COLMAP then runs with the pilot's lens calibration held fixed, so the model shares the camera frame the lights were calibrated in. The circle the camera centres trace gives the turntable's axis. The ChArUco board, standing on the turntable and photographed at five angles from −40° to 40°, gives the camera's distance from that axis in metres, and so the scale. Without the pilot's calibration, COLMAP's self-calibration put the scale 2.5 % off in a synthetic test; the checks flag it.</p>
+<p>After Gaussian Wrapping, a scan of the bare mannequin, made once per mannequin, tells the garment's faces from the mannequin's and the turntable's: it is registered to the garment scan, and faces within 2 mm of it are left out of every statistic and out of the bake.</p>
+</section>
+
+<section id="camera">
+<h2><span class="num">3</span>Camera body and lens</h2>
+<h3>What each goal needs from the camera</h3>
+<table>
+  <thead><tr><th>Goal</th><th>Needs</th><th>Breaks it</th></tr></thead>
+  <tbody>
+    <tr><td>Photogrammetry (COLMAP, Gaussian Wrapping)</td><td>Sharp, well-exposed views; one fixed set of intrinsics; enough depth of field</td><td>Sensor movement (IBIS), refocusing, zoom, shallow depth of field</td></tr>
+    <tr><td>Photometric stereo</td><td>Linear RAW; identical framing across all light frames; locked exposure; flicker-free light</td><td>JPEG tone curves, auto exposure, PWM banding, a frame bumped between lights</td></tr>
+    <tr><td>Albedo (glTF base colour)</td><td>Linear RAW; a colour chart under the same lights; a known-reflectance reference</td><td>Picture styles, auto white balance, specular reflection mixed into colour</td></tr>
+  </tbody>
+</table>
+
+<h3>Recommendation</h3>
+<div class="grid2">
+  <div class="panel">
+    <h3>First choice: Canon EOS R8</h3>
+    <p>24.2 MP full frame (6000 × 4000), <b>no in-body stabilisation</b>. Electronic first curtain or fully electronic shutter; there is no mechanical first curtain. US$1,499 body only at launch. It is in the camera table of libgphoto2 2.5.33, the version Fedora 44 ships.</p>
+    <p><b>Its successor adds stabilisation.</b> Canon announced the EOS R8 Mark II on 15 September 2026: still 24.2 MP, but with 5-axis IBIS, at US$1,899, shipping in late October 2026. libgphoto2 2.5.33 doesn't list it. The original R8 is still sold (Rp 20,999,000 body only at an Indonesian dealer in 2026). Buy it while stock lasts, and buy both bodies at once if you plan a second camera.</p>
+    <p><b>Lens:</b> a 50 mm prime with a <b>mechanical</b> focus ring, for example a manual-focus EF lens on Canon's EF-to-RF adapter. The native TTArtisan 50 mm f/1.4 ASPH (RF) is fully manual. Tape the focus ring. The TTArtisan has no electronic contacts, so tape its aperture ring too and set f/11 by hand; the camera can neither set it nor report it.</p>
+  </div>
+  <div class="panel">
+    <h3>Alternative: Nikon Z6 III or Z5</h3>
+    <p>Both are in libgphoto2 2.5.33. Both have IBIS, so it must be <b>switched off and never toggled</b> between calibration and capture.</p>
+    <p><b>Lens:</b> Voigtländer APO-Lanthar 50 mm f/2 (Z mount): manual focus and manual aperture, US$1,049. Tape the aperture ring too: it sits only 4 mm from the focus ring.</p>
+  </div>
+</div>
+<p>In the libgphoto2 2.5.33 table, these are listed with capture and preview:</p>
+<ul>
+  <li>Canon: R8, RP, R6 Mark II, R50 and R100;</li>
+  <li>Nikon: Z5, Z6 II, Z6 III and Zf;</li>
+  <li>Sony: A7 IV, in PC Control mode.</li>
+</ul>
+<p>The Canon R6 Mark III is only in the development branch. The Canon R5 Mark II and Nikon Z5 II are in neither.</p>
+
+<h3>Why no in-body stabilisation</h3>
+<p>Nocerino, Menna and Verhoeven tested how stabilisation affects photogrammetry (ISPRS Archives, 2022). In-body stabilisation made precision and accuracy worse by up to 300 %. On a Nikon Z7 II, image residuals were 2.69 px with it on and 0.63 px with it off, and switching it moved the calibrated principal point by about 110 px. Lens-based stabilisation, like stabilisation switched off, calibrated normally. A body without IBIS removes the question.</p>
+
+<h3>Why a mechanical focus ring</h3>
+<p>By default, Nikon Z cameras reset a focus-by-wire lens to infinity every time the camera is switched off and on. The "Save focus position" option restores the position, but Nikon's manual warns that it "may change due to changes in zoom or ambient temperature". On Canon, the "Retract lens on power off" setting affects whether gear-type STM lenses keep their manual focus position. Calibrated intrinsics and light positions assume the optics never change, which only a taped mechanical ring guarantees.</p>
+
+<h3>Framing, depth of field and diffraction</h3>
+<p>For a 0.9 m garment plus margin (1.0 m on the 36 mm side of a full-frame sensor, in portrait):</p>
+<table>
+  <thead><tr><th>Focal length</th><th>35 mm</th><th>50 mm</th><th>85 mm</th><th>100 mm</th></tr></thead>
+  <tbody><tr><td>Camera distance</td><td>1.0 m</td><td>1.44 m</td><td>2.45 m</td><td>2.88 m</td></tr></tbody>
+</table>
+<p>At that framing, with blur limited to 2 pixels of 6 µm (pixel-level sharpness):</p>
+<table>
+  <thead><tr><th>Aperture</th><th>Depth of field</th><th>Diffraction blur</th></tr></thead>
+  <tbody>
+    <tr><td>f/8</td><td>±77 mm</td><td>1.8 px</td></tr>
+    <tr><td><b>f/11</b></td><td><b>±106 mm</b></td><td><b>2.5 px</b></td></tr>
+    <tr><td>f/16</td><td>±153 mm</td><td>3.6 px</td></tr>
+  </tbody>
+</table>
+<ul>
+  <li>By our estimate, a garment on a mannequin spans roughly ±15 cm in depth as it turns. At f/11 the extremes get about 3 px of defocus blur; f/16 would add 3.6 px of diffraction blur everywhere. So f/11 is the compromise; check that the nearest and farthest surfaces are both acceptably sharp.</li>
+  <li>At a fixed framing, depth of field depends only on aperture, not on focal length.</li>
+  <li>Because diffraction already blurs about 2.5 px at f/11, a 24 MP sensor is enough. Gaussian Wrapping itself trains at 1600 px wide by default.</li>
+</ul>
+
+<h3>Settings and habits</h3>
+<ul>
+  <li>RAW only, ISO 100, manual shutter, aperture, white balance and focus; in-camera lens corrections off.</li>
+  <li>Auto power-off and sensor cleaning at power-on/off disabled: a sensor re-seated mid-session misaligns the lit frames. Between sessions it's harmless: a 3-pixel sensor shift at 50 mm turns the camera frame by only 0.02°.</li>
+  <li>Use the electronic shutter only with flicker-free, constant-current LED drivers, and check a flat frame for banding. A Canon Community thread on the R8 asks which LED bulbs avoid banding with the silent shutter.</li>
+  <li>For dark garments, bracket: keep the photometric-stereo shutter at the one the lights were calibrated with, and shoot every light again at 4× and 16× that shutter. The processing merges each pixel from the longest exposure that does not clip.</li>
+  <li><b>Long-exposure noise reduction off.</b> With wide-beam LEDs at 1.3 m, the working shutter is about 0.4–3 s (see <a href="#budget">the light budget</a>). That setting would add an in-camera dark frame to every RAW and double the capture time.</li>
+</ul>
+
+<h3 id="second-camera">A second camera (optional)</h3>
+<p>Use the same body and lens as the first. Mount it on the same frame about 0.5–0.8 m higher, tilted down, so it looks at the garment from at least ~20° more elevation.</p>
+<ul>
+  <li><b>Gains:</b> Gaussian Wrapping sees shoulders and hems better. The verdict also gets a check against row-dependent biases tied to one camera, such as its own light calibration or view-dependent sheen. A bias from a light-model error that both calibrations share stays fixed to the garment. Only the fabric controls at several heights bound that one.</li>
+  <li><b>Costs:</b> a second light calibration and its own fabric controls. In software, the capture script and the COLMAP step handle one camera today, and a few later steps need a setting per camera. None of that needs the hardware: it can be built and tested on synthetic data once the second camera is decided.</li>
+  <li><b>Polarisers:</b> tuning each light's polariser works for one viewpoint only (Ma et al.), so it can't extinguish the highlights for both cameras. The options:
+    <ul>
+      <li>circular polarisers;</li>
+      <li>Ghosh et al.'s latitude/longitude pattern, with both cameras near its equator;</li>
+      <li>tuning for the first camera, then measuring the second camera's leakage in the pilot.</li>
+    </ul>
+  </li>
+</ul>
+</section>
+
+<section id="lights">
+<h2><span class="num">4</span>Lights, controller and mount</h2>
+<ul>
+  <li><b>Eight LEDs</b> (six minimum), about 1.2–1.5 m from the garment. They are fixed in the studio, not on the turntable.
+    <ul>
+      <li>Folds shadow some lights. The solve wants at least 4 unshadowed lights per pixel (3 is allowed but flagged low-confidence), and 8 lights leave that margin.</li>
+      <li>With 8 lights and the test noise (0.5 % read noise plus shot noise), the synthetic PS error is 0.81° median.</li>
+    </ul>
+  </li>
+  <li><b>30–45° off the camera axis</b>, spread evenly in azimuth.</li>
+  <li><b>Wide beam</b>, so the whole garment sits in the flat part of each beam. A ~15° spot, fine for an A4 sample at 45 cm, covers only ~34 cm at 1.3 m.</li>
+  <li><b>CRI &gt; 95</b> (or TM-30 Rf ≥ 90) for colour.</li>
+  <li><b>Constant-current drivers</b>, so there is no PWM flicker.</li>
+  <li><b>Warm up</b> the LEDs for at least 15 minutes.</li>
+  <li><b>Calibrate positions, not just directions.</b> With lights 1–3 m away, a distant-light solve errs by 28.5° (at 1 m) down to 11.1° (at 3 m), median. The near-light solve needs light positions within 5–10 mm: 10 mm costs ~0.5°, 20 mm ~1.3°.</li>
+</ul>
+<div class="panel callout">
+  <h3>How the lights are calibrated</h3>
+  <p>A mirror ball and a primer-white matte ball of the same diameter share one kinematic seat and are swapped at six positions.</p>
+  <ul>
+    <li>The matte ball's backlit silhouette gives its centre, to within 2 µm laterally in synthetic tests.</li>
+    <li>The mirror ball's highlights give one reflected ray per light and position, and the rays are triangulated.</li>
+    <li>A second estimate, fitted from the matte ball's shading, doesn't depend on the seat and is reported alongside.</li>
+  </ul>
+  <p>The seat decides the accuracy: every 0.1 mm of seat error moves a light by ~6 mm, so a swapped ball must return to within ~10 µm.</p>
+</div>
+
+<h3 id="parts">Recommended parts</h3>
+<p>These are list prices on 27 September 2026. Like the camera, every part stays a recommendation until the pilot has measured it.</p>
+<table>
+  <thead><tr><th>Part</th><th>Choice</th><th>Why</th><th>Price</th></tr></thead>
+  <tbody>
+    <tr><td>LED (8, plus spares from one bin)</td><td>Yuji 125H flip-chip COB: 5600 K, CRI 97 typical (95 minimum), 120° emission, 12.5 mm emitter. Rated 100 W at 3 A (7,700 lm); run it at 1.4 A.</td><td>The emitter spans 0.55° at 1.3 m, so it is effectively a point. A bare 120° COB is close to Lambertian: at the garment's edge (±21°) it still gives 0.93 of its on-axis intensity, smoothly, which the falloff model fits. Half current runs cooler.</td><td>US$109 each</td></tr>
+    <tr><td>Cheaper LED</td><td>Yuji 400L COB: 50 W at 1.5 A, 3,190–3,740 lm (5600 K), CRI 95+, 120°</td><td>The same idea, with a larger emitter and lower colour fidelity</td><td>US$98 per 2</td></tr>
+    <tr><td>Driver (one per LED)</td><td>Mean Well NLDD-1400H: 10–56 V in, 6–46 V out, 1.4 A constant current</td><td>Constant current, switched on and off through its DIM pin. It succeeds the obsolete LDD-1500H.</td><td>US$5.55</td></tr>
+    <tr><td>Controller board</td><td>Raspberry Pi Pico 2, or an Arduino UNO R4 Minima</td><td>The Pico's 3.3 V logic sits inside DIM's 2.5–5 V "on" range; the UNO's 5 V is at its upper limit. Both appear as a USB serial port for the capture script. 9 channels: 8 lights plus the backdrop.</td><td>US$5 (UNO R4: US$20)</td></tr>
+    <tr><td>Power</td><td>One 48 V supply of at least 500 W, e.g. Mean Well HRP-600-48</td><td>All eight lights on draw about 420 W</td><td>–</td></tr>
+    <tr><td>Heat</td><td>A passive heatsink per COB, rated for its full power</td><td>No fan vibration on the frame that holds the camera. Each light is on for only ~6 % of a session.</td><td>–</td></tr>
+    <tr><td>Mount</td><td>One rigid aluminium T-slot frame (40 × 40 mm profile) carrying the camera(s) and all lights</td><td>The lights are calibrated in the camera's frame, so the two must never move relative to each other. On one frame, a bump moves both together.</td><td>4040 profile: ~Rp 900,000 per 6 m (one Tokopedia listing)</td></tr>
+  </tbody>
+</table>
+
+<h3>Switching without flicker</h3>
+<ul>
+  <li>Use the driver's DIM pin only as a static on/off switch. Its PWM input chops the output current, which is exactly the flicker to avoid.</li>
+  <li>DIM reads "open" as <b>on</b>, so a resetting board would light every LED at once. Make off the default. For example, give each channel an N-MOSFET that pulls DIM to the supply's negative rail, with its gate pulled up; the firmware drives the gate low to switch a light on.</li>
+  <li>The capture script sends one line per command over USB serial: <code>ALL=0</code>, then <code>L3=1</code>, then waits 0.3 s to settle. The firmware only has to accept these lines.</li>
+  <li>Mount the polarising film a few centimetres in front of each COB, not on it.</li>
+</ul>
+
+<h3 id="budget">Light budget</h3>
+<p>Wide beams at 1.3 m deliver far less light than narrow spots at 45 cm. The table assumes a bare COB on-axis at 1.3 m, ISO 100, and an exposure that puts a 90 % white facing the light at about 60 % of full scale:</p>
+<table>
+  <thead><tr><th>Light output</th><th>Illuminance</th><th>f/11</th><th>f/11, cross-polarised</th><th>f/8, cross-polarised</th></tr></thead>
+  <tbody>
+    <tr><td>~3,500 lm (400L)</td><td>659 lx</td><td>0.46 s</td><td>3.5 s</td><td>1.9 s</td></tr>
+    <tr><td>~4,000 lm (125H at 1.4 A, estimated)</td><td>753 lx</td><td>0.40 s</td><td>3.1 s</td><td>1.6 s</td></tr>
+    <tr><td>7,700 lm (125H at 3 A)</td><td>1,450 lx</td><td>0.21 s</td><td>1.6 s</td><td>0.85 s</td></tr>
+  </tbody>
+</table>
+<p>So the working shutter is about 0.4–3 s, not the 1/60 s of flat-sample scanners. The garment is static, so long exposures are fine. A 36-step garment session takes about 30–45 minutes: about 400 frames (with the silhouettes and the metric board), each with about 3 s of tethering overhead (still to be measured).</p>
+<div class="panel callout">
+  <h3>Frames with all eight lights on</h3>
+  <p>The SfM image, the flat frames and the intrinsics shots use all eight lights. On a surface facing the camera, that is 2.5–2.8 stops brighter than any single-light frame. So at the photometric-stereo exposure, anything lighter than about 15–25 % albedo clips.</p>
+  <p>Clipped SfM images would degrade Gaussian Wrapping exactly where the verdict then blames it. So these frames get their own, shorter shutter, about 1/8 of the photometric-stereo one. The capture script switches to it for any frame lit by more than two lights, and switches back for single-light, ambient and dark frames. It reads each change back from the camera and logs the shutter of every frame: two changes per turntable step.</p>
+</div>
+</section>
+
+<section id="polarisation">
+<h2><span class="num">5</span>Cross-polarisation</h2>
+<p>Specular reflection keeps the polarisation of the incident light, while diffuse (subsurface) reflection is almost completely depolarised. So a lens polariser crossed with the lights' polarisers removes the specular part and passes half the diffuse:</p>
+<ul>
+  <li><b>diffuse = 2 × crossed image</b>;</li>
+  <li><b>specular = parallel − crossed</b> (with circular polarisers, specular = 2 × (parallel − crossed)).</li>
+</ul>
+<h3>Many lights, one camera</h3>
+<p>Ma et al. (EGSR 2007) tuned "linear polarizers placed over each light source … to minimize the observed specular reflection from a spherical test object as viewed through the camera's linear polarizer". The tuning depends on the viewpoint. That suits a turntable rig: camera and lights never move, only the garment does, so one tuning holds for every step.</p>
+<p>The alternative is circular polarisers of the same handedness on every light and on the lens. They need no tuning, and Ma et al. report that they separate well within about 70° of the camera.</p>
+<p>Wu et al. (2025) took a shortcut:</p>
+<ul>
+  <li>They rotated the lens polariser until one opposite pair of LEDs looked darkest.</li>
+  <li>They then turned the other three pairs' films by 90°, using the LED mounting base as the angle reference.</li>
+  <li>That crossed the perpendicular pair too, but left the two diagonal pairs at 45°, so only half their lights were cross-polarised.</li>
+</ul>
+<h3>Costs and caveats</h3>
+<ul>
+  <li><b>About 3 stops of light.</b> Wu et al.'s filters transmit 42 % (LED film) and 30 % (lens polariser), so 0.42 × 0.30 ≈ 13 % reaches the sensor. With the recommended LEDs at 1.3 m, that turns 0.4 s exposures at f/11 into about 3 s.</li>
+  <li><b>Two cameras</b> can't share one per-light tuning; see <a href="#second-camera">the second camera</a>.</li>
+  <li>It also removes the mirror-ball highlight that light calibration needs, so the mirror ball is shot with the lens polariser <b>parallel</b>.</li>
+  <li>Diffuse (cross-polarised) normals are blurred by subsurface scattering, and the blur depends on wavelength. That softens baked fine detail more than it affects shape at 5 mm and above.</li>
+  <li><b>Decide from data:</b> shoot the fabric control board crossed and parallel, and compare the two fabric floors.</li>
+</ul>
+</section>
+
+<section id="albedo">
+<h2><span class="num">6</span>Albedo and the glTF material</h2>
+<ol class="steps">
+  <li><b>Decode RAW linearly</b> (no tone curve, no auto-brightness).</li>
+  <li><b>Solve normals</b> on the channel mean of the cross-polarised frames, then <b>per-channel albedo</b> with the normals fixed. Albedo comes from the PS solve, not from an all-lights frame, which on a 3-D garment still contains shading.</li>
+  <li><b>Absolute scale and white balance</b> from the ColorChecker's neutral patches, photographed at the garment position under the rig's lights.
+    <ul>
+      <li>Neutral 8 reflects about 59 % in every published dataset: 58.9 % in the BabelColor average and in X-Rite's pre-November-2014 data, 59.0 % after it.</li>
+      <li>The white patch changed more: 91.3 % before November 2014, 88.1 % after. Use reference data that matches the chart's manufacture date.</li>
+    </ul>
+  </li>
+  <li><b>Colour correction</b> on linear values only: a 3×3 matrix or a root-polynomial fit to all 24 patches (colour-science's <code>colour_correction</code>). Validate in ΔE2000 on patches left out of the fit. Never apply colour transforms to the PS inputs.</li>
+  <li><b>Export</b> to glTF 2.0 as below.</li>
+</ol>
+<table>
+  <thead><tr><th>glTF 2.0 element</th><th>What goes in it</th></tr></thead>
+  <tbody>
+    <tr><td><code>baseColorTexture</code></td><td>The linear albedo, sRGB-encoded: the texture "MUST contain 8-bit values encoded with the sRGB opto-electronic transfer function". glTF weights the diffuse term by 1 − F, with F ≈ 0.04 at normal incidence, so base colour ≈ cross-polarised albedo / 0.96. Metallic is 0 for fabric.</td></tr>
+    <tr><td><code>normalTexture</code></td><td>Tangent-space PS normals baked onto the decimated mesh, with +X right and +Y up. UV (0,0) is the image's upper-left corner. Export <code>TANGENT</code> explicitly (bitangent = cross(normal, tangent) × w), so viewers don't substitute their own.</td></tr>
+    <tr><td><code>KHR_materials_sheen</code></td><td>For "cloth and fabric materials": <code>sheenColor</code> (sRGB) and <code>sheenRoughness</code>, using the "Charlie" sheen BRDF. PS alone can't measure roughness or sheen. Start with hand-set values, or fit them from parallel-minus-crossed frames.</td></tr>
+  </tbody>
+</table>
+<p>The closest published precedent is a scanner for flat A4 samples, with 8 cross-polarised LEDs and two-stage colour calibration (Wu, Morosi and Caruso, <i>Applied Sciences</i>, 2025).</p>
+<ul>
+  <li><b>Colour:</b> mean ΔE2000 fell from 8.20 to 2.29 on 39 RAL colour samples kept out of the calibration. The authors take 2.3 as the just-noticeable difference. Blue hues were worst, with a group mean of 4.89.</li>
+  <li><b>Normals:</b> made with Substance 3D Designer's Multi Angle to Normal node, with its intensity parameter tuned against ground truth. They had 1.80° and 2.25° mean angular error on two test shapes.</li>
+</ul>
+<p>A calibrated near-light solve aims below 1°.</p>
+</section>
+
+<section id="fabrics">
+<h2><span class="num">7</span>Which fabrics work</h2>
+<p>Photometric stereo assumes light scattered diffusely by an opaque surface. Gaussian Wrapping assumes a surface that looks the same from every view and holds still. Fabrics that break these assumptions fail in predictable ways. The grouping below follows from that physics; the pilot measures each fabric.</p>
+<div class="grid2">
+  <div class="panel"><h3>Good</h3><p>Matte, opaque, textured fabrics of mid to light colour: cotton jersey, twill and canvas; denim; linen; non-fuzzy wool; knits; cotton batik.</p></div>
+  <div class="panel"><h3>Caution: the fabric test decides</h3>
+    <ul>
+      <li>Dark fabrics: photometric-stereo error grows roughly as 1/albedo. In synthetic tests at the planned camera's resolution, the verdict itself held even for near-black fabric, but the normal map lost accuracy below about 6 % reflectance (1.4° at 3 %, 3.2° at 0.8 %). Bracketing restored it (0.3° and 0.7°).</li>
+      <li>Sheen (satin, silk, sateen, polyester, coated nylon), which needs cross-polarisation.</li>
+      <li>Pile (velvet, velour, corduroy), which is not Lambertian.</li>
+      <li>Brushed or fuzzy fleece, suede and leather.</li>
+      <li>Glossy or metallic prints, and fluorescent dyes (colour only).</li>
+      <li>Thin parts such as cords, straps and fringe, and deep folds, where light bounces between surfaces.</li>
+      <li>Garments longer than the ~0.9 m frame.</li>
+    </ul>
+  </div>
+  <div class="panel"><h3>Not supported</h3>
+    <ul>
+      <li>Sheer or translucent fabric: chiffon, organza, tulle, mesh, lace.</li>
+      <li>Metallic or mirror-like surfaces: sequins, lamé, foil, metallic-thread songket, patent leather, PVC. Their reflection keeps its polarisation, so cross-polarisation leaves almost nothing.</li>
+      <li>Retroreflective trims and long-pile faux fur.</li>
+      <li>Anything that moves during a ~45-minute capture.</li>
+    </ul>
+  </div>
+</div>
+<p><b>The test, for each new fabric:</b> put a swatch on the ChArUco control board and shoot it under each light, crossed and parallel, before scanning any garment made of it. Its fabric floor (the 95th-percentile photometric-stereo error on a flat plane of known pose) decides. Above 3° at 5 mm and up, the verdict would be INCONCLUSIVE, so the fabric is declined or scanned with a written warning.</p>
+</section>
+
+<section id="delivery">
+<h2><span class="num">8</span>Where the .glb opens</h2>
+<p>On a BAKE verdict the pipeline writes one glTF 2.0 binary (.glb) per garment. It holds a mesh decimated to 50,000 faces by default (Scene Viewer takes up to 100,000), a 2048 × 2048 sRGB base-colour texture, a tangent-space normal map with explicit tangents, and optionally <code>KHR_materials_sheen</code>. Here is where it can be shown, as of September 2026:</p>
+<table>
+  <thead><tr><th>Platform</th><th>3D view</th><th>AR</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>Web browsers (desktop, Android, HarmonyOS)</td><td>Yes, through WebGL viewers such as <code>&lt;model-viewer&gt;</code> or three.js</td><td>Chrome on Android, through WebXR or Scene Viewer</td><td>three.js renders <code>KHR_materials_sheen</code>.</td></tr>
+    <tr><td>iPhone and iPad (Safari 27)</td><td>Yes: the new HTML <code>&lt;model&gt;</code> element accepts USDZ or GLB sources</td><td>AR Quick Look needs USDZ. <code>&lt;model-viewer&gt;</code> generates one from the GLB in Safari, but Chrome on iOS won't open Quick Look for a generated file.</td><td>USD preview materials have no sheen, so iOS AR loses it.</td></tr>
+    <tr><td>Android Scene Viewer</td><td>Yes, even without Google Play Services for AR (it falls back to 3D)</td><td>Yes, with Google Play Services for AR</td><td>GLB up to 15 MB (10 MB recommended), textures up to 2048², up to 100k triangles (30–50k ideal). It supports only the unlit and texture-transform extensions, so it ignores sheen.</td></tr>
+    <tr><td>HarmonyOS apps (Huawei)</td><td>Yes: ArkGraphics 3D loads .glb or .gltf with <code>Scene.load()</code> into a <code>Component3D</code></td><td>Not through Scene Viewer: Huawei phones lack Google Play Services</td><td>In the browser, the web viewers above work.</td></tr>
+    <tr><td>Shopify</td><td>Yes</td><td>Yes</td><td>GLB or USDZ up to 500 MB. Files over 15 MB are optimised, and each upload is converted so that both formats exist.</td></tr>
+    <tr><td>Amazon</td><td>"View in 3D" lists shoes, eyewear, furniture, toys and electronics</td><td>Virtual try-on for shoes and eyewear</td><td>Apparel is not among the categories Amazon names.</td></tr>
+    <tr><td>Shopee, Tokopedia</td><td colspan="2">We found no 3D product media</td><td>Use turntable videos rendered from the .glb, or a viewer on the brand's own site.</td></tr>
+  </tbody>
+</table>
+<p><b>File size:</b> the synthetic bake with 1024² textures is 4.3 MB, and with the default 2048² textures it measured 9.1 MB, under Scene Viewer's limit and its recommendation. A real weave may compress worse. If a garment's file exceeds the limit, the bake now stores the base colour as JPEG, lowering the quality until it fits, and keeps the normal map as PNG, whose compression blocks would read as tilted surface. On the synthetic textures, a file squeezed to under 60 % of its PNG size kept the base colour within a median ΔE00 of 0.74 of the original.</p>
+<h3>What it is for, and what it isn't</h3>
+<p>The .glb is a measured 3D product view of the garment draped on one mannequin: its shape at 5 mm and up, its colour calibrated against a ColorChecker, and its true size. That suits 3D and AR product views, turntable videos and digital fabric samples.</p>
+<p>It is <b>not a personal try-on</b>. Showing the garment on a shopper's own body needs pattern-based cloth simulation or a sizing tool, and generative 2D try-on already runs in Google Search in the US. In Coresight Research's March 2023 survey of 100 US apparel brands and retailers, 53 % named size and fit as the top reason for online returns, and 16 % named colour. A calibrated scan addresses the colour reason directly, but not fit.</p>
+</section>
+
+<section id="gpu">
+<h2><span class="num">9</span>GPU for Gaussian Wrapping</h2>
+<p>Gaussian Wrapping needs an NVIDIA GPU; the rest of the pipeline runs on CPU. <b>Rent first.</b></p>
+<ul>
+  <li><b>Prices:</b> in September 2026, GPUs cost about twice their launch prices. An RTX 5090 sells for about US$4,300 or more, against a US$1,999 MSRP; an RTX PRO 6000 (96 GB) costs US$14,000–16,000.</li>
+  <li><b>What to rent:</b> a 48 GB Ampere or Ada card runs Gaussian Wrapping's pinned PyTorch 2.3.1 and CUDA 12.1 as they are. Examples on RunPod: the RTX A6000 at US$0.33–0.53 per hour, or the L40S at US$0.79–1.09. RTX 50-series cards need PyTorch 2.7 or later with CUDA 12.8, and a rebuild of Gaussian Wrapping's CUDA extensions.</li>
+  <li><b>Memory:</b> Gaussian Wrapping's own training script keeps the training images in the machine's RAM, not on the GPU (<code>--data_device cpu</code>), and moves each one to the GPU when it is used. At full 24 MP resolution the 36 images take about 10 GB of RAM as 32-bit floats, so rent a machine with at least 32 GB of RAM. GPU memory goes to the Gaussians (at most 6 million) and the render buffers. It is not yet measured, and 48 GB leaves headroom until it is.</li>
+  <li><b>Time (our estimate):</b> the Gaussian Wrapping paper reports 27 minutes on Tanks and Temples, without naming the GPU. Full resolution has about 15 times the pixels of its 1600 px default, so expect hours per garment: a few dollars when rented.</li>
+  <li><b>Buy</b> only once throughput is known. A US$4,300 RTX 5090 costs as much as 4,300–6,300 rented hours of the same card.</li>
+</ul>
+</section>
+
+<section id="pilot">
+<h2><span class="num">10</span>The pilot capture session</h2>
+<p>One session without a garment calibrates the rig and measures the fabric first. If PS on the fabric is off by more than 3°, a garment capture and a GPU run would be wasted. A capture script runs these steps in order, drives the camera (gphoto2) and the lights, and writes the manifests.</p>
+<ol class="steps">
+  <li><b>Noise and linearity:</b> 10 dark frames (lens cap), 10 frames of an evenly lit matte white card at the all-lights shutter, and the same card at 6–8 shutter speeds either side of it.</li>
+  <li><b>Lens intrinsics:</b> about 15 ChArUco board shots at 0.7–1.1× the garment distance, tilted up to ±35°, together reaching every edge and corner of the frame.</li>
+  <li><b>Balls at 6 or more positions</b> spanning the garment volume:
+    <ul>
+      <li>the matte ball: backlit silhouette, ambient, then each light alone;</li>
+      <li>then the mirror ball, with the lens polariser parallel: ambient, then each light.</li>
+    </ul>
+  </li>
+  <li><b>Additivity:</b> two lights on together, compared with the sum of their single-light frames.</li>
+  <li><b>Fabric board:</b> each placement is shot crossed and again parallel.
+    <ul>
+      <li>"Face-on" at three heights, tilted 20° about the horizontal axis. A square-on board's normal is only good to ~0.1–0.15°.</li>
+      <li>±30° and ±50° about the vertical axis.</li>
+    </ul>
+  </li>
+  <li><b>Colour chart:</b> the ColorChecker in the board's window, each light alone.</li>
+  <li><b>Drift check:</b> the matte ball at position 1 under light 1 again at the end. It must match the start within 1 %.</li>
+</ol>
+</section>
+
+<section id="verified">
+<h2><span class="num">11</span>What is built, verified and still open</h2>
+<p>All of it is on synthetic scenes with known ground truth; no real garment has been captured yet.</p>
+<table>
+  <thead><tr><th>Part</th><th>Synthetic result</th></tr></thead>
+  <tbody>
+    <tr><td>Near-light PS versus distant-light PS</td><td>A distant-light solve on the independent evidence's geometry: 20.64° median error. The near-light solve is exact without noise and 0.81° median with the test noise.</td></tr>
+    <tr><td>Finding a real shape error</td><td>A 3 mm bump (σ = 10 mm) missing from the mesh is flagged at 5 and 10 mm, with consistent direction across views (mean resultant length 0.92 and 0.88 with 12 turntable steps of 30°, and 0.92 and 0.85 with 36 steps of 10°, with noise). The verdict also says how deep: integrating the normal difference over the flagged region reads 2.6 mm of surface missing from the mesh.</td></tr>
+    <tr><td>Rejecting bias that turns with the lights</td><td>A smooth bias fixed to the camera and lights is rejected: its direction across views scores a mean resultant length of 0.64 at 50 mm with 12 turntable steps of 30°, and 0.61 with 36 steps of 10°, under the 0.7 threshold. Counted view by view, 10° steps gave 0.711, a false BUILD, now fixed (<a href="#step-angle">below</a>).</td></tr>
+    <tr><td>Object masks</td><td>From backlit silhouettes, 0.989 overlap (intersection over union) with the true masks, with the turntable's base removed by a painted exclusion. From the SfM image against a black backdrop, also 0.989.</td></tr>
+    <tr><td>COLMAP and the turntable's frame</td><td>36 steps of 10° with 1° of turntable error, a distorted lens and a textured studio: all 36 views registered at 0.26 px; camera-to-axis distance 1.5998 m against 1.6000; camera positions within 0.66 mm and rotations within 0.03° (RMS); the frame gates pass against the true mesh (depth within 0.15 mm). Without masks and with COLMAP's default settings, nothing was reconstructed.</td></tr>
+    <tr><td>Rejecting fine texture</td><td>A 3 px, ±10° weave ripple leaves under 0.4° at 5 mm and above, and no clusters. Both normal fields are low-passed as vectors; the angle map itself is never low-passed.</td></tr>
+    <tr><td>Light calibration → fabric floor</td><td>The whole pilot chain with a 20 µm seat error gives a fabric floor of 0.06–0.10° at 5 mm and above. Through a distorted lens it is 0.08–0.10°.</td></tr>
+    <tr><td>Dark fabrics</td><td>At the planned camera's resolution and a guessed 14-bit sensor's noise, the median normal error at one exposure is 0.3° at 50 % reflectance, 0.7° at 12 %, 1.4° at 3 % and 3.2° at 0.8 %. Shooting every light again at 4× and 16× the exposure brings it to 0.2–0.7° across that range. With a noisier sensor (0.5 % read noise), a fabric of 3 % reflectance could not be judged at one exposure (its control error was 3.6°, over the 3° limit) and was fine bracketed (0.04°). The pilot's measured sensor noise decides which case applies. How each pixel picks its exposure matters: deciding from that pixel's own noisy value biased the result, so the choice is made from the neighbourhood of a shorter exposure.</td></tr>
+    <tr><td>Radiometry</td><td>The noise model is recovered to within 0.2 % from a flat-frame photon-transfer fit, which is needed because dark frames clip at 0 and understate read noise. A 3 % LED drift fails the gate.</td></tr>
+    <tr><td>Colour</td><td>Chart leave-one-out ΔE2000 is 0.32 (linear) and 0.23 (root-polynomial). Garment albedo is 0.30 after 5×5 averaging.</td></tr>
+    <tr><td>BAKE to glTF</td><td>Decimated to 50,000 faces. Baked normals: 0.53° median error, against 5.66° for the decimated mesh alone. Base colour: ΔE2000 0.61. The .glb is valid, with explicit tangents and <code>KHR_materials_sheen</code>.</td></tr>
+    <tr><td>Known blind spot</td><td>A light-fixed bias that tilts normals vertically, as a function of image row, looks garment-fixed, because turntable steps never move a face up or down in the image. A synthetic test reproduces the false BUILD. The verdict now flags it: every cluster behind that BUILD has 98–100 % of its disagreement along the turntable's axis, against 53–57 % for a real bump. The mitigations are fabric controls at three heights, that flag, and optionally <a href="#second-camera">a second camera at another height</a>. Since 1 October 2026 the verdict also checks the first of these: it reports how much of the garment the fabric board's placements covered by height in the image, and calls out a vertical cluster at a height no placement covered. In a synthetic test with the bias only near the top and bottom of the image, a board at mid height alone covered 45 % of the garment and left every vertical cluster unchecked; boards at three heights saw the bias (4° at 5 mm) and the verdict became INCONCLUSIVE.</td></tr>
+    <tr><td>Garment selection</td><td>A dressed mannequin with a bare-mannequin scan from another session, turned 25° and shifted 4 mm: after registration, 100 % of the selected area is garment and 99.2 % of the garment is selected. A height and radius cut alone keeps the exposed mannequin (74 % garment). Painted garment masks in a few views can also vote.</td></tr>
+    <tr><td>Meshes of Gaussian Wrapping's size</td><td>10 million faces seen at 24 MP: every stage runs, and the bump is still found (mean resultant length 0.96 and 0.95). Stage by stage, at most 7 GB of memory, and about 1.5 minutes per view each for the photometric-stereo solve and the comparison: a 36-view garment takes about 2 hours on an 8-core CPU.</td></tr>
+  </tbody>
+</table>
+
+<h3 id="step-angle">Turntable steps of 10°</h3>
+<p>The consistency test was tuned on 12 turntable steps of 30°, but the capture plan uses 36 steps of 10°, which gives each face about 12 views instead of 4. The test corrects the mean resultant length for the number of samples, because a few random directions already score high. Counted view by view, 12 views made that correction small, so the bias's raw score of 0.74 came through almost unchanged: 0.711 at 50 mm, a false BUILD.</p>
+<p>The fix, adopted on 28 September 2026: each face's disagreement is averaged within 30° bins of turntable angle, and the test counts bins, not views. At 30° steps that is exactly the old score. At 36 steps of 10° the bias scores 0.61 and the real bump 0.92 and 0.85 at 5 and 10 mm (with noise). The tests now run at both step settings.</p>
+
+<h3 id="not-built">Still to do before the rig</h3>
+<p>Every processing step is now built and tested on synthetic data. What is left before the rig exists:</p>
+<ul>
+  <li><b>A trial run of Gaussian Wrapping on a rented GPU,</b> on a synthetic capture: its install, memory and time at full resolution, and a real Gaussian Wrapping mesh through the rest of the pipeline. Everything but the GPU step is ready and tested here: the synthetic capture and its dataset, a script that sets the GPU machine up and runs Gaussian Wrapping while logging memory and time, and the processing of the mesh it returns.</li>
+  <li><b>The light controller's firmware</b> is written for the recommended parts (a Raspberry Pi Pico 2 switching each driver's DIM pin, every light off from power-up) and tested against a simulated board, with the capture script checking every reply. What remains needs the hardware: each channel by hand, the settle time, and a flat frame free of banding.</li>
+</ul>
+</section>
+
+<section id="faq">
+<h2><span class="num">12</span>FAQ</h2>
+<details><summary>Is 24 MP enough for garment photogrammetry and photometric stereo?</summary>
+<p>Yes. Framing a 0.9 m garment on a full-frame sensor gives about 0.17 mm per pixel. The garment needs depth of field, which forces about f/11, and there diffraction blurs about 2.5 pixels. So a higher-resolution sensor mostly records more diffraction. Gaussian Wrapping trains at 1600 px wide by default.</p></details>
+<details><summary>Should in-body image stabilisation be off for photogrammetry?</summary>
+<p>Yes. A 2022 ISPRS study found in-body stabilisation made photogrammetric accuracy up to 300 % worse. Switching it on or off moved a Nikon Z7 II's principal point by about 110 px. With it off, or with lens-based stabilisation, the cameras calibrated normally. A body without it, such as the Canon EOS R8, avoids the issue.</p></details>
+<details><summary>Why use a manual-focus lens instead of a focus-by-wire lens?</summary>
+<p>Focus-by-wire lenses move focus with a motor, and camera bodies may reset the position at power-off or only approximately restore it. Nikon warns the saved position "may change due to changes in zoom or ambient temperature". The rig's calibration assumes the optics never change, which only a taped mechanical focus ring guarantees.</p></details>
+<details><summary>Do I need cross-polarisation for fabric photometric stereo?</summary>
+<p>For sheened fabric such as satin or silk, very likely: specular sheen breaks the Lambertian model that PS assumes. Measure it rather than assume it. Shoot the fabric on a flat ChArUco board crossed and parallel, and compare the two error floors. Cross-polarisation costs about 3 stops of light.</p></details>
+<details><summary>How many lights does photometric stereo need?</summary>
+<p>Three in theory, six to eight in practice. Each pixel must drop shadowed and saturated lights and still keep at least four for a robust solve. With eight lights and the test noise, synthetic tests give 0.81° median normal error.</p></details>
+<details><summary>Why near-light photometric stereo instead of the usual distant-light model?</summary>
+<p>With lights 1.5 m from a garment, the light direction and intensity change across the garment, and a distant-light solve errs by about 20° (median). A near-light solve uses the surface position and light positions calibrated within 5 mm, and stays around 0.3°.</p></details>
+<details><summary>Can a mirrorless camera be tethered on Linux?</summary>
+<p>Yes, with gphoto2 and libgphoto2. Version 2.5.33 lists capture support for the Canon EOS R8, RP, R6 Mark II, R50 and R100, the Nikon Z5, Z6 II, Z6 III and Zf, and the Sony A7 IV (in PC Control mode). Check your exact body, and lock the settings and read them back before every session.</p></details>
+<details><summary>How do I get an absolute albedo for glTF base colour?</summary>
+<p>Photograph a ColorChecker at the garment position under the rig's own lights. The neutral 8 patch reflects about 59 % in every published dataset, so it sets the absolute scale. The white patch changed from 91.3 % to 88.1 % in X-Rite's November 2014 revision, so match the reference data to the chart's age. A 3×3 or root-polynomial colour correction fitted to all 24 patches maps camera RGB to linear sRGB. Then sRGB-encode the result for <code>baseColorTexture</code>, as glTF 2.0 requires.</p></details>
+<details><summary>Which normal-map convention does glTF use?</summary>
+<p>Tangent space with +X right and +Y up (the OpenGL convention), UV origin at the image's upper-left corner, and bitangent = cross(normal, tangent) × w. Exporting the <code>TANGENT</code> attribute makes viewers use exactly the frame the texture was baked in.</p></details>
+<details><summary>What LEDs suit near-light photometric stereo on a garment?</summary>
+<p>Small, bare, high-CRI COB emitters on constant-current drivers, switched on and off rather than dimmed. One example is a 5600 K, CRI 97 COB with a 12.5 mm emitter: at 1.3 m it is effectively a point, and its beam is smooth and close to Lambertian. Expect exposures of about 0.4 s at f/11 and ISO 100, or about 3 s cross-polarised.</p></details>
+<details><summary>Can a garment .glb be viewed on an iPhone?</summary>
+<p>Yes. Safari 27 adds the HTML model element on iPhone, iPad and Mac, and it accepts GLB as well as USDZ. AR Quick Look still needs USDZ: model-viewer generates one from the GLB in Safari, and Shopify converts uploads to both formats. USDZ materials have no sheen.</p></details>
+<details><summary>Which fabrics can a photometric-stereo garment scanner handle?</summary>
+<p>Matte, opaque, textured fabrics work best: cotton, denim, linen, knits and non-fuzzy wool. Dark, sheened, pile and fuzzy fabrics need a test on a flat control board first. Sheer, metallic, sequinned, retroreflective and long-pile fabrics are not supported.</p></details>
+<details><summary>Is a 3D garment scan a virtual try-on?</summary>
+<p>No. It records the garment's shape, colour and size on one mannequin. Showing it on a shopper's body needs pattern-based cloth simulation or a sizing tool. The scan helps most with colour-related returns. In a 2023 Coresight Research survey of US apparel brands and retailers, 16 % named colour as the top return reason and 53 % named size and fit.</p></details>
+<details><summary>What GPU does Gaussian Wrapping need?</summary>
+<p>An NVIDIA GPU with CUDA. Its GPU memory at full 24 MP resolution is not yet measured, so start with a 48 GB card. The training images stay in the machine's RAM (about 10 GB), so it also needs at least 32 GB of RAM. In September 2026, renting an RTX A6000 (48 GB) costs about US$0.33–0.53 per hour, and it runs the pinned PyTorch 2.3.1 without changes. RTX 50-series cards need PyTorch 2.7 or later.</p></details>
+</section>
+
+<section id="refs">
+<h2><span class="num">13</span>References</h2>
+<ol class="refs">
+  <li>E. Nocerino, F. Menna, G. J. Verhoeven, <a href="https://isprs-archives.copernicus.org/articles/XLVI-2-W1-2022/395/2022/" rel="external nofollow">Good vibrations? How image stabilisation influences photogrammetry</a>, ISPRS Archives XLVI-2/W1-2022, 395–400.</li>
+  <li>W.-C. Ma, T. Hawkins, P. Peers, C.-F. Chabert, M. Weiss, P. Debevec, <a href="https://vgl.ict.usc.edu/Research/FaceScanning/EGSR2007_SGI_low.pdf" rel="external nofollow">Rapid Acquisition of Specular and Diffuse Normal Maps from Polarized Spherical Gradient Illumination</a>, EGSR 2007.</li>
+  <li>A. Ghosh, G. Fyffe, B. Tunwattanapong, J. Busch, X. Yu, P. Debevec, <a href="https://dl.acm.org/doi/10.1145/2024156.2024163" rel="external nofollow">Multiview face capture using polarized spherical gradient illumination</a>, SIGGRAPH Asia 2011.</li>
+  <li>L. Wu, F. Morosi, G. Caruso, <a href="https://doi.org/10.3390/app152010911" rel="external nofollow">Custom Material Scanning System for PBR Texture Acquisition: Hardware Design and Digitisation Workflow</a>, Applied Sciences 15, 10911, 2025.</li>
+  <li>Khronos Group, <a href="https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html" rel="external nofollow">glTF 2.0 specification</a> and <a href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_materials_sheen/README.md" rel="external nofollow">KHR_materials_sheen</a>.</li>
+  <li><a href="https://github.com/gphoto/libgphoto2/blob/libgphoto2-2_5_33-release/camlibs/ptp2/library.c" rel="external nofollow">libgphoto2 2.5.33 PTP camera table</a>.</li>
+  <li>Nikon, <a href="https://onlinemanual.nikonimglib.com/z7II_z6II/en/09_menu_guide_06_15.html" rel="external nofollow">Save focus position</a> (Z7 II / Z6 II reference manual).</li>
+  <li><a href="https://en.wikipedia.org/wiki/Canon_EOS_R8" rel="external nofollow">Canon EOS R8</a> specifications.</li>
+  <li>Canon Community, <a href="https://community.usa.canon.com/t5/Speedlite-Flashes/EOS-R8-quot-Which-LED-Light-Bulbs-don-t-flicker-or-cause-banding/m-p/473053" rel="external nofollow">EOS R8: which LED bulbs don't flicker or cause banding with the silent shutter?</a></li>
+  <li>D. Pascale, <a href="https://babelcolor.com/index_htm_files/RGB%20Coordinates%20of%20the%20Macbeth%20ColorChecker.pdf" rel="external nofollow">RGB coordinates of the Macbeth ColorChecker</a>, BabelColor.</li>
+  <li><a href="https://github.com/colour-science/colour/discussions/747" rel="external nofollow">colour-science: colour correction with a ColorChecker</a> and <a href="https://github.com/colour-science/colour-checker-detection" rel="external nofollow">colour-checker-detection</a>.</li>
+  <li>Unity Technologies, <a href="https://unity3d.com/files/solutions/photogrammetry/Unity-Photogrammetry-Workflow_2017-07_v2.pdf" rel="external nofollow">Photogrammetry Workflow</a> (2017).</li>
+  <li><a href="https://arxiv.org/abs/2604.07337" rel="external nofollow">From Blobs to Spokes: High-Fidelity Surface Reconstruction via Oriented Gaussians</a> (Gaussian Wrapping), arXiv 2604.07337.</li>
+  <li>Newsshooter, <a href="https://www.newsshooter.com/2026/09/15/canon-announces-eos-r8-mark-ii-adds-in-body-stabilization-keeps-24-2mp-sensor/" rel="external nofollow">Canon announces EOS R8 Mark II: adds in-body stabilization, keeps 24.2MP sensor</a>, 15 September 2026.</li>
+  <li><a href="https://www.tokocamzone.com/EOS-R8-Body-Only-Jual-Harga-Murah-Sale-Hemat-Asli-Original-Terpercaya-Spec-Spesifikasi-Specification-Indonesia-Jakarta-Jabodetabek-Bandung-Review-Foto-Deskripsi" rel="external nofollow">Canon EOS R8 body only</a>, Tokocamzone (Indonesia), 2026.</li>
+  <li>B&amp;H, <a href="https://www.bhphotovideo.com/c/product/1657675-REG/ttartisan_a09b_r_50mm_f_1_4_lens_for.html" rel="external nofollow">TTArtisan 50mm f/1.4 manual focus lens for Canon RF</a>.</li>
+  <li>Yuji, <a href="https://store.yujiintl.com/products/yujileds-cri-95-high-power-100w-flip-chip-cob-led-3200k-5600k-125h" rel="external nofollow">CRI 95+ 100W flip-chip COB LED (125H)</a> and <a href="https://store.yujiintl.com/products/yujileds-cri-95-50w-cob-led-3200k-5600k-400l" rel="external nofollow">CRI 95+ 50W COB LED (400L)</a>.</li>
+  <li>Mean Well, <a href="https://www.meanwell.com/Upload/PDF/NLDD-H/NLDD-H-SPEC.PDF" rel="external nofollow">NLDD-H series specification</a>; <a href="https://www.trcelectronics.com/products/mean-well-nldd-1400h" rel="external nofollow">NLDD-1400H price and stock</a>.</li>
+  <li>Raspberry Pi, <a href="https://www.raspberrypi.com/news/raspberry-pi-pico-2-our-new-5-microcontroller-board-on-sale-now/" rel="external nofollow">Raspberry Pi Pico 2, our new $5 microcontroller board</a>; Arduino, <a href="https://store.arduino.cc/products/uno-r4-minima" rel="external nofollow">UNO R4 Minima</a>.</li>
+  <li>Tokopedia, <a href="https://www.tokopedia.com/find/aluminium-profile-4040" rel="external nofollow">aluminium profile 4040 listings</a>, including <a href="https://www.tokopedia.com/misumiofficialstore/aluminium-profile-4040-6-meter-slot-width-8mm" rel="external nofollow">Misumi Indonesia's 6 m bar</a>.</li>
+  <li>RunPod, <a href="https://www.runpod.io/pricing" rel="external nofollow">GPU pricing</a>; Tom's Hardware, <a href="https://www.tomshardware.com/pc-components/gpus/nvidia-doubles-rtx-pro-6000-blackwells-msrp-to-a-staggering-usd16-000-96gb-card-started-pre-orders-below-usd8-000-last-year" rel="external nofollow">RTX PRO 6000 Blackwell's MSRP doubles to $16,000</a>; Pangoly, <a href="https://pangoly.com/en/price-trends/vga/rtx-5090" rel="external nofollow">RTX 5090 price trends</a>.</li>
+  <li>SaladCloud, <a href="https://docs.salad.com/container-engine/tutorials/machine-learning/pytorch-rtx5090" rel="external nofollow">Running PyTorch on RTX 5090 and 5080 GPUs</a> (CUDA 12.8, PyTorch 2.7+).</li>
+  <li>Google, <a href="https://developers.google.com/ar/develop/scene-viewer" rel="external nofollow">Scene Viewer</a> (glTF requirements).</li>
+  <li>WebKit, <a href="https://webkit.org/blog/18325/webkit-features-for-safari-27-0/" rel="external nofollow">WebKit features for Safari 27.0</a> (the HTML model element on iOS, iPadOS and macOS).</li>
+  <li><a href="https://modelviewer.dev/docs/" rel="external nofollow">&lt;model-viewer&gt; documentation</a> and <a href="https://github.com/google/model-viewer/discussions/2898" rel="external nofollow">Chrome on iOS and generated USDZ</a>; three.js, <a href="https://threejs.org/examples/webgl_loader_gltf_sheen.html" rel="external nofollow">GLTFLoader with sheen</a>.</li>
+  <li>Huawei, <a href="https://developer.huawei.com/consumer/en/doc/harmonyos-guides-V5/arkgraphics3d-scene-V5" rel="external nofollow">Building and managing ArkGraphics 3D scenes</a> (HarmonyOS).</li>
+  <li>Shopify, <a href="https://help.shopify.com/en/manual/products/product-media/product-media-types" rel="external nofollow">Product media types</a>; Amazon, <a href="https://sell.amazon.com/tools/3d-ar" rel="external nofollow">3D models and augmented reality</a>.</li>
+  <li>Coresight Research, <a href="https://3dlook.ai/content-hub/the-true-cost-of-apparel-returns/" rel="external nofollow">The true cost of apparel returns</a> (survey of 100 US apparel brands and retailers, March 2023).</li>
+  <li>Google, <a href="https://blog.google/products-and-platforms/products/shopping/google-shopping-ai-mode-virtual-try-on-update/" rel="external nofollow">AI Mode shopping and virtual try-on updates</a> (I/O 2025).</li>
+</ol>
+</section>
+
+<footer>
+  <p>Written by Claude Opus 5.5 for a garment-scanning project by Dawud Tan. Published 27 September 2026. Updated the same day with the light hardware, a second camera, the GPU, the fabrics the rig suits and where the .glb opens. Updated on 28 September 2026: the GPU memory estimate was corrected (Gaussian Wrapping keeps its training images in RAM, not on the GPU); the consistency test's false BUILD with 10° turntable steps was found and fixed; object masks, the COLMAP step, garment selection and a flag for the vertical blind spot were built; and the pipeline was run on meshes of Gaussian Wrapping's size. Updated on 29 September 2026: the light controller's firmware and a ready kit for a Gaussian Wrapping trial run. Updated on 1 October 2026: exposure bracketing for dark garments and how dark a fabric can be without it, a check that the fabric controls covered every height of the garment, the depth in millimetres of what the verdict flags, and a size limit for the .glb. Every result above comes from synthetic tests with known ground truth. The camera, lights and polarisation stay recommendations until the pilot session has measured the real rig and fabric.</p>
+</footer>
+
+</main>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://dawud-tan.github.io/garment-scan-camera-ps-gltf.html#article",
+      "headline": "Camera, Lights and Polarisers for Garment Photogrammetry, Photometric Stereo and glTF Albedo",
+      "name": "One rig, three goals: garment photogrammetry, photometric stereo and glTF albedo",
+      "description": "A garment-scanning rig for photogrammetry, photometric stereo and glTF: camera, LEDs and drivers, polarisers, colour, GPU, fabrics, and where the .glb opens.",
+      "inLanguage": "en",
+      "datePublished": "2026-09-27T11:18:44+07:00",
+      "dateModified": "2026-10-01T15:33:00+07:00",
+      "author": {"@type": "Person", "name": "Claude Opus 5.5"},
+      "publisher": {"@type": "Person", "name": "Dawud Tan"},
+      "mainEntityOfPage": "https://dawud-tan.github.io/garment-scan-camera-ps-gltf.html",
+      "proficiencyLevel": "Expert",
+      "articleSection": ["Camera body and lens", "Lights, controller and mount", "Cross-polarisation", "Albedo and the glTF material", "Which fabrics work", "Where the .glb opens", "GPU for Gaussian Wrapping", "Pilot capture session"],
+      "keywords": "photogrammetry camera, photometric stereo, near-light photometric stereo, cross-polarization, glTF baseColor, normal map baking, KHR_materials_sheen, ColorChecker, Gaussian Wrapping, libgphoto2, high CRI COB LED, constant-current LED driver, Scene Viewer, AR Quick Look, HTML model element, HarmonyOS ArkGraphics 3D, fabric suitability, GPU rental",
+      "about": [
+        {"@type": "Thing", "name": "Photometric stereo"},
+        {"@type": "Thing", "name": "Photogrammetry"},
+        {"@type": "Thing", "name": "glTF 2.0"},
+        {"@type": "Thing", "name": "Cross-polarization"}
+      ],
+      "mentions": [
+        {"@type": "Thing", "name":"Canon EOS R8"},
+        {"@type": "Thing", "name":"Nikon Z6 III"},
+        {"@type": "Thing", "name":"Voigtländer APO-LANTHAR 50mm F2 Aspherical"},
+        {"@type": "Thing", "name":"X-Rite ColorChecker Classic"},
+        {"@type": "Thing", "name":"Canon EOS R8 Mark II"},
+        {"@type": "Thing", "name":"TTArtisan 50mm f/1.4 ASPH (Canon RF)"},
+        {"@type": "Thing", "name":"YUJILEDS CRI 95+ 100W flip-chip COB LED 125H"},
+        {"@type": "Thing", "name":"MEAN WELL NLDD-1400H"},
+        {"@type": "Thing", "name":"Raspberry Pi Pico 2"},
+        {"@type": "Thing", "name":"NVIDIA RTX A6000"},
+        {"@type": "Thing", "name": "KHR_materials_sheen"},
+        {"@type": "Thing", "name": "Scene Viewer"},
+        {"@type": "Thing", "name": "HTML model element"},
+        {"@type": "Thing", "name": "ArkGraphics 3D"}
+      ],
+      "citation": [
+        {"@type": "ScholarlyArticle", "name": "Good vibrations? How image stabilisation influences photogrammetry", "url": "https://isprs-archives.copernicus.org/articles/XLVI-2-W1-2022/395/2022/"},
+        {"@type": "ScholarlyArticle", "name": "Rapid Acquisition of Specular and Diffuse Normal Maps from Polarized Spherical Gradient Illumination", "url": "https://vgl.ict.usc.edu/Research/FaceScanning/EGSR2007_SGI_low.pdf"},
+        {"@type": "ScholarlyArticle", "name": "Custom Material Scanning System for PBR Texture Acquisition: Hardware Design and Digitisation Workflow", "url": "https://doi.org/10.3390/app152010911"},
+        {"@type": "CreativeWork", "name": "glTF 2.0 specification", "url": "https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html"},
+        {"@type": "ScholarlyArticle", "name": "Multiview face capture using polarized spherical gradient illumination", "url": "https://dl.acm.org/doi/10.1145/2024156.2024163"},
+        {"@type": "CreativeWork", "name": "Using Scene Viewer to display interactive 3D models in AR", "url": "https://developers.google.com/ar/develop/scene-viewer"},
+        {"@type": "CreativeWork", "name": "WebKit Features for Safari 27.0", "url": "https://webkit.org/blog/18325/webkit-features-for-safari-27-0/"},
+        {"@type": "CreativeWork", "name": "Building and Managing ArkGraphics 3D Scenes", "url": "https://developer.huawei.com/consumer/en/doc/harmonyos-guides-V5/arkgraphics3d-scene-V5"},
+        {"@type": "CreativeWork", "name": "The True Cost of Apparel Returns (Coresight Research)", "url": "https://3dlook.ai/content-hub/the-true-cost-of-apparel-returns/"}
+      ]
+    },
+    {
+      "@type": "HowTo",
+      "@id": "https://dawud-tan.github.io/garment-scan-camera-ps-gltf.html#pilot",
+      "name": "Pilot capture session: calibrate a photometric-stereo rig and measure the fabric before scanning a garment",
+      "inLanguage": "en",
+      "tool": [
+        {"@type": "HowToTool", "name": "Full-frame mirrorless camera without in-body stabilisation, tethered with gphoto2"},
+        {"@type": "HowToTool", "name": "Eight 5600 K, CRI 97 COB LEDs on constant-current drivers, with linear polarising film"},
+        {"@type": "HowToTool", "name": "Microcontroller board switching the LED drivers over USB serial"},
+        {"@type": "HowToTool", "name": "Rigid aluminium frame carrying the camera and all lights"},
+        {"@type": "HowToTool", "name": "Lens polariser"}
+      ],
+      "supply": [
+        {"@type": "HowToSupply", "name": "Mirror ball and primer-white matte ball of the same diameter on a kinematic seat"},
+        {"@type": "HowToSupply", "name": "ChArUco board with the garment fabric in its window"},
+        {"@type": "HowToSupply", "name": "ColorChecker Classic"}
+      ],
+      "step": [
+        {"@type": "HowToStep", "position": 1, "name": "Noise and linearity", "text": "Capture 10 dark frames with the lens cap on, 10 frames of an evenly lit matte white card at the all-lights shutter, and the same card at 6 to 8 shutter speeds either side of it."},
+        {"@type": "HowToStep", "position": 2, "name": "Lens intrinsics", "text": "Capture about 15 ChArUco board shots at 0.7 to 1.1 times the garment distance, tilted up to 35 degrees, together reaching every edge and corner of the frame."},
+        {"@type": "HowToStep", "position": 3, "name": "Balls at six or more positions", "text": "At each position shoot the matte ball (backlit silhouette, ambient, each light alone), then swap in the mirror ball with the lens polariser parallel and shoot ambient and each light."},
+        {"@type": "HowToStep", "position": 4, "name": "Additivity", "text": "Shoot two lights on together and compare with the sum of their single-light frames."},
+        {"@type": "HowToStep", "position": 5, "name": "Fabric board", "text": "Place the fabric board face-on at three heights tilted 20 degrees about the horizontal axis, and at plus and minus 30 and 50 degrees about the vertical axis; shoot each placement crossed and parallel."},
+        {"@type": "HowToStep", "position": 6, "name": "Colour chart", "text": "Shoot the ColorChecker in the board window under each light alone."},
+        {"@type": "HowToStep", "position": 7, "name": "Drift check", "text": "Shoot the matte ball at position 1 under light 1 again at the end; it must match the start within 1 percent."}
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://dawud-tan.github.io/garment-scan-camera-ps-gltf.html#faq",
+      "inLanguage": "en",
+      "mainEntity": [
+        {"@type": "Question", "name": "Is 24 MP enough for garment photogrammetry and photometric stereo?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Framing a 0.9 m garment on a full-frame sensor gives about 0.17 mm per pixel. The garment needs depth of field, which forces about f/11, and there diffraction blurs about 2.5 pixels. So a higher-resolution sensor mostly records more diffraction. Gaussian Wrapping trains at 1600 px wide by default."}},
+        {"@type": "Question", "name": "Should in-body image stabilisation be off for photogrammetry?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. A 2022 ISPRS study found in-body stabilisation made photogrammetric accuracy up to 300 percent worse. Switching it on or off moved a Nikon Z7 II's principal point by about 110 px. With it off, or with lens-based stabilisation, the cameras calibrated normally. A body without it, such as the Canon EOS R8, avoids the issue."}},
+        {"@type": "Question", "name": "Why use a manual-focus lens instead of a focus-by-wire lens?", "acceptedAnswer": {"@type": "Answer", "text": "Focus-by-wire lenses move focus with a motor, and camera bodies may reset the position at power-off or only approximately restore it. Nikon warns the saved position may change due to changes in zoom or ambient temperature. The rig's calibration assumes the optics never change, which only a taped mechanical focus ring guarantees."}},
+        {"@type": "Question", "name": "Do I need cross-polarisation for fabric photometric stereo?", "acceptedAnswer": {"@type": "Answer", "text": "For sheened fabric such as satin or silk, very likely: specular sheen breaks the Lambertian model that photometric stereo assumes. Measure it rather than assume it. Shoot the fabric on a flat ChArUco board crossed and parallel, and compare the two error floors. Cross-polarisation costs about 3 stops of light."}},
+        {"@type": "Question", "name": "How many lights does photometric stereo need?", "acceptedAnswer": {"@type": "Answer", "text": "Three in theory, six to eight in practice. Each pixel must drop shadowed and saturated lights and still keep at least four for a robust solve. With eight lights and the test noise, synthetic tests give 0.81 degrees median normal error."}},
+        {"@type": "Question", "name": "Why near-light photometric stereo instead of the usual distant-light model?", "acceptedAnswer": {"@type": "Answer", "text": "With lights 1.5 m from a garment, the light direction and intensity change across the garment, and a distant-light solve errs by about 20 degrees (median). A near-light solve uses the surface position and light positions calibrated within 5 mm, and stays around 0.3 degrees."}},
+        {"@type": "Question", "name": "Can a mirrorless camera be tethered on Linux?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, with gphoto2 and libgphoto2. Version 2.5.33 lists capture support for the Canon EOS R8, RP, R6 Mark II, R50 and R100, the Nikon Z5, Z6 II, Z6 III and Zf, and the Sony A7 IV (in PC Control mode). Check your exact body, and lock the settings and read them back before every session."}},
+        {"@type": "Question", "name": "How do I get an absolute albedo for glTF base colour?", "acceptedAnswer": {"@type": "Answer", "text": "Photograph a ColorChecker at the garment position under the rig's own lights. The neutral 8 patch reflects about 59 percent in every published dataset, so it sets the absolute scale. The white patch changed from 91.3 to 88.1 percent in X-Rite's November 2014 revision, so match the reference data to the chart's age. A 3x3 or root-polynomial colour correction fitted to all 24 patches maps camera RGB to linear sRGB. Then sRGB-encode the result for baseColorTexture, as glTF 2.0 requires."}},
+        {"@type": "Question", "name": "Which normal-map convention does glTF use?", "acceptedAnswer": {"@type": "Answer", "text": "Tangent space with +X right and +Y up (the OpenGL convention), UV origin at the image's upper-left corner, and bitangent = cross(normal, tangent) x w. Exporting the TANGENT attribute makes viewers use exactly the frame the texture was baked in."}},
+        {"@type": "Question", "name": "What LEDs suit near-light photometric stereo on a garment?", "acceptedAnswer": {"@type": "Answer", "text": "Small, bare, high-CRI COB emitters on constant-current drivers, switched on and off rather than dimmed. One example is a 5600 K, CRI 97 COB with a 12.5 mm emitter: at 1.3 m it is effectively a point, and its beam is smooth and close to Lambertian. Expect exposures of about 0.4 s at f/11 and ISO 100, or about 3 s cross-polarised."}},
+        {"@type": "Question", "name": "Can a garment .glb be viewed on an iPhone?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Safari 27 adds the HTML model element on iPhone, iPad and Mac, and it accepts GLB as well as USDZ. AR Quick Look still needs USDZ: model-viewer generates one from the GLB in Safari, and Shopify converts uploads to both formats. USDZ materials have no sheen."}},
+        {"@type": "Question", "name": "Which fabrics can a photometric-stereo garment scanner handle?", "acceptedAnswer": {"@type": "Answer", "text": "Matte, opaque, textured fabrics work best: cotton, denim, linen, knits and non-fuzzy wool. Dark, sheened, pile and fuzzy fabrics need a test on a flat control board first. Sheer, metallic, sequinned, retroreflective and long-pile fabrics are not supported."}},
+        {"@type": "Question", "name": "Is a 3D garment scan a virtual try-on?", "acceptedAnswer": {"@type": "Answer", "text": "No. It records the garment's shape, colour and size on one mannequin. Showing it on a shopper's body needs pattern-based cloth simulation or a sizing tool. The scan helps most with colour-related returns. In a 2023 Coresight Research survey of US apparel brands and retailers, 16 percent named colour as the top return reason and 53 percent named size and fit."}},
+        {"@type": "Question", "name": "What GPU does Gaussian Wrapping need?", "acceptedAnswer": {"@type": "Answer", "text": "An NVIDIA GPU with CUDA. Its GPU memory at full 24 MP resolution is not yet measured, so start with a 48 GB card. The training images stay in the machine's RAM (about 10 GB), so it also needs at least 32 GB of RAM. In September 2026, renting an RTX A6000 (48 GB) costs about US$0.33 to 0.53 per hour, and it runs the pinned PyTorch 2.3.1 without changes. RTX 50-series cards need PyTorch 2.7 or later."}}
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://dawud-tan.github.io/"},
+        {"@type": "ListItem", "position": 2, "name": "Garment scanning rig: camera, lights and polarisers", "item": "https://dawud-tan.github.io/garment-scan-camera-ps-gltf.html"}
+      ]
+    }
+  ]
+}
+</script>
+</body>
+</html>

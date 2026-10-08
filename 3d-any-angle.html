@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Pengenalan Objek 3D</title>
+    <link crossorigin href="https://cdnjs.cloudflare.com/" rel="preconnect">
+    <link href="https://cdnjs.cloudflare.com/" rel="dns-prefetch">
+    <link as="style" href="/css/bootstrap.min.css"
+          rel="preload" type="text/css">
+    <link as="style" crossorigin
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.22.6/bootstrap-table.min.css" rel="preload" type="text/css">
+    <link as="image" href="/img/perspective-projection.jpg" rel="preload" type="image/jpeg"/>
+    <link as="font" href="/fonts/CharisSIL-Regular.woff2" rel="preload" type="font/woff2">
+    <link as="script" crossorigin href="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.slim.min.js"
+          rel="preload" type="text/javascript">
+    <link as="script" crossorigin
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.22.6/bootstrap-table.min.js" rel="preload" type="text/javascript">
+    <link as="script"
+          crossorigin
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.22.6/extensions/multiple-sort/bootstrap-table-multiple-sort.min.js" rel="preload" type="text/javascript">
+    <link href="/css/bootstrap.min.css"
+          rel="stylesheet">
+    <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.22.6/bootstrap-table.min.css"
+          rel="stylesheet">
+    <link href="/img/pk.ico" rel="icon" type="image/x-icon">
+    <link href="/img/pk.png" rel="icon" type="image/png">
+    <style>
+        @font-face {
+            font-display: swap;
+            font-family: "Charis SIL";
+            font-style: normal;
+            font-weight: normal;
+            src: url(/fonts/CharisSIL-Regular.woff2) format("woff2"),
+            url(/fonts/CharisSIL-Regular.woff) format("woff"),
+            url(/fonts/CharisSIL-Regular.ttf) format("truetype");
+        }
+
+        html {
+            font-size: 2.4vw;
+        }
+
+        @media all and (min-width: 1000px) {
+            html {
+                font-size: 24px;
+            }
+        }
+
+        @media all and (max-width: 520px) {
+            html {
+                font-size: 18px;
+            }
+        }
+
+        body {
+            font-family: "Charis SIL", serif;
+            line-height: 1.5;
+            font-size: 0.9rem;
+            -webkit-font-smoothing: subpixel-antialiased;
+        }
+    </style>
+</head>
+<body class="container-fluid">
+<div class="row">
+    <div class="col-12">
+        <h1 class="display-6">Bisa akurat kah model mengenal ukuran objek?</h1>
+        <figure class="figure">
+            <img alt="proyeksi perspektif" class="figure-img img-fluid rounded" src="/img/perspective-projection.jpg">
+            <figcaption class="figure-caption text-end">proyeksi perspektif</figcaption>
+        </figure>
+        <p>Bagaimana cara menentukan ukuran suatu objek, apakah ukurannya tergolong besar, sedang, atau kecil, sedangkan
+            foto/video hanya 2 dimensi? Sedangkan posisi kamera dan objek tidak sejajar, lebih tepatnya agak di bawah
+            pusat kamera dan terkadang objek tersebut diposisikan secara tegak lurus kadang mendatar? Apakah model
+            pengenalan objek 3d adalah solusinya, atau adakah cara yang lain?</p>
+        <h4 class="display-6">Daftar model pengenalan objek 3D</h4>
+        <div class="table-responsive-sm">
+            <table class="table align-middle table-striped-columns table-hover table-sm" id="table">
+                <caption><a href="https://modelnet.cs.princeton.edu/" rel="nofollow">ModelNet</a>40 adalah sehimpunan
+                    model CAD 3D dengan 40 kategori/kelas dan 100 model unik per kategori/kelas dalam berkas <em>Object
+                        File Format</em> (<em>OFF</em>) yang dihimpun oleh ilmu komputer Universitas Princeton, New
+                    Jersey. Berkas <em>OFF</em> dikembangkan oleh Randi J. Rost saat masih di Digital Equipment
+                    Corporation
+                </caption>
+                <thead>
+                <tr>
+                    <th class="text-center align-middle" data-sortable="true" rowspan="2" scope="col">Metode</th>
+                    <th class="text-center align-middle" data-sortable="true" rowspan="2" scope="col">Jumlah Rujukan
+                    </th>
+                    <th class="text-center align-middle" data-sortable="true" rowspan="2" scope="col">Jumlah Foto</th>
+                    <th class="text-center" colspan="2" scope="col">Akurasi Pengklasifikasian (%)</th>
+                    <th class="text-center align-middle" rowspan="2" scope="col">Git yang menerapkan</th>
+                    <th class="text-center align-middle" data-sortable="true" rowspan="2" scope="col">Jumlah ⭐ Git</th>
+                </tr>
+                <tr>
+                    <th data-sortable="true" scope="col">ModelNet40</th>
+                    <th data-sortable="true" scope="col">ModelNet10</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <th scope="row"><a href="http://pkrms.pungkookid.com/twoisys/buku/Multi-view%2BConvolutional%2BNeural%2BNetworks%2Bfor%2B3D%2BShape%2BRecognition.pdf"
+                                       rel="nofollow">MVCNN</a>
+                    </th>
+                    <td>3858</td>
+                    <td>80</td>
+                    <td>90.1%</td>
+                    <td></td>
+                    <td><a href="https://github.com/suhangpro/mvcnn"
+                           rel="nofollow">https://github.com/suhangpro/mvcnn</a></td>
+                    <td>359</td>
+                </tr>
+                <tr>
+                    <th scope="row"><a href="http://pkrms.pungkookid.com/twoisys/buku/Multi-view%2BConvolutional%2BNeural%2BNetworks%2Bfor%2B3D%2BShape%2BRecognition.pdf"
+                                       rel="nofollow">MVCNN</a>
+                    </th>
+                    <td>3858</td>
+                    <td>80</td>
+                    <td>90.1%</td>
+                    <td></td>
+                    <td><a href="https://github.com/WeiTang114/MVCNN-TensorFlow" rel="nofollow">https://github.com/WeiTang114/MVCNN-TensorFlow</a>
+                    </td>
+                    <td>120</td>
+                </tr>
+                <tr>
+                    <th scope="row"><a href="http://pkrms.pungkookid.com/twoisys/buku/Multi-view%2BConvolutional%2BNeural%2BNetworks%2Bfor%2B3D%2BShape%2BRecognition.pdf"
+                                       rel="nofollow">MVCNN</a>
+                    </th>
+                    <td>3858</td>
+                    <td>80</td>
+                    <td>90.1%</td>
+                    <td></td>
+                    <td><a href="https://github.com/AmitTurner/MVCNN-Multi-view-Convolutional-Neural-Networks-for-3D-Shape-Recognition"
+                           rel="nofollow">https://github.com/AmitTurner/MVCNN-Multi-view-Convolutional-Neural-Networks-for-3D-Shape-Recognition</a>
+                    </td>
+                    <td>12</td>
+                </tr>
+                <tr>
+                    <th scope="row"><a href="http://pkrms.pungkookid.com/twoisys/buku/GVCNN%253A%2BGroup-View%2BConvolutional%2BNeural%2BNetworks%2Bfor%2B3D%2BShape%2BRecognition.pdf"
+                                       rel="nofollow">GVCNN</a>
+                    </th>
+                    <td>617</td>
+                    <td>8</td>
+                    <td>93.1%</td>
+                    <td></td>
+                    <td><a href="https://github.com/waxnkw/gvcnn-pytorch" rel="nofollow">https://github.com/waxnkw/gvcnn-pytorch</a>
+                    </td>
+                    <td>14</td>
+                </tr>
+                <tr>
+                    <th scope="row"><a href="http://pkrms.pungkookid.com/twoisys/buku/GVCNN%253A%2BGroup-View%2BConvolutional%2BNeural%2BNetworks%2Bfor%2B3D%2BShape%2BRecognition.pdf"
+                                       rel="nofollow">GVCNN</a>
+                    </th>
+                    <td>617</td>
+                    <td>8</td>
+                    <td>93.1%</td>
+                    <td></td>
+                    <td><a href="https://github.com/ace19-dev/gvcnn-tf" rel="nofollow">https://github.com/ace19-dev/gvcnn-tf</a>
+                    </td>
+                    <td>35</td>
+                </tr>
+                <tr>
+                    <th scope="row"><a href="http://pkrms.pungkookid.com/twoisys/buku/SeqViews2SeqLabels%253A%2BLearning%2B3D%2BGlobal%2BFeatures%2Bvia%2BAggregating%2BSequential%2BViews%2Bby%2BRNN%2Bwith%2BAttention.pdf"
+                                       rel="nofollow">SeqViews2SeqLabels</a>
+                    </th>
+                    <td>209</td>
+                    <td>12</td>
+                    <td>93.31%</td>
+                    <td></td>
+                    <td><a href="https://github.com/mingyangShang/SeqViews2SeqLabels" rel="nofollow">https://github.com/mingyangShang/SeqViews2SeqLabels</a>
+                    </td>
+                    <td>15</td>
+                </tr>
+                <tr>
+                    <th scope="row"><a href="http://pkrms.pungkookid.com/twoisys/buku/RotationNet%253A%2BJoint%2BObject%2BCategorization%2Band%2BPose%2BEstimation%2BUsing%2BMultiviews%2Bfrom%2BUnsupervised%2BViewpoints.pdf"
+                                       rel="nofollow">RotationNet
+                        with VGG-M</a></th>
+                    <td>563</td>
+                    <td>20</td>
+                    <td>97.37%</td>
+                    <td></td>
+                    <td><a href="https://github.com/kanezaki/rotationnet" rel="nofollow">https://github.com/kanezaki/rotationnet</a>
+                    </td>
+                    <td>126</td>
+                </tr>
+                <tr>
+                    <th scope="row"><a href="http://pkrms.pungkookid.com/twoisys/buku/MVT%253A%2BMulti-view%2BVision%2BTransformer%2Bfor%2B3D%2BObject%2BRecognition.pdf"
+                                       rel="nofollow">MVT-small</a>
+                    </th>
+                    <td>44</td>
+                    <td>20</td>
+                    <td>97.5%</td>
+                    <td></td>
+                    <td><a href="https://github.com/shanshuo/MVT" rel="nofollow">https://github.com/shanshuo/MVT</a>
+                    </td>
+                    <td>5</td>
+                </tr>
+                <tr>
+                    <th scope="row"><a href="http://pkrms.pungkookid.com/twoisys/buku/View-GCN%253A%2BView-based%2BGraph%2BConvolutional%2BNetwork%2Bfor%2B3D%2BShape%2BAnalysis.pdf"
+                                       rel="nofollow">View-GCN</a>
+                    </th>
+                    <td>270</td>
+                    <td>20</td>
+                    <td>97.6%</td>
+                    <td></td>
+                    <td><a href="https://github.com/weixmath/view-GCN" rel="nofollow">https://github.com/weixmath/view-GCN</a>
+                    </td>
+                    <td>71</td>
+                </tr>
+                <tr>
+                    <th scope="row"><a href="http://pkrms.pungkookid.com/twoisys/buku/R%25C2%25B2-MLP%253A%2BRound-Roll%2BMLP%2BArchitecture%2Bfor%2BMulti-View%2B3D%2BObject%2BRecognition.pdf"
+                                       rel="nofollow">R²-MLP-36</a>
+                    </th>
+                    <td>4</td>
+                    <td>20</td>
+                    <td>97.7%</td>
+                    <td></td>
+                    <td><a href="https://github.com/shanshuo/R2-MLP"
+                           rel="nofollow">https://github.com/shanshuo/R2-MLP</a></td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <th scope="row"><a href="http://pkrms.pungkookid.com/twoisys/buku/Dominant%2BSet%2BClustering%2Band%2BPooling%2Bfor%2BMulti-View%2B3D%2BObject%2BRecognition.pdf"
+                                       rel="nofollow">DSCNN</a>
+                    </th>
+                    <td>211</td>
+                    <td>12</td>
+                    <td>93.8%</td>
+                    <td></td>
+                    <td><a href="https://github.com/wangchu1/dscnn" rel="nofollow">https://github.com/wangchu1/dscnn</a>
+                    </td>
+                    <td>12</td>
+                </tr>
+                <tr>
+                    <th scope="row"><a href="http://pkrms.pungkookid.com/twoisys/buku/VERAM%253A%2BView-Enhanced%2BRecurrent%2BAttention%2BModel%2Bfor%2B3D%2BShape%2BClassification.pdf"
+                                       rel="nofollow">Veram</a>
+                    </th>
+                    <td>76</td>
+                    <td>9</td>
+                    <td>93.7%</td>
+                    <td></td>
+                    <td><a href="https://github.com/SongleChen2015/VERAM" rel="nofollow">https://github.com/SongleChen2015/VERAM</a>
+                    </td>
+                    <td>12</td>
+                </tr>
+                <tr>
+                    <th scope="row"><a href="http://pkrms.pungkookid.com/twoisys/buku/Hypergraph%2BNeural%2BNetworks.pdf"
+                                       rel="nofollow">HGNN</a>
+                    </th>
+                    <td>1112</td>
+                    <td>12</td>
+                    <td>96.7%</td>
+                    <td></td>
+                    <td><a href="https://github.com/iMoonLab/HGNN" rel="nofollow">https://github.com/iMoonLab/HGNN</a>
+                    </td>
+                    <td>623</td>
+                </tr>
+                <tr>
+                    <th scope="row"><a href="http://pkrms.pungkookid.com/twoisys/buku/Equivariant%2BMulti-View%2BNetworks.pdf"
+                                       rel="nofollow">EMVN</a>
+                    </th>
+                    <td>93</td>
+                    <td>20</td>
+                    <td>94.69%</td>
+                    <td></td>
+                    <td><a href="https://github.com/daniilidis-group/emvn" rel="nofollow">https://github.com/daniilidis-group/emvn</a>
+                    </td>
+                    <td>56</td>
+                </tr>
+                <tr>
+                    <th scope="row"><a href="http://pkrms.pungkookid.com/twoisys/buku/Escape%2Bfrom%2BCells%253A%2BDeep%2BKd-Networks%2Bfor%2Bthe%2BRecognition%2Bof%2B3D%2BPoint%2BCloud%2BModels.pdf"
+                                       rel="nofollow">Kd-Net
+                        (depth 15)</a></th>
+                    <td>1160</td>
+                    <td>20</td>
+                    <td>91.8%</td>
+                    <td></td>
+                    <td><a href="https://github.com/fxia22/kdnet.pytorch" rel="nofollow">https://github.com/fxia22/kdnet.pytorch</a>
+                    </td>
+                    <td>117</td>
+                </tr>
+                <tr>
+                    <th scope="row"><a href="http://pkrms.pungkookid.com/twoisys/buku/Volumetric%2Band%2BMulti-View%2BCNNs%2Bfor%2BObject%2BClassification%2Bon%2B3D%2BData.pdf"
+                                       rel="nofollow">MVCNN-MultiRes</a>
+                    </th>
+                    <td>1892</td>
+                    <td>20</td>
+                    <td>91.4%</td>
+                    <td></td>
+                    <td><a href="https://github.com/charlesq34/3dcnn.torch" rel="nofollow">https://github.com/charlesq34/3dcnn.torch</a>
+                    </td>
+                    <td>220</td>
+                </tr>
+                <tr>
+                    <th scope="row"><a href="http://pkrms.pungkookid.com/twoisys/buku/Orientation-boosted%2BVoxel%2BNets%2Bfor%2B3D%2BObject%2BRecognition.pdf"
+                                       rel="nofollow">ORION</a>
+                    </th>
+                    <td>278</td>
+                    <td>20</td>
+                    <td></td>
+                    <td>93.8%</td>
+                    <td><a href="https://github.com/lmb-freiburg/orion" rel="nofollow">https://github.com/lmb-freiburg/orion</a>
+                    </td>
+                    <td>104</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script crossorigin="anonymous" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.slim.min.js"></script>
+<script crossorigin="anonymous"
+        src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.22.6/bootstrap-table.min.js"></script>
+<script crossorigin="anonymous"
+        src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.22.6/extensions/multiple-sort/bootstrap-table-multiple-sort.min.js"></script>
+<script> $(() => $('#table').bootstrapTable());</script>
+</body>
+</html>
