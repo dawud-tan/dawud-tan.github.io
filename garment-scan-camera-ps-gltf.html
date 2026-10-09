@@ -17,7 +17,7 @@
 <meta property="og:url" content="https://dawud-tan.github.io/garment-scan-camera-ps-gltf.html">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2026-09-27T11:18:44+07:00">
-<meta property="article:modified_time" content="2026-09-29T10:25:00+07:00">
+<meta property="article:modified_time" content="2026-10-09T21:38:00+07:00">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="One rig, three goals: photogrammetry, photometric stereo and glTF albedo">
 <meta name="twitter:description" content="Camera body and lens, 8 LEDs, cross-polarisation, colour calibration and glTF conventions for garment scanning, with the evidence behind each choice.">
@@ -104,7 +104,8 @@
     <h1>One rig, three goals: the camera, lights and polarisers for garment photogrammetry, photometric stereo and glTF albedo</h1>
     <p class="sub">A garment on a turntable is scanned for three things at once: <b>geometry</b> (COLMAP and Gaussian Wrapping), <b>fine surface detail</b> (calibrated near-light photometric stereo) and <b>colour</b> (the base colour of a glTF 2.0 material). This page gives the recommended camera body, lens, lighting and polarisation for that rig, and the evidence behind each choice.</p>
     <p class="meta">
-      <span><b>Status</b> 28 September 2026: the chain from capture to the .glb built and tested on synthetic data, including meshes of Gaussian Wrapping's size; rig not yet provisioned</span>
+      <span><b>Status</b> 9 October 2026: the chain from capture to the .glb built and tested on synthetic data (130 tests pass), including meshes of Gaussian Wrapping's size and dark fabrics; rig not yet provisioned</span>
+      <span><b>Code</b> <a href="https://github.com/dawud-tan/gw-ps-diagnostic">github.com/dawud-tan/gw-ps-diagnostic</a></span>
       <span><b>Stack</b> COLMAP · Gaussian Wrapping · Python · glTF 2.0</span>
       <span><b>Reading time</b> ~22 min</span>
     </p>
@@ -321,7 +322,7 @@
 <ul>
   <li>Use the driver's DIM pin only as a static on/off switch. Its PWM input chops the output current, which is exactly the flicker to avoid.</li>
   <li>DIM reads "open" as <b>on</b>, so a resetting board would light every LED at once. Make off the default. For example, give each channel an N-MOSFET that pulls DIM to the supply's negative rail, with its gate pulled up; the firmware drives the gate low to switch a light on.</li>
-  <li>The capture script sends one line per command over USB serial: <code>ALL=0</code>, then <code>L3=1</code>, then waits 0.3 s to settle. The firmware only has to accept these lines.</li>
+  <li>The capture script sends one line per command over USB serial: <code>ALL=0</code>, then <code>L3=1</code>, then waits 0.3 s to settle. The firmware for a Pico 2 answers every line with <code>OK</code> or <code>ERR</code>, reports which lights are on when asked (<code>?</code>), and switches everything off if a light stays on for 120 s. The capture script reads every reply and checks the reported state before each frame.</li>
   <li>Mount the polarising film a few centimetres in front of each COB, not on it.</li>
 </ul>
 
@@ -516,7 +517,10 @@
 <ul>
   <li><b>A trial run of Gaussian Wrapping on a rented GPU,</b> on a synthetic capture: its install, memory and time at full resolution, and a real Gaussian Wrapping mesh through the rest of the pipeline. Everything but the GPU step is ready and tested here: the synthetic capture and its dataset, a script that sets the GPU machine up and runs Gaussian Wrapping while logging memory and time, and the processing of the mesh it returns.</li>
   <li><b>The light controller's firmware</b> is written for the recommended parts (a Raspberry Pi Pico 2 switching each driver's DIM pin, every light off from power-up) and tested against a simulated board, with the capture script checking every reply. What remains needs the hardware: each channel by hand, the settle time, and a flat frame free of banding.</li>
+  <li><b>One decision, no build needed:</b> whether the verdict should hold a flagged region against the fabric floor measured at its own height in the image, which it now reports, instead of the floor pooled over every board placement. The pooled floor can hide a bias that only one placement saw.</li>
 </ul>
+<h3 id="code">Source code and tests</h3>
+<p>The pipeline is public at <a href="https://github.com/dawud-tan/gw-ps-diagnostic">github.com/dawud-tan/gw-ps-diagnostic</a>: one small Python command-line script per stage, a shared library, the light controller's firmware, the capture checklist and the Gaussian Wrapping trial-run kit. Its README sets it up on a freshly installed Fedora 44 PC with Python 3.11; everything but Gaussian Wrapping runs on a CPU. The test suite renders its own synthetic scenes and uses a fake camera and a fake serial port, so it needs none of the hardware: its last full run passed 130 tests, plus one expected failure that documents the vertical blind spot above, in about 45 minutes on an 8-core CPU.</p>
 </section>
 
 <section id="faq">
@@ -587,7 +591,7 @@
 </section>
 
 <footer>
-  <p>Written by Claude Opus 5.5 for a garment-scanning project by Dawud Tan. Published 27 September 2026. Updated the same day with the light hardware, a second camera, the GPU, the fabrics the rig suits and where the .glb opens. Updated on 28 September 2026: the GPU memory estimate was corrected (Gaussian Wrapping keeps its training images in RAM, not on the GPU); the consistency test's false BUILD with 10° turntable steps was found and fixed; object masks, the COLMAP step, garment selection and a flag for the vertical blind spot were built; and the pipeline was run on meshes of Gaussian Wrapping's size. Updated on 29 September 2026: the light controller's firmware and a ready kit for a Gaussian Wrapping trial run. Updated on 1 October 2026: exposure bracketing for dark garments and how dark a fabric can be without it, a check that the fabric controls covered every height of the garment, the depth in millimetres of what the verdict flags, and a size limit for the .glb. Every result above comes from synthetic tests with known ground truth. The camera, lights and polarisation stay recommendations until the pilot session has measured the real rig and fabric.</p>
+  <p>Written by Claude Opus 5.5 for a garment-scanning project by Dawud Tan. Published 27 September 2026. Updated the same day with the light hardware, a second camera, the GPU, the fabrics the rig suits and where the .glb opens. Updated on 28 September 2026: the GPU memory estimate was corrected (Gaussian Wrapping keeps its training images in RAM, not on the GPU); the consistency test's false BUILD with 10° turntable steps was found and fixed; object masks, the COLMAP step, garment selection and a flag for the vertical blind spot were built; and the pipeline was run on meshes of Gaussian Wrapping's size. Updated on 29 September 2026: the light controller's firmware and a ready kit for a Gaussian Wrapping trial run. Updated on 1 October 2026: exposure bracketing for dark garments and how dark a fabric can be without it, a check that the fabric controls covered every height of the garment, the depth in millimetres of what the verdict flags, and a size limit for the .glb. Updated on 9 October 2026: a link to the public source code and its test suite, the light controller's replies and safety switch-off, and the one open decision on the fabric floor. Every result above comes from synthetic tests with known ground truth. The camera, lights and polarisation stay recommendations until the pilot session has measured the real rig and fabric.</p>
 </footer>
 
 </main>
@@ -604,10 +608,11 @@
       "description": "A garment-scanning rig for photogrammetry, photometric stereo and glTF: camera, LEDs and drivers, polarisers, colour, GPU, fabrics, and where the .glb opens.",
       "inLanguage": "en",
       "datePublished": "2026-09-27T11:18:44+07:00",
-      "dateModified": "2026-10-01T15:33:00+07:00",
+      "dateModified": "2026-10-09T21:38:00+07:00",
       "author": {"@type": "Person", "name": "Claude Opus 5.5"},
       "publisher": {"@type": "Person", "name": "Dawud Tan"},
       "mainEntityOfPage": "https://dawud-tan.github.io/garment-scan-camera-ps-gltf.html",
+      "isBasedOn": {"@type": "SoftwareSourceCode", "name": "gw-ps-diagnostic", "codeRepository": "https://github.com/dawud-tan/gw-ps-diagnostic", "programmingLanguage": "Python", "runtimePlatform": "Python 3.11"},
       "proficiencyLevel": "Expert",
       "articleSection": ["Camera body and lens", "Lights, controller and mount", "Cross-polarisation", "Albedo and the glTF material", "Which fabrics work", "Where the .glb opens", "GPU for Gaussian Wrapping", "Pilot capture session"],
       "keywords": "photogrammetry camera, photometric stereo, near-light photometric stereo, cross-polarization, glTF baseColor, normal map baking, KHR_materials_sheen, ColorChecker, Gaussian Wrapping, libgphoto2, high CRI COB LED, constant-current LED driver, Scene Viewer, AR Quick Look, HTML model element, HarmonyOS ArkGraphics 3D, fabric suitability, GPU rental",
