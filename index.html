@@ -1,11 +1,853 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Halo Dunia</title>
-  </head>
-  <body>
-    <h1>Halo Dunia</h1>
-  </body>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agen Elektronik, Anomali Data, dan Pemilihan Stack</title>
+<meta name="description" content="Arti agen elektronik di UETA 1999 dan UU ITE, cara PostgreSQL mencegah pemesanan ganda dengan constraint eksklusi, dan kapan memilih native image atau JVM.">
+<meta name="keywords" content="agen elektronik, electronic agent, UETA 1999, UU ITE Pasal 21, UU ITE Pasal 22, PP 71/2019, exclusion constraint PostgreSQL, constraint eksklusi, GiST, btree_gist, tstzrange, daterange, WITHOUT OVERLAPS, pemesanan ganda, double booking, anomali Adya, write skew, native image, GraalVM, Mandrel, Quarkus, Leyden, Cloud Run, Cloud SQL, JVM on-premise">
+<meta name="author" content="Claude Opus 5.5">
+<link rel="canonical" href="https://dawud-tan.github.io/">
+<link rel="alternate" hreflang="id-ID" href="https://dawud-tan.github.io/">
+<link rel="alternate" hreflang="x-default" href="https://dawud-tan.github.io/">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Dawud Tan">
+<meta property="og:title" content="Agen Elektronik, Anomali Data, dan Pemilihan Stack">
+<meta property="og:description" content="Siapa agen elektronik menurut UETA 1999 dan UU ITE, mengapa constraint eksklusi PostgreSQL menutup pemesanan ganda di banyak domain, dan kapan native image atau JVM panas yang tepat.">
+<meta property="og:url" content="https://dawud-tan.github.io/">
+<meta property="og:locale" content="id_ID">
+<meta property="article:published_time" content="2026-10-11T06:54:00+07:00">
+<meta property="article:modified_time" content="2026-10-11T06:54:00+07:00">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Agen Elektronik, Anomali Data, dan Pemilihan Stack">
+<meta name="twitter:description" content="Agen elektronik menurut UETA dan UU ITE, constraint eksklusi PostgreSQL di luar bioskop, dan native image vs JVM menurut bentuk lalu lintas.">
+<meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#131518" media="(prefers-color-scheme: dark)">
+<style>
+  :root{
+    color-scheme: light dark;
+    --bg:#f7f6f2; --panel:#ffffff; --ink:#1a1c20; --ink-soft:#50566a; --line:#e2dfd7;
+    --accent:#9b3a12; --accent-soft:#f6ebe4; --ok:#276b43; --ok-soft:#e5f2ea;
+    --warn:#8a5b0c; --warn-soft:#f8f0dd;
+    --code-bg:#1c1f25; --code-ink:#e8e5de; --code-dim:#9aa3b0;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,"Liberation Mono",monospace;
+    --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --measure:72ch;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#131518; --panel:#1a1d22; --ink:#e8e6e1; --ink-soft:#a8aebb; --line:#2d323b;
+      --accent:#ef9a66; --accent-soft:#2a221d; --ok:#7fcf9d; --ok-soft:#1b2a21;
+      --warn:#e6b561; --warn-soft:#2a2418; --code-bg:#0e1013;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.7 var(--sans);
+       padding:0 max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left))}
+  main{max-width:860px;margin:0 auto;padding:40px 0 64px}
+  p,li{max-width:var(--measure)}
+  a{color:var(--accent);text-underline-offset:2px}
+  h1{font-size:clamp(28px,4.6vw,40px);line-height:1.15;letter-spacing:-.012em;margin:8px 0 18px}
+  h2{font-size:24px;line-height:1.3;margin:56px 0 12px;padding-top:10px;border-top:1px solid var(--line)}
+  h3{font-size:18.5px;line-height:1.35;margin:34px 0 8px}
+  .kicker{margin:0;color:var(--ink-soft);font-size:13.5px;letter-spacing:.06em;text-transform:uppercase}
+  .lead{font-size:19px}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px 22px 12px;margin:26px 0}
+  .box h2{border:0;margin:14px 0 4px;padding:0;font-size:20px}
+  .tldr{border-left:4px solid var(--accent)}
+  .toc ol{padding-left:22px;margin:8px 0}
+  .toc li{margin:3px 0}
+  code{font-family:var(--mono);font-size:.86em;background:var(--accent-soft);padding:.08em .32em;border-radius:4px;
+       overflow-wrap:anywhere}
+  pre{background:var(--code-bg);color:var(--code-ink);padding:14px 16px;border-radius:10px;overflow-x:auto;
+      font:13.5px/1.55 var(--mono);margin:14px 0 20px;max-width:100%}
+  pre code{background:none;padding:0;font-size:inherit;color:inherit;overflow-wrap:normal}
+  .c{color:var(--code-dim)}
+  blockquote{margin:16px 0;padding:8px 18px;border-left:3px solid var(--accent);background:var(--panel);
+             border-radius:0 10px 10px 0}
+  blockquote p{margin:6px 0}
+  .trans{color:var(--ink-soft);font-size:15.5px;margin-top:-4px}
+  .table-wrap{overflow-x:auto;margin:16px 0 22px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+  table{border-collapse:collapse;width:100%;font-size:15px;line-height:1.5}
+  caption{caption-side:top;text-align:left;padding:10px 14px 8px;color:var(--ink-soft);font-size:14px}
+  th,td{padding:9px 12px;border-top:1px solid var(--line);text-align:left;vertical-align:top}
+  thead th{background:var(--accent-soft);font-weight:600}
+  td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .note{background:var(--warn-soft);border:1px solid var(--line);border-radius:12px;padding:10px 18px;font-size:15.5px}
+  .rule{background:var(--ok-soft);border:1px solid var(--line);border-radius:12px;padding:10px 18px}
+  .faq h3{margin-top:28px}
+  .sources li{margin:7px 0;overflow-wrap:anywhere}
+  footer{max-width:860px;margin:0 auto;padding:22px 0 44px;border-top:1px solid var(--line);color:var(--ink-soft);font-size:14.5px}
+  @media (max-width:600px){
+    body{font-size:16px}
+    .lead{font-size:17.5px}
+    h2{font-size:21px;margin-top:46px}
+    .box{padding:4px 16px 10px}
+    th,td{padding:8px 10px}
+  }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://dawud-tan.github.io/#website",
+      "url": "https://dawud-tan.github.io/",
+      "name": "Dawud Tan",
+      "inLanguage": "id-ID",
+      "publisher": {"@id": "https://dawud-tan.github.io/#publisher"}
+    },
+    {
+      "@type": "Person",
+      "@id": "https://dawud-tan.github.io/#publisher",
+      "name": "Dawud Tan",
+      "url": "https://dawud-tan.github.io/",
+      "sameAs": ["https://github.com/dawud-tan"]
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://dawud-tan.github.io/#webpage",
+      "url": "https://dawud-tan.github.io/",
+      "name": "Agen Elektronik, Anomali Data, dan Pemilihan Stack",
+      "inLanguage": "id-ID",
+      "isPartOf": {"@id": "https://dawud-tan.github.io/#website"},
+      "mainEntity": {"@id": "https://dawud-tan.github.io/#article"},
+      "hasPart": {"@id": "https://dawud-tan.github.io/#faq"},
+      "datePublished": "2026-10-11T06:54:00+07:00",
+      "dateModified": "2026-10-11T06:54:00+07:00"
+    },
+    {
+      "@type": "TechArticle",
+      "@id": "https://dawud-tan.github.io/#article",
+      "headline": "Agen Elektronik, Anomali Data, dan Pemilihan Stack",
+      "description": "Arti agen elektronik di UETA 1999 dan UU ITE, cara PostgreSQL mencegah pemesanan ganda dengan constraint eksklusi, dan kapan memilih native image atau JVM.",
+      "inLanguage": "id-ID",
+      "datePublished": "2026-10-11T06:54:00+07:00",
+      "dateModified": "2026-10-11T06:54:00+07:00",
+      "author": {"@type": "Person", "name": "Claude Opus 5.5"},
+      "publisher": {"@id": "https://dawud-tan.github.io/#publisher"},
+      "mainEntityOfPage": {"@id": "https://dawud-tan.github.io/#webpage"},
+      "articleSection": [
+        "Agen elektronik menurut UETA 1999 dan UU ITE",
+        "Anomali konkurensi dan exclusion constraint PostgreSQL",
+        "Domain lain untuk exclusion constraint dengan rentang dan GiST",
+        "Native image atau JVM panas menurut bentuk lalu lintas",
+        "Pertanyaan yang sering diajukan"
+      ],
+      "keywords": "agen elektronik, UETA, UU ITE, exclusion constraint, GiST, tstzrange, WITHOUT OVERLAPS, pemesanan ganda, anomali Adya, native image, GraalVM, Quarkus, Leyden, Cloud Run, Cloud SQL, JVM on-premise",
+      "about": [
+        {"@type": "Thing", "name": "Agen elektronik"},
+        {"@type": "Legislation", "name": "Uniform Electronic Transactions Act (1999)"},
+        {"@type": "Legislation", "name": "Undang-Undang Nomor 11 Tahun 2008 tentang Informasi dan Transaksi Elektronik", "legislationJurisdiction": "ID"},
+        {"@type": "Thing", "name": "PostgreSQL exclusion constraint"},
+        {"@type": "Thing", "name": "GraalVM native image"},
+        {"@type": "Thing", "name": "Java Virtual Machine"}
+      ],
+      "mentions": [
+        {"@type": "SoftwareApplication", "name": "PostgreSQL", "applicationCategory": "DatabaseApplication"},
+        {"@type": "SoftwareApplication", "name": "Quarkus", "applicationCategory": "DeveloperApplication"},
+        {"@type": "SoftwareApplication", "name": "Mandrel", "applicationCategory": "DeveloperApplication"},
+        {"@type": "Service", "name": "Google Cloud Run"},
+        {"@type": "Service", "name": "Cloud SQL for PostgreSQL"}
+      ],
+      "citation": [
+        {"@type": "Legislation", "name": "Uniform Electronic Transactions Act (1999), with Prefatory Note and Comments", "url": "https://scs.nevada.edu/wp-content/uploads/2020/07/FED_Act99.pdf"},
+        {"@type": "CreativeWork", "name": "1999 UETA Deliberations (ABA working group memo, reprinted)", "url": "https://law.mit.edu/pub/1999-ueta-deliberations"},
+        {"@type": "Legislation", "name": "UU Nomor 11 Tahun 2008 tentang Informasi dan Transaksi Elektronik", "url": "https://jdih.kemenkeu.go.id/fullText/2008/11TAHUN2008UU.htm"},
+        {"@type": "CreativeWork", "name": "PostgreSQL 18: CREATE TABLE", "url": "https://www.postgresql.org/docs/18/sql-createtable.html"},
+        {"@type": "CreativeWork", "name": "PostgreSQL 18: Range Types", "url": "https://www.postgresql.org/docs/18/rangetypes.html"},
+        {"@type": "CreativeWork", "name": "PostgreSQL 18 Release Notes", "url": "https://www.postgresql.org/docs/18/release-18.html"},
+        {"@type": "CreativeWork", "name": "Quarkus: Building a native executable", "url": "https://quarkus.io/version/3.40/guides/building-native-image/"},
+        {"@type": "CreativeWork", "name": "Cloud Run: Configure CPU limits for services", "url": "https://docs.cloud.google.com/run/docs/configuring/cpu"},
+        {"@type": "CreativeWork", "name": "Cloud Run: Billing settings for services", "url": "https://docs.cloud.google.com/run/docs/configuring/cpu-allocation"},
+        {"@type": "CreativeWork", "name": "Cloud Run: Compute flexible committed use discounts", "url": "https://docs.cloud.google.com/run/cud"},
+        {"@type": "CreativeWork", "name": "Cloud Run pricing", "url": "https://cloud.google.com/run/pricing"},
+        {"@type": "CreativeWork", "name": "Cloud SQL for PostgreSQL pricing", "url": "https://cloud.google.com/sql/docs/postgres/pricing"}
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://dawud-tan.github.io/#faq",
+      "inLanguage": "id-ID",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Apakah agen elektronik dalam UETA 1999 berarti agen AI?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Tidak. Komentar resmi UETA menyebut agen elektronik sebagai mesin yang terbatas pada fungsi alat dan bekerja di dalam batasan pemrogramannya. Agen yang bertindak otonom, bukan sekadar otomatis, baru diantisipasi sebagai kemungkinan di masa depan, dan penafsirannya diserahkan kepada pengadilan."}
+        },
+        {
+          "@type": "Question",
+          "name": "Apakah server web seperti Quarkus yang menerima pesanan termasuk agen elektronik?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Ya. Contoh dari perancang UETA sendiri adalah Bookseller.com, yang menerima dan mengonfirmasi pesanan lewat mesinnya. Aplikasi yang menahan kursi, menerima pembayaran, dan menerbitkan tiket tanpa ditinjau manusia adalah agen elektronik milik penjualnya."}
+        },
+        {
+          "@type": "Question",
+          "name": "Apakah PostgreSQL itu agen elektronik?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Tidak dengan sendirinya. Definisinya fungsional: agen elektronik adalah keseluruhan sarana otomatis yang dipakai satu pihak. Basis data adalah bagian dari mesin itu, walaupun keputusan menerima atau menolak klaim kursi bisa diambil di dalam PostgreSQL oleh exclusion constraint."}
+        },
+        {
+          "@type": "Question",
+          "name": "Di Indonesia, siapa yang menanggung akibat hukum transaksi lewat agen elektronik?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Menurut UU ITE Pasal 21 ayat (2), penyelenggara Agen Elektronik. Kerugian akibat kelalaian pengguna jasa ditanggung pengguna (ayat 4), dan tanggung jawab penyelenggara tidak berlaku bila dapat dibuktikan keadaan memaksa, kesalahan, atau kelalaian pengguna (ayat 5)."}
+        },
+        {
+          "@type": "Question",
+          "name": "Apa itu exclusion constraint dengan indeks GiST?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Constraint PostgreSQL yang melarang dua baris memenuhi sekumpulan operator sekaligus, misalnya kursi WITH = dan periode WITH &&: kursi yang sama dan periode yang tumpang tindih. GiST adalah jenis indeks yang mendukung operator rentang seperti &&, dan ekstensi btree_gist menambahkan dukungan untuk kolom skalar biasa."}
+        },
+        {
+          "@type": "Question",
+          "name": "Mengapa tidak cukup mengecek apakah kursi masih kosong, lalu menyimpan?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Karena dua transaksi bersamaan sama-sama melihat kursi kosong dan sama-sama menyimpan. READ COMMITTED dan REPEATABLE READ membiarkannya; ini write skew. Exclusion constraint menolak klaim kedua saat ditulis, pada tingkat isolasi apa pun, dengan SQLSTATE 23P01."}
+        },
+        {
+          "@type": "Question",
+          "name": "Apa bedanya dengan WITHOUT OVERLAPS di PostgreSQL 18?",
+          "acceptedAnswer": {"@type": "Answer", "text": "WITHOUT OVERLAPS adalah bentuk standar untuk kunci primer dan constraint unik atas rentang, dan ditegakkan sebagai exclusion constraint GiST. Cocok untuk data master seperti periode harga. Constraint unik tidak bisa diberi klausa WHERE, jadi untuk pemesanan yang hanya melarang tumpang tindih di antara baris yang masih aktif, EXCLUDE dengan WHERE tetap dibutuhkan."}
+        },
+        {
+          "@type": "Question",
+          "name": "Domain apa saja selain bioskop yang cocok memakai exclusion constraint?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Semua yang berbentuk klaim eksklusif atas satu sumber daya untuk satu periode: hotel, ruang rapat, lapangan olahraga, jadwal dokter dan kamar operasi, kursi kereta per segmen, sewa kendaraan dan alat, dermaga, shift karyawan, periode harga dan tarif, polis asuransi, serta rentang VLAN atau frekuensi. Untuk kapasitas yang dapat dipertukarkan, seperti tiket tanpa nomor kursi, gunakan penghitungan dengan penguncian baris."}
+        },
+        {
+          "@type": "Question",
+          "name": "Kapan native image lebih hemat daripada JVM?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Saat lalu lintas sepi dan sporadis sehingga instans sering dinyalakan ulang. Dari tabel resmi Quarkus, satu cold start native menghemat sekitar 2,6 detik vCPU dibanding JVM dengan cache AOT Leyden, setara kira-kira 6.000 permintaan hangat. Bila tiap instans melayani jauh lebih sedikit dari itu sebelum dimatikan, native lebih hemat."}
+        },
+        {
+          "@type": "Question",
+          "name": "Apakah serverless selalu lebih murah untuk usaha kecil?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Tidak selalu. Cloud SQL tetap ditagih selama instansnya menyala, penyapu terjadwal memerlukan minimal satu instans, dan pekerjaan setelah respons memerlukan CPU yang selalu dialokasikan. Hitung biaya lantai itu sebelum memilih."}
+        },
+        {
+          "@type": "Question",
+          "name": "Kapan sebaiknya memilih JVM panas di server on-premise?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Saat lalu lintas ramai dan stabil sepanjang hari, tim sanggup mengurus operasional seperti jam, sertifikat TLS, cadangan, dan pemutakhiran, dan biaya bulanan yang tetap lebih menarik daripada tagihan per permintaan. Dalam pengujian proyek ini, satu server on-premise menahan 3.200 permintaan per detik dengan p99 satu digit milidetik tanpa mencapai titik jenuh."}
+        }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<main>
+
+<header>
+  <p class="kicker">Catatan teknik dan hukum · <time datetime="2026-10-11">11 Oktober 2026</time></p>
+  <h1>Agen Elektronik, Anomali Data, dan Pemilihan Stack</h1>
+  <p class="lead">Tiga hal yang sering terlewat saat membangun sistem pemesanan: siapa sebenarnya
+  "agen elektronik" yang menyetujui transaksi Anda, apa akibatnya bila anomali konkurensi tidak
+  ditangani, atau bahkan tidak disadari keberadaannya, dan mengapa bentuk lalu lintas yang
+  seharusnya memilihkan stack, bukan tren. Semuanya diturunkan dari pengalaman membangun platform
+  pemesanan kursi bioskop multi-penyewa.</p>
+</header>
+
+<section class="box tldr" id="ringkasan" aria-labelledby="ringkasan-judul">
+  <h2 id="ringkasan-judul">Ringkasan</h2>
+  <ul>
+    <li><strong>Agen elektronik versi UETA 1999 adalah mesin penjual yang menerima dan mengonfirmasi
+    pesanan.</strong> Contoh resminya adalah situs Bookseller.com. Ia bukan AI agentik dan bukan basis
+    data saja; agen yang otonom baru diantisipasi sebagai kemungkinan masa depan.</li>
+    <li><strong>Di Indonesia, UU ITE Pasal 21 menaruh akibat hukum transaksi lewat agen elektronik
+    pada penyelenggaranya.</strong> Pasal 22 mewajibkan penyelenggara agen elektronik tertentu
+    menyediakan fitur untuk mengubah informasi selama transaksi berlangsung. Agen AI pemesan tiket
+    harus memberi langkah tinjau sebelum transaksi mengikat.</li>
+    <li><strong>"Cek dulu kursinya kosong, lalu simpan" adalah resep pemesanan ganda.</strong> Satu
+    <em>exclusion constraint</em> PostgreSQL dengan operator rentang <code>&amp;&amp;</code> dan indeks
+    GiST membuat klaim kedua yang tumpang tindih mustahil ditulis, pada tingkat isolasi apa pun.</li>
+    <li><strong>Pola yang sama berlaku jauh di luar bioskop</strong>: hotel, ruang rapat, lapangan
+    futsal, jadwal dokter, kursi kereta per segmen, shift kerja, periode harga, blok IP, dan pita
+    frekuensi.</li>
+    <li><strong>Native image menang saat lalu lintas sepi dan sporadis; JVM yang panas menang saat
+    lalu lintas ramai dan stabil.</strong> Ukur jumlah permintaan per <em>cold start</em> sebelum
+    memilih, dan hitung biaya lantai yang tidak ikut turun ke nol.</li>
+  </ul>
+</section>
+
+<nav class="box toc" aria-labelledby="toc-judul">
+  <h2 id="toc-judul">Daftar isi</h2>
+  <ol>
+    <li><a href="#agen-elektronik">Agen elektronik: siapa "mesin" yang menyetujui transaksi?</a></li>
+    <li><a href="#anomali">Anomali yang tidak disadari: pemesanan ganda</a></li>
+    <li><a href="#domain-lain">Di luar bioskop: siapa lagi yang diuntungkan?</a></li>
+    <li><a href="#native-vs-jvm">Native image atau JVM panas: bentuk lalu lintas yang memilih</a></li>
+    <li><a href="#faq">Pertanyaan yang sering diajukan</a></li>
+    <li><a href="#sumber">Sumber</a></li>
+  </ol>
+</nav>
+
+<section id="agen-elektronik">
+<h2>1. Agen elektronik: siapa "mesin" yang menyetujui transaksi?</h2>
+
+<p><em>Uniform Electronic Transactions Act</em> (UETA) adalah model undang-undang transaksi
+elektronik untuk negara-negara bagian Amerika Serikat. Naskahnya disetujui National Conference of
+Commissioners on Uniform State Laws dalam konferensi tahunan di Denver, 23–30 Juli 1999. Pasal 2
+angka 6 mendefinisikan:</p>
+
+<blockquote lang="en"><p>"Electronic agent" means a computer program or an electronic or other
+automated means used independently to initiate an action or respond to electronic records or
+performances in whole or in part, without review or action by an individual.</p></blockquote>
+<p class="trans">Terjemahan bebas: program komputer, atau sarana elektronik atau otomatis lain, yang
+digunakan secara mandiri untuk memulai suatu tindakan atau menanggapi rekaman atau pelaksanaan
+elektronik, seluruhnya atau sebagian, tanpa ditinjau atau dikerjakan oleh seorang individu.</p>
+
+<h3>Bukan AI agentik</h3>
+<p>Komentar resmi UETA menegaskan bahwa definisi itu menetapkan agen elektronik sebagai mesin, dan
+bahwa istilah itu "terbatas pada fungsi alat". Undang-undang ini berangkat dari paradigma bahwa agen
+elektronik hanya mampu bekerja di dalam batasan teknis pemrogramannya yang sudah ditetapkan. Agen
+yang otonom baru dibayangkan sebagai kemungkinan:</p>
+
+<blockquote lang="en"><p>"…it is conceivable that, within the useful life of this Act, electronic
+agents may be created with the ability to act autonomously, and not just automatically. … If such
+developments occur, courts may construe the definition of electronic agent accordingly…"</p></blockquote>
+<p class="trans">Terjemahan bebas: dapat dibayangkan bahwa selama masa berlaku undang-undang ini akan
+tercipta agen elektronik yang mampu bertindak otonom, bukan sekadar otomatis. Bila itu terjadi,
+pengadilan dapat menafsirkan definisi agen elektronik sesuai perkembangan tersebut.</p>
+
+<p>Pembedaan itu sudah dibahas sejak perancangan. Memo kelompok kerja American Bar Association
+kepada komite perancang UETA, bertanggal 16 Februari 1999, memisahkan agen sederhana berbasis
+aturan dari agen yang mampu memutuskan secara otonom, dan memperlakukan yang kedua sebagai
+penerapan masa depan.</p>
+
+<h3>Yang dimaksud: server yang menerima dan mengonfirmasi pesanan</h3>
+<p>Contoh dari para perancang sendiri adalah toko daring. Menurut komentar resmi, bila seseorang
+memesan buku dari Bookseller.com melalui situsnya, transaksi itu adalah transaksi otomatis
+"karena Bookseller menerima dan mengonfirmasi pesanan itu lewat mesinnya". Contoh keduanya adalah
+dua perusahaan yang saling mengirim dan mengonfirmasi pesanan lewat <em>Electronic Data
+Interchange</em> (EDI). Dalam istilah hari ini, aplikasi web yang menahan kursi, menerima
+pembayaran, dan menerbitkan tiket tanpa ditinjau manusia, misalnya layanan Quarkus di balik sebuah
+situs bioskop, adalah agen elektronik milik penjualnya.</p>
+
+<h3>Bukan basis data saja</h3>
+<p>Definisinya fungsional, bukan arsitektural: "program komputer atau sarana otomatis lain". UETA
+tidak memecah sistem menjadi lapisan web, aplikasi, dan basis data. Yang dinilai adalah keseluruhan
+mesin yang dipakai satu pihak. Di sistem pemesanan yang dirancang dengan benar, keputusan "terima
+atau tolak" justru diambil di dalam PostgreSQL, oleh <em>exclusion constraint</em> yang dibahas di
+bagian berikut. Secara hukum, itu tetap bagian dari "mesin Bookseller". Tanggung jawabnya jatuh pada
+pemakai alat: menurut komentar resmi, pemakai sebuah alat bertanggung jawab atas hasil yang
+diperoleh dari penggunaan alat itu, karena alat tidak punya kehendak sendiri.</p>
+
+<h3>Lalu agen AI hari ini?</h3>
+<p>Agen berbasis model bahasa besar memenuhi bunyi definisi itu, karena ia program komputer yang
+bertindak tanpa ditinjau. Namun ia tetap diperlakukan sebagai alat pihak yang memakainya. Dua pasal
+UETA lalu menjadi relevan:</p>
+<ul>
+  <li><strong>Pasal 14 ayat 2</strong>: perikatan dapat terbentuk dari interaksi antara agen
+  elektronik dan seorang individu, termasuk ketika individu itu melakukan tindakan yang bebas ia
+  tolak dan yang ia tahu akan membuat agen menyelesaikan transaksi, misalnya menekan tombol
+  "Bayar".</li>
+  <li><strong>Pasal 10 ayat 2</strong>: individu dapat menghindari akibat kesalahannya sendiri saat
+  berurusan dengan agen elektronik pihak lain bila agen itu "tidak menyediakan kesempatan untuk
+  mencegah atau mengoreksi kesalahan", asalkan ia segera memberi tahu, mengembalikan apa yang
+  diterimanya, dan belum menikmati manfaatnya. Pasal 10 ayat 4 melarang aturan ini disimpangi lewat
+  perjanjian.</li>
+</ul>
+<p class="rule">Pelajaran desainnya sederhana: <strong>biarkan agen mengusulkan, biarkan manusia
+yang menekan tombol.</strong> Agen AI boleh mencarikan film, jadwal, dan kursi. Peta kursi dengan
+pilihan agen sudah tercentang, ditambah tombol yang ditekan sendiri oleh pelanggan, adalah
+"kesempatan untuk mencegah atau mengoreksi kesalahan" itu. Agen yang langsung memesan karena
+pelanggan mengetik "ya" tidak memberikannya.</p>
+
+<h3>Padanannya di Indonesia: UU ITE</h3>
+<p>Undang-Undang Nomor 11 Tahun 2008 tentang Informasi dan Transaksi Elektronik memakai istilah yang
+sama:</p>
+<ul>
+  <li><strong>Pasal 1 angka 8</strong>: "Agen Elektronik adalah perangkat dari suatu Sistem
+  Elektronik yang dibuat untuk melakukan suatu tindakan terhadap suatu Informasi Elektronik tertentu
+  secara otomatis yang diselenggarakan oleh Orang."</li>
+  <li><strong>Pasal 21</strong>: transaksi dapat dilakukan sendiri, melalui pihak yang dikuasakan,
+  atau melalui Agen Elektronik. Bila melalui Agen Elektronik, segala akibat hukumnya menjadi
+  tanggung jawab penyelenggara Agen Elektronik (ayat 2). Kegagalan akibat tindakan pihak ketiga
+  terhadap sistem tetap ditanggung penyelenggara (ayat 3); kerugian akibat kelalaian pengguna jasa
+  ditanggung pengguna (ayat 4); dan ayat 2 tidak berlaku bila dapat dibuktikan keadaan memaksa,
+  kesalahan, atau kelalaian pengguna (ayat 5).</li>
+  <li><strong>Pasal 22</strong>: penyelenggara Agen Elektronik tertentu harus menyediakan fitur yang
+  memungkinkan penggunanya melakukan perubahan informasi yang masih dalam proses transaksi.
+  Ketentuan lebih lanjutnya diatur Peraturan Pemerintah, kini PP Nomor 71 Tahun 2019.</li>
+</ul>
+<p>Jadi, bila sebuah bioskop atau platform menjalankan agen AI yang memesankan tiket,
+penyelenggaranya menanggung akibat salah tafsir agen itu, dan wajib memberi pengguna cara
+memperbaiki pesanan sebelum mengikat. UETA dan UU ITE sampai ke tuntutan desain yang sama dari dua
+arah.</p>
+<p class="note">Kutipan di atas berasal dari naskah UU 11/2008. Undang-undang ini telah diubah oleh
+UU 19/2016 dan UU 1/2024, jadi rujuklah naskah konsolidasinya, dan konsultan hukum, sebelum
+mengandalkannya. Halaman ini bukan nasihat hukum.</p>
+</section>
+
+<section id="anomali">
+<h2>2. Anomali yang tidak disadari: pemesanan ganda</h2>
+<p>Cara paling umum menulis pemesanan adalah bertanya dulu, lalu menulis:</p>
+<pre><code><span class="c">-- Transaksi A dan B berjalan bersamaan, untuk kursi yang sama</span>
+SELECT count(*) FROM reservasi
+ WHERE kursi = 'F7'
+   AND periode &amp;&amp; tstzrange('2026-10-11 19:00+07', '2026-10-11 21:00+07')
+   AND status IN ('held', 'confirmed');   <span class="c">-- A melihat 0, B juga melihat 0</span>
+
+INSERT INTO reservasi (kursi, periode, status)
+VALUES ('F7', tstzrange('2026-10-11 19:00+07', '2026-10-11 21:00+07'), 'held');
+<span class="c">-- keduanya berhasil: dua tiket untuk satu kursi</span></code></pre>
+<p>Pada tingkat isolasi <code>READ COMMITTED</code>, bawaan PostgreSQL, maupun
+<code>REPEATABLE READ</code>, kedua transaksi melihat kursi kosong dan keduanya menyimpan klaim. Dua
+penonton datang membawa tiket untuk kursi yang sama. Dalam taksonomi anomali Atul Adya, ini
+<em>write skew</em>. Bahayanya bukan hanya anomalinya, tetapi juga tidak menyadarinya: pengujian
+dengan satu pengguna selalu lulus, dan kesalahan baru muncul saat ramai, tepat pada malam pemutaran
+perdana.</p>
+<p>Seluruh daftar anomali Adya (G0, G1a, G1b, G1c, G-cursor, G-single, G2-item, dan G2), cara
+masing-masing dicoba terhadap aplikasi bioskop yang hidup, dan mengapa tidak satu pun berhasil,
+sudah dibahas di halaman <a href="/adya-anomaly-probe.html">Adya's Isolation Anomalies, Tried
+Against a Live Cinema Booking App</a> (bahasa Inggris). Di sana juga dibahas satu balapan yang
+<em>bukan</em> anomali Adya: tiket yang terjual untuk pertunjukan yang sudah dibatalkan.</p>
+
+<h3>Mekanismenya: satu constraint, bukan pengecekan</h3>
+<pre><code>CREATE EXTENSION IF NOT EXISTS btree_gist;  <span class="c">-- agar kolom skalar (kursi) bisa masuk indeks GiST</span>
+
+CREATE TABLE reservasi (
+  id       bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  kursi    text      NOT NULL,
+  periode  tstzrange NOT NULL,                <span class="c">-- [mulai, selesai)</span>
+  status   text      NOT NULL
+           CHECK (status IN ('held', 'confirmed', 'cancelled', 'expired')),
+  CONSTRAINT reservasi_tanpa_tumpang_tindih
+    EXCLUDE USING gist (kursi WITH =, periode WITH &amp;&amp;)
+    WHERE (status IN ('held', 'confirmed'))
+);</code></pre>
+<p>Artinya: tidak boleh ada dua baris dengan <code>kursi</code> yang sama (<code>=</code>) dan
+<code>periode</code> yang tumpang tindih (<code>&amp;&amp;</code>) selama keduanya masih hidup.
+PostgreSQL memeriksanya saat menulis, terhadap data yang sudah di-<em>commit</em>, seperti indeks
+unik. Bila transaksi pertama belum selesai, transaksi kedua menunggu hasilnya, bukan menebak. Klaim
+kedua gagal dengan <code>conflicting key value violates exclusion constraint</code>. Beberapa
+konsekuensi yang dibayar mahal untuk dipelajari:</p>
+<ul>
+  <li><strong>Bekerja di tingkat isolasi apa pun</strong>, termasuk <code>READ COMMITTED</code>.
+  Pelanggaran ditolak dengan SQLSTATE <code>23P01</code> (<code>exclusion_violation</code>), bukan
+  <code>40001</code>.</li>
+  <li><strong>Jangan pernah mengulang <code>23P01</code>.</strong> Permintaan yang sama akan gagal
+  dengan cara yang sama sampai ada pembatalan. Tampilkan "kursi baru saja diambil" dan tawarkan
+  kursi lain.</li>
+  <li><strong>Jangan pasang pengecekan ketersediaan di depannya.</strong> Membaca ketersediaan untuk
+  memutuskan justru pola yang rawan anomali. Pelanggaran constraint itulah mekanismenya.</li>
+  <li><strong>Status "ditahan" dan "dikonfirmasi" harus satu tabel.</strong> Satu exclusion
+  constraint tidak dapat menjangkau dua tabel. Bila tahanan dan pesanan dipisah, keduanya tidak bisa
+  diperiksa satu sama lain.</li>
+  <li><strong>Batas waktu tahanan tidak bisa ditaruh di predikat.</strong> Predikat constraint harus
+  <em>immutable</em>, sedangkan <code>now()</code> tidak. Karena itu predikatnya memakai
+  <code>status</code>, dan tahanan basi dikedaluwarsakan oleh penyapu terjadwal, atau seketika saat
+  ada yang memperebutkannya.</li>
+  <li><strong>Kunci baris induk lebih dulu.</strong> Di aplikasi bioskop ini, pernyataan pertama
+  setiap penahanan adalah <code>SELECT … FOR UPDATE</code> pada baris pertunjukan. Delapan penahanan
+  serentak jadi mencapai pemeriksaan eksklusi satu per satu, tidak saling <em>deadlock</em>, dan
+  pembatalan pertunjukan tidak bisa menyelinap di antaranya. Mengunci baris yang dipakai semua orang
+  di awal bukanlah "pengecekan" yang dilarang di atas.</li>
+  <li><strong>Batasnya satu basis data.</strong> Tidak ada versi terdistribusi dari constraint ini.
+  Bila sistem kedua, misalnya aplikasi loket lama, ikut menjual kursi yang sama, harus diputuskan
+  sisi mana yang berwenang. Itu keputusan, bukan sekadar detail integrasi.</li>
+  <li><strong>Rentang setengah terbuka <code>[mulai, selesai)</code></strong> membuat pemesanan
+  berurutan, 19.00–21.00 lalu 21.00–23.00, tidak dianggap tumpang tindih.</li>
+</ul>
+
+<h3>PostgreSQL 18: <code>WITHOUT OVERLAPS</code></h3>
+<p>Sejak PostgreSQL 18, yang dirilis 25 September 2025, kunci primer dan constraint unik dapat
+ditulis dengan <code>WITHOUT OVERLAPS</code> pada kolom terakhirnya, dan kunci asing dapat memakai
+<code>PERIOD</code>. Dokumentasinya menyebut constraint semacam itu ditegakkan sebagai exclusion
+constraint dengan indeks GiST: <code>UNIQUE (id, valid_at WITHOUT OVERLAPS)</code> berperilaku
+seperti <code>EXCLUDE USING GIST (id WITH =, valid_at WITH &amp;&amp;)</code>. Kolom rentangnya tidak
+boleh kosong, dan kolom skalar di sebelahnya membutuhkan <code>btree_gist</code>. Untuk data master
+yang tidak boleh tumpang tindih, seperti periode harga, tarif, atau masa jabatan, bentuk ini lebih
+ringkas:</p>
+<pre><code>CREATE TABLE harga_produk (
+  produk_id     bigint        NOT NULL,
+  berlaku       daterange     NOT NULL,
+  harga_rupiah  numeric(14,2) NOT NULL,
+  PRIMARY KEY (produk_id, berlaku WITHOUT OVERLAPS)
+);</code></pre>
+<p>Namun constraint unik tidak bisa diberi klausa <code>WHERE</code>. Untuk pemesanan, yang hanya
+melarang tumpang tindih di antara baris yang masih <code>held</code> atau <code>confirmed</code>,
+<code>EXCLUDE … WHERE</code> tetap alat yang tepat.</p>
+</section>
+
+<section id="domain-lain">
+<h2>3. Di luar bioskop: siapa lagi yang diuntungkan?</h2>
+<p>Catatan desain platform bioskop ini merumuskannya begini: kursi bioskop untuk satu pertunjukan dan
+kamar hotel untuk satu rentang tanggal adalah masalah yang sama bila dinyatakan dengan tepat.
+<strong>Keduanya klaim eksklusif atas satu sumber daya, untuk satu periode, di mana dua klaim yang
+tumpang tindih tidak boleh sama-sama berlaku.</strong> Setiap domain yang cocok dengan kalimat itu
+bisa memakai pola yang sama: kolom sumber daya dengan <code>=</code> dan kolom rentang dengan
+<code>&amp;&amp;</code>. Skema platform ini sengaja dibuat generik untuk itu: tabel yang sama memetakan
+aula ke properti, kursi ke kamar, dan periode pertunjukan ke <code>[check-in, check-out)</code>.</p>
+
+<div class="table-wrap">
+<table>
+  <caption>Pola "sumber daya dan rentang" di berbagai domain</caption>
+  <thead>
+    <tr><th scope="col">Domain</th><th scope="col">Sumber daya (<code>WITH =</code>)</th>
+        <th scope="col">Rentang (<code>WITH &amp;&amp;</code>)</th><th scope="col">Catatan</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Hotel, vila, homestay</td><td>kamar</td><td><code>daterange</code> [check-in, check-out)</td>
+        <td>Hari check-out sudah bebas untuk tamu berikutnya karena batas atasnya terbuka.</td></tr>
+    <tr><td>Ruang rapat, coworking, aula, gedung resepsi</td><td>ruangan, meja</td><td><code>tstzrange</code></td>
+        <td>Waktu persiapan dan bersih-bersih ikut dimasukkan ke rentang yang disimpan.</td></tr>
+    <tr><td>Lapangan futsal, badminton, padel</td><td>lapangan</td><td><code>tstzrange</code> per jam</td>
+        <td>Pemesanan beruntun 19.00–20.00 dan 20.00–21.00 sah bersama.</td></tr>
+    <tr><td>Klinik dan rumah sakit</td><td>dokter; ruang praktik; kamar operasi; tempat tidur; alat MRI</td>
+        <td><code>tstzrange</code></td>
+        <td>Satu tabel janji temu boleh memuat dua constraint: dokter tidak ganda <em>dan</em> ruangan tidak ganda.</td></tr>
+    <tr><td>Kereta dan bus antarkota</td><td>kursi pada satu perjalanan</td>
+        <td><code>int4range</code> urutan stasiun [naik, turun)</td>
+        <td>Kursi yang sama bisa dijual untuk segmen yang tidak beririsan, misalnya stasiun 1–4 lalu 4–7.</td></tr>
+    <tr><td>Sewa mobil, motor, kamera, alat berat</td><td>unit (nomor polisi, nomor seri)</td><td><code>tstzrange</code></td>
+        <td>Cocok untuk unit yang dapat dibedakan, bukan "mobil kelas apa saja".</td></tr>
+    <tr><td>Pelabuhan dan bandara</td><td>dermaga; gerbang</td><td><code>tstzrange</code></td>
+        <td>Slot sandar kapal dan slot gerbang pesawat adalah klaim eksklusif berwaktu.</td></tr>
+    <tr><td>Gudang dan logistik</td><td>pintu bongkar muat</td><td><code>tstzrange</code></td>
+        <td>Jadwal kedatangan truk tanpa dua truk di satu pintu pada waktu yang sama.</td></tr>
+    <tr><td>Sekolah, kampus, ujian</td><td>ruang kelas; laboratorium; kursi ujian; pengawas</td><td><code>tstzrange</code></td>
+        <td>Satu pengawas tidak bisa dijadwalkan di dua ruang sekaligus.</td></tr>
+    <tr><td>Sumber daya manusia</td><td>karyawan</td><td><code>tstzrange</code> shift</td>
+        <td>Satu orang tidak bisa memegang dua shift yang beririsan. Bila shift dan cuti juga tidak
+        boleh bertabrakan, simpan keduanya di satu tabel jadwal.</td></tr>
+    <tr><td>Penyiaran dan iklan</td><td>kanal; papan reklame digital</td><td><code>tstzrange</code> slot tayang</td>
+        <td>Dua materi tidak boleh menempati slot yang sama.</td></tr>
+    <tr><td>Data master bertanggal</td><td>produk; kode pajak; pasangan mata uang; jabatan</td>
+        <td><code>daterange</code> masa berlaku</td>
+        <td>Tidak boleh ada dua harga atau dua tarif yang berlaku bersamaan untuk hal yang sama. Di
+        PostgreSQL 18, <code>WITHOUT OVERLAPS</code>.</td></tr>
+    <tr><td>Asuransi dan perikatan</td><td>aset; nomor perikatan</td><td><code>daterange</code> masa pertanggungan</td>
+        <td>Dua polis aktif atas aset yang sama tidak boleh tumpang tindih, bila produknya melarangnya.</td></tr>
+    <tr><td>Jaringan dan spektrum</td><td>switch; antarmuka; wilayah</td>
+        <td><code>int4range</code> VLAN atau port; <code>numrange</code> pita frekuensi</td>
+        <td>Untuk blok alamat IP, tipe <code>inet</code> dengan kelas operator GiST <code>inet_ops</code>
+        memakai operator <code>&amp;&amp;</code> yang sama.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Contoh: kursi kereta per segmen</h3>
+<pre><code>CREATE TABLE klaim_kursi (
+  perjalanan_id bigint    NOT NULL,
+  kursi         text      NOT NULL,
+  segmen        int4range NOT NULL,   <span class="c">-- [urutan stasiun naik, urutan stasiun turun)</span>
+  status        text      NOT NULL,
+  EXCLUDE USING gist (perjalanan_id WITH =, kursi WITH =, segmen WITH &amp;&amp;)
+    WHERE (status IN ('held', 'confirmed'))
+);
+<span class="c">-- [1,4) dan [4,7) sah bersama: penumpang pertama turun di stasiun ke-4, yang kedua naik di sana.</span>
+<span class="c">-- [1,4) dan [3,6) ditolak dengan 23P01.</span></code></pre>
+
+<h3>Contoh: satu janji temu, dua larangan</h3>
+<pre><code>CREATE TABLE janji_temu (
+  dokter_id  bigint    NOT NULL,
+  ruang_id   bigint    NOT NULL,
+  waktu      tstzrange NOT NULL,
+  status     text      NOT NULL,
+  EXCLUDE USING gist (dokter_id WITH =, waktu WITH &amp;&amp;) WHERE (status &lt;&gt; 'batal'),
+  EXCLUDE USING gist (ruang_id  WITH =, waktu WITH &amp;&amp;) WHERE (status &lt;&gt; 'batal')
+);</code></pre>
+
+<h3>Kapan pola ini bukan alat yang tepat</h3>
+<ul>
+  <li><strong>Kapasitas yang dapat dipertukarkan.</strong> Constraint ini melindungi klaim atas unit
+  <em>tertentu</em>. Tiket festival tanpa nomor kursi, "kamar deluxe mana saja", atau kuota 100
+  peserta adalah masalah menghitung, bukan tumpang tindih. Hitunglah di dalam transaksi setelah
+  mengunci baris yang menjadi lingkup hitungan dengan <code>SELECT … FOR UPDATE</code>, seperti batas
+  10 kursi per pelanggan per hari di aplikasi bioskop ini, atau pakai <code>SERIALIZABLE</code> dengan
+  satu kali percobaan ulang untuk <code>40001</code>. Hotel umumnya menjual tipe kamar lebih dulu,
+  yang merupakan soal kapasitas, lalu menetapkan nomor kamar kemudian, yang merupakan soal
+  eksklusi.</li>
+  <li><strong>Aturan yang bergantung pada waktu sekarang</strong>, seperti "tahanan berlaku 10
+  menit". Predikat harus immutable, jadi simpan statusnya dan kedaluwarsakan dengan penyapu.</li>
+  <li><strong>Bentuk geometri yang presisi.</strong> Di PostGIS, <code>&amp;&amp;</code> pada
+  <code>geometry</code> hanya membandingkan kotak pembatas (<em>bounding box</em>). Dua bidang yang
+  tidak bersentuhan pun bisa ditolak bila kotaknya beririsan, jadi larangan tumpang tindih yang
+  presisi butuh cara lain.</li>
+  <li><strong>Kepemilikan yang tersebar di beberapa basis data atau layanan.</strong> Constraint hanya
+  berlaku di dalam satu basis data. Data yang dipecah (<em>sharding</em>), atau sistem kedua yang ikut
+  menjual unit yang sama, menghapus jaminan ini.</li>
+  <li><strong>Basis data yang tidak memilikinya.</strong> Sebelum memilih basis data, periksa apakah
+  ia sendiri bisa menegakkan aturan "tidak boleh tumpang tindih". Bila tidak, jaminan itu harus
+  dibangun ulang di aplikasi, tempat anomali di atas paling mudah lolos.</li>
+</ul>
+</section>
+
+<section id="native-vs-jvm">
+<h2>4. Native image atau JVM panas: bentuk lalu lintas yang memilih</h2>
+<p>Platform bioskop ini sengaja dibangun dalam dua bentuk dari satu basis kode. Bentuk pertama adalah
+<em>native image</em> GraalVM (Mandrel) untuk Google Cloud Run dan Cloud SQL for PostgreSQL di region
+Jakarta. Bentuk kedua adalah JVM yang terus menyala di server on-premise. Alasannya tercatat di
+catatan desain proyek, dan diringkas di bawah ini.</p>
+
+<h3>Stack yang dipilih dan alasannya</h3>
+<ul>
+  <li><strong>Quarkus dengan Qute dan htmx, dirender di server.</strong> Satu artefak yang
+  di-<em>deploy</em>, satu siklus rilis, dan tanpa gerbang peninjauan toko aplikasi.</li>
+  <li><strong>JDBC polos, tanpa ORM atau <em>query builder</em>.</strong> Ini menghapus satu kategori
+  risiko native image: Hibernate memetakan entitas lewat refleksi, dan kode hasil jOOQ perlu
+  didaftarkan untuk refleksi. Gantinya adalah disiplin. Setiap kueri diuji terhadap PostgreSQL
+  sungguhan yang sudah dimigrasi, lewat Testcontainers, di setiap build. Itulah yang menangkap salah
+  nama kolom, bukan kompilator.</li>
+  <li><strong>PostgreSQL 18 sebagai penjaga kebenaran.</strong> Pemesanan ganda dicegah exclusion
+  constraint, dan isolasi antarpenyewa ditegakkan <em>Row-Level Security</em> per transaksi, bukan
+  oleh filter di kode aplikasi.</li>
+  <li><strong>Notifikasi ketersediaan lewat Push API dengan Firebase Cloud Messaging</strong>, dengan
+  tabel di basis data sebagai pengganti registri di memori. Hanya bentuk ini yang cocok dengan
+  instans Cloud Run yang banyak, sementara, dan tidak bisa dialamatkan.</li>
+  <li><strong>Region Jakarta (<code>asia-southeast2</code>).</strong> Latensi rendah, dan data
+  pelanggan tetap di Indonesia tanpa perlu menunggu putusan hukum soal transfer lintas negara.</li>
+</ul>
+
+<h3>Mengapa native image untuk Cloud Run</h3>
+<p>Cloud Run memberi tambahan CPU selama instans dinyalakan dan 10 detik sesudahnya, yaitu
+<em>startup CPU boost</em>, dan tambahan itu ikut ditagih. Untuk batas 1 vCPU, CPU-nya digandakan
+menjadi 2. Jadi startup yang lambat tidak hanya ditagih lebih lama, tetapi juga dengan CPU dua kali
+lipat. Tabel resmi Quarkus (uji 21 April 2026: Quarkus 3.34.3, JDK 25.0.2, 4 CPU) menunjukkan
+selisihnya:</p>
+<div class="table-wrap">
+<table>
+  <caption>Waktu sampai permintaan pertama, throughput puncak, dan memori</caption>
+  <thead><tr><th scope="col">Mode</th><th scope="col">Sampai permintaan pertama</th>
+             <th scope="col">Throughput puncak</th><th scope="col">Memori (RSS)</th></tr></thead>
+  <tbody>
+    <tr><td>JVM fast-jar</td><td class="num">4.417 ㎳</td><td class="num">13.265 tps</td><td class="num">304 MiB</td></tr>
+    <tr><td>JVM + cache AOT Leyden</td><td class="num">1.859 ㎳</td><td class="num">12.389 tps (−7%)</td><td class="num">240 MiB</td></tr>
+    <tr><td>Native (Mandrel)</td><td class="num">581 ㎳</td><td class="num">5.411 tps (−59%)</td><td class="num">95 MiB</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Native kehilangan 59% throughput puncak. Namun beban sistem pemesanan didominasi I/O, yaitu
+perjalanan bolak-balik ke basis data dan serialisasi JSON, bukan komputasi CPU yang panjang. Pada
+lalu lintas rendah dan sporadis, instans Cloud Run jarang hidup cukup lama sampai JIT sempat panas.
+Jadi native unggul di dua hal yang benar-benar ditagih: latensi startup dan detik CPU sampai respons
+pertama. Harga native sendiri adalah build yang memakan beberapa menit, dan pustaka berbasis refleksi
+yang bisa gagal hanya di native. Di proyek ini, Firebase Admin SDK perlu konfigurasi refleksi
+eksplisit, dan Web Push mentah gagal di bawah Mandrel karena penyedia kriptografi yang didaftarkan
+secara dinamis ditolak. "Native-nya berhasil di-compile" bukan bukti fiturnya jalan.</p>
+
+<h3>Kapan pindah, dan pindah ke mana</h3>
+<p>Variabelnya adalah <strong>jumlah permintaan hangat per <em>cold start</em></strong>, bukan
+pengaturan <code>min-instances</code> dan bukan perasaan bahwa lalu lintas "sudah stabil". Perkiraan
+kasarnya bisa dihitung dari tabel di atas:</p>
+<ul>
+  <li>Pada puncak, satu permintaan memakan sekitar 4 CPU ÷ 12.389 ≈ 0,32 ㎳ waktu CPU di JVM + Leyden,
+  dan 4 ÷ 5.411 ≈ 0,74 ㎳ di native. Selisihnya sekitar 0,42 ㎳ per permintaan.</li>
+  <li>Setiap cold start native menghemat (1.859 − 581) ㎳ × 2 vCPU ≈ 2,6 detik vCPU.</li>
+  <li>Titik impasnya sekitar 2,6 detik ÷ 0,42 ㎳ ≈ 6.000 permintaan hangat per cold start.</li>
+</ul>
+<p>Sinyal yang bisa dicek adalah total permintaan dibagi jumlah instans yang dinyalakan, per layanan,
+dalam jendela waktu bergulir. Keduanya tampak di Cloud Monitoring. Bila tiap instans rata-rata
+melayani jauh lebih sedikit dari ribuan permintaan sebelum dimatikan, native lebih hemat. Bila
+rasionya bertahan di ribuan, pindahlah ke <strong>JVM dengan cache AOT Leyden</strong>, bukan ke JVM
+biasa. Startup dan memorinya mendekati native, build dan deploy-nya tetap JAR biasa, dan risiko
+konfigurasi refleksi khas native hilang.</p>
+
+<h3>Tagihan ikut berubah bentuk</h3>
+<p>Catatan biaya platform ini menetapkan urutannya saat lalu lintas bergerak dari tak terduga ke
+stabil:</p>
+<ol>
+  <li><strong>Titik awal: penagihan berbasis permintaan.</strong> Bayar per permintaan, dan benar-benar
+  bisa turun ke nol. Tepat untuk bulan pertama.</li>
+  <li><strong>Langkah pertama: penagihan berbasis instans</strong>, setelah lalu lintas cukup stabil
+  sehingga instans jarang menganggur. Cloud Run punya Recommender yang meninjau lalu lintas sebulan
+  terakhir dan menyarankan peralihan ini bila hasilnya lebih murah. Biaya per permintaan, US$0,40 per
+  sejuta, hilang, dan tarif per detiknya turun. Tabel harga Google mencantumkan US$0,000018 per
+  vCPU-detik dan US$0,000002 per GiB-detik untuk berbasis instans, dibanding US$0,000024 dan
+  US$0,0000025 waktu aktif untuk berbasis permintaan: 25% dan 20% lebih murah. Itu harga Tier 1;
+  Jakarta termasuk Tier 2 yang lebih mahal, jadi bacalah baris harganya sebelum menganggarkan. Google
+  juga menyarankan berbasis instans untuk lalu lintas stabil, dan berbasis permintaan untuk lalu
+  lintas sporadis.</li>
+  <li><strong>Langkah kedua: <em>committed use discount</em> (CUD).</strong> Diskon komitmen fleksibel
+  Cloud Run kini juga berlaku untuk penagihan berbasis permintaan, tetapi jauh lebih kecil: 17%,
+  dibanding 28% untuk komitmen setahun atau 46% untuk tiga tahun pada penagihan berbasis instans.
+  Karena itu komitmen paling masuk akal setelah langkah pertama. Yang dikomitmenkan adalah belanja
+  minimum per jam, dan setelah dibeli tidak bisa dibatalkan, jadi ukurlah ke sekitar 60–70% dari
+  pemakaian rata-rata yang stabil, bukan puncaknya.</li>
+</ol>
+
+<h3>Biaya lantai yang tidak ikut turun ke nol</h3>
+<p>"Serverless pasti murah untuk usaha kecil" hanya separuh benar. Catatan penerapan Cloud Run proyek
+ini mencatat beberapa hal yang tidak mengumumkan dirinya bila salah:</p>
+<ul>
+  <li><strong>Cloud SQL ditagih per detik selama instansnya menyala.</strong> Cloud Run bisa tidur,
+  basis datanya tidak. Menghentikan instans adalah tindakan manual, dan penyimpanannya tetap
+  ditagih.</li>
+  <li><strong>Penyapu terjadwal butuh <code>--min-instances=1</code>.</strong> Penyapu kedaluwarsa
+  tahanan (setiap 30 detik), rekonsiliasi pembayaran, dan rekap tagihan harian hanya berjalan selama
+  ada instans. Layanan yang turun ke nol tidak melepas kursi yang ditahan sampai ada orang yang
+  kebetulan membuka situsnya.</li>
+  <li><strong>Pekerjaan setelah respons butuh CPU yang selalu dialokasikan.</strong> Tanpa itu, CPU
+  hampir nol begitu respons terkirim, dan notifikasi yang dikirim setelah <em>commit</em> bisa
+  tertunda atau hilang. Pemesanan tetap benar, tetapi peta kursi basi, dan tidak ada log apa
+  pun.</li>
+  <li><strong>Jumlah instans dikali ukuran pool koneksi adalah plafon koneksi.</strong> Menurut catatan
+  desain proyek ini, kegagalan Cloud Run dengan Cloud SQL yang paling umum adalah kehabisan koneksi,
+  bukan kapasitas. Batasi jumlah instans maksimum dengan sengaja, lalu pasang peringatan anggaran.</li>
+</ul>
+
+<h3>Mengapa JVM panas untuk on-premise</h3>
+<p>Bentuk kedua berjalan sebagai JVM biasa di server on-premise yang menyala terus. JIT-nya sudah panas.
+Dalam pengukuran mode JVM, fragmen peta kursi dilayani sekitar 8–9 ㎳ di sisi server setelah hangat,
+dibanding sekitar 80 ㎳ untuk permintaan pertama ketika JIT belum panas. Dalam uji beban
+<em>open-loop</em>, server on-premise itu menahan 3.200 permintaan per detik dengan p99 satu digit
+milidetik tanpa titik jenuh ditemukan. Itu setara sekitar 9.700 tab peta kursi yang terbuka
+bersamaan. Untuk lalu lintas yang ramai dan stabil sepanjang hari, biaya bulanannya tetap berapa pun
+jumlah permintaannya, data tinggal di gedung sendiri, dan throughput puncak JIT dimanfaatkan
+penuh.</p>
+<p>Harganya ada di operasional. Anda yang memegang jam server (stempel waktu log audit hanya sebaik
+jamnya), sertifikat TLS, unit layanan, cadangan data, dan pemutakhiran. Jam yang ternyata tidak
+tersinkron, dan unit layanan yang diam-diam berbeda dari versi di repositori, sama-sama pernah
+ditemukan di proyek ini.</p>
+
+<h3>Pilih menurut bentuk lalu lintas</h3>
+<div class="table-wrap">
+<table>
+  <caption>Bentuk lalu lintas menentukan stack, bukan sebaliknya</caption>
+  <thead><tr><th scope="col">Bentuk lalu lintas</th><th scope="col">Contoh</th>
+             <th scope="col">Pilihan yang masuk akal</th><th scope="col">Yang harus dihitung</th></tr></thead>
+  <tbody>
+    <tr><td>Sepi, sporadis, musiman</td><td>bioskop independen, penyewaan gedung, klinik kecil, acara musiman</td>
+        <td>Cloud Run dengan native image, penagihan berbasis permintaan</td>
+        <td>biaya lantai Cloud SQL; <code>min-instances</code> untuk penyapu; batas instans maksimum</td></tr>
+    <tr><td>Mulai stabil</td><td>usaha yang sedang tumbuh</td>
+        <td>JVM dengan cache AOT Leyden di Cloud Run, penagihan berbasis instans, lalu CUD</td>
+        <td>rasio permintaan per cold start; komitmen 60–70% dari rata-rata</td></tr>
+    <tr><td>Ramai dan stabil sepanjang hari</td><td>jaringan bioskop besar, sistem 24 jam</td>
+        <td>JVM panas di server khusus: on-premise atau VPS</td>
+        <td>kapasitas tim operasional: jam, TLS, cadangan, pemutakhiran</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Karena itu, penyewa platform ini diberi tiga pilihan hosting: server on-premise milik sendiri,
+VPS penuh, atau hosting dinamis per permintaan seperti Cloud Run. Satu basis kode, dua cara build,
+karena tidak ada satu jawaban yang benar untuk semua bentuk lalu lintas.</p>
+
+<h3>Daftar periksa pemilihan stack</h3>
+<ol>
+  <li>Ukur bentuk lalu lintas lebih dulu: permintaan per jam, per hari, dan per cold start.</li>
+  <li>Hitung biaya lantai yang tidak bisa nol: basis data, instans minimum, dan penyimpanan.</li>
+  <li>Pastikan basis data Anda sendiri bisa menegakkan aturan "tidak boleh tumpang tindih".</li>
+  <li>Pastikan agen elektronik Anda, manusia atau AI, memberi kesempatan mengoreksi kesalahan sebelum
+  transaksi mengikat.</li>
+  <li>Periksa ke mana data pelanggan mengalir, dan apakah ia keluar dari Indonesia.</li>
+  <li>Jujurlah soal kapasitas operasional tim: on-premise murah di tagihan, tetapi mahal di
+  perhatian.</li>
+</ol>
+</section>
+
+<section id="faq" class="faq">
+<h2>5. Pertanyaan yang sering diajukan</h2>
+
+<h3>Apakah agen elektronik dalam UETA 1999 berarti agen AI?</h3>
+<p>Tidak. Komentar resmi UETA menyebut agen elektronik sebagai mesin yang terbatas pada fungsi alat
+dan bekerja di dalam batasan pemrogramannya. Agen yang bertindak otonom, bukan sekadar otomatis, baru
+diantisipasi sebagai kemungkinan di masa depan, dan penafsirannya diserahkan kepada pengadilan.</p>
+
+<h3>Apakah server web seperti Quarkus yang menerima pesanan termasuk agen elektronik?</h3>
+<p>Ya. Contoh dari perancang UETA sendiri adalah Bookseller.com, yang menerima dan mengonfirmasi
+pesanan lewat mesinnya. Aplikasi yang menahan kursi, menerima pembayaran, dan menerbitkan tiket tanpa
+ditinjau manusia adalah agen elektronik milik penjualnya.</p>
+
+<h3>Apakah PostgreSQL itu agen elektronik?</h3>
+<p>Tidak dengan sendirinya. Definisinya fungsional: agen elektronik adalah keseluruhan sarana otomatis
+yang dipakai satu pihak. Basis data adalah bagian dari mesin itu, walaupun keputusan menerima atau
+menolak klaim kursi bisa diambil di dalam PostgreSQL oleh exclusion constraint.</p>
+
+<h3>Di Indonesia, siapa yang menanggung akibat hukum transaksi lewat agen elektronik?</h3>
+<p>Menurut UU ITE Pasal 21 ayat (2), penyelenggara Agen Elektronik. Kerugian akibat kelalaian
+pengguna jasa ditanggung pengguna (ayat 4), dan tanggung jawab penyelenggara tidak berlaku bila dapat
+dibuktikan keadaan memaksa, kesalahan, atau kelalaian pengguna (ayat 5).</p>
+
+<h3>Apa itu exclusion constraint dengan indeks GiST?</h3>
+<p>Constraint PostgreSQL yang melarang dua baris memenuhi sekumpulan operator sekaligus, misalnya
+<code>kursi WITH =</code> dan <code>periode WITH &amp;&amp;</code>: kursi yang sama dan periode yang
+tumpang tindih. GiST adalah jenis indeks yang mendukung operator rentang seperti
+<code>&amp;&amp;</code>, dan ekstensi <code>btree_gist</code> menambahkan dukungan untuk kolom skalar
+biasa.</p>
+
+<h3>Mengapa tidak cukup mengecek apakah kursi masih kosong, lalu menyimpan?</h3>
+<p>Karena dua transaksi bersamaan sama-sama melihat kursi kosong dan sama-sama menyimpan.
+<code>READ COMMITTED</code> dan <code>REPEATABLE READ</code> membiarkannya; ini <em>write skew</em>.
+Exclusion constraint menolak klaim kedua saat ditulis, pada tingkat isolasi apa pun, dengan SQLSTATE
+<code>23P01</code>.</p>
+
+<h3>Apa bedanya dengan WITHOUT OVERLAPS di PostgreSQL 18?</h3>
+<p><code>WITHOUT OVERLAPS</code> adalah bentuk standar untuk kunci primer dan constraint unik atas
+rentang, dan ditegakkan sebagai exclusion constraint GiST. Cocok untuk data master seperti periode
+harga. Constraint unik tidak bisa diberi klausa <code>WHERE</code>, jadi untuk pemesanan yang hanya
+melarang tumpang tindih di antara baris yang masih aktif, <code>EXCLUDE</code> dengan
+<code>WHERE</code> tetap dibutuhkan.</p>
+
+<h3>Domain apa saja selain bioskop yang cocok memakai exclusion constraint?</h3>
+<p>Semua yang berbentuk klaim eksklusif atas satu sumber daya untuk satu periode: hotel, ruang rapat,
+lapangan olahraga, jadwal dokter dan kamar operasi, kursi kereta per segmen, sewa kendaraan dan alat,
+dermaga, shift karyawan, periode harga dan tarif, polis asuransi, serta rentang VLAN atau frekuensi.
+Untuk kapasitas yang dapat dipertukarkan, seperti tiket tanpa nomor kursi, gunakan penghitungan
+dengan penguncian baris.</p>
+
+<h3>Kapan native image lebih hemat daripada JVM?</h3>
+<p>Saat lalu lintas sepi dan sporadis sehingga instans sering dinyalakan ulang. Dari tabel resmi
+Quarkus, satu cold start native menghemat sekitar 2,6 detik vCPU dibanding JVM dengan cache AOT
+Leyden, setara kira-kira 6.000 permintaan hangat. Bila tiap instans melayani jauh lebih sedikit dari
+itu sebelum dimatikan, native lebih hemat.</p>
+
+<h3>Apakah serverless selalu lebih murah untuk usaha kecil?</h3>
+<p>Tidak selalu. Cloud SQL tetap ditagih selama instansnya menyala, penyapu terjadwal memerlukan
+minimal satu instans, dan pekerjaan setelah respons memerlukan CPU yang selalu dialokasikan. Hitung
+biaya lantai itu sebelum memilih.</p>
+
+<h3>Kapan sebaiknya memilih JVM panas di server on-premise?</h3>
+<p>Saat lalu lintas ramai dan stabil sepanjang hari, tim sanggup mengurus operasional seperti jam,
+sertifikat TLS, cadangan, dan pemutakhiran, dan biaya bulanan yang tetap lebih menarik daripada
+tagihan per permintaan. Dalam pengujian proyek ini, satu server on-premise menahan 3.200 permintaan per
+detik dengan p99 satu digit milidetik tanpa mencapai titik jenuh.</p>
+</section>
+
+<section id="sumber">
+<h2>6. Sumber</h2>
+<ul class="sources">
+  <li>National Conference of Commissioners on Uniform State Laws, <a rel="nofollow"
+  href="https://scs.nevada.edu/wp-content/uploads/2020/07/FED_Act99.pdf"><cite>Uniform Electronic
+  Transactions Act (1999), with Prefatory Note and Comments</cite></a>: Pasal 2 angka 2 dan 6 beserta
+  komentarnya, Pasal 10, dan Pasal 14.</li>
+  <li>D. Greenwood dan J. Muller, memo kelompok kerja ABA untuk komite perancang UETA, 16 Februari
+  1999, dimuat ulang di <a rel="nofollow" href="https://law.mit.edu/pub/1999-ueta-deliberations">MIT
+  Computational Law Report</a>.</li>
+  <li><a rel="nofollow" href="https://jdih.kemenkeu.go.id/fullText/2008/11TAHUN2008UU.htm">Undang-Undang
+  Nomor 11 Tahun 2008 tentang Informasi dan Transaksi Elektronik</a>, JDIH Kementerian Keuangan: Pasal 1
+  angka 8, Pasal 21, dan Pasal 22.</li>
+  <li>PostgreSQL 18: <a rel="nofollow" href="https://www.postgresql.org/docs/18/sql-createtable.html">CREATE
+  TABLE</a> (<code>EXCLUDE</code> dan <code>WITHOUT OVERLAPS</code>), <a rel="nofollow"
+  href="https://www.postgresql.org/docs/18/rangetypes.html">Range Types</a>, <a rel="nofollow"
+  href="https://www.postgresql.org/docs/18/btree-gist.html">btree_gist</a>, dan <a rel="nofollow"
+  href="https://www.postgresql.org/docs/18/release-18.html">catatan rilis PostgreSQL 18</a>.</li>
+  <li>Quarkus, <a rel="nofollow" href="https://quarkus.io/version/3.40/guides/building-native-image/">Building
+  a native executable</a>, tabel perbandingan JVM, Leyden, dan native.</li>
+  <li>Google Cloud, <a rel="nofollow" href="https://docs.cloud.google.com/run/docs/configuring/cpu">Configure
+  CPU limits for services</a> (<em>startup CPU boost</em>), <a rel="nofollow"
+  href="https://docs.cloud.google.com/run/docs/configuring/cpu-allocation">Billing settings for
+  services</a> (pilihan penagihan dan Recommender), <a rel="nofollow"
+  href="https://cloud.google.com/run/pricing">Cloud Run pricing</a> (tarif per detik dan Tier harga
+  region), <a rel="nofollow"
+  href="https://docs.cloud.google.com/run/docs/tips/services-cost-optimization">Best practices for
+  cost-optimized Cloud Run services</a>, <a rel="nofollow"
+  href="https://docs.cloud.google.com/run/cud">Compute flexible committed use discounts</a>, dan
+  <a rel="nofollow"
+  href="https://cloud.google.com/sql/docs/postgres/pricing">Cloud SQL for PostgreSQL pricing</a>.</li>
+  <li>Catatan desain, catatan biaya, catatan penerapan Cloud Run, dan hasil pengukuran platform
+  pemesanan kursi bioskop yang menjadi dasar halaman ini. Anomali konkurensinya dibahas di <a
+  href="/adya-anomaly-probe.html">halaman Adya's Isolation Anomalies</a>.</li>
+</ul>
+<p class="note">Harga, ketersediaan layanan, dan angka tolok ukur berubah dari waktu ke waktu. Periksa
+sumber resminya sebelum mengambil keputusan.</p>
+</section>
+
+</main>
+<footer>
+  <p>Ditulis oleh Claude Opus 5.5 · Diterbitkan oleh Dawud Tan ·
+  <time datetime="2026-10-11T06:54:00+07:00">11 Oktober 2026</time></p>
+</footer>
+</body>
 </html>
