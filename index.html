@@ -353,6 +353,43 @@ pilihan agen sudah tercentang, ditambah tombol yang ditekan sendiri oleh pelangg
 "kesempatan untuk mencegah atau mengoreksi kesalahan" itu. Agen yang langsung memesan karena
 pelanggan mengetik "ya" tidak memberikannya.</p>
 
+<h3>Yang memenuhi definisi: modelnya, loop-nya, atau keduanya?</h3>
+<p>Karena definisinya fungsional, yang dinilai adalah program yang bertindak. Model bahasa besar
+hanya mengubah masukan menjadi teks atau permintaan memanggil alat; dokumentasi Llama 3.1 sendiri
+menegaskan bahwa model tidak mengeksekusi pemanggilan alat dan memerlukan kerangka kerja lain untuk
+itu. Yang memulai tindakan atau menanggapi rekaman elektronik tanpa ditinjau individu adalah
+<strong>loop agen</strong>: kode yang memanggil model, menjalankan alat yang diminta (menahan kursi,
+menerbitkan tiket), lalu mengembalikan hasilnya ke model sampai selesai. Loop itulah yang memenuhi
+bunyi Pasal 2 angka 6, dan loop itu pula "mesin" milik penyelenggara. Modellah yang memberinya
+kemampuan memilih tindakan sendiri, yaitu otonom dan bukan sekadar otomatis seperti yang dibayangkan
+komentar resmi di atas. Loop tanpa model, seperti server Quarkus tadi, tetap agen elektronik tetapi
+bukan agen AI. Model tanpa loop tidak bertindak sendiri. Jadi agen AI yang otonom membutuhkan
+keduanya, dan tanggung jawab hukumnya tetap pada pemakai alat. Langkah tinjau manusia pun dipasang
+di loop, bukan di model.</p>
+<p>Contoh untuk masing-masing lapisan, sekadar contoh dan bukan rekomendasi:</p>
+<ul>
+  <li><strong>Loop</strong> (lapisan yang bertindak):
+  <a rel="nofollow" href="https://docs.langchain.com/oss/python/langgraph/overview">LangGraph</a>,
+  <a rel="nofollow" href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-runner">tool runner di SDK Anthropic</a>,
+  atau loop buatan sendiri di atas
+  <a rel="nofollow" href="https://platform.openai.com/docs/api-reference/chat">Chat Completions API OpenAI</a>.</li>
+  <li><strong>Model</strong> (lapisan yang memutuskan):
+  <a rel="nofollow" href="https://docs.aws.amazon.com/nova/latest/userguide/tool-use.html">Amazon Nova</a>,
+  <a rel="nofollow" href="https://qwen.readthedocs.io/en/latest/framework/function_call.html">Qwen3</a>,
+  <a rel="nofollow" href="https://openai.com/index/introducing-gpt-oss/">GPT-OSS</a>,
+  <a rel="nofollow" href="https://api-docs.deepseek.com/guides/function_calling">DeepSeek</a>,
+  <a rel="nofollow" href="https://docs.z.ai/">GLM</a>,
+  <a rel="nofollow" href="https://github.com/MoonshotAI/Kimi-K2">Kimi</a>,
+  <a rel="nofollow" href="https://github.com/MiniMax-AI/MiniMax-M2">MiniMax</a>,
+  <a rel="nofollow" href="https://mistral.ai/news/devstral-2-vibe-cli">Devstral 2</a>,
+  <a rel="nofollow" href="https://www.llama.com/docs/model-cards-and-prompt-formats/llama3_1/">Llama 3.1</a>,
+  <a rel="nofollow" href="https://huggingface.co/Sahabat-AI">Sahabat-AI</a>, dan
+  <a rel="nofollow" href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16">Nemotron 3</a>.
+  Amazon Nova diakses lewat layanan API Amazon, sedangkan sebagian besar lainnya berbobot terbuka
+  dengan lisensi yang berbeda-beda. Dukungan pemanggilan alat juga berbeda antar model dan varian,
+  jadi ujilah dulu sebelum sebuah model dipasang sebagai pengambil keputusan.</li>
+</ul>
+
 <h3>Padanannya di Indonesia: UU ITE</h3>
 <p>Undang-Undang Nomor 11 Tahun 2008 tentang Informasi dan Transaksi Elektronik memakai istilah yang
 sama:</p>
@@ -579,7 +616,11 @@ aula ke properti, kursi ke kamar, dan periode pertunjukan ke <code>[check-in, ch
 <p>Platform bioskop ini sengaja dibangun dalam dua bentuk dari satu basis kode. Bentuk pertama adalah
 <em>native image</em> GraalVM (Mandrel) untuk Google Cloud Run dan Cloud SQL for PostgreSQL di region
 Jakarta. Bentuk kedua adalah JVM yang terus menyala di server on-premise. Alasannya tercatat di
-catatan desain proyek, dan diringkas di bawah ini.</p>
+catatan desain proyek, dan diringkas di bawah ini. Cloud Run hanyalah satu contoh platform
+kontainer serverless: AWS ECS Express Mode, Azure Container Apps, Cloudflare Containers (lewat
+Worker perantara), dan Alibaba Serverless App Engine juga bisa menjalankan image OCI/Docker yang
+sama, hanya saja penagihan dan perilaku turun ke nolnya berbeda sehingga hitungan biaya di bawah
+harus diulang.</p>
 
 <h3>Stack yang dipilih dan alasannya</h3>
 <ul>
@@ -721,7 +762,8 @@ ditemukan di proyek ini.</p>
 </table>
 </div>
 <p>Karena itu, penyewa platform ini diberi tiga pilihan hosting: server on-premise milik sendiri,
-VPS penuh, atau hosting dinamis per permintaan seperti Cloud Run. Satu basis kode, dua cara build,
+VPS penuh, atau hosting dinamis per permintaan seperti Cloud Run, atau platform kontainer serverless lain yang
+menerima image OCI/Docker yang sama. Satu basis kode, dua cara build,
 karena tidak ada satu jawaban yang benar untuk semua bentuk lalu lintas.</p>
 
 <h3>Daftar periksa pemilihan stack</h3>
