@@ -17,8 +17,8 @@
 <meta property="og:description" content="Siapa agen elektronik menurut UETA 1999 dan UU ITE, mengapa constraint eksklusi PostgreSQL menutup pemesanan ganda di banyak domain, dan kapan native image atau JVM panas yang tepat.">
 <meta property="og:url" content="https://dawud-tan.github.io/">
 <meta property="og:locale" content="id_ID">
-<meta property="article:published_time" content="2026-10-11T18:27:00+07:00">
-<meta property="article:modified_time" content="2026-10-11T18:27:00+07:00">
+<meta property="article:published_time" content="2026-10-11T06:54:00+07:00">
+<meta property="article:modified_time" content="2026-10-12T16:45:00+07:00">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Agen Elektronik, Anomali Data, dan Pemilihan Stack">
 <meta name="twitter:description" content="Agen elektronik menurut UETA dan UU ITE, constraint eksklusi PostgreSQL di luar bioskop, dan native image vs JVM menurut bentuk lalu lintas.">
@@ -75,6 +75,8 @@
   th,td{padding:9px 12px;border-top:1px solid var(--line);text-align:left;vertical-align:top}
   thead th{background:var(--accent-soft);font-weight:600}
   td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+  th.ck,td.ck{text-align:center}
+  th.ck small{display:block;font-weight:400;color:var(--ink-soft)}
   .note{background:var(--warn-soft);border:1px solid var(--line);border-radius:12px;padding:10px 18px;font-size:15.5px}
   .rule{background:var(--ok-soft);border:1px solid var(--line);border-radius:12px;padding:10px 18px}
   .faq h3{margin-top:28px}
@@ -116,8 +118,8 @@
       "isPartOf": {"@id": "https://dawud-tan.github.io/#website"},
       "mainEntity": {"@id": "https://dawud-tan.github.io/#article"},
       "hasPart": {"@id": "https://dawud-tan.github.io/#faq"},
-      "datePublished": "2026-10-11T18:27:00+07:00",
-      "dateModified": "2026-10-11T18:27:00+07:00"
+      "datePublished": "2026-10-12T16:45:00+07:00",
+      "dateModified": "2026-10-12T16:45:00+07:00"
     },
     {
       "@type": "TechArticle",
@@ -125,8 +127,8 @@
       "headline": "Agen Elektronik, Anomali Data, dan Pemilihan Stack",
       "description": "Arti agen elektronik di UETA 1999 dan UU ITE, cara PostgreSQL mencegah pemesanan ganda dengan constraint eksklusi, dan kapan memilih native image atau JVM.",
       "inLanguage": "id-ID",
-      "datePublished": "2026-10-11T18:27:00+07:00",
-      "dateModified": "2026-10-11T18:27:00+07:00",
+      "datePublished": "2026-10-12T16:45:00+07:00",
+      "dateModified": "2026-10-12T16:45:00+07:00",
       "author": {"@type": "Person", "name": "Claude Opus 5.5"},
       "publisher": {"@id": "https://dawud-tan.github.io/#publisher"},
       "mainEntityOfPage": {"@id": "https://dawud-tan.github.io/#webpage"},
@@ -366,29 +368,66 @@ komentar resmi di atas. Loop tanpa model, seperti server Quarkus tadi, tetap age
 bukan agen AI. Model tanpa loop tidak bertindak sendiri. Jadi agen AI yang otonom membutuhkan
 keduanya, dan tanggung jawab hukumnya tetap pada pemakai alat. Langkah tinjau manusia pun dipasang
 di loop, bukan di model.</p>
-<p>Contoh untuk masing-masing lapisan, sekadar contoh dan bukan rekomendasi:</p>
+<p>Pasangan loop dan model berikut paling ringan dipasang di Quarkus karena semuanya berjalan di
+dalam proses JVM yang sama (Java atau Kotlin), tanpa Jython dan tanpa layanan Python terpisah;
+sekadar contoh dan bukan rekomendasi:</p>
 <ul>
-  <li><strong>Loop</strong> (lapisan yang bertindak):
-  <a rel="nofollow" href="https://docs.langchain.com/oss/python/langgraph/overview">LangGraph</a>,
-  <a rel="nofollow" href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-runner">tool runner di SDK Anthropic</a>,
-  atau loop buatan sendiri di atas
-  <a rel="nofollow" href="https://platform.openai.com/docs/api-reference/chat">Chat Completions API OpenAI</a>.</li>
-  <li><strong>Model</strong> (lapisan yang memutuskan):
-  <a rel="nofollow" href="https://docs.aws.amazon.com/nova/latest/userguide/tool-use.html">Amazon Nova</a>,
+  <li><a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/index.html">Quarkus LangChain4j</a> +
+  <a rel="nofollow" href="https://docs.aws.amazon.com/nova/latest/userguide/tool-use.html">Amazon Nova</a>
+  lewat <a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/bedrock-chat-model.html">ekstensi Amazon Bedrock</a>: cukup kredensial AWS, tanpa
+  server model sendiri.</li>
+  <li>Quarkus LangChain4j + model berbobot terbuka seperti
   <a rel="nofollow" href="https://qwen.readthedocs.io/en/latest/framework/function_call.html">Qwen3</a>,
   <a rel="nofollow" href="https://openai.com/index/introducing-gpt-oss/">GPT-OSS</a>,
+  <a rel="nofollow" href="https://www.llama.com/docs/model-cards-and-prompt-formats/llama3_1/">Llama 3.1</a>,
+  <a rel="nofollow" href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16">Nemotron 3</a>, dan
+  <a rel="nofollow" href="https://huggingface.co/Sahabat-AI">Sahabat-AI</a> lewat
+  <a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/ollama-chat-model.html">ekstensi Ollama</a> (atau server kompatibel OpenAI seperti vLLM):
+  model dijalankan sendiri dan Quarkus cukup diarahkan ke alamat servernya.</li>
+  <li>Quarkus LangChain4j +
   <a rel="nofollow" href="https://api-docs.deepseek.com/guides/function_calling">DeepSeek</a>,
   <a rel="nofollow" href="https://docs.z.ai/">GLM</a>,
-  <a rel="nofollow" href="https://github.com/MoonshotAI/Kimi-K2">Kimi</a>,
-  <a rel="nofollow" href="https://github.com/MiniMax-AI/MiniMax-M2">MiniMax</a>,
-  <a rel="nofollow" href="https://mistral.ai/news/devstral-2-vibe-cli">Devstral 2</a>,
-  <a rel="nofollow" href="https://www.llama.com/docs/model-cards-and-prompt-formats/llama3_1/">Llama 3.1</a>,
-  <a rel="nofollow" href="https://huggingface.co/Sahabat-AI">Sahabat-AI</a>, dan
-  <a rel="nofollow" href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16">Nemotron 3</a>.
-  Amazon Nova diakses lewat layanan API Amazon, sedangkan sebagian besar lainnya berbobot terbuka
-  dengan lisensi yang berbeda-beda. Dukungan pemanggilan alat juga berbeda antar model dan varian,
-  jadi ujilah dulu sebelum sebuah model dipasang sebagai pengambil keputusan.</li>
+  <a rel="nofollow" href="https://github.com/MoonshotAI/Kimi-K2">Kimi</a>, dan
+  <a rel="nofollow" href="https://github.com/MiniMax-AI/MiniMax-M2">MiniMax</a> lewat
+  <a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/openai-chat-model.html">ekstensi OpenAI</a> dengan base-url milik vendor (API kompatibel
+  OpenAI): tinggal mengisi kunci API dan alamatnya.</li>
+  <li>Quarkus LangChain4j + <a rel="nofollow" href="https://mistral.ai/news/devstral-2-vibe-cli">Devstral 2</a> lewat
+  <a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/mistral-chat-model.html">ekstensi Mistral AI</a>.</li>
 </ul>
+<p>Loop berbasis Python atau TypeScript seperti LangGraph atau OpenAI Agents SDK tetap bisa dipakai
+sebagai layanan terpisah yang dipanggil Quarkus lewat HTTP, tetapi itu menambah satu layanan untuk
+dikelola. Jython bukan jalan keluarnya, karena Jython hanya mendukung Python 2.7. Amazon Nova diakses
+lewat layanan API Amazon, sedangkan sebagian besar model lainnya berbobot terbuka dengan lisensi yang
+berbeda-beda. Dukungan pemanggilan alat berbeda antar model dan varian, termasuk Sahabat-AI, jadi
+ujilah dulu sebelum sebuah model dipasang sebagai pengambil keputusan.</p>
+<p>Tabel berikut membandingkan penyedia loop lain menurut bahasa utamanya dan model yang bisa dipanggil.</p>
+<div class="table-wrap">
+<table>
+  <caption>Dukungan model menurut penyedia loop dan bahasa utamanya</caption>
+  <thead><tr><th scope="col">Model</th><th scope="col" class="ck"><a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/index.html">Quarkus LangChain4j</a><small>Java/Kotlin, paling ringan di Quarkus</small></th><th scope="col" class="ck"><a rel="nofollow" href="https://docs.langchain.com/oss/python/langgraph/overview">LangGraph</a><small>Python/JS</small></th><th scope="col" class="ck"><a rel="nofollow" href="https://github.com/google/adk-python">Google ADK</a><small>Python/Java/Go/TS</small></th><th scope="col" class="ck"><a rel="nofollow" href="https://platform.claude.com/docs/en/agent-sdk/agent-loop">Claude Agent SDK</a><small>Python/TS</small></th><th scope="col" class="ck"><a rel="nofollow" href="https://learn.microsoft.com/agent-framework/overview/">Microsoft Agent Framework</a><small>.NET/Python</small></th><th scope="col" class="ck"><a rel="nofollow" href="https://openai.github.io/openai-agents-python/">OpenAI Agents SDK</a><small>Python/TS</small></th><th scope="col" class="ck"><a rel="nofollow" href="https://aws.amazon.com/bedrock/agentcore/faqs/">Bedrock AgentCore</a><small>Python, platform hosting</small></th><th scope="col" class="ck"><a rel="nofollow" href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-runner">Tool runner SDK Anthropic</a><small>Java/Python/TS/Go/C#/PHP/Ruby</small></th><th scope="col" class="ck"><a rel="nofollow" href="https://platform.openai.com/docs/api-reference/chat">Chat Completions OpenAI</a><small>bahasa apa saja</small></th></tr></thead>
+  <tbody>
+    <tr><th scope="row">Amazon Nova</th><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">–</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">–</td><td class="ck">☑</td></tr>
+    <tr><th scope="row">Qwen3</th><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td></tr>
+    <tr><th scope="row">GPT-OSS</th><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td></tr>
+    <tr><th scope="row">DeepSeek</th><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td></tr>
+    <tr><th scope="row">GLM</th><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td></tr>
+    <tr><th scope="row">Kimi</th><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td></tr>
+    <tr><th scope="row">MiniMax</th><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td></tr>
+    <tr><th scope="row">Devstral 2</th><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td></tr>
+    <tr><th scope="row">Llama 3.1</th><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td></tr>
+    <tr><th scope="row">Sahabat-AI</th><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td></tr>
+    <tr><th scope="row">Nemotron 3</th><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td><td class="ck">☑</td></tr>
+  </tbody>
+</table>
+</div>
+<p class="note">☑ berarti model itu bisa dipanggil lewat jalur yang dikenal loop tersebut: integrasi
+bawaan, atau endpoint kompatibel OpenAI/Anthropic milik vendor model maupun server seperti Ollama,
+llama.cpp, dan vLLM. Tanda – berarti tidak ada jalur seperti itu tanpa gateway tambahan: Amazon Nova
+hanya bisa dipanggil lewat Bedrock Converse atau API Amazon Nova yang kompatibel OpenAI, sehingga
+loop berprotokol Anthropic tidak punya jalurnya. Untuk Claude Agent SDK dan tool runner Anthropic,
+☑ berarti lewat endpoint kompatibel Anthropic, bukan dukungan resmi Anthropic untuk model non-Claude.
+Bedrock AgentCore hanya tempat menjalankan agen; loop-nya tetap kerangka yang Anda bawa. Tanda
+☑ tidak menjamin mutu pemanggilan alat pada tiap model.</p>
 
 <h3>Padanannya di Indonesia: UU ITE</h3>
 <p>Undang-Undang Nomor 11 Tahun 2008 tentang Informasi dan Transaksi Elektronik memakai istilah yang
@@ -889,7 +928,7 @@ sumber resminya sebelum mengambil keputusan.</p>
 </main>
 <footer>
   <p>Ditulis oleh Claude Opus 5.5 · Diterbitkan oleh Dawud Tan ·
-  <time datetime="2026-10-11T18:27:00+07:00">11 Oktober 2026</time></p>
+  <time datetime="2026-10-12T16:45:00+07:00">11 Oktober 2026</time></p>
 </footer>
 </body>
 </html>
