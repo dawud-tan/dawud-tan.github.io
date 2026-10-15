@@ -396,29 +396,64 @@ di loop, bukan di model.</p>
 <p>Pasangan loop dan model berikut paling ringan dipasang di Quarkus, sekadar contoh dan bukan
 rekomendasi. Loop-nya sama, yaitu <a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/index.html">Quarkus LangChain4j</a>, yang berjalan di proses JVM
 yang sama dengan servernya (Java atau Kotlin), jadi tanpa Jython dan tanpa layanan Python terpisah.
-Yang berganti hanya ekstensi model di baliknya:</p>
+Yang berganti hanya ekstensi model di baliknya. Modelnya dibatasi pada yang inferensinya berjalan di
+Indonesia, sesuai daftar periksa di bagian 4: region Jakarta (<code>ap-southeast-3</code>), server
+sendiri di dalam negeri, atau API penyedia dalam negeri.</p>
 <ul>
-  <li><strong>Quarkus LangChain4j + <a rel="nofollow" href="https://docs.aws.amazon.com/nova/latest/userguide/tool-use.html">Amazon Nova</a></strong> lewat
-  <a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/bedrock-chat-model.html">ekstensi Amazon Bedrock</a>: cukup kredensial AWS, tanpa server model sendiri.
-  <a rel="nofollow" href="https://docs.aws.amazon.com/bedrock/latest/userguide/models-api-compatibility.html">Tabel API Bedrock</a> juga mencatat Qwen3, GPT-OSS, DeepSeek, GLM, Kimi, MiniMax,
-  Devstral 2, Llama 3.1, dan Nemotron 3 mendukung Converse API, jadi loop yang sama bisa diarahkan ke
-  model itu dengan mengganti <code>model-id</code>.</li>
+  <li><strong>Quarkus LangChain4j + <a rel="nofollow" href="https://docs.aws.amazon.com/nova/latest/userguide/tool-use.html">Amazon Nova</a> Pro atau Lite</strong> lewat
+  <a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/bedrock-chat-model.html">ekstensi Amazon Bedrock</a>, dengan <code>quarkus.langchain4j.bedrock.aws.region=ap-southeast-3</code>
+  dan ID model tanpa awalan, misalnya <code>amazon.nova-lite-v1:0</code>: cukup kredensial AWS, tanpa server
+  model sendiri. Jangan menyalin contoh di dokumentasi ekstensi, <code>global.amazon.nova-2-lite-v1:0</code>:
+  awalan <code>global.</code> atau <code>apac.</code> mengizinkan Bedrock memproses permintaan di region lain,
+  dan Nova 2 Lite memang hanya tersedia lewat profil global dari Jakarta.</li>
   <li><strong>Quarkus LangChain4j + <a rel="nofollow" href="https://qwen.readthedocs.io/en/latest/framework/function_call.html">Qwen3</a>, <a rel="nofollow" href="https://openai.com/index/introducing-gpt-oss/">GPT-OSS</a>,
-  <a rel="nofollow" href="https://www.llama.com/docs/model-cards-and-prompt-formats/llama3_1/">Llama 3.1</a>, <a rel="nofollow" href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16">Nemotron 3</a>, atau
-  <a rel="nofollow" href="https://huggingface.co/Sahabat-AI">Sahabat-AI</a></strong> lewat <a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/ollama-chat-model.html">ekstensi Ollama</a> (mode dev
-  Quarkus menyalakan kontainer Ollama sendiri) atau lewat server kompatibel-OpenAI seperti vLLM dengan
-  <a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/openai-chat-model.html">ekstensi OpenAI</a>: model dijalankan sendiri dan Quarkus cukup diarahkan ke
-  alamatnya.</li>
-  <li><strong>Quarkus LangChain4j + <a rel="nofollow" href="https://api-docs.deepseek.com/guides/function_calling">DeepSeek</a>, <a rel="nofollow" href="https://docs.z.ai/">GLM</a>,
-  <a rel="nofollow" href="https://github.com/MoonshotAI/Kimi-K2">Kimi</a>, atau <a rel="nofollow" href="https://github.com/MiniMax-AI/MiniMax-M2">MiniMax</a></strong> lewat
-  <a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/openai-chat-model.html">ekstensi OpenAI</a> dengan <code>quarkus.langchain4j.openai.base-url</code> milik
-  vendor (API kompatibel-OpenAI): tinggal mengisi kunci API dan alamatnya.</li>
-  <li><strong>Quarkus LangChain4j + <a rel="nofollow" href="https://mistral.ai/news/devstral-2-vibe-cli">Devstral 2</a></strong> lewat
-  <a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/mistral-chat-model.html">ekstensi Mistral AI</a>.</li>
-  <li><strong>Quarkus LangChain4j + Claude, Gemini, atau GPT</strong> lewat
-  <a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/anthropic-chat-model.html">ekstensi Anthropic</a>, <a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/gemini-chat-model.html">ekstensi Gemini</a>, atau ekstensi OpenAI,
-  sebagai pembanding bagi model di atas.</li>
+  <a rel="nofollow" href="https://api-docs.deepseek.com/guides/function_calling">DeepSeek</a>, <a rel="nofollow" href="https://docs.z.ai/">GLM</a>, <a rel="nofollow" href="https://github.com/MoonshotAI/Kimi-K2">Kimi</a>,
+  <a rel="nofollow" href="https://github.com/MiniMax-AI/MiniMax-M2">MiniMax</a>, <a rel="nofollow" href="https://mistral.ai/news/devstral-2-vibe-cli">Devstral 2</a>, atau
+  <a rel="nofollow" href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16">Nemotron 3</a></strong> di Bedrock Jakarta, lewat
+  <a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/openai-chat-model.html">ekstensi OpenAI</a> dengan
+  <code>quarkus.langchain4j.openai.base-url=https://bedrock-mantle.ap-southeast-3.api.aws/v1</code> dan
+  kunci API Bedrock. <a rel="nofollow" href="https://docs.aws.amazon.com/bedrock/latest/userguide/models-region-compatibility.html">Tabel region Bedrock</a>
+  mencatat sebagian versinya In-Region di Jakarta, misalnya Qwen3 32B, gpt-oss-120b, DeepSeek V3.2,
+  GLM 4.7, Kimi K2.5, MiniMax M2.5, Devstral 2 123B, dan Nemotron 3 Super 120B, sedangkan versi lain
+  seperti Kimi K3 dan GLM 5.3 hanya lewat profil global. Kartu model Bedrock mencantumkan pemanggilan
+  alat model-model ini di <a rel="nofollow" href="https://docs.aws.amazon.com/bedrock/latest/userguide/endpoints.html">endpoint <code>bedrock-mantle</code></a>
+  yang kompatibel-OpenAI, bukan di Converse, karena itu jalurnya ekstensi OpenAI, bukan ekstensi Bedrock.
+  API milik vendornya sendiri tidak dipakai. Menurut halaman resmi masing-masing,
+  <a rel="nofollow" href="https://www.alibabacloud.com/help/en/model-studio/regions/">Alibaba Cloud Model Studio</a> (Qwen) tidak punya region Jakarta,
+  <a rel="nofollow" href="https://cdn.deepseek.com/policies/en-US/deepseek-privacy-policy.html">DeepSeek</a> memproses dan menyimpan data di Tiongkok,
+  <a rel="nofollow" href="https://docs.z.ai/legal-agreement/privacy-policy">Z.ai</a> (GLM) dan <a rel="nofollow" href="https://platform.kimi.ai/docs/agreement/userprivacy">Moonshot</a> (Kimi) di Singapura,
+  <a rel="nofollow" href="https://platform.minimax.io/protocol/privacy-policy">MiniMax</a> di pusat data Amerika Serikat, dan
+  <a rel="nofollow" href="https://help.mistral.ai/en/articles/347629-where-do-you-store-my-data-or-my-organization-s-data">Mistral</a> (Devstral 2) di Uni Eropa atau
+  Amerika Serikat. <a rel="nofollow" href="https://assets.ngc.nvidia.com/products/api-catalog/legal/NVIDIA%20API%20Trial%20Terms%20of%20Service.pdf">API NVIDIA</a> (Nemotron)
+  hanya untuk uji coba, bukan produksi, dan tidak menyebut lokasinya.
+  <a rel="nofollow" href="https://developers.openai.com/api/docs/models/gpt-oss-120b">OpenAI</a> mencantumkan GPT-OSS di API-nya, tetapi dengan batas
+  laju nol di setiap tingkat.</li>
+  <li><strong>Quarkus LangChain4j + <a rel="nofollow" href="https://www.llama.com/docs/model-cards-and-prompt-formats/llama3_1/">Llama 3.1</a> atau
+  <a rel="nofollow" href="https://huggingface.co/Sahabat-AI">Sahabat-AI</a></strong>, juga model berbobot terbuka di atas, lewat
+  <a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/ollama-chat-model.html">ekstensi Ollama</a> (mode dev Quarkus menyalakan kontainer Ollama sendiri) atau
+  lewat server kompatibel-OpenAI seperti vLLM dengan ekstensi OpenAI, di server on-premise atau penyedia GPU
+  di Indonesia. Untuk Llama 3.1, hanya jalur ini yang ditemukan: di Bedrock ia hanya lewat profil
+  <code>us.</code>, dan kedua API dalam negeri di bawah tidak mencantumkannya. Hindari model <em>cloud</em>
+  Ollama (tag seperti <code>gemma4:cloud</code>), yang dijalankan di server <code>ollama.com</code>, bukan di
+  server Anda.</li>
+  <li><strong>Quarkus LangChain4j + Sahabat-AI, GPT-OSS, Qwen3, atau Nemotron 3</strong> lewat API
+  kompatibel-OpenAI yang dihosting di Indonesia, dengan ekstensi OpenAI dan <code>base-url</code> penyedianya.
+  <a rel="nofollow" href="https://docs.cloudeka.ai/guideline-for-enterprise/deka-llm/model-catalog">Katalog Deka LLM</a> (Lintasarta Cloudeka)
+  mencantumkan <code>sahabat-ai-v2-70b-it</code>, <code>gpt-oss-120b</code>, <code>gpt-oss-20b</code>,
+  <code>qwen3-30b-a3b-instruct-2507</code>, dan <code>nemotron-3-nano-30b-a3b</code>, dan
+  <a rel="nofollow" href="https://www.cloudeka.id/products/deka-llm/">halaman produknya</a> menyatakan prompt dan hasilnya tetap di
+  yurisdiksi Indonesia. <a rel="nofollow" href="https://www.biznetgio.com/blog/press-release-ai-services/">NEO Inference</a> (Biznet Gio) menyediakan
+  GPT-oss-120B dan Qwen3-Coder-480B, dan menyatakan data pelanggan tetap di Indonesia. Halaman yang
+  diperiksa tidak menyebut pemanggilan alat, jadi ujilah dulu sebelum dipakai di loop.</li>
 </ul>
+<p>Claude, Gemini, dan GPT tidak masuk daftar ini. Dari Jakarta, Bedrock menyediakan Claude dan GPT hanya
+lewat profil global. <a rel="nofollow" href="https://platform.claude.com/docs/en/manage-claude/data-residency">API Anthropic sendiri</a>
+hanya menawarkan inferensi di Amerika Serikat (<code>"us"</code>) atau di mana saja (<code>"global"</code>), dan
+data tersimpan di Amerika Serikat. <a rel="nofollow" href="https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/data-residency">Halaman data residency Google Cloud</a>
+tidak mencantumkan Jakarta (<code>asia-southeast2</code>) sama sekali; lokasi terdekatnya Singapura, dan
+endpoint global tidak menjamin di mana permintaan diproses. <a rel="nofollow" href="https://developers.openai.com/api/docs/guides/your-data">Halaman data OpenAI</a>
+mencantumkan pemrosesan regional hanya di Amerika Serikat, Eropa, dan Uni Emirat Arab; Singapura hanya
+untuk penyimpanan, dan Indonesia tidak tercantum. Data region di atas per 15 Oktober 2026.</p>
 <p>Loop berbasis Python atau TypeScript, seperti LangGraph, Google ADK, Claude Agent SDK, Microsoft Agent
 Framework, dan OpenAI Agents SDK, tetap bisa dipakai sebagai layanan terpisah yang dipanggil Quarkus lewat
 HTTP, tetapi itu menambah satu layanan untuk dikelola. <a rel="nofollow" href="https://github.com/jython/jython">Jython</a> bukan jalan keluarnya:
