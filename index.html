@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Agen Elektronik, Anomali Data, dan Pemilihan Stack</title>
-<meta name="description" content="Arti agen elektronik di UETA 1999 dan UU ITE, cara PostgreSQL mencegah pemesanan ganda dengan constraint eksklusi, dan kapan memilih native image atau JVM.">
-<meta name="keywords" content="agen elektronik, electronic agent, UETA 1999, UU ITE Pasal 21, UU ITE Pasal 22, PP 71/2019, exclusion constraint PostgreSQL, constraint eksklusi, GiST, btree_gist, tstzrange, daterange, WITHOUT OVERLAPS, pemesanan ganda, double booking, anomali Adya, write skew, native image, GraalVM, Mandrel, Quarkus, Quarkus LangChain4j, loop agen AI, Leyden, Cloud Run, Cloud SQL, JVM on-premise">
+<title>Agen Elektronik, Anomali Adya, dan On-Premise vs Serverless</title>
+<meta name="description" content="Siapa agen elektronik menurut UETA, UU ITE, dan PP 71/2019; anomali isolasi Adya dan cara mencegahnya di PostgreSQL 18.6; serta kapan memilih server on-premise atau serverless yang bisa turun ke nol.">
+<meta name="keywords" content="agen elektronik, electronic agent, UETA 1999, UU ITE Pasal 21, UU ITE Pasal 22, PP 71/2019 Pasal 37, UU PDP Pasal 56, agen AI, loop agen, Quarkus LangChain4j, anomali Adya, G0, G1c, lost update, read skew, write skew, phantom, tingkat isolasi PostgreSQL, READ COMMITTED, SERIALIZABLE, SELECT FOR UPDATE, exclusion constraint, constraint eksklusi, btree_gist, WITHOUT OVERLAPS, PostgreSQL 18.6, REINDEX, pemesanan ganda, double booking, serverless, scale to zero, Cloud Run, min-instances, native image, GraalVM, Leyden, JVM on-premise">
 <meta name="author" content="Claude Opus 5.5">
 <link rel="canonical" href="https://dawud-tan.github.io/">
 <link rel="alternate" hreflang="id-ID" href="https://dawud-tan.github.io/">
@@ -13,15 +13,15 @@
 <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Dawud Tan">
-<meta property="og:title" content="Agen Elektronik, Anomali Data, dan Pemilihan Stack">
-<meta property="og:description" content="Siapa agen elektronik menurut UETA 1999 dan UU ITE, mengapa constraint eksklusi PostgreSQL menutup pemesanan ganda di banyak domain, dan kapan native image atau JVM panas yang tepat.">
+<meta property="og:title" content="Agen Elektronik, Anomali Adya, dan On-Premise vs Serverless">
+<meta property="og:description" content="Agen elektronik menurut UETA, UU ITE, dan PP 71/2019; anomali Adya dan pencegahannya di PostgreSQL 18.6; dan kapan on-premise lebih tepat daripada serverless yang turun ke nol.">
 <meta property="og:url" content="https://dawud-tan.github.io/">
 <meta property="og:locale" content="id_ID">
 <meta property="article:published_time" content="2026-10-11T06:54:00+07:00">
-<meta property="article:modified_time" content="2026-10-16T13:47:00+07:00">
+<meta property="article:modified_time" content="2026-10-22T12:45:00+07:00">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Agen Elektronik, Anomali Data, dan Pemilihan Stack">
-<meta name="twitter:description" content="Agen elektronik menurut UETA dan UU ITE, constraint eksklusi PostgreSQL di luar bioskop, dan native image vs JVM menurut bentuk lalu lintas.">
+<meta name="twitter:title" content="Agen Elektronik, Anomali Adya, dan On-Premise vs Serverless">
+<meta name="twitter:description" content="Agen elektronik dan kewajibannya, anomali Adya di PostgreSQL 18.6, dan on-premise vs serverless menurut tenggat waktu dan bentuk lalu lintas.">
 <meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#131518" media="(prefers-color-scheme: dark)">
 <style>
@@ -75,21 +75,21 @@
   th,td{padding:9px 12px;border-top:1px solid var(--line);text-align:left;vertical-align:top}
   thead th{background:var(--accent-soft);font-weight:600}
   td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
-  .matrix th,.matrix td{padding:8px 6px}
-  .matrix th:first-child{padding-left:12px}
-  .matrix th.ck,.matrix td.ck{text-align:center;vertical-align:middle}
-  .matrix th.ck{min-width:80px;font-size:14px;line-height:1.35}
-  .matrix th.ck small{display:block;margin-top:2px;font-weight:400;color:var(--ink-soft);font-size:12.5px}
-  .matrix th.pick{box-shadow:inset 0 3px 0 var(--accent)}
-  .matrix td.ck{position:relative;color:var(--ok);font-size:19px;line-height:1;font-family:"Segoe UI Symbol","Apple Symbols","DejaVu Sans",system-ui,sans-serif}
-  .matrix thead th:first-child,.matrix tbody th[scope=row]{position:sticky;left:0;z-index:1;white-space:nowrap}
-  .matrix tbody th[scope=row]{background:var(--panel);font-weight:600}
-  .matrix thead th:first-child{background:var(--accent-soft);z-index:2}
-  .matrix tr.grp th{position:sticky;left:0;background:var(--accent-soft);color:var(--ink-soft);font-size:12.5px;
-                    font-weight:600;letter-spacing:.05em;text-transform:uppercase}
-  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .note{background:var(--warn-soft);border:1px solid var(--line);border-radius:12px;padding:10px 18px;font-size:15.5px}
   .rule{background:var(--ok-soft);border:1px solid var(--line);border-radius:12px;padding:10px 18px}
+  figure{margin:22px 0}
+  figcaption{font-size:14.5px;color:var(--ink-soft);margin-top:6px;max-width:var(--measure)}
+  svg.dsg{width:100%;max-width:440px;margin:0 auto;height:auto;display:block;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:10px}
+  svg.dsg .node{fill:var(--bg);stroke:currentColor;stroke-width:1.5}
+  svg.dsg .dep{fill:none;stroke:var(--ink-soft);stroke-width:1.8}
+  svg.dsg .anti{fill:none;stroke:var(--accent);stroke-width:1.8;stroke-dasharray:5 4}
+  svg.dsg .head-dep{fill:var(--ink-soft)}
+  svg.dsg .head-anti{fill:var(--accent)}
+  svg.dsg text{fill:currentColor;font:13px var(--sans)}
+  svg.dsg .lbl{font:600 12.5px var(--mono)}
+  svg.dsg .lbl-anti{fill:var(--accent)}
+  svg.dsg .cap{font:600 13.5px var(--mono);fill:var(--accent)}
+  svg.dsg .sub{font-size:12px;fill:var(--ink-soft)}
   .faq h3{margin-top:28px}
   .sources li{margin:7px 0;overflow-wrap:anywhere}
   footer{max-width:860px;margin:0 auto;padding:22px 0 44px;border-top:1px solid var(--line);color:var(--ink-soft);font-size:14.5px}
@@ -99,7 +99,6 @@
     h2{font-size:21px;margin-top:46px}
     .box{padding:4px 16px 10px}
     th,td{padding:8px 10px}
-    .matrix th.ck{min-width:78px}
   }
 </style>
 <script type="application/ld+json">
@@ -125,58 +124,72 @@
       "@type": "WebPage",
       "@id": "https://dawud-tan.github.io/#webpage",
       "url": "https://dawud-tan.github.io/",
-      "name": "Agen Elektronik, Anomali Data, dan Pemilihan Stack",
+      "name": "Agen Elektronik, Anomali Adya, dan On-Premise vs Serverless",
       "inLanguage": "id-ID",
       "isPartOf": {"@id": "https://dawud-tan.github.io/#website"},
       "mainEntity": {"@id": "https://dawud-tan.github.io/#article"},
       "hasPart": {"@id": "https://dawud-tan.github.io/#faq"},
       "datePublished": "2026-10-11T06:54:00+07:00",
-      "dateModified": "2026-10-16T13:47:00+07:00"
+      "dateModified": "2026-10-22T12:45:00+07:00"
     },
     {
       "@type": "TechArticle",
       "@id": "https://dawud-tan.github.io/#article",
-      "headline": "Agen Elektronik, Anomali Data, dan Pemilihan Stack",
-      "description": "Arti agen elektronik di UETA 1999 dan UU ITE, cara PostgreSQL mencegah pemesanan ganda dengan constraint eksklusi, dan kapan memilih native image atau JVM.",
+      "headline": "Agen Elektronik, Anomali Adya, dan On-Premise vs Serverless",
+      "description": "Siapa agen elektronik menurut UETA, UU ITE, dan PP 71/2019; anomali isolasi Adya dan cara mencegahnya di PostgreSQL 18.6; serta kapan memilih server on-premise atau serverless yang bisa turun ke nol.",
       "inLanguage": "id-ID",
       "datePublished": "2026-10-11T06:54:00+07:00",
-      "dateModified": "2026-10-16T13:47:00+07:00",
+      "dateModified": "2026-10-22T12:45:00+07:00",
       "author": {"@type": "Person", "name": "Claude Opus 5.5"},
       "publisher": {"@id": "https://dawud-tan.github.io/#publisher"},
       "mainEntityOfPage": {"@id": "https://dawud-tan.github.io/#webpage"},
       "articleSection": [
-        "Agen elektronik menurut UETA 1999 dan UU ITE",
-        "Anomali konkurensi dan exclusion constraint PostgreSQL",
-        "Domain lain untuk exclusion constraint dengan rentang dan GiST",
-        "Native image atau JVM panas menurut bentuk lalu lintas",
+        "Agen elektronik menurut UETA 1999, UU ITE, dan PP 71/2019",
+        "Agen AI: model, loop, dan lokasi inferensi",
+        "Anomali isolasi Adya dan tingkat isolasi PostgreSQL",
+        "Mencegah anomali di PostgreSQL 18.6",
+        "Domain lain untuk constraint eksklusi dengan rentang dan GiST",
+        "On-premise atau serverless yang bisa turun ke nol",
         "Pertanyaan yang sering diajukan"
       ],
-      "keywords": "agen elektronik, UETA, UU ITE, exclusion constraint, GiST, tstzrange, WITHOUT OVERLAPS, pemesanan ganda, anomali Adya, native image, GraalVM, Quarkus, Quarkus LangChain4j, loop agen AI, Leyden, Cloud Run, Cloud SQL, JVM on-premise",
+      "keywords": "agen elektronik, UETA, UU ITE, PP 71/2019, UU PDP, agen AI, Quarkus LangChain4j, anomali Adya, write skew, lost update, phantom, tingkat isolasi, SERIALIZABLE, constraint eksklusi, btree_gist, WITHOUT OVERLAPS, PostgreSQL 18.6, serverless, scale to zero, Cloud Run, native image, Leyden, JVM on-premise",
       "about": [
         {"@type": "Thing", "name": "Agen elektronik"},
         {"@type": "Legislation", "name": "Uniform Electronic Transactions Act (1999)"},
         {"@type": "Legislation", "name": "Undang-Undang Nomor 11 Tahun 2008 tentang Informasi dan Transaksi Elektronik", "legislationJurisdiction": "ID"},
+        {"@type": "Legislation", "name": "Peraturan Pemerintah Nomor 71 Tahun 2019 tentang Penyelenggaraan Sistem dan Transaksi Elektronik", "legislationJurisdiction": "ID"},
+        {"@type": "Thing", "name": "Anomali isolasi transaksi (taksonomi Adya)"},
         {"@type": "Thing", "name": "PostgreSQL exclusion constraint"},
-        {"@type": "Thing", "name": "GraalVM native image"},
-        {"@type": "Thing", "name": "Java Virtual Machine"}
+        {"@type": "Thing", "name": "Serverless computing"},
+        {"@type": "Thing", "name": "On-premises software"}
       ],
       "mentions": [
-        {"@type": "SoftwareApplication", "name": "PostgreSQL", "applicationCategory": "DatabaseApplication"},
+        {"@type": "SoftwareApplication", "name": "PostgreSQL", "softwareVersion": "18.6", "applicationCategory": "DatabaseApplication"},
         {"@type": "SoftwareApplication", "name": "Quarkus", "applicationCategory": "DeveloperApplication"},
+        {"@type": "SoftwareApplication", "name": "Quarkus LangChain4j", "applicationCategory": "DeveloperApplication"},
         {"@type": "SoftwareApplication", "name": "Mandrel", "applicationCategory": "DeveloperApplication"},
         {"@type": "Service", "name": "Google Cloud Run"},
-        {"@type": "Service", "name": "Cloud SQL for PostgreSQL"}
+        {"@type": "Service", "name": "Cloud SQL for PostgreSQL"},
+        {"@type": "Service", "name": "Amazon Bedrock"}
       ],
       "citation": [
         {"@type": "Legislation", "name": "Uniform Electronic Transactions Act (1999), with Prefatory Note and Comments", "url": "https://scs.nevada.edu/wp-content/uploads/2020/07/FED_Act99.pdf"},
         {"@type": "CreativeWork", "name": "1999 UETA Deliberations (ABA working group memo, reprinted)", "url": "https://law.mit.edu/pub/1999-ueta-deliberations"},
         {"@type": "Legislation", "name": "UU Nomor 11 Tahun 2008 tentang Informasi dan Transaksi Elektronik", "url": "https://jdih.kemenkeu.go.id/fullText/2008/11TAHUN2008UU.htm"},
+        {"@type": "Legislation", "name": "PP Nomor 71 Tahun 2019 tentang Penyelenggaraan Sistem dan Transaksi Elektronik", "url": "https://peraturan.bpk.go.id/Details/122030/pp-no-71-tahun-2019"},
+        {"@type": "Legislation", "name": "UU Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi", "url": "https://peraturan.bpk.go.id/Details/229798/uu-no-27-tahun-2022"},
+        {"@type": "ScholarlyArticle", "name": "Generalized Isolation Level Definitions (Adya, Liskov, O'Neil, ICDE 2000)", "url": "https://doi.org/10.1109/ICDE.2000.839388"},
+        {"@type": "CreativeWork", "name": "PostgreSQL 18: Transaction Isolation", "url": "https://www.postgresql.org/docs/18/transaction-iso.html"},
+        {"@type": "CreativeWork", "name": "PostgreSQL 18: Explicit Locking", "url": "https://www.postgresql.org/docs/18/explicit-locking.html"},
         {"@type": "CreativeWork", "name": "PostgreSQL 18: CREATE TABLE", "url": "https://www.postgresql.org/docs/18/sql-createtable.html"},
         {"@type": "CreativeWork", "name": "PostgreSQL 18: Range Types", "url": "https://www.postgresql.org/docs/18/rangetypes.html"},
+        {"@type": "CreativeWork", "name": "PostgreSQL 18: btree_gist", "url": "https://www.postgresql.org/docs/18/btree-gist.html"},
         {"@type": "CreativeWork", "name": "PostgreSQL 18 Release Notes", "url": "https://www.postgresql.org/docs/18/release-18.html"},
+        {"@type": "CreativeWork", "name": "PostgreSQL 18.6 Release Notes", "url": "https://www.postgresql.org/docs/18/release-18-6.html"},
         {"@type": "CreativeWork", "name": "Quarkus: Building a native executable", "url": "https://quarkus.io/version/3.40/guides/building-native-image/"},
         {"@type": "CreativeWork", "name": "Cloud Run: Configure CPU limits for services", "url": "https://docs.cloud.google.com/run/docs/configuring/cpu"},
         {"@type": "CreativeWork", "name": "Cloud Run: Billing settings for services", "url": "https://docs.cloud.google.com/run/docs/configuring/cpu-allocation"},
+        {"@type": "CreativeWork", "name": "Cloud Run: Using WebSockets", "url": "https://docs.cloud.google.com/run/docs/triggering/websockets"},
         {"@type": "CreativeWork", "name": "Cloud Run: Compute flexible committed use discounts", "url": "https://docs.cloud.google.com/run/cud"},
         {"@type": "CreativeWork", "name": "Cloud Run pricing", "url": "https://cloud.google.com/run/pricing"},
         {"@type": "CreativeWork", "name": "Cloud SQL for PostgreSQL pricing", "url": "https://cloud.google.com/sql/docs/postgres/pricing"},
@@ -189,6 +202,7 @@
         {"@type": "CreativeWork", "name": "OpenAI Agents SDK: Models", "url": "https://openai.github.io/openai-agents-python/models/"},
         {"@type": "CreativeWork", "name": "Amazon Bedrock AgentCore: What is Amazon Bedrock AgentCore", "url": "https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/what-is-bedrock-agentcore.html"},
         {"@type": "CreativeWork", "name": "Amazon Bedrock AgentCore: Harness", "url": "https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/harness.html"},
+        {"@type": "CreativeWork", "name": "Amazon Bedrock: Model support by AWS Region", "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/models-region-compatibility.html"},
         {"@type": "CreativeWork", "name": "Amazon Bedrock: API compatibility", "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/models-api-compatibility.html"},
         {"@type": "CreativeWork", "name": "Amazon Nova: Using Amazon Nova as a foundation model in an AI agent", "url": "https://docs.aws.amazon.com/nova/latest/userguide/agents-use-nova.html"},
         {"@type": "CreativeWork", "name": "Anthropic: OpenAI SDK compatibility", "url": "https://platform.claude.com/docs/en/api/openai-sdk"},
@@ -207,53 +221,68 @@
         },
         {
           "@type": "Question",
-          "name": "Apakah server web seperti Quarkus yang menerima pesanan termasuk agen elektronik?",
-          "acceptedAnswer": {"@type": "Answer", "text": "Ya. Contoh dari perancang UETA sendiri adalah Bookseller.com, yang menerima dan mengonfirmasi pesanan lewat mesinnya. Aplikasi yang menahan kursi, menerima pembayaran, dan menerbitkan tiket tanpa ditinjau manusia adalah agen elektronik milik penjualnya."}
-        },
-        {
-          "@type": "Question",
-          "name": "Apakah PostgreSQL itu agen elektronik?",
-          "acceptedAnswer": {"@type": "Answer", "text": "Tidak dengan sendirinya. Definisinya fungsional: agen elektronik adalah keseluruhan sarana otomatis yang dipakai satu pihak. Basis data adalah bagian dari mesin itu, walaupun keputusan menerima atau menolak klaim kursi bisa diambil di dalam PostgreSQL oleh exclusion constraint."}
+          "name": "Apakah server web yang menerima pesanan termasuk agen elektronik?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Ya. Contoh dari perancang UETA sendiri adalah Bookseller.com, yang menerima dan mengonfirmasi pesanan lewat mesinnya. Aplikasi yang menahan kursi, menerima pembayaran, dan menerbitkan tiket tanpa ditinjau manusia adalah agen elektronik milik penjualnya, termasuk basis data di dalamnya, walaupun keputusan menerima atau menolak klaim kursi diambil oleh constraint di PostgreSQL."}
         },
         {
           "@type": "Question",
           "name": "Di Indonesia, siapa yang menanggung akibat hukum transaksi lewat agen elektronik?",
-          "acceptedAnswer": {"@type": "Answer", "text": "Menurut UU ITE Pasal 21 ayat (2), penyelenggara Agen Elektronik. Kerugian akibat kelalaian pengguna jasa ditanggung pengguna (ayat 4), dan tanggung jawab penyelenggara tidak berlaku bila dapat dibuktikan keadaan memaksa, kesalahan, atau kelalaian pengguna (ayat 5)."}
+          "acceptedAnswer": {"@type": "Answer", "text": "Menurut UU ITE Pasal 21 ayat (2) huruf c, penyelenggara Agen Elektronik. Kerugian karena agen gagal beroperasi akibat tindakan pihak ketiga juga ditanggung penyelenggara (ayat 3), kerugian karena kelalaian pengguna jasa ditanggung pengguna (ayat 4), dan tanggung jawab penyelenggara tidak berlaku bila dapat dibuktikan keadaan memaksa, kesalahan, atau kelalaian pengguna (ayat 5)."}
         },
         {
           "@type": "Question",
-          "name": "Apa itu exclusion constraint dengan indeks GiST?",
-          "acceptedAnswer": {"@type": "Answer", "text": "Constraint PostgreSQL yang melarang dua baris memenuhi sekumpulan operator sekaligus, misalnya kursi WITH = dan periode WITH &&: kursi yang sama dan periode yang tumpang tindih. GiST adalah jenis indeks yang mendukung operator rentang seperti &&, dan ekstensi btree_gist menambahkan dukungan untuk kolom skalar biasa."}
+          "name": "Fitur apa yang wajib disediakan penyelenggara agen elektronik?",
+          "acceptedAnswer": {"@type": "Answer", "text": "PP 71/2019 Pasal 37 ayat (3) menyebut fasilitas untuk melakukan koreksi, membatalkan perintah, memberikan konfirmasi atau rekonfirmasi, memilih meneruskan atau berhenti, melihat informasi tawaran, mengecek status berhasil atau gagalnya transaksi, dan membaca perjanjian sebelum bertransaksi, sesuai karakteristik agennya. Ayat (1) mewajibkan informasi seperti identitas penyelenggara, syarat kontrak, jaminan privasi, dan nomor telepon pengaduan. Pelanggarannya dikenai sanksi administratif menurut Pasal 100."}
+        },
+        {
+          "@type": "Question",
+          "name": "Bolehkah agen AI langsung memesan atas nama pelanggan?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Sebaiknya tidak. UETA Pasal 10 ayat 2 membolehkan individu menghindari akibat kesalahannya bila agen elektronik pihak lain tidak memberi kesempatan untuk mencegah atau mengoreksinya, dan PP 71/2019 mewajibkan fitur koreksi dan konfirmasi. Biarkan agen mengusulkan, misalnya lewat peta kursi yang pilihannya sudah tercentang, dan biarkan pelanggan sendiri yang menekan tombol tahan dan bayar."}
+        },
+        {
+          "@type": "Question",
+          "name": "Apa itu anomali Adya?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Taksonomi anomali isolasi dari tesis Atul Adya di MIT (1999) dan makalah ICDE 2000 yang ia tulis bersama Barbara Liskov dan Patrick O'Neil. Setiap anomali didefinisikan sebagai siklus tertentu pada graf ketergantungan antartransaksi yang sudah di-commit, atau sebagai pembacaan data yang seharusnya tidak terlihat: G0 (siklus tulis), G1a, G1b, dan G1c (bacaan kotor), G-cursor (lost update), G-single (read skew), G2-item (write skew), dan G2 (phantom). Karena tidak bergantung pada penguncian, definisi itu cocok untuk basis data multiversi seperti PostgreSQL."}
         },
         {
           "@type": "Question",
           "name": "Mengapa tidak cukup mengecek apakah kursi masih kosong, lalu menyimpan?",
-          "acceptedAnswer": {"@type": "Answer", "text": "Karena dua transaksi bersamaan sama-sama melihat kursi kosong dan sama-sama menyimpan. READ COMMITTED dan REPEATABLE READ membiarkannya; ini write skew. Exclusion constraint menolak klaim kedua saat ditulis, pada tingkat isolasi apa pun, dengan SQLSTATE 23P01."}
+          "acceptedAnswer": {"@type": "Answer", "text": "Karena dua transaksi bersamaan sama-sama melihat kursi kosong dan sama-sama menyimpan. READ COMMITTED dan REPEATABLE READ membiarkannya; ini write skew. Constraint eksklusi menolak klaim kedua saat ditulis, pada tingkat isolasi apa pun, dengan SQLSTATE 23P01."}
         },
         {
           "@type": "Question",
-          "name": "Apa bedanya dengan WITHOUT OVERLAPS di PostgreSQL 18?",
+          "name": "Tingkat isolasi PostgreSQL mana yang mencegah anomali apa?",
+          "acceptedAnswer": {"@type": "Answer", "text": "READ COMMITTED, bawaan PostgreSQL, mencegah G0, G1a, G1b, dan G1c. REPEATABLE READ, yang di PostgreSQL berupa snapshot isolation, menambahkan lost update dan read skew. Hanya SERIALIZABLE yang juga mencegah write skew dan phantom, dengan membatalkan salah satu transaksi lewat SQLSTATE 40001. READ UNCOMMITTED diterima tetapi berperilaku seperti READ COMMITTED."}
+        },
+        {
+          "@type": "Question",
+          "name": "Apa yang perlu diperhatikan saat memakai PostgreSQL 18.6?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Versi 18.6, dirilis 13 Agustus 2026, memperbaiki deteksi konflik SERIALIZABLE yang bisa melewatkan konflik pada indeks btree yang awalnya kosong, index-only scan GiST atas kolom rentang yang bukan kolom pertama indeks, dan pencarian btree_gist dengan operator tidak-sama. Setelah naik versi, bangun ulang indeks btree_gist pada kolom float yang mungkin berisi NaN, indeks btree_gist pada kolom bit, dan indeks btree atas ltree."}
+        },
+        {
+          "@type": "Question",
+          "name": "Apa bedanya WITHOUT OVERLAPS di PostgreSQL 18 dengan EXCLUDE?",
           "acceptedAnswer": {"@type": "Answer", "text": "WITHOUT OVERLAPS adalah bentuk standar untuk kunci primer dan constraint unik atas rentang, dan ditegakkan sebagai exclusion constraint GiST. Cocok untuk data master seperti periode harga. Constraint unik tidak bisa diberi klausa WHERE, jadi untuk pemesanan yang hanya melarang tumpang tindih di antara baris yang masih aktif, EXCLUDE dengan WHERE tetap dibutuhkan."}
         },
         {
           "@type": "Question",
-          "name": "Domain apa saja selain bioskop yang cocok memakai exclusion constraint?",
+          "name": "Domain apa saja selain bioskop yang cocok memakai constraint eksklusi?",
           "acceptedAnswer": {"@type": "Answer", "text": "Semua yang berbentuk klaim eksklusif atas satu sumber daya untuk satu periode: hotel, ruang rapat, lapangan olahraga, jadwal dokter dan kamar operasi, kursi kereta per segmen, sewa kendaraan dan alat, dermaga, shift karyawan, periode harga dan tarif, polis asuransi, serta rentang VLAN atau frekuensi. Untuk kapasitas yang dapat dipertukarkan, seperti tiket tanpa nomor kursi, gunakan penghitungan dengan penguncian baris."}
         },
         {
           "@type": "Question",
-          "name": "Kapan native image lebih hemat daripada JVM?",
-          "acceptedAnswer": {"@type": "Answer", "text": "Saat lalu lintas sepi dan sporadis sehingga instans sering dinyalakan ulang. Dari tabel resmi Quarkus, satu cold start native menghemat sekitar 2,6 detik vCPU dibanding JVM dengan cache AOT Leyden, setara kira-kira 6.000 permintaan hangat. Bila tiap instans melayani jauh lebih sedikit dari itu sebelum dimatikan, native lebih hemat."}
+          "name": "Bisakah sistem pemesanan benar-benar turun ke nol di serverless?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Biasanya tidak. Tahanan kursi punya tenggat yang jatuh tempo justru saat tidak ada permintaan, jadi penyapu terjadwal butuh satu instans yang selalu menyala; notifikasi setelah commit butuh CPU yang selalu dialokasikan; dan Cloud SQL tetap ditagih selama instansnya menyala. Satu instans 1 vCPU yang menyala sebulan sudah sekitar US$47 untuk CPU-nya saja pada tarif berbasis instans Tier 1 Cloud Run. Hitung biaya lantai itu sebelum memilih."}
         },
         {
           "@type": "Question",
-          "name": "Apakah serverless selalu lebih murah untuk usaha kecil?",
-          "acceptedAnswer": {"@type": "Answer", "text": "Tidak selalu. Cloud SQL tetap ditagih selama instansnya menyala, penyapu terjadwal memerlukan minimal satu instans, dan pekerjaan setelah respons memerlukan CPU yang selalu dialokasikan. Hitung biaya lantai itu sebelum memilih."}
+          "name": "Kapan native image lebih hemat daripada JVM?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Saat instans sering dinyalakan ulang. Dari tabel resmi Quarkus, satu cold start native menghemat sekitar 2,6 detik vCPU dibanding JVM dengan cache AOT Leyden, setara kira-kira 6.000 permintaan hangat. Bila tiap instans melayani jauh lebih sedikit dari itu sebelum dimatikan, native lebih hemat. Aplikasi yang wajib menjaga satu instans tetap menyala jarang mendapat manfaat itu, karena cold start-nya hanya terjadi saat lonjakan dan saat deploy."}
         },
         {
           "@type": "Question",
           "name": "Kapan sebaiknya memilih JVM panas di server on-premise?",
-          "acceptedAnswer": {"@type": "Answer", "text": "Saat lalu lintas ramai dan stabil sepanjang hari, tim sanggup mengurus operasional seperti jam, sertifikat TLS, cadangan, dan pemutakhiran, dan biaya bulanan yang tetap lebih menarik daripada tagihan per permintaan. Dalam pengujian proyek ini, satu server on-premise menahan 3.200 permintaan per detik dengan p99 satu digit milidetik tanpa mencapai titik jenuh."}
+          "acceptedAnswer": {"@type": "Answer", "text": "Saat lalu lintas ramai dan stabil sepanjang hari, data harus tinggal di gedung sendiri, dan tim sanggup mengurus jam, sertifikat TLS, cadangan, firewall, dan pemutakhiran. Dalam uji beban, satu server kantor proyek ini melayani sekitar 8.000 permintaan per detik dengan p99 sekitar 25 milidetik, dan batasnya adalah pool koneksi basis data, bukan CPU."}
         }
       ]
     }
@@ -265,51 +294,58 @@
 <main>
 
 <header>
-  <p class="kicker">Catatan teknik dan hukum · <time datetime="2026-10-11">11 Oktober 2026</time></p>
-  <h1>Agen Elektronik, Anomali Data, dan Pemilihan Stack</h1>
-  <p class="lead">Tiga hal yang sering terlewat saat membangun sistem pemesanan: siapa sebenarnya
-  "agen elektronik" yang menyetujui transaksi Anda, apa akibatnya bila anomali konkurensi tidak
-  ditangani, atau bahkan tidak disadari keberadaannya, dan mengapa bentuk lalu lintas yang
-  seharusnya memilihkan stack, bukan tren. Semuanya diturunkan dari pengalaman membangun platform
-  pemesanan kursi bioskop multi-penyewa.</p>
+  <p class="kicker">Catatan teknik dan hukum · <time datetime="2026-10-11">11 Oktober 2026</time> · diperbarui
+  <time datetime="2026-10-22">22 Oktober 2026</time></p>
+  <h1>Agen Elektronik, Anomali Adya, dan On-Premise vs Serverless</h1>
+  <p class="lead">Tiga keputusan menentukan apakah sebuah sistem pemesanan layak dipercaya: siapa "agen
+  elektronik" yang mengikat transaksi Anda dan apa yang wajib ia sediakan, anomali konkurensi mana yang bisa
+  menjual satu kursi dua kali dan bagaimana PostgreSQL 18.6 menutupnya, serta kapan server on-premise yang
+  selalu menyala lebih tepat daripada serverless yang bisa turun ke nol. Semuanya diturunkan dari platform
+  pemesanan kursi bioskop multi-penyewa yang kami bangun, uji, dan ukur sendiri.</p>
 </header>
 
 <section class="box tldr" id="ringkasan" aria-labelledby="ringkasan-judul">
   <h2 id="ringkasan-judul">Ringkasan</h2>
   <ul>
-    <li><strong>Agen elektronik versi UETA 1999 adalah mesin penjual yang menerima dan mengonfirmasi
-    pesanan.</strong> Contoh resminya adalah situs Bookseller.com. Ia bukan AI agentik dan bukan basis
-    data saja; agen yang otonom baru diantisipasi sebagai kemungkinan masa depan.</li>
-    <li><strong>Di Indonesia, UU ITE Pasal 21 menaruh akibat hukum transaksi lewat agen elektronik
-    pada penyelenggaranya.</strong> Pasal 22 mewajibkan penyelenggara agen elektronik tertentu
-    menyediakan fitur untuk mengubah informasi selama transaksi berlangsung. Agen AI pemesan tiket
-    harus memberi langkah tinjau sebelum transaksi mengikat.</li>
-    <li><strong>"Cek dulu kursinya kosong, lalu simpan" adalah resep pemesanan ganda.</strong> Satu
-    <em>exclusion constraint</em> PostgreSQL dengan operator rentang <code>&amp;&amp;</code> dan indeks
-    GiST membuat klaim kedua yang tumpang tindih mustahil ditulis, pada tingkat isolasi apa pun.</li>
-    <li><strong>Pola yang sama berlaku jauh di luar bioskop</strong>: hotel, ruang rapat, lapangan
-    futsal, jadwal dokter, kursi kereta per segmen, shift kerja, periode harga, blok IP, dan pita
-    frekuensi.</li>
-    <li><strong>Native image menang saat lalu lintas sepi dan sporadis; JVM yang panas menang saat
-    lalu lintas ramai dan stabil.</strong> Ukur jumlah permintaan per <em>cold start</em> sebelum
-    memilih, dan hitung biaya lantai yang tidak ikut turun ke nol.</li>
+    <li><strong>Agen elektronik bukan AI agentik.</strong> Dalam UETA 1999 ia adalah mesin penjual yang
+    menerima dan mengonfirmasi pesanan tanpa ditinjau manusia, seperti server web sebuah toko daring. UU ITE
+    Pasal 21 menaruh akibat hukum transaksinya pada penyelenggara, dan PP 71/2019 Pasal 37 merinci fitur yang
+    wajib ia sediakan: koreksi, pembatalan, dan konfirmasi.</li>
+    <li><strong>Agen AI adalah model ditambah loop, dan loop-lah yang bertindak.</strong> Biarkan agen
+    mengusulkan, biarkan pelanggan yang menekan tombol. Tempat model dijalankan menentukan apakah teks
+    pelanggan keluar dari Indonesia.</li>
+    <li><strong>READ COMMITTED, bawaan PostgreSQL, sudah mencegah G0 sampai G1c, tetapi tidak lost update,
+    read skew, write skew, dan phantom.</strong> "Cek dulu kursinya kosong, lalu simpan" adalah write skew.
+    Keempatnya ditutup oleh desain: constraint, kunci baris yang diambil semua orang lebih dulu, UPDATE
+    bersyarat, satu pernyataan untuk satu bacaan, atau SERIALIZABLE dengan satu kali percobaan ulang.</li>
+    <li><strong>PostgreSQL 18.6 memperbaiki celah deteksi konflik SERIALIZABLE dan dua bug yang menyentuh
+    bentuk constraint eksklusi.</strong> Setelah naik versi, cari indeks <code>btree_gist</code> pada kolom
+    float atau bit, lalu bangun ulang.</li>
+    <li><strong>Sistem pemesanan tidak benar-benar bisa turun ke nol.</strong> Tahanan kursi punya tenggat,
+    penyapunya harus bangun, dan notifikasi dikirim setelah respons. Lantainya satu instans yang selalu
+    menyala ditambah basis data, dan native image hanya membayar dirinya bila cold start sering terjadi.</li>
+    <li><strong>On-premise menang saat lalu lintas stabil, data harus tinggal di gedung sendiri, dan tim
+    sanggup mengurus jam, TLS, cadangan, firewall, dan pemutakhiran.</strong> Dalam uji beban, satu server
+    kantor kami melayani sekitar 8.000 permintaan per detik dengan p99 sekitar 25 ㎳.</li>
   </ul>
 </section>
 
 <nav class="box toc" aria-labelledby="toc-judul">
   <h2 id="toc-judul">Daftar isi</h2>
   <ol>
-    <li><a href="#agen-elektronik">Agen elektronik: siapa "mesin" yang menyetujui transaksi?</a></li>
-    <li><a href="#anomali">Anomali yang tidak disadari: pemesanan ganda</a></li>
+    <li><a href="#agen-elektronik">Agen elektronik: siapa "mesin" yang mengikat transaksi?</a></li>
+    <li><a href="#agen-ai">Agen AI: model, loop, dan ke mana data mengalir</a></li>
+    <li><a href="#anomali">Anomali Adya: apa saja, dan mana yang lolos di PostgreSQL</a></li>
+    <li><a href="#pencegahan">Mencegahnya di PostgreSQL 18.6</a></li>
     <li><a href="#domain-lain">Di luar bioskop: siapa lagi yang diuntungkan?</a></li>
-    <li><a href="#native-vs-jvm">Native image atau JVM panas: bentuk lalu lintas yang memilih</a></li>
+    <li><a href="#onprem-vs-serverless">On-premise atau serverless yang bisa turun ke nol</a></li>
     <li><a href="#faq">Pertanyaan yang sering diajukan</a></li>
     <li><a href="#sumber">Sumber</a></li>
   </ol>
 </nav>
 
 <section id="agen-elektronik">
-<h2>1. Agen elektronik: siapa "mesin" yang menyetujui transaksi?</h2>
+<h2>1. Agen elektronik: siapa "mesin" yang mengikat transaksi?</h2>
 
 <p><em>Uniform Electronic Transactions Act</em> (UETA) adalah model undang-undang transaksi
 elektronik untuk negara-negara bagian Amerika Serikat. Naskahnya disetujui National Conference of
@@ -323,7 +359,7 @@ performances in whole or in part, without review or action by an individual.</p>
 digunakan secara mandiri untuk memulai suatu tindakan atau menanggapi rekaman atau pelaksanaan
 elektronik, seluruhnya atau sebagian, tanpa ditinjau atau dikerjakan oleh seorang individu.</p>
 
-<h3>Bukan AI agentik</h3>
+<h3>Mesin penjual, bukan AI agentik</h3>
 <p>Komentar resmi UETA menegaskan bahwa definisi itu menetapkan agen elektronik sebagai mesin, dan
 bahwa istilah itu "terbatas pada fungsi alat". Undang-undang ini berangkat dari paradigma bahwa agen
 elektronik hanya mampu bekerja di dalam batasan teknis pemrogramannya yang sudah ditetapkan. Agen
@@ -340,263 +376,359 @@ pengadilan dapat menafsirkan definisi agen elektronik sesuai perkembangan terseb
 kepada komite perancang UETA, bertanggal 16 Februari 1999, memisahkan agen sederhana berbasis
 aturan dari agen yang mampu memutuskan secara otonom, dan memperlakukan yang kedua sebagai
 penerapan masa depan.</p>
+<p>Yang dimaksud para perancang adalah toko daring. Menurut komentar resmi, bila seseorang memesan buku
+dari Bookseller.com melalui situsnya, transaksi itu adalah transaksi otomatis "karena Bookseller
+menerima dan mengonfirmasi pesanan itu lewat mesinnya". Contoh keduanya adalah dua perusahaan yang saling
+mengirim dan mengonfirmasi pesanan lewat <em>Electronic Data Interchange</em> (EDI). Dalam istilah hari
+ini, aplikasi web yang menahan kursi, menerima pembayaran, dan menerbitkan tiket tanpa ditinjau manusia
+adalah agen elektronik milik penjualnya.</p>
+<p>Definisinya fungsional, bukan arsitektural: "program komputer atau sarana otomatis lain". UETA tidak
+memecah sistem menjadi lapisan web, aplikasi, dan basis data; yang dinilai adalah keseluruhan mesin yang
+dipakai satu pihak. Di sistem pemesanan yang dirancang dengan benar, keputusan "terima atau tolak" justru
+diambil di dalam PostgreSQL, oleh <em>exclusion constraint</em> yang dibahas di bagian 4, dan secara hukum
+itu tetap bagian dari "mesin Bookseller". Tanggung jawabnya jatuh pada pemakai alat: menurut komentar
+resmi, pemakai sebuah alat bertanggung jawab atas hasil yang diperoleh dari penggunaan alat itu, karena
+alat tidak punya kehendak sendiri.</p>
 
-<h3>Yang dimaksud: server yang menerima dan mengonfirmasi pesanan</h3>
-<p>Contoh dari para perancang sendiri adalah toko daring. Menurut komentar resmi, bila seseorang
-memesan buku dari Bookseller.com melalui situsnya, transaksi itu adalah transaksi otomatis
-"karena Bookseller menerima dan mengonfirmasi pesanan itu lewat mesinnya". Contoh keduanya adalah
-dua perusahaan yang saling mengirim dan mengonfirmasi pesanan lewat <em>Electronic Data
-Interchange</em> (EDI). Dalam istilah hari ini, aplikasi web yang menahan kursi, menerima
-pembayaran, dan menerbitkan tiket tanpa ditinjau manusia, misalnya layanan Quarkus di balik sebuah
-situs bioskop, adalah agen elektronik milik penjualnya.</p>
-
-<h3>Bukan basis data saja</h3>
-<p>Definisinya fungsional, bukan arsitektural: "program komputer atau sarana otomatis lain". UETA
-tidak memecah sistem menjadi lapisan web, aplikasi, dan basis data. Yang dinilai adalah keseluruhan
-mesin yang dipakai satu pihak. Di sistem pemesanan yang dirancang dengan benar, keputusan "terima
-atau tolak" justru diambil di dalam PostgreSQL, oleh <em>exclusion constraint</em> yang dibahas di
-bagian berikut. Secara hukum, itu tetap bagian dari "mesin Bookseller". Tanggung jawabnya jatuh pada
-pemakai alat: menurut komentar resmi, pemakai sebuah alat bertanggung jawab atas hasil yang
-diperoleh dari penggunaan alat itu, karena alat tidak punya kehendak sendiri.</p>
-
-<h3>Lalu agen AI hari ini?</h3>
-<p>Agen berbasis model bahasa besar memenuhi bunyi definisi itu, karena ia program komputer yang
-bertindak tanpa ditinjau. Namun ia tetap diperlakukan sebagai alat pihak yang memakainya. Dua pasal
-UETA lalu menjadi relevan:</p>
+<h3>Padanannya di Indonesia: UU ITE dan PP 71/2019</h3>
+<p>Undang-Undang Nomor 11 Tahun 2008 tentang Informasi dan Transaksi Elektronik memakai istilah yang sama,
+dan peraturan pelaksananya, PP Nomor 71 Tahun 2019, merinci kewajiban penyelenggaranya:</p>
 <ul>
-  <li><strong>Pasal 14 ayat 2</strong>: perjanjian dapat terbentuk dari interaksi antara agen
-  elektronik dan seorang individu, termasuk ketika individu itu melakukan tindakan yang bebas ia
-  tolak dan yang ia tahu akan membuat agen menyelesaikan transaksi, misalnya menekan tombol
-  "Bayar".</li>
-  <li><strong>Pasal 10 ayat 2</strong>: individu dapat menghindari akibat kesalahannya sendiri saat
-  berurusan dengan agen elektronik pihak lain bila agen itu "tidak menyediakan kesempatan untuk
-  mencegah atau mengoreksi kesalahan", asalkan ia segera memberi tahu, mengembalikan apa yang
-  diterimanya, dan belum menikmati manfaatnya. Pasal 10 ayat 4 melarang aturan ini disimpangi lewat
-  perjanjian.</li>
+  <li><strong>UU ITE Pasal 1 angka 8</strong>: "Agen Elektronik adalah perangkat dari suatu Sistem
+  Elektronik yang dibuat untuk melakukan suatu tindakan terhadap suatu Informasi Elektronik tertentu
+  secara otomatis yang diselenggarakan oleh Orang." PP 71/2019 Pasal 1 angka 3 mengulang definisi itu.</li>
+  <li><strong>UU ITE Pasal 21</strong>: transaksi dapat dilakukan sendiri, melalui pihak yang dikuasakan,
+  atau melalui Agen Elektronik (ayat 1). Bila melalui Agen Elektronik, segala akibat hukumnya menjadi
+  tanggung jawab penyelenggara Agen Elektronik (ayat 2 huruf c). Kerugian karena agen gagal beroperasi
+  akibat tindakan pihak ketiga terhadap sistem tetap ditanggung penyelenggara (ayat 3); kerugian karena
+  kelalaian pengguna jasa ditanggung pengguna (ayat 4); dan ayat 2 tidak berlaku bila dapat dibuktikan
+  keadaan memaksa, kesalahan, atau kelalaian pengguna (ayat 5).</li>
+  <li><strong>UU ITE Pasal 22</strong>: penyelenggara Agen Elektronik tertentu harus menyediakan fitur
+  yang memungkinkan penggunanya mengubah informasi yang masih dalam proses transaksi.</li>
+  <li><strong>PP 71/2019 Pasal 36</strong>: Agen Elektronik adalah bagian dari Sistem Elektronik, dan
+  kewajiban Penyelenggara Sistem Elektronik berlaku <em>mutatis mutandis</em> bagi penyelenggara Agen
+  Elektronik.</li>
+  <li><strong>PP 71/2019 Pasal 37</strong>: penyelenggara wajib menyampaikan informasi untuk melindungi
+  hak pengguna, paling sedikit identitas penyelenggara, objek yang ditransaksikan, kelayakan atau keamanan
+  agen, tata cara penggunaan, syarat kontrak, prosedur mencapai kesepakatan, jaminan privasi atau
+  pelindungan data pribadi, dan nomor telepon pusat pengaduan (ayat 1). Ia juga wajib menyediakan fitur
+  pelindung hak pengguna sesuai karakteristik agennya (ayat 2 dan 3, tabel di bawah). Ayat 4 mengulang
+  Pasal 22 UU ITE.</li>
+  <li><strong>PP 71/2019 Pasal 38</strong>: agen yang diselenggarakan untuk lebih dari satu Penyelenggara
+  Sistem Elektronik wajib memperlakukan mereka sama (ayat 3), dan penyelenggaranya dianggap Penyelenggara
+  Sistem Elektronik tersendiri (ayat 4). Bagi platform multi-penyewa yang melayani banyak bioskop, siapa
+  yang harus mendaftar sebagai penyelenggara adalah pertanyaan untuk konsultan hukum, bukan detail
+  teknis.</li>
+  <li><strong>PP 71/2019 Pasal 39</strong>: prinsip kehati-hatian, pengamanan sistem, pengendalian
+  transaksi, efisiensi biaya, dan pelindungan konsumen, ditambah prosedur standar pengoperasian yang menjaga
+  kerahasiaan, integritas, ketersediaan, keautentikan, otorisasi, dan kenirsangkalan.</li>
 </ul>
-<p class="rule">Pelajaran desainnya sederhana: <strong>biarkan agen mengusulkan, biarkan manusia
-yang menekan tombol.</strong> Agen AI boleh mencarikan film, jadwal, dan kursi. Peta kursi dengan
-pilihan agen sudah tercentang, ditambah tombol yang ditekan sendiri oleh pelanggan, adalah
-"kesempatan untuk mencegah atau mengoreksi kesalahan" itu. Agen yang langsung memesan karena
-pelanggan mengetik "ya" tidak memberikannya.</p>
+<p>Pelanggaran Pasal 37 ayat (1) dan (2), Pasal 38 ayat (3), dan Pasal 39 ayat (2) dikenai sanksi
+administratif menurut Pasal 100: teguran tertulis, denda administratif, penghentian sementara, pemutusan
+akses, atau dikeluarkan dari daftar. Fitur di ayat (3) Pasal 37 terdengar abstrak sampai dipetakan ke
+sebuah layar pemesanan:</p>
 
-<h3>Yang memenuhi definisi: modelnya, loop-nya, atau keduanya?</h3>
-<p>Karena definisinya fungsional, yang dinilai adalah program yang bertindak. Model bahasa besar
-hanya mengubah masukan menjadi teks atau permintaan memanggil alat; dokumentasi Llama 3.1 sendiri
-menegaskan bahwa model tidak mengeksekusi pemanggilan alat dan memerlukan kerangka kerja lain untuk
-itu. Yang memulai tindakan atau menanggapi rekaman elektronik tanpa ditinjau individu adalah
-<strong>loop agen</strong>: kode yang memanggil model, menjalankan alat yang diminta (menahan kursi,
-menerbitkan tiket), lalu mengembalikan hasilnya ke model sampai selesai. Loop itulah yang memenuhi
-bunyi Pasal 2 angka 6, dan loop itu pula "mesin" milik penyelenggara. Modellah yang memberinya
-kemampuan memilih tindakan sendiri, yaitu otonom dan bukan sekadar otomatis seperti yang dibayangkan
-komentar resmi di atas. Loop tanpa model, seperti server Quarkus tadi, tetap agen elektronik tetapi
-bukan agen AI. Model tanpa loop tidak bertindak sendiri. Jadi agen AI yang otonom membutuhkan
-keduanya, dan tanggung jawab hukumnya tetap pada pemakai alat. Langkah tinjau manusia pun dipasang
-di loop, bukan di model.</p>
-<p>Pasangan loop dan model berikut paling ringan dipasang di Quarkus, sekadar contoh dan bukan
-rekomendasi. Loop-nya sama, yaitu <a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/index.html">Quarkus LangChain4j</a>, yang berjalan di proses JVM
-yang sama dengan servernya (Java atau Kotlin), jadi tanpa Jython dan tanpa layanan Python terpisah.
-Yang berganti hanya ekstensi model di baliknya. Modelnya dibatasi pada yang inferensinya berjalan di
-Indonesia, sesuai daftar periksa di bagian 4: region Jakarta (<code>ap-southeast-3</code>), server
-sendiri di dalam negeri, atau API penyedia dalam negeri.</p>
-<ul>
-  <li><strong>Quarkus LangChain4j + <a rel="nofollow" href="https://docs.aws.amazon.com/nova/latest/userguide/tool-use.html">Amazon Nova</a> Pro atau Lite</strong> lewat
-  <a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/bedrock-chat-model.html">ekstensi Amazon Bedrock</a>, dengan <code>quarkus.langchain4j.bedrock.aws.region=ap-southeast-3</code>
-  dan ID model tanpa awalan, misalnya <code>amazon.nova-lite-v1:0</code>: cukup kredensial AWS, tanpa server
-  model sendiri. Jangan menyalin contoh di dokumentasi ekstensi, <code>global.amazon.nova-2-lite-v1:0</code>:
-  awalan <code>global.</code> atau <code>apac.</code> mengizinkan Bedrock memproses permintaan di region lain,
-  dan Nova 2 Lite memang hanya tersedia lewat profil global dari Jakarta.</li>
-  <li><strong>Quarkus LangChain4j + <a rel="nofollow" href="https://qwen.readthedocs.io/en/latest/framework/function_call.html">Qwen3</a>, <a rel="nofollow" href="https://openai.com/index/introducing-gpt-oss/">GPT-OSS</a>,
-  <a rel="nofollow" href="https://api-docs.deepseek.com/guides/function_calling">DeepSeek</a>, <a rel="nofollow" href="https://docs.z.ai/">GLM</a>, <a rel="nofollow" href="https://github.com/MoonshotAI/Kimi-K2">Kimi</a>,
-  <a rel="nofollow" href="https://github.com/MiniMax-AI/MiniMax-M2">MiniMax</a>, <a rel="nofollow" href="https://mistral.ai/news/devstral-2-vibe-cli">Devstral 2</a>, atau
-  <a rel="nofollow" href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16">Nemotron 3</a></strong> di Bedrock Jakarta, lewat
-  <a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/openai-chat-model.html">ekstensi OpenAI</a> dengan
-  <code>quarkus.langchain4j.openai.base-url=https://bedrock-mantle.ap-southeast-3.api.aws/v1</code> dan
-  kunci API Bedrock. <a rel="nofollow" href="https://docs.aws.amazon.com/bedrock/latest/userguide/models-region-compatibility.html">Tabel region Bedrock</a>
-  mencatat 16 model berbobot terbuka In-Region di Jakarta, di endpoint <code>bedrock-runtime</code> maupun
-  <code>bedrock-mantle</code>: Qwen3 32B, Qwen3 235B A22B 2507, Qwen3 Coder 30B dan 480B, gpt-oss-20b dan
-  -120b, DeepSeek V3.1 dan V3.2, GLM 4.7, 4.7 Flash, dan 5, Kimi K2.5, MiniMax M2.1 dan M2.5, Devstral 2
-  123B, dan Nemotron 3 Super 120B. Versi lain seperti Kimi K3 dan GLM 5.3 hanya lewat profil global.
-  Untuk Kimi K2 Thinking dan Nemotron Nano 3 30B, dokumen AWS sendiri bertentangan: kartu model dan
-  daftar harga Jakarta mencantumkannya In-Region, tetapi tabel region tidak punya baris Jakarta untuk
-  keduanya. Walau kedua endpoint berstatus In-Region, kartu model mencantumkan pemanggilan alat sisi
-  klien untuk semuanya di <a rel="nofollow" href="https://docs.aws.amazon.com/bedrock/latest/userguide/endpoints.html">endpoint <code>bedrock-mantle</code></a>
-  yang kompatibel-OpenAI, sedangkan di <code>bedrock-runtime</code> hanya untuk Qwen3 235B A22B 2507,
-  Qwen3 Coder 480B, dan DeepSeek V3.1. Karena itu jalurnya ekstensi OpenAI, bukan ekstensi Bedrock.
-  Daftar saring yang direncanakan untuk menguji pemanggilan alat berbahasa Indonesia memuat 12 model:
-  Qwen3 32B dan 235B A22B 2507, gpt-oss-20b dan -120b, DeepSeek V3.2, GLM 4.7, 4.7 Flash, dan 5, Kimi
-  K2.5, MiniMax M2.5, Nemotron 3 Super 120B, dan Nemotron Nano 3 30B. Qwen3 Coder 30B dan 480B serta
-  Devstral 2 dilewati karena dilatih untuk kode, DeepSeek V3.1 dan MiniMax M2.1 karena sudah ada
-  penerusnya (V3.2 dan M2.5), dan Kimi K2 Thinking karena ia model penalaran, sedangkan pengujian ini
-  mematikan mode berpikir dan Kimi K2.5 sudah mewakili vendornya.
-  API milik vendornya sendiri tidak dipakai. Menurut halaman resmi masing-masing,
-  <a rel="nofollow" href="https://www.alibabacloud.com/help/en/model-studio/regions/">Alibaba Cloud Model Studio</a> (Qwen) tidak punya region Jakarta,
-  <a rel="nofollow" href="https://cdn.deepseek.com/policies/en-US/deepseek-privacy-policy.html">DeepSeek</a> memproses dan menyimpan data di Tiongkok,
-  <a rel="nofollow" href="https://docs.z.ai/legal-agreement/privacy-policy">Z.ai</a> (GLM) dan <a rel="nofollow" href="https://platform.kimi.ai/docs/agreement/userprivacy">Moonshot</a> (Kimi) di Singapura,
-  <a rel="nofollow" href="https://platform.minimax.io/protocol/privacy-policy">MiniMax</a> di pusat data Amerika Serikat, dan
-  <a rel="nofollow" href="https://help.mistral.ai/en/articles/347629-where-do-you-store-my-data-or-my-organization-s-data">Mistral</a> (Devstral 2) di Uni Eropa atau
-  Amerika Serikat. <a rel="nofollow" href="https://assets.ngc.nvidia.com/products/api-catalog/legal/NVIDIA%20API%20Trial%20Terms%20of%20Service.pdf">API NVIDIA</a> (Nemotron)
-  hanya untuk uji coba, bukan produksi, dan tidak menyebut lokasinya.
-  <a rel="nofollow" href="https://developers.openai.com/api/docs/models/gpt-oss-120b">OpenAI</a> mencantumkan GPT-OSS di API-nya, tetapi dengan batas
-  laju nol di setiap tingkat.</li>
-  <li><strong>Quarkus LangChain4j + <a rel="nofollow" href="https://www.llama.com/docs/model-cards-and-prompt-formats/llama3_1/">Llama 3.1</a> atau
-  <a rel="nofollow" href="https://huggingface.co/Sahabat-AI">Sahabat-AI</a></strong>, juga model berbobot terbuka di atas, lewat
-  <a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/ollama-chat-model.html">ekstensi Ollama</a> (mode dev Quarkus menyalakan kontainer Ollama sendiri) atau
-  lewat server kompatibel-OpenAI seperti vLLM dengan ekstensi OpenAI, di server on-premise atau penyedia GPU
-  di Indonesia. Untuk Llama 3.1, hanya jalur ini yang ditemukan: di Bedrock ia hanya lewat profil
-  <code>us.</code>, dan kedua API dalam negeri di bawah tidak mencantumkannya. Hindari model <em>cloud</em>
-  Ollama (tag seperti <code>gemma4:cloud</code>), yang dijalankan di server <code>ollama.com</code>, bukan di
-  server Anda.</li>
-  <li><strong>Quarkus LangChain4j + Sahabat-AI, GPT-OSS, Qwen3, atau Nemotron 3</strong> lewat API
-  kompatibel-OpenAI yang dihosting di Indonesia, dengan ekstensi OpenAI dan <code>base-url</code> penyedianya.
-  <a rel="nofollow" href="https://docs.cloudeka.ai/guideline-for-enterprise/deka-llm/model-catalog">Katalog Deka LLM</a> (Lintasarta Cloudeka)
-  mencantumkan <code>sahabat-ai-v2-70b-it</code>, <code>gpt-oss-120b</code>, <code>gpt-oss-20b</code>,
-  <code>qwen3-30b-a3b-instruct-2507</code>, dan <code>nemotron-3-nano-30b-a3b</code>, dan
-  <a rel="nofollow" href="https://www.cloudeka.id/products/deka-llm/">halaman produknya</a> menyatakan prompt dan hasilnya tetap di
-  yurisdiksi Indonesia. <a rel="nofollow" href="https://www.biznetgio.com/blog/press-release-ai-services/">NEO Inference</a> (Biznet Gio) menyediakan
-  GPT-oss-120B dan Qwen3-Coder-480B, dan menyatakan data pelanggan tetap di Indonesia. Halaman yang
-  diperiksa tidak menyebut pemanggilan alat, jadi ujilah dulu sebelum dipakai di loop.</li>
-</ul>
-<p>Claude, Gemini, dan GPT tidak masuk daftar ini. Dari Jakarta, Bedrock menyediakan Claude dan GPT hanya
-lewat profil global. <a rel="nofollow" href="https://platform.claude.com/docs/en/manage-claude/data-residency">API Anthropic sendiri</a>
-hanya menawarkan inferensi di Amerika Serikat (<code>"us"</code>) atau di mana saja (<code>"global"</code>), dan
-data tersimpan di Amerika Serikat. <a rel="nofollow" href="https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/data-residency">Halaman data residency Google Cloud</a>
-tidak mencantumkan Jakarta (<code>asia-southeast2</code>) sama sekali; lokasi terdekatnya Singapura, dan
-endpoint global tidak menjamin di mana permintaan diproses. <a rel="nofollow" href="https://developers.openai.com/api/docs/guides/your-data">Halaman data OpenAI</a>
-mencantumkan pemrosesan regional hanya di Amerika Serikat, Eropa, dan Uni Emirat Arab; Singapura hanya
-untuk penyimpanan, dan Indonesia tidak tercantum. Data region di atas per 15 Oktober 2026.</p>
-<p>Loop berbasis Python atau TypeScript, seperti LangGraph, Google ADK, Claude Agent SDK, Microsoft Agent
-Framework, dan OpenAI Agents SDK, tetap bisa dipakai sebagai layanan terpisah yang dipanggil Quarkus lewat
-HTTP, tetapi itu menambah satu layanan untuk dikelola. <a rel="nofollow" href="https://github.com/jython/jython">Jython</a> bukan jalan keluarnya:
-rilisannya hanya mendukung Python 2.7, dan README resminya menyatakan Jython 3 belum menjadi produk yang
-bisa dipakai di aplikasi, sedangkan LangGraph, OpenAI Agents SDK, dan Microsoft Agent Framework versi Python
-mensyaratkan Python 3.10 ke atas. Amazon Nova diakses lewat layanan API Amazon, sedangkan sebagian besar
-model lainnya berbobot terbuka dengan lisensi yang berbeda-beda. Dukungan pemanggilan alat juga berbeda
-antar model dan varian, jadi ujilah dulu sebelum sebuah model dipasang sebagai pengambil keputusan.</p>
-<p>Pasangan pertama sudah kami uji sendiri: Quarkus LangChain4j dengan enam alat (kota, bioskop, film,
-jadwal, kursi kosong, dan usulan kursi), tanpa alat untuk menahan kursi atau membayar, pada 40 permintaan
-pemesanan berbahasa Indonesia baku. Sebuah kasus lulus bila model memanggil semua alat yang diperlukan
-dan, pada 19 kasus yang meminta kursi, mengusulkan kursi yang benar. Hasilnya per 16 Oktober 2026, satu kali jalan per kasus:</p>
-<ul>
-  <li><strong>Model kecil di CPU tidak cukup.</strong> Qwen3 1.7B, 4B, dan 8B lewat Ollama di server
-  on-premise tanpa GPU lulus 2 sampai 6 dari 40, termasuk dengan prompt yang menambahkan aturan merangkai
-  alat, dan tidak satu pun mengusulkan kursi yang benar. Polanya sama: memanggil satu alat lalu berhenti,
-  menanyakan kepada pelanggan hal yang bisa dicari lewat alat, atau mengarang ID. Qwen3 8B butuh median 16
-  detik per permintaan dan 83 detik pada persentil ke-95, di server yang juga melayani aplikasinya. Tanda ☑
-  di tabel di bawah berarti model bisa memanggil alat, bukan bisa merangkainya.</li>
-  <li><strong>Varian dan cara penyajian ikut menentukan.</strong> Tag Ollama <code>qwen3:4b</code> adalah
-  varian berpikir yang mengabaikan <code>think=false</code> dan menulis penalarannya ke jawaban, sampai 845
-  detik untuk satu kasus; <code>qwen3:4b-instruct-2507</code> tidak. Gemma 4 E4B dengan mode berpikir mati
-  dan lebih dari satu alat menjawab hasil alat dengan pesan kosong, dan itu terjadi di Ollama sendiri, bukan
-  di ekstensi Quarkus.</li>
-  <li><strong>Ukuran bukan urutan.</strong> Lewat tingkat gratis Groq, Qwen3.8 27B lulus 24 dari 26 kasus
-  pertama, sedangkan gpt-oss-120b, yang parameter totalnya lebih dari empat kali lipat, lulus 18 dari 35.</li>
-  <li><strong>Yang lulus belum tersedia di dalam negeri.</strong> Groq memproses permintaan di luar
-  Indonesia, jadi pengujian ini memakai data sintetis dan hanya model berbobot terbuka, supaya pemenangnya
-  bisa dipindah ke host dalam negeri. Qwen3.8 27B tidak ada di daftar Bedrock Jakarta, Deka LLM, maupun NEO
-  Inference di atas. Daftar saring 12 model di Bedrock Jakarta, yang diperkirakan sekitar US$35, ditunda
-  sampai ada penyewa yang memintanya. Demo kami yang memakai Groq menyebutkan host-nya dan meminta pembaca
-  tidak mengetik data pribadi.</li>
-</ul>
-<p>Untuk loop lain, tabel berikut mencatat model mana yang diklaim cocok menurut dokumentasi resmi loop atau
-penyedia modelnya. Kolom dengan garis atas adalah yang paling ringan di Quarkus.</p>
 <div class="table-wrap">
-<table class="matrix">
-  <caption>Model yang diklaim cocok dengan tiap loop menurut dokumentasi resmi (data per 13 Oktober 2026)</caption>
-  <thead><tr><th scope="col">Model</th><th scope="col" class="ck pick"><a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/index.html">Quarkus LangChain4j</a><small>Java/<wbr>Kotlin</small></th><th scope="col" class="ck"><a rel="nofollow" href="https://docs.koog.ai/llm-providers/">Koog</a><small>Kotlin/<wbr>Java</small></th><th scope="col" class="ck"><a rel="nofollow" href="https://docs.langchain.com/oss/python/langgraph/overview">LangGraph</a><small>Python/<wbr>JS</small></th><th scope="col" class="ck"><a rel="nofollow" href="https://adk.dev/agents/models/">Google ADK</a><small>Java/<wbr>Kotlin/<wbr>Python/<wbr>Go/<wbr>TS</small></th><th scope="col" class="ck"><a rel="nofollow" href="https://code.claude.com/docs/en/agent-sdk/overview">Claude Agent SDK</a><small>Python/<wbr>TS</small></th><th scope="col" class="ck"><a rel="nofollow" href="https://github.com/microsoft/agent-framework">Microsoft Agent Framework</a><small>.NET/<wbr>Python/<wbr>Go</small></th><th scope="col" class="ck"><a rel="nofollow" href="https://openai.github.io/openai-agents-python/models/">OpenAI Agents SDK</a><small>Python/<wbr>TS</small></th><th scope="col" class="ck"><a rel="nofollow" href="https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/what-is-bedrock-agentcore.html">Bedrock AgentCore</a><small>Python/<wbr>TS</small></th></tr></thead>
+<table>
+  <caption>Fitur wajib menurut PP 71/2019 Pasal 37 ayat (3), dan wujud wajarnya di sistem pemesanan kursi</caption>
+  <thead><tr><th scope="col">Fasilitas untuk</th><th scope="col">Wujud di sistem pemesanan kursi</th></tr></thead>
   <tbody>
-    <tr><th scope="row"><a rel="nofollow" href="https://docs.aws.amazon.com/nova/latest/userguide/tool-use.html">Amazon Nova</a></th><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span class="sr">tidak ada klaim</span></td><td class="ck"><span class="sr">tidak ada klaim</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span class="sr">tidak ada klaim</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td></tr>
-    <tr><th scope="row"><a rel="nofollow" href="https://qwen.readthedocs.io/en/latest/framework/function_call.html">Qwen3</a></th><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span class="sr">tidak ada klaim</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td></tr>
-    <tr><th scope="row"><a rel="nofollow" href="https://openai.com/index/introducing-gpt-oss/">GPT-OSS</a></th><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span class="sr">tidak ada klaim</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td></tr>
-    <tr><th scope="row"><a rel="nofollow" href="https://api-docs.deepseek.com/guides/function_calling">DeepSeek</a></th><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span class="sr">tidak ada klaim</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td></tr>
-    <tr><th scope="row"><a rel="nofollow" href="https://docs.z.ai/">GLM</a></th><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span class="sr">tidak ada klaim</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td></tr>
-    <tr><th scope="row"><a rel="nofollow" href="https://github.com/MoonshotAI/Kimi-K2">Kimi</a></th><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span class="sr">tidak ada klaim</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td></tr>
-    <tr><th scope="row"><a rel="nofollow" href="https://github.com/MiniMax-AI/MiniMax-M2">MiniMax</a></th><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span class="sr">tidak ada klaim</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td></tr>
-    <tr><th scope="row"><a rel="nofollow" href="https://mistral.ai/news/devstral-2-vibe-cli">Devstral 2</a></th><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span class="sr">tidak ada klaim</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td></tr>
-    <tr><th scope="row"><a rel="nofollow" href="https://www.llama.com/docs/model-cards-and-prompt-formats/llama3_1/">Llama 3.1</a></th><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span class="sr">tidak ada klaim</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span class="sr">tidak ada klaim</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td></tr>
-    <tr><th scope="row"><a rel="nofollow" href="https://huggingface.co/Sahabat-AI">Sahabat-AI</a></th><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span class="sr">tidak ada klaim</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span class="sr">tidak ada klaim</span></td></tr>
-    <tr><th scope="row"><a rel="nofollow" href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16">Nemotron 3</a></th><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span class="sr">tidak ada klaim</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td></tr>
-    <tr class="grp"><th scope="colgroup" colspan="9">Pembanding: model milik vendor loop</th></tr>
-    <tr><th scope="row"><a rel="nofollow" href="https://platform.claude.com/docs/en/about-claude/models/overview">Claude</a></th><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td></tr>
-    <tr><th scope="row"><a rel="nofollow" href="https://ai.google.dev/gemini-api/docs/models">Gemini</a></th><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span class="sr">tidak ada klaim</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td></tr>
-    <tr><th scope="row"><a rel="nofollow" href="https://developers.openai.com/api/docs/models">GPT (OpenAI)</a></th><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span class="sr">tidak ada klaim</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td><td class="ck"><span aria-hidden="true">☑︎</span><span class="sr">ya</span></td></tr>
+    <tr><td>a. melakukan koreksi</td><td>Selama kursi masih <em>ditahan</em>, pelanggan bisa mengganti pilihannya.</td></tr>
+    <tr><td>b. membatalkan perintah</td><td>Melepas tahanan, atau membatalkan satu kursi dari pesanan.</td></tr>
+    <tr><td>c. memberikan konfirmasi atau rekonfirmasi</td><td>Tombol tahan dan langkah bayar yang ditekan pelanggan sendiri.</td></tr>
+    <tr><td>d. memilih meneruskan atau berhenti</td><td>Lanjut membayar, atau membiarkan tahanan kedaluwarsa; di platform ini setelah 10 menit.</td></tr>
+    <tr><td>e. melihat informasi tawaran</td><td>Film, jadwal, studio, kursi, dan harga terlihat sebelum menahan.</td></tr>
+    <tr><td>f. mengecek status berhasil atau gagalnya transaksi</td><td>Halaman pesanan dengan status pembayaran dan tiketnya.</td></tr>
+    <tr><td>g. membaca perjanjian sebelum melakukan transaksi</td><td>Kebijakan pembatalan yang bisa dibaca sebelum membayar.</td></tr>
   </tbody>
 </table>
 </div>
-<p class="note"><strong>Cara membaca.</strong> ☑ berarti dokumentasi resmi loop, atau dokumentasi penyedia
-model termasuk katalog Amazon Bedrock, menyatakan pasangan itu didukung: menyebut keduanya langsung, atau
-kedua pihak mendukung antarmuka yang sama (Bedrock Converse, API kompatibel-OpenAI, Ollama, atau vLLM).
-Kotak kosong berarti klaim resmi tidak ditemukan, bukan berarti mustahil. Tabel ini tidak menguji pasangan
-mana pun dan tidak menilai seberapa andal tiap model memanggil alat.</p>
+<p>Jadi status "ditahan" yang terpisah dari "dikonfirmasi" bukan sekadar kenyamanan. Itulah fitur koreksi
+yang diminta UU ITE Pasal 22 dan PP 71/2019 Pasal 37, dan UETA sampai ke tuntutan yang sama dari arah lain
+(bagian 2).</p>
+
+<h3>Kegagalan agen adalah tanggungan penyelenggaranya</h3>
+<p>Pasal 21 punya dua akibat praktis bagi engineer. Pertama, bila dua penonton datang membawa tiket untuk
+kursi yang sama karena balapan di kode Anda, itu agen elektronik yang gagal beroperasi, bukan karena
+tindakan pihak ketiga dan bukan karena kelalaian pengguna. Menurut bunyi pasalnya, akibat hukum itu jatuh
+pada penyelenggara. Anomali konkurensi di bagian 3 karena itu juga soal hukum, bukan hanya soal
+teknik.</p>
+<p>Kedua, membuktikan pengecualian di ayat 5 membutuhkan jejak siapa melakukan apa dan kapan, dan UU ITE
+Pasal 6 menganggap dokumen elektronik sah sepanjang ia dapat diakses, ditampilkan, dijamin keutuhannya, dan
+dapat dipertanggungjawabkan. Platform ini mencatat setiap perubahan pemesanan di log audit dengan jenis
+pelaku <code>customer</code>, <code>tenant_staff</code>, <code>system</code>, atau
+<code>agen_elektronik</code>, yang terakhir untuk pelunasan otomatis dari gerbang pembayaran, sehingga
+keputusan mesin dapat dibedakan dari keputusan manusia. Keutuhannya dijaga dengan rantai hash per
+penyewa, dan bagian 4 menceritakan bagaimana sebuah anomali konkurensi diam-diam mematahkan rantai itu.</p>
+<p class="note">Kutipan UU ITE berasal dari naskah UU 11/2008, yang telah diubah oleh UU 19/2016 dan
+UU 1/2024; rujuklah naskah konsolidasinya, dan konsultan hukum, sebelum mengandalkannya. Halaman ini bukan
+nasihat hukum.</p>
+</section>
+
+<section id="agen-ai">
+<h2>2. Agen AI: model, loop, dan ke mana data mengalir</h2>
+<p>Agen berbasis model bahasa besar memenuhi bunyi definisi UETA, karena ia program komputer yang
+bertindak tanpa ditinjau. Namun ia tetap diperlakukan sebagai alat pihak yang memakainya, dan di Indonesia
+penyelenggaranya yang menanggung akibatnya. Pertanyaan teknisnya: bagian mana yang sebenarnya
+bertindak?</p>
+
+<h3>Yang memenuhi definisi: loop-nya</h3>
+<p>Karena definisinya fungsional, yang dinilai adalah program yang bertindak. Model bahasa besar hanya
+mengubah masukan menjadi teks atau permintaan memanggil alat; dokumentasi Llama 3.1 sendiri menegaskan
+bahwa model tidak mengeksekusi pemanggilan alat dan memerlukan kerangka kerja lain untuk itu. Yang memulai
+tindakan atau menanggapi rekaman elektronik tanpa ditinjau individu adalah <strong>loop agen</strong>: kode
+yang memanggil model, menjalankan alat yang diminta (mencari jadwal, mengusulkan kursi), lalu mengembalikan
+hasilnya ke model sampai selesai. Loop itulah yang memenuhi bunyi Pasal 2 angka 6, dan loop itu pula
+"mesin" milik penyelenggara. Modellah yang memberinya kemampuan memilih tindakan sendiri, yaitu otonom dan
+bukan sekadar otomatis seperti yang dibayangkan komentar resmi. Loop tanpa model, seperti server pemesanan
+biasa, tetap agen elektronik tetapi bukan agen AI. Model tanpa loop tidak bertindak sendiri. Jadi agen AI
+yang otonom membutuhkan keduanya, tanggung jawab hukumnya tetap pada pemakai alat, dan langkah tinjau
+manusia dipasang di loop, bukan di model.</p>
+
+<h3>Biarkan agen mengusulkan, biarkan manusia yang menekan tombol</h3>
+<p>Begitu agennya otonom, dua pasal UETA menjadi relevan:</p>
 <ul>
-  <li><strong>Quarkus LangChain4j</strong>: ekstensi Quarkiverse untuk Amazon Bedrock, Anthropic, Gemini,
-  OpenAI (dan API kompatibel-OpenAI lewat <code>base-url</code>), Ollama, dan Mistral AI. Dokumentasinya
-  menyebut native image, dan repositorinya memuat <a rel="nofollow" href="https://github.com/quarkiverse/quarkus-langchain4j/tree/main/samples/chatbot-easy-rag-kotlin">sampel Kotlin</a>.</li>
-  <li><strong>Koog</strong>: pustaka agen JetBrains untuk Kotlin dan Java. Dokumentasinya memuat integrasi
-  Spring Boot, Spring AI, dan Ktor, tanpa menyebut Quarkus.</li>
-  <li><strong>LangGraph</strong>: memakai model chat LangChain, yang punya integrasi untuk Amazon Bedrock,
-  <a rel="nofollow" href="https://docs.langchain.com/oss/python/integrations/chat/amazon_nova">Amazon Nova</a>, Ollama, vLLM, NVIDIA (Nemotron), Mistral, DeepSeek, Qwen, dan endpoint
-  kompatibel-OpenAI.</li>
-  <li><strong>Google ADK</strong>: Gemini dan Claude langsung; model lain lewat Agent Platform (Model Garden)
-  serta, di Python, LiteLLM, Ollama, dan vLLM. Di Java, jembatan ke LangChain4j dan Spring AI hanya ada di
-  modul <a rel="nofollow" href="https://github.com/google/adk-java/blob/main/contrib/README.md">contrib</a> yang kompatibilitas API-nya tidak dijamin antarversi. Dokumentasi
-  ADK tidak menyebut Amazon Nova, dan dokumentasi Nova tidak menyebut ADK.</li>
-  <li><strong>Claude Agent SDK</strong>: pustaka Python dan TypeScript yang menjalankan binari Claude Code.
-  Dokumentasi Anthropic hanya membahas Claude, dan halaman <a rel="nofollow" href="https://code.claude.com/docs/en/llm-gateway">LLM gateway</a>-nya
-  menyatakan bahwa Anthropic <q lang="en">doesn't support routing Claude Code to non-Claude models through
-  any gateway</q>. DeepSeek, Alibaba (Qwen), Z.ai (GLM), Moonshot (Kimi), dan MiniMax mendokumentasikan atau
-  menyebut pemakaian lewat Claude Code atau API kompatibel-Anthropic, bukan lewat Agent SDK. Hanya gateway pihak
-  ketiga seperti <a rel="nofollow" href="https://docs.litellm.ai/docs/tutorials/claude_agent_sdk">LiteLLM</a> yang mendokumentasikan perutean Agent SDK ke model
-  lain.</li>
-  <li><strong>Microsoft Agent Framework</strong>: .NET, Python, dan Go. Di Python tersedia klien Amazon
-  Bedrock (Converse), Anthropic, Gemini, Ollama, OpenAI (dengan <code>OPENAI_BASE_URL</code> untuk endpoint
-  kompatibel-OpenAI), dan Foundry.</li>
-  <li><strong>OpenAI Agents SDK</strong>: model non-OpenAI lewat endpoint kompatibel-OpenAI
-  (<code>base_url</code>) atau adaptor LiteLLM dan Any-LLM yang masih beta. Nova dan Llama 3.1 kosong karena
-  tabel API Bedrock tidak mencantumkan keduanya di Chat Completions dan dokumentasi Meta tidak menyebut
-  antarmuka itu. Claude tercentang lewat <a rel="nofollow" href="https://platform.claude.com/docs/en/api/openai-sdk">lapisan kompatibel-OpenAI</a> Anthropic, yang
-  menurut Anthropic untuk uji coba dan bukan solusi produksi jangka panjang.</li>
-  <li><strong>Bedrock AgentCore</strong>: Runtime hanya menjalankan loop yang Anda bawa, sedangkan
-  <a rel="nofollow" href="https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/harness.html">Harness</a> adalah loop terkelola bertenaga Strands Agents yang memakai model Amazon
-  Bedrock, OpenAI, Google Gemini, atau penyedia kompatibel LiteLLM; kolom ini mengikuti Harness.
-  Sahabat-AI kosong karena tidak ada di katalog Bedrock. Runtime juga bisa menjalankan loop Java, seperti
-  pada <a rel="nofollow" href="https://github.com/awslabs/amazon-bedrock-agentcore-samples/tree/main/03-integrations/agentic-frameworks/java_adk">contoh resmi AWS</a> (Google ADK di Spring Boot), dan AWS SDK for Java
-  menyediakan <code>BedrockAgentCoreClient</code> untuk memanggilnya.</li>
-  <li><strong>Amazon Nova</strong>: tabel API Bedrock mencatat Nova hanya untuk Invoke dan Converse, tidak
-  untuk Chat Completions maupun Messages (Anthropic), jadi loop yang hanya berbicara protokol OpenAI atau
-  Anthropic tidak punya jalur resmi ke Nova di Bedrock. <a rel="nofollow" href="https://docs.langchain.com/oss/python/integrations/chat/amazon_nova">Dokumentasi LangChain</a> menyebut
-  Nova API terpisah (<code>api.nova.amazon.com</code>) kompatibel-OpenAI; klaim itu tidak dihitung karena
-  belum terverifikasi di dokumentasi Amazon sendiri.</li>
+  <li><strong>Pasal 14 ayat 2</strong>: perjanjian dapat terbentuk dari interaksi antara agen elektronik
+  dan seorang individu, termasuk ketika individu itu melakukan tindakan yang bebas ia tolak dan yang ia tahu
+  akan membuat agen menyelesaikan transaksi, misalnya menekan tombol "Bayar".</li>
+  <li><strong>Pasal 10 ayat 2</strong>: individu dapat menghindari akibat kesalahannya sendiri saat
+  berurusan dengan agen elektronik pihak lain bila agen itu "tidak menyediakan kesempatan untuk mencegah
+  atau mengoreksi kesalahan", asalkan ia segera memberi tahu, mengembalikan apa yang diterimanya, dan belum
+  menikmati manfaatnya. Pasal 10 ayat 4 melarang aturan ini disimpangi lewat perjanjian.</li>
+</ul>
+<p>PP 71/2019 Pasal 37 ayat (3) sampai ke tempat yang sama: koreksi, pembatalan, dan konfirmasi adalah
+fitur yang wajib tersedia sebelum transaksi mengikat.</p>
+<p class="rule">Pelajaran desainnya sederhana: <strong>biarkan agen mengusulkan, biarkan manusia yang
+menekan tombol.</strong> Agen AI boleh mencarikan film, jadwal, dan kursi. Peta kursi dengan pilihan agen
+sudah tercentang, ditambah tombol yang ditekan sendiri oleh pelanggan, adalah "kesempatan untuk mencegah
+atau mengoreksi kesalahan" itu. Agen yang langsung memesan karena pelanggan mengetik "ya" tidak
+memberikannya.</p>
+<p>Begitulah asisten pemesanan berbahasa alami di platform ini dibangun. Ia punya enam alat: lima yang
+hanya membaca (kota, bioskop, film, jadwal, dan kursi kosong) dan satu yang sekadar mencatat usulan kursi.
+Tidak ada alat untuk menahan, membatalkan, mengonfirmasi, atau membayar. Jawabannya berakhir dengan tautan ke peta kursi
+yang biasa, dengan kursi usulannya sudah tercentang, sedangkan penahanan, pernyataan usia, dan pembayaran
+tetap di halaman yang dipakai semua pelanggan. Masing-masing alasan berikut cukup untuk desain itu:</p>
+<ul>
+  <li><strong>Centang pernyataan usia adalah bukti.</strong> Untuk film berbatas usia, pelanggan mencentang
+  sebuah pernyataan, dan hash teks pernyataan itu disimpan bersama persetujuannya. Model yang bertanya
+  "umurnya sudah 17?" lalu mengirim centang itu karena pelanggan mengetik "ya" menulis bukti palsu.</li>
+  <li><strong>Jalurnya sama dengan klik biasa.</strong> Penahanan tetap melewati <code>SELECT … FOR
+  UPDATE</code> dan constraint eksklusi yang sama (bagian 4), jadi kursi yang keburu diambil orang lain
+  kembali sebagai pesan di peta kursi, bukan sebagai pemesanan ganda.</li>
+  <li><strong>Prompt injection dibatasi.</strong> Judul dan sinopsis film adalah teks ketikan penyewa yang
+  ikut dibaca model. Dengan alat yang hanya membaca dan tanpa kredensial pelanggan, hal terburuk yang bisa
+  dicapai baris sisipan adalah usulan kursi yang salah, dan pelanggan melihat peta yang sebenarnya sebelum
+  mengeklik.</li>
+  <li><strong>Biaya dan identitas dijaga.</strong> Asisten hanya untuk pengguna yang sudah masuk, dibatasi
+  30 pesan per pengguna per hari, dan selain data katalog dari alatnya, yang dikirim ke host model hanyalah
+  teks pelanggan, waktu, dan bahasa halaman, tanpa nama atau email.</li>
 </ul>
 
-<h3>Padanannya di Indonesia: UU ITE</h3>
-<p>Undang-Undang Nomor 11 Tahun 2008 tentang Informasi dan Transaksi Elektronik memakai istilah yang
-sama:</p>
+<h3>Ke mana teks pelanggan mengalir</h3>
+<p>Yang diketik pelanggan tetap bisa memuat data pribadi, jadi tempat model dijalankan adalah soal hukum.
+UU 27/2022 tentang Pelindungan Data Pribadi Pasal 56 membolehkan transfer data pribadi ke luar wilayah hukum
+Indonesia ke negara dengan pelindungan yang setara atau lebih tinggi; bila tidak, dengan pelindungan yang
+memadai dan mengikat; dan bila keduanya tidak terpenuhi, dengan persetujuan subjek data. Pasal itu pernah
+diuji di Mahkamah Konstitusi (Perkara 137/PUU-XXIII/2025), jadi periksa statusnya bersama konsultan hukum.
+Inferensi di dalam negeri menghindari pertanyaan itu sama sekali.</p>
+<p>Per 15 Oktober 2026, model frontier tidak punya jalur seperti itu. Dari Jakarta, Amazon Bedrock menyediakan Claude dan GPT
+hanya lewat profil global. <a rel="nofollow" href="https://platform.claude.com/docs/en/manage-claude/data-residency">API
+Anthropic sendiri</a> hanya menawarkan inferensi di Amerika Serikat (<code>"us"</code>) atau di mana saja
+(<code>"global"</code>), dengan data tersimpan di Amerika Serikat. <a rel="nofollow"
+href="https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/data-residency">Halaman data
+residency Google Cloud</a> tidak mencantumkan Jakarta (<code>asia-southeast2</code>); lokasi terdekatnya
+Singapura, dan endpoint global tidak menjamin di mana permintaan diproses. <a rel="nofollow"
+href="https://developers.openai.com/api/docs/guides/your-data">Halaman data OpenAI</a> mencantumkan
+pemrosesan regional hanya di Amerika Serikat, Eropa, dan Uni Emirat Arab; Singapura hanya untuk
+penyimpanan, dan Indonesia tidak tercantum. Yang punya jalur dalam negeri adalah model berbobot terbuka,
+dan tabel berikut sekadar contoh, bukan rekomendasi:</p>
+
+<div class="table-wrap">
+<table>
+  <caption>Jalur inferensi di Indonesia yang bisa dipakai dari Quarkus LangChain4j (data per 15 Oktober 2026)</caption>
+  <thead><tr><th scope="col">Jalur</th><th scope="col">Model</th><th scope="col">Cara memanggil</th><th scope="col">Yang perlu diperhatikan</th></tr></thead>
+  <tbody>
+    <tr><td>Amazon Bedrock, region Jakarta (<code>ap-southeast-3</code>)</td>
+        <td><a rel="nofollow" href="https://docs.aws.amazon.com/nova/latest/userguide/tool-use.html">Amazon Nova</a> Pro dan Lite</td>
+        <td><a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/bedrock-chat-model.html">Ekstensi Bedrock</a>,
+        <code>quarkus.langchain4j.bedrock.aws.region=ap-southeast-3</code>, ID model tanpa awalan seperti
+        <code>amazon.nova-lite-v1:0</code></td>
+        <td>Awalan <code>global.</code> atau <code>apac.</code> mengizinkan Bedrock memproses di region lain.
+        Jangan menyalin contoh <code>global.amazon.nova-2-lite-v1:0</code> di dokumentasi ekstensi: Nova 2 Lite
+        dari Jakarta memang hanya tersedia lewat profil global.</td></tr>
+    <tr><td>Amazon Bedrock Jakarta, model berbobot terbuka</td>
+        <td>16 model In-Region menurut <a rel="nofollow" href="https://docs.aws.amazon.com/bedrock/latest/userguide/models-region-compatibility.html">tabel
+        region Bedrock</a>: <a rel="nofollow" href="https://qwen.readthedocs.io/en/latest/framework/function_call.html">Qwen3</a> 32B
+        dan 235B A22B 2507, Qwen3 Coder 30B dan 480B, <a rel="nofollow" href="https://openai.com/index/introducing-gpt-oss/">gpt-oss</a>-20b
+        dan -120b, <a rel="nofollow" href="https://api-docs.deepseek.com/guides/function_calling">DeepSeek</a> V3.1 dan V3.2,
+        <a rel="nofollow" href="https://docs.z.ai/">GLM</a> 4.7, 4.7 Flash, dan 5, <a rel="nofollow" href="https://github.com/MoonshotAI/Kimi-K2">Kimi</a> K2.5,
+        <a rel="nofollow" href="https://github.com/MiniMax-AI/MiniMax-M2">MiniMax</a> M2.1 dan M2.5,
+        <a rel="nofollow" href="https://mistral.ai/news/devstral-2-vibe-cli">Devstral 2</a> 123B, dan
+        <a rel="nofollow" href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16">Nemotron 3</a> Super 120B</td>
+        <td><a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/openai-chat-model.html">Ekstensi OpenAI</a>
+        dengan <code>base-url=https://bedrock-mantle.ap-southeast-3.api.aws/v1</code> dan kunci API Bedrock</td>
+        <td>Kartu model mencantumkan pemanggilan alat untuk semuanya di <a rel="nofollow"
+        href="https://docs.aws.amazon.com/bedrock/latest/userguide/endpoints.html">endpoint <code>bedrock-mantle</code></a>,
+        tetapi di <code>bedrock-runtime</code> hanya untuk Qwen3 235B A22B 2507, Qwen3 Coder 480B, dan DeepSeek
+        V3.1; karena itu jalurnya ekstensi OpenAI. Versi seperti Kimi K3 dan GLM 5.3 hanya lewat profil global,
+        dan untuk Kimi K2 Thinking serta Nemotron Nano 3 30B dokumen AWS sendiri saling bertentangan.</td></tr>
+    <tr><td>API penyedia dalam negeri</td>
+        <td><a rel="nofollow" href="https://docs.cloudeka.ai/guideline-for-enterprise/deka-llm/model-catalog">Deka LLM</a>
+        (Lintasarta Cloudeka): <code>sahabat-ai-v2-70b-it</code>, <code>gpt-oss-120b</code>,
+        <code>gpt-oss-20b</code>, <code>qwen3-30b-a3b-instruct-2507</code>, <code>nemotron-3-nano-30b-a3b</code>.
+        <a rel="nofollow" href="https://www.biznetgio.com/blog/press-release-ai-services/">NEO Inference</a>
+        (Biznet Gio): GPT-oss-120B dan Qwen3-Coder-480B</td>
+        <td>Ekstensi OpenAI dengan <code>base-url</code> penyedianya</td>
+        <td><a rel="nofollow" href="https://www.cloudeka.id/products/deka-llm/">Deka LLM</a> dan NEO Inference
+        sama-sama menyatakan data tetap di Indonesia. Halaman yang diperiksa tidak menyebut pemanggilan alat,
+        jadi ujilah dulu sebelum dipakai di loop.</td></tr>
+    <tr><td>Server sendiri atau penyedia GPU di Indonesia</td>
+        <td><a rel="nofollow" href="https://www.llama.com/docs/model-cards-and-prompt-formats/llama3_1/">Llama 3.1</a>,
+        <a rel="nofollow" href="https://huggingface.co/Sahabat-AI">Sahabat-AI</a>, dan model berbobot terbuka di atas</td>
+        <td><a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/ollama-chat-model.html">Ekstensi Ollama</a>
+        (mode dev Quarkus menyalakan kontainer Ollama sendiri), atau server kompatibel-OpenAI seperti vLLM
+        dengan ekstensi OpenAI</td>
+        <td>Satu-satunya jalur yang ditemukan untuk Llama 3.1: di Bedrock ia hanya tersedia lewat profil
+        <code>us.</code>, yang memprosesnya di Amerika Serikat. Model kecil di CPU tidak cukup (di bawah). Hindari model <em>cloud</em> Ollama (tag
+        seperti <code>gemma4:cloud</code>), yang dijalankan di server <code>ollama.com</code>, bukan di server
+        Anda.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>API milik vendor model-model itu sendiri tidak dipakai. Menurut halaman resmi masing-masing, <a
+rel="nofollow" href="https://www.alibabacloud.com/help/en/model-studio/regions/">Alibaba Cloud Model
+Studio</a> (Qwen) tidak punya region Jakarta, <a rel="nofollow"
+href="https://cdn.deepseek.com/policies/en-US/deepseek-privacy-policy.html">DeepSeek</a> memproses dan
+menyimpan data di Tiongkok, <a rel="nofollow" href="https://docs.z.ai/legal-agreement/privacy-policy">Z.ai</a>
+(GLM) dan <a rel="nofollow" href="https://platform.kimi.ai/docs/agreement/userprivacy">Moonshot</a> (Kimi) di
+Singapura, <a rel="nofollow" href="https://platform.minimax.io/protocol/privacy-policy">MiniMax</a> di pusat
+data Amerika Serikat, dan <a rel="nofollow"
+href="https://help.mistral.ai/en/articles/347629-where-do-you-store-my-data-or-my-organization-s-data">Mistral</a>
+(Devstral 2) di Uni Eropa atau Amerika Serikat. <a rel="nofollow"
+href="https://assets.ngc.nvidia.com/products/api-catalog/legal/NVIDIA%20API%20Trial%20Terms%20of%20Service.pdf">API
+NVIDIA</a> (Nemotron) hanya untuk uji coba, bukan produksi, dan tidak menyebut lokasinya. <a rel="nofollow"
+href="https://developers.openai.com/api/docs/models/gpt-oss-120b">OpenAI</a> mencantumkan GPT-OSS di API-nya,
+tetapi dengan batas laju nol di setiap tingkat.</p>
+
+<h3>Yang kami ukur: memanggil alat belum tentu merangkai alat</h3>
+<p>Asisten itu kami uji sendiri: loop Quarkus LangChain4j dengan enam alat tadi, pada 40 permintaan
+pemesanan berbahasa Indonesia baku. Sebuah kasus lulus bila model memanggil semua alat yang diperlukan dan, pada 19
+kasus yang meminta kursi, mengusulkan kursi yang benar. Kesalahan <em>kritis</em> adalah mengusulkan kursi
+yang sudah terjual atau tidak ada. Batas lulus yang ditetapkan pemilik proyek: minimal 36 dari 40, tanpa
+kesalahan kritis, dan 5% balasan paling lambat di bawah sekitar 30 detik. Hasilnya, satu kali jalan per
+kasus, 16–17 Oktober 2026:</p>
+<div class="table-wrap">
+<table>
+  <caption>Uji pemanggilan alat berbahasa Indonesia pada loop Quarkus LangChain4j</caption>
+  <thead><tr><th scope="col">Model</th><th scope="col">Host</th><th scope="col">Lulus</th>
+             <th scope="col">Usulan kursi benar</th><th scope="col">Median / p95, tanpa jeda antrean</th></tr></thead>
+  <tbody>
+    <tr><td>Qwen3 1.7B, 4B, dan 8B</td><td>Ollama, CPU server on-premise tanpa GPU</td><td class="num">2–6 dari 40</td>
+        <td class="num">0 dari 19</td><td class="num">8B: 16 / 83 detik</td></tr>
+    <tr><td>gpt-oss-120b</td><td>Groq, tingkat gratis, luar negeri</td><td class="num">21 dari 40</td>
+        <td class="num">9 dari 19</td><td class="num">4,4 / 15,5 detik</td></tr>
+    <tr><td>Qwen3.8 27B</td><td>Groq, tingkat gratis, luar negeri</td><td class="num">36 dari 40</td>
+        <td class="num">17 dari 19</td><td class="num">5,2 / 9,1 detik</td></tr>
+  </tbody>
+</table>
+</div>
 <ul>
-  <li><strong>Pasal 1 angka 8</strong>: "Agen Elektronik adalah perangkat dari suatu Sistem
-  Elektronik yang dibuat untuk melakukan suatu tindakan terhadap suatu Informasi Elektronik tertentu
-  secara otomatis yang diselenggarakan oleh Orang."</li>
-  <li><strong>Pasal 21</strong>: transaksi dapat dilakukan sendiri, melalui pihak yang dikuasakan,
-  atau melalui Agen Elektronik. Bila melalui Agen Elektronik, segala akibat hukumnya menjadi
-  tanggung jawab penyelenggara Agen Elektronik (ayat 2). Kegagalan akibat tindakan pihak ketiga
-  terhadap sistem tetap ditanggung penyelenggara (ayat 3); kerugian akibat kelalaian pengguna jasa
-  ditanggung pengguna (ayat 4); dan ayat 2 tidak berlaku bila dapat dibuktikan keadaan memaksa,
-  kesalahan, atau kelalaian pengguna (ayat 5).</li>
-  <li><strong>Pasal 22</strong>: penyelenggara Agen Elektronik tertentu harus menyediakan fitur yang
-  memungkinkan penggunanya melakukan perubahan informasi yang masih dalam proses transaksi.
-  Ketentuan lebih lanjutnya diatur Peraturan Pemerintah, kini PP Nomor 71 Tahun 2019.</li>
+  <li><strong>Model kecil di CPU tidak cukup.</strong> Qwen3 1.7B, 4B, dan 8B gagal dengan pola yang sama,
+  termasuk dengan prompt yang menambahkan aturan merangkai alat: memanggil satu alat lalu berhenti,
+  menanyakan kepada pelanggan hal yang bisa dicari lewat alat, atau mengarang ID. Klaim "mendukung
+  pemanggilan alat" di dokumentasi berarti model bisa memanggil alat, bukan bisa merangkainya.</li>
+  <li><strong>Varian dan cara penyajian ikut menentukan.</strong> Tag Ollama <code>qwen3:4b</code> adalah
+  varian berpikir yang mengabaikan <code>think=false</code> dan menulis penalarannya ke jawaban, sampai 845
+  detik untuk satu kasus; <code>qwen3:4b-instruct-2507</code> tidak. Gemma 4 E4B dengan mode berpikir mati
+  dan lebih dari satu alat menjawab hasil alat dengan pesan kosong, dan itu terjadi di Ollama sendiri,
+  bukan di ekstensi Quarkus.</li>
+  <li><strong>Ukuran bukan urutan.</strong> gpt-oss-120b, yang parameter totalnya lebih dari empat kali
+  lipat Qwen3.8 27B, lulus 21 dari 40 dan dua kali mengirim pemanggilan alat yang cacat.</li>
+  <li><strong>Sisa kegagalan adalah kesalahan model, bukan penilai.</strong> Empat kasus yang gagal pada
+  Qwen3.8 27B dibaca transkripnya satu per satu. Tiga membaca "Grobogan Raya" sebagai nama kota, tidak
+  menemukan apa-apa, lalu bertanya kepada pelanggan alih-alih mencoba Purwodadi; satu menyebut empat kursi
+  "berjejer" padahal tidak. Tidak satu pun balasannya menyebut kursi sudah dipesan atau dibayar.</li>
+  <li><strong>Tingkat gratis hanya untuk demo.</strong> Dengan jeda antrean tingkat gratis, median dan p95
+  Qwen3.8 27B menjadi 77 dan 147 detik, karena satu usulan kursi mengirim sekitar 16 ribu token terhadap
+  batas 7 ribu token per menit.</li>
+  <li><strong>Yang lulus belum tersedia di dalam negeri.</strong> Groq memproses permintaan di luar
+  Indonesia, jadi pengujian ini memakai data sintetis dan hanya model berbobot terbuka, supaya pemenangnya
+  bisa dipindah ke host dalam negeri. Qwen3.8 27B tidak ada di Bedrock Jakarta, Deka LLM, maupun NEO
+  Inference. Penyaringan 12 model di Bedrock Jakarta, yang diperkirakan sekitar US$35, ditunda sampai ada
+  penyewa yang memintanya. Demo kami yang memakai Groq menyebutkan host-nya dan meminta pembaca tidak
+  mengetik data pribadi. Kasus berbahasa Inggris, campur kode dan bahasa gaul, koreksi lintas giliran,
+  permintaan yang kurang lengkap atau tidak didukung, dan bahasa lain sedang dijalankan sampai 28 Oktober
+  2026.</li>
 </ul>
-<p>Jadi, bila sebuah bioskop atau platform menjalankan agen AI yang memesankan tiket,
-penyelenggaranya menanggung akibat salah tafsir agen itu, dan wajib memberi pengguna cara
-memperbaiki pesanan sebelum mengikat. UETA dan UU ITE sampai ke tuntutan desain yang sama dari dua
-arah.</p>
-<p class="note">Kutipan di atas berasal dari naskah UU 11/2008. Undang-undang ini telah diubah oleh
-UU 19/2016 dan UU 1/2024, jadi rujuklah naskah konsolidasinya, dan konsultan hukum, sebelum
-mengandalkannya. Halaman ini bukan nasihat hukum.</p>
+
+<h3>Memilih loop</h3>
+<p><a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/index.html">Quarkus
+LangChain4j</a> berjalan di proses JVM yang sama dengan servernya, Java atau Kotlin, jadi tanpa Jython dan
+tanpa layanan Python terpisah. Ia punya ekstensi untuk Amazon Bedrock, Anthropic, Gemini, OpenAI (dan API
+kompatibel-OpenAI lewat <code>base-url</code>), Ollama, dan Mistral AI; dokumentasinya menyebut native
+image, dan repositorinya memuat <a rel="nofollow"
+href="https://github.com/quarkiverse/quarkus-langchain4j/tree/main/samples/chatbot-easy-rag-kotlin">sampel
+Kotlin</a>. Loop berbasis Python atau TypeScript tetap bisa dipakai sebagai layanan terpisah yang dipanggil
+lewat HTTP, dengan harga satu layanan lagi untuk dikelola. <a rel="nofollow"
+href="https://github.com/jython/jython">Jython</a> bukan jalan pintasnya: rilisannya hanya mendukung Python
+2.7, README resminya menyatakan Jython 3 belum menjadi produk yang bisa dipakai di aplikasi, sedangkan
+LangGraph, OpenAI Agents SDK, dan Microsoft Agent Framework versi Python mensyaratkan Python 3.10 ke
+atas.</p>
+<p>Hampir setiap loop bisa mencapai hampir setiap model, lewat Bedrock Converse, API kompatibel-OpenAI,
+Ollama, atau vLLM. Yang membedakan adalah pengecualiannya:</p>
+<div class="table-wrap">
+<table>
+  <caption>Loop agen dan model yang tidak diklaim cocok oleh dokumentasi resminya (data per 13 Oktober 2026)</caption>
+  <thead><tr><th scope="col">Loop</th><th scope="col">Bahasa</th><th scope="col">Tanpa klaim resmi untuk</th><th scope="col">Catatan</th></tr></thead>
+  <tbody>
+    <tr><td><a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/index.html">Quarkus LangChain4j</a></td><td>Java, Kotlin</td><td>tidak ada</td>
+        <td>Di dalam JVM server; paling ringan di Quarkus.</td></tr>
+    <tr><td><a rel="nofollow" href="https://docs.koog.ai/llm-providers/">Koog</a></td><td>Kotlin, Java</td><td>tidak ada</td>
+        <td>Pustaka agen JetBrains; dokumentasinya memuat integrasi Spring Boot, Spring AI, dan Ktor, tanpa menyebut Quarkus.</td></tr>
+    <tr><td><a rel="nofollow" href="https://docs.langchain.com/oss/python/langgraph/overview">LangGraph</a></td><td>Python, JS</td><td>tidak ada</td>
+        <td>Lewat model chat LangChain: Amazon Bedrock, <a rel="nofollow" href="https://docs.langchain.com/oss/python/integrations/chat/amazon_nova">Amazon Nova</a>,
+        Ollama, vLLM, NVIDIA, Mistral, DeepSeek, Qwen, dan endpoint kompatibel-OpenAI.</td></tr>
+    <tr><td><a rel="nofollow" href="https://adk.dev/agents/models/">Google ADK</a></td><td>Java, Kotlin, Python, Go, TS</td><td>Amazon Nova</td>
+        <td>Gemini dan Claude langsung; model lain lewat Model Garden dan, di Python, LiteLLM, Ollama, dan vLLM.
+        Jembatan Java ke LangChain4j dan Spring AI hanya ada di modul <a rel="nofollow"
+        href="https://github.com/google/adk-java/blob/main/contrib/README.md">contrib</a> yang kompatibilitas API-nya tidak dijamin.</td></tr>
+    <tr><td><a rel="nofollow" href="https://code.claude.com/docs/en/agent-sdk/overview">Claude Agent SDK</a></td><td>Python, TS</td><td>semua selain Claude</td>
+        <td>Menjalankan binari Claude Code; halaman <a rel="nofollow" href="https://code.claude.com/docs/en/llm-gateway">LLM
+        gateway</a>-nya menyatakan bahwa Anthropic <q lang="en">doesn't support routing Claude Code to non-Claude models
+        through any gateway</q>. Hanya gateway pihak ketiga seperti <a rel="nofollow"
+        href="https://docs.litellm.ai/docs/tutorials/claude_agent_sdk">LiteLLM</a> yang mendokumentasikannya.</td></tr>
+    <tr><td><a rel="nofollow" href="https://github.com/microsoft/agent-framework">Microsoft Agent Framework</a></td><td>.NET, Python, Go</td><td>tidak ada</td>
+        <td>Klien Amazon Bedrock (Converse), Anthropic, Gemini, Ollama, OpenAI (dengan <code>OPENAI_BASE_URL</code>), dan Foundry.</td></tr>
+    <tr><td><a rel="nofollow" href="https://openai.github.io/openai-agents-python/models/">OpenAI Agents SDK</a></td><td>Python, TS</td><td>Amazon Nova, Llama 3.1</td>
+        <td>Model lain lewat <code>base_url</code> atau adaptor LiteLLM dan Any-LLM yang masih beta. Claude lewat <a rel="nofollow"
+        href="https://platform.claude.com/docs/en/api/openai-sdk">lapisan kompatibel-OpenAI</a> Anthropic, yang menurut
+        Anthropic untuk uji coba, bukan produksi jangka panjang.</td></tr>
+    <tr><td>Amazon Bedrock AgentCore (<a rel="nofollow" href="https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/harness.html">Harness</a>)</td><td>Python, TS</td><td>Sahabat-AI</td>
+        <td>Harness adalah loop terkelola bertenaga Strands Agents untuk model Bedrock, OpenAI, Gemini, atau
+        penyedia kompatibel LiteLLM. <a rel="nofollow" href="https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/what-is-bedrock-agentcore.html">Runtime</a>-nya
+        menjalankan loop yang Anda bawa, termasuk loop Java seperti pada <a rel="nofollow"
+        href="https://github.com/awslabs/amazon-bedrock-agentcore-samples/tree/main/03-integrations/agentic-frameworks/java_adk">contoh resmi AWS</a>.</td></tr>
+  </tbody>
+</table>
+</div>
+<p class="note"><strong>Cara membaca.</strong> Model yang diperiksa adalah Amazon Nova, Qwen3, GPT-OSS,
+DeepSeek, GLM, Kimi, MiniMax, Devstral 2, Llama 3.1, Sahabat-AI, dan Nemotron 3, ditambah Claude, Gemini,
+dan GPT sebagai pembanding. Sebuah pasangan dihitung cocok bila dokumentasi resmi loop atau penyedia
+modelnya menyebut keduanya, atau keduanya mendukung antarmuka yang sama. Kolom pengecualian berarti klaim
+resmi tidak ditemukan, bukan berarti mustahil; tabel ini tidak menguji pasangan mana pun dan tidak menilai
+keandalan pemanggilan alatnya. Nova kosong di Google ADK karena dokumentasi ADK tidak menyebut Nova dan
+dokumentasi Nova tidak menyebut ADK. Di OpenAI Agents SDK, Nova kosong karena tabel API Bedrock mencatatnya
+hanya untuk Invoke dan Converse, tidak untuk Chat Completions maupun Messages, sehingga loop yang hanya
+berbicara protokol OpenAI atau Anthropic tidak punya jalur resmi ke Nova di Bedrock; Llama 3.1 kosong karena
+tabel itu tidak mencantumkannya di Chat Completions dan dokumentasi Meta tidak menyebut antarmuka itu.
+Sahabat-AI kosong di AgentCore karena tidak ada di katalog Bedrock. Klaim LangChain soal API Nova terpisah
+yang kompatibel-OpenAI tidak dihitung, karena belum terverifikasi di dokumentasi Amazon sendiri.</p>
 </section>
 
 <section id="anomali">
-<h2>2. Anomali yang tidak disadari: pemesanan ganda</h2>
+<h2>3. Anomali Adya: apa saja, dan mana yang lolos di PostgreSQL</h2>
+
+<h3>Contoh termahal: pemesanan ganda</h3>
 <p>Cara paling umum menulis pemesanan adalah bertanya dulu, lalu menulis:</p>
 <pre><code><span class="c">-- Transaksi A dan B berjalan bersamaan, untuk kursi yang sama</span>
 SELECT count(*) FROM reservasi
@@ -607,19 +739,191 @@ SELECT count(*) FROM reservasi
 INSERT INTO reservasi (kursi, periode, status)
 VALUES ('F7', tstzrange('2026-10-11 19:00+07', '2026-10-11 21:00+07'), 'held');
 <span class="c">-- keduanya berhasil: dua tiket untuk satu kursi</span></code></pre>
-<p>Pada tingkat isolasi <code>READ COMMITTED</code>, bawaan PostgreSQL, maupun
-<code>REPEATABLE READ</code>, kedua transaksi melihat kursi kosong dan keduanya menyimpan klaim. Dua
-penonton datang membawa tiket untuk kursi yang sama. Dalam taksonomi anomali Atul Adya, ini
-<em>write skew</em>. Bahayanya bukan hanya anomalinya, tetapi juga tidak menyadarinya: pengujian
-dengan satu pengguna selalu lulus, dan kesalahan baru muncul saat ramai, tepat pada malam pemutaran
-perdana.</p>
-<p>Seluruh daftar anomali Adya (G0, G1a, G1b, G1c, G-cursor, G-single, G2-item, dan G2), cara
-masing-masing dicoba terhadap aplikasi bioskop yang hidup, dan mengapa tidak satu pun berhasil,
-sudah dibahas di halaman <a href="/adya-anomaly-probe.html">Adya's Isolation Anomalies, Tried
-Against a Live Cinema Booking App</a> (bahasa Inggris). Di sana juga dibahas satu balapan yang
-<em>bukan</em> anomali Adya: tiket yang terjual untuk pertunjukan yang sudah dibatalkan.</p>
+<p>Pada tingkat isolasi <code>READ COMMITTED</code>, bawaan PostgreSQL, maupun <code>REPEATABLE
+READ</code>, kedua transaksi melihat kursi kosong dan keduanya menyimpan klaim. Dua penonton datang membawa
+tiket untuk kursi yang sama. Dalam taksonomi Atul Adya, ini <em>write skew</em>. Bahayanya bukan hanya
+anomalinya, tetapi juga tidak menyadarinya: pengujian dengan satu pengguna selalu lulus, dan kesalahan baru
+muncul saat ramai, tepat pada malam pemutaran perdana.</p>
 
-<h3>Mekanismenya: satu constraint, bukan pengecekan</h3>
+<h3>Adya dalam lima menit</h3>
+<p>Standar SQL ANSI mendefinisikan tingkat isolasi lewat tiga "fenomena": <em>dirty read</em>,
+<em>non-repeatable read</em>, dan <em>phantom</em>. Rumusannya berbahasa penguncian dan tidak pas untuk basis
+data multiversi seperti PostgreSQL. Tesis doktoral Atul Adya di MIT (1999), dan makalah ICDE 2000
+<cite lang="en">Generalized Isolation Level Definitions</cite> yang ia tulis bersama Barbara Liskov dan
+Patrick O'Neil, menggantinya dengan syarat atas <strong>riwayat transaksi yang sudah di-commit</strong>.
+Implementasi apa pun, entah penguncian, MVCC, atau konkurensi optimistis, bisa diperiksa dengan ukuran yang
+sama.</p>
+<p>Riwayat itu digambar sebagai graf, <em>direct serialization graph</em>: satu simpul per transaksi yang
+di-commit, dan sisi dari <em>T1</em> ke <em>T2</em> bila <em>T2</em> bergantung pada <em>T1</em> dengan
+salah satu dari tiga cara:</p>
+<ul>
+  <li><strong><code>ww</code>, ketergantungan tulis.</strong> <em>T2</em> menimpa versi yang ditulis
+  <em>T1</em>.</li>
+  <li><strong><code>wr</code>, ketergantungan baca.</strong> <em>T2</em> membaca versi yang ditulis
+  <em>T1</em>, atau tulisan <em>T1</em> mengubah baris mana yang cocok dengan klausa <code>WHERE</code>
+  <em>T2</em>.</li>
+  <li><strong><code>rw</code>, anti-ketergantungan.</strong> <em>T1</em> membaca suatu versi lalu
+  <em>T2</em> menulis versi berikutnya, atau tulisan <em>T2</em> akan mengubah apa yang cocok dengan
+  <code>WHERE</code> <em>T1</em>. <em>T1</em> tidak melihat <em>T2</em>, jadi <em>T1</em> harus
+  didahulukan.</li>
+</ul>
+<p>Sebuah riwayat serializable bila grafnya tidak bersiklus: ada urutan di mana setiap transaksi hanya
+melihat transaksi sebelumnya. Setiap anomali adalah bentuk siklus tertentu, atau pembacaan data yang
+seharusnya tidak pernah terlihat.</p>
+
+<figure>
+<svg class="dsg" viewBox="0 0 360 370" role="img" aria-labelledby="dsg-judul dsg-desk">
+  <title id="dsg-judul">Empat bentuk siklus</title>
+  <desc id="dsg-desk">Empat pasang transaksi T1 dan T2. G0: ketergantungan tulis dua arah. G1c: ketergantungan
+  baca dua arah. G-single: satu anti-ketergantungan dan satu ketergantungan baca. G2-item dan G2:
+  anti-ketergantungan dua arah.</desc>
+  <defs>
+    <marker id="h-dep" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="head-dep" d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="h-anti" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="head-anti" d="M0,0 L10,5 L0,10 z"/></marker>
+  </defs>
+  <g>
+    <path class="dep" d="M68,64 Q90,26 112,64" marker-end="url(#h-dep)"/>
+    <path class="dep" d="M112,86 Q90,124 68,86" marker-end="url(#h-dep)"/>
+    <circle class="node" cx="50" cy="75" r="19"/><text x="50" y="80" text-anchor="middle">T1</text>
+    <circle class="node" cx="130" cy="75" r="19"/><text x="130" y="80" text-anchor="middle">T2</text>
+    <text class="lbl" x="90" y="30" text-anchor="middle">ww</text><text class="lbl" x="90" y="130" text-anchor="middle">ww</text>
+    <text class="cap" x="90" y="156" text-anchor="middle">G0</text><text class="sub" x="90" y="172" text-anchor="middle">siklus tulis</text>
+  </g>
+  <g transform="translate(180 0)">
+    <path class="dep" d="M68,64 Q90,26 112,64" marker-end="url(#h-dep)"/>
+    <path class="dep" d="M112,86 Q90,124 68,86" marker-end="url(#h-dep)"/>
+    <circle class="node" cx="50" cy="75" r="19"/><text x="50" y="80" text-anchor="middle">T1</text>
+    <circle class="node" cx="130" cy="75" r="19"/><text x="130" y="80" text-anchor="middle">T2</text>
+    <text class="lbl" x="90" y="30" text-anchor="middle">wr</text><text class="lbl" x="90" y="130" text-anchor="middle">wr</text>
+    <text class="cap" x="90" y="156" text-anchor="middle">G1c</text><text class="sub" x="90" y="172" text-anchor="middle">aliran informasi melingkar</text>
+  </g>
+  <g transform="translate(0 185)">
+    <path class="anti" d="M68,64 Q90,26 112,64" marker-end="url(#h-anti)"/>
+    <path class="dep" d="M112,86 Q90,124 68,86" marker-end="url(#h-dep)"/>
+    <circle class="node" cx="50" cy="75" r="19"/><text x="50" y="80" text-anchor="middle">T1</text>
+    <circle class="node" cx="130" cy="75" r="19"/><text x="130" y="80" text-anchor="middle">T2</text>
+    <text class="lbl lbl-anti" x="90" y="30" text-anchor="middle">rw</text><text class="lbl" x="90" y="130" text-anchor="middle">wr</text>
+    <text class="cap" x="90" y="156" text-anchor="middle">G-single</text><text class="sub" x="90" y="172" text-anchor="middle">read skew</text>
+  </g>
+  <g transform="translate(180 185)">
+    <path class="anti" d="M68,64 Q90,26 112,64" marker-end="url(#h-anti)"/>
+    <path class="anti" d="M112,86 Q90,124 68,86" marker-end="url(#h-anti)"/>
+    <circle class="node" cx="50" cy="75" r="19"/><text x="50" y="80" text-anchor="middle">T1</text>
+    <circle class="node" cx="130" cy="75" r="19"/><text x="130" y="80" text-anchor="middle">T2</text>
+    <text class="lbl lbl-anti" x="90" y="30" text-anchor="middle">rw</text><text class="lbl lbl-anti" x="90" y="130" text-anchor="middle">rw</text>
+    <text class="cap" x="90" y="156" text-anchor="middle">G2-item / G2</text><text class="sub" x="90" y="172" text-anchor="middle">write skew, phantom</text>
+  </g>
+</svg>
+<figcaption>Empat bentuk siklus. Panah utuh adalah ketergantungan (<code>ww</code>, <code>wr</code>) dan
+panah putus-putus adalah anti-ketergantungan (<code>rw</code>). G1a dan G1b bukan siklus: keduanya pembacaan
+versi yang dibatalkan, atau versi yang ditimpa penulisnya sendiri sebelum commit. G-cursor adalah bentuk
+G-single pada satu baris, dengan ketergantungan tulis menggantikan ketergantungan baca.</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+  <caption>Delapan anomali Adya, wujudnya di bioskop, dan tingkat isolasi pertama yang melarangnya</caption>
+  <thead><tr><th scope="col">Anomali</th><th scope="col">Syarat pada riwayat yang di-commit</th>
+             <th scope="col">Di bioskop</th><th scope="col">Dilarang mulai</th></tr></thead>
+  <tbody>
+    <tr><td><code>G0</code> siklus tulis (<em>dirty write</em>)</td><td>Siklus yang hanya terdiri atas sisi <code>ww</code></td>
+        <td>Dua pasangan memesan sepasang kursi yang sama dari arah berlawanan; masing-masing pulang dengan satu kursi dari pasangan itu</td><td>PL-1</td></tr>
+    <tr><td><code>G1a</code> bacaan yang dibatalkan</td><td>Transaksi yang di-commit membaca versi tulisan transaksi yang batal</td>
+        <td>Peta kursi menampilkan klaim dari pemesanan yang tidak pernah jadi</td><td>PL-2 (<em>read committed</em>)</td></tr>
+    <tr><td><code>G1b</code> bacaan antara</td><td>Membaca versi yang kemudian ditimpa penulisnya sendiri sebelum commit</td>
+        <td>Kursi berkedip "ditahan" selama pemesanan blok orang lain yang akhirnya gagal</td><td>PL-2</td></tr>
+    <tr><td><code>G1c</code> aliran informasi melingkar</td><td>Siklus yang hanya terdiri atas sisi <code>ww</code> dan <code>wr</code></td>
+        <td>Dua pasangan saling melihat pemesanan setengah jadi milik yang lain, keduanya mundur, dan kursinya tidak terjual</td><td>PL-2</td></tr>
+    <tr><td><code>G-cursor</code> <em>lost update</em> (P4)</td><td>Pada satu item, siklus berisi satu sisi <code>rw</code> dan sisi <code>ww</code></td>
+        <td>Pembatalan sebuah kursi tertelan dan kursinya tetap terjual; satu barcode meloloskan dua orang di pintu</td><td>PL-CS (<em>cursor stability</em>)</td></tr>
+    <tr><td><code>G-single</code> <em>read skew</em></td><td>Siklus dengan tepat satu sisi <code>rw</code></td>
+        <td>Peta kursi menampilkan separuh pesanan dua kursi seseorang</td><td>PL-2+ (dan <em>snapshot isolation</em>)</td></tr>
+    <tr><td><code>G2-item</code> <em>write skew</em></td><td>Siklus dengan satu atau lebih sisi <code>rw</code> atas item tertentu</td>
+        <td>Dua pelanggan datang membawa tiket untuk F7</td><td>PL-2.99 (<em>repeatable read</em>)</td></tr>
+    <tr><td><code>G2</code> <em>phantom</em></td><td>Siklus dengan satu atau lebih sisi <code>rw</code>, termasuk dari klausa <code>WHERE</code></td>
+        <td>Satu calo dengan dua tab melewati batas 10 kursi per hari</td><td>PL-3 (<em>serializable</em>)</td></tr>
+  </tbody>
+</table>
+</div>
+<p>G-single dan G2 dibedakan oleh jumlah anti-ketergantungannya, dan keduanya mudah tertukar. <em>Write
+skew</em> versi buku teks, dua dokter jaga yang masing-masing melihat rekannya masih berjaga lalu sama-sama
+pulang, menutup siklusnya dengan <em>dua</em> sisi <code>rw</code>, jadi ia G2, bukan G-single. Contoh
+"cek dulu, lalu simpan" di atas pun, bila dibaca ketat, adalah G2, karena klaim baru adalah baris baru yang
+ditemukan lewat predikat (kursi ini, waktu yang beririsan, status hidup), bukan versi baru dari baris yang
+sudah ada. Catatan desain proyek ini memasukkannya ke G2-item karena menyangkut satu kursi yang sudah
+diketahui. Apa pun labelnya, obatnya sama (bagian 4).</p>
+
+<h3>Di mana empat tingkat isolasi PostgreSQL berada</h3>
+<div class="table-wrap">
+<table>
+  <caption>Tingkat isolasi PostgreSQL 18 terhadap anomali Adya</caption>
+  <thead><tr><th scope="col">Tingkat di PostgreSQL</th><th scope="col">Mencegah</th><th scope="col">Masih membiarkan</th></tr></thead>
+  <tbody>
+    <tr><td><code>READ UNCOMMITTED</code></td><td colspan="2">Diterima, tetapi berjalan persis seperti <code>READ COMMITTED</code></td></tr>
+    <tr><td><code>READ COMMITTED</code>, bawaan</td><td>G0, G1a, G1b, G1c</td><td>G-cursor*, G-single, G2-item, G2</td></tr>
+    <tr><td><code>REPEATABLE READ</code> (<em>snapshot isolation</em>)</td><td>…ditambah G-cursor dan G-single</td><td>G2-item, G2</td></tr>
+    <tr><td><code>SERIALIZABLE</code> (<em>serializable snapshot isolation</em>)</td><td>Semuanya, dengan membatalkan salah satu transaksi lewat <code>40001</code></td><td>tidak ada</td></tr>
+  </tbody>
+</table>
+</div>
+<p class="trans">* <em>Lost update</em> di <code>READ COMMITTED</code> butuh pembacaan dan penulisan di dua
+pernyataan terpisah. Satu <code>UPDATE … WHERE</code> yang harus menunggu kunci baris akan mengevaluasi
+ulang <code>WHERE</code>-nya terhadap baris yang baru di-commit, jadi ia tidak bisa menimpa perubahan yang
+tidak dilihatnya.</p>
+<p>Tabel itu menjadi praktis karena satu fakta: aplikasi bioskop ini tidak pernah mengatur tingkat isolasi,
+jadi semua transaksinya berjalan di <code>READ COMMITTED</code>, tingkat paling longgar yang dimiliki
+PostgreSQL. Separuh pertama daftar Adya sudah tertutup oleh tingkat itu, dan tidak ada pengaturan
+PostgreSQL yang bisa membukanya. Separuh keduanya harus ditutup oleh desain, di setiap tempat sebuah
+pemesanan bergantung padanya.</p>
+
+<h3>Satu balapan yang bukan anomali Adya</h3>
+<p>Sebuah penahanan membaca pertunjukan masih berstatus dijual. Staf membatalkan pertunjukan itu.
+Penahanannya tetap di-commit sesudahnya. Hasilnya tiket untuk pertunjukan yang sudah dibatalkan. Riwayat ini
+hanya punya satu anti-ketergantungan tanpa sisi kembali, jadi bukan siklus: "pesan, lalu batalkan" adalah
+urutan serial yang sah, dan tidak ada tingkat isolasi yang keberatan, bahkan <code>SERIALIZABLE</code>. Yang
+salah adalah pemeriksaannya basi sebelum di-commit. Aturan bisnisnya, tidak boleh ada penjualan setelah
+pembatalan berlaku, adalah aturan tentang <em>kapan</em> sesuatu di-commit. Obatnya
+<code>SELECT … FOR UPDATE</code> pada baris pertunjukan sebagai pernyataan pertama setiap penahanan, dan
+pelajaran yang lebih umum: klasifikasi anomali bergantung pada jejak baca dan tulis kedua transaksi, bukan
+pada wujud skenarionya. Bila pembatalan kelak memeriksa "masih adakah pemesanan aktif?" lebih dulu, skenario
+yang sama memperoleh sisi kembali dan menjadi G2 yang sungguhan.</p>
+<p>Daftar lengkap di atas sudah dicoba satu per satu terhadap aplikasi bioskop yang hidup, lewat API
+publiknya, dan tidak satu pun berhasil. Skrip, cara menjalankan, dan hasilnya ada di halaman <a
+href="/adya-anomaly-probe.html">Adya's Isolation Anomalies, Tried Against a Live Cinema Booking App</a>
+(bahasa Inggris).</p>
+</section>
+
+<section id="pencegahan">
+<h2>4. Mencegahnya di PostgreSQL 18.6</h2>
+<p><code>READ COMMITTED</code> menutup G0 sampai G1c dengan sendirinya. Empat sisanya, ditambah balapan
+yang bukan anomali Adya, ditutup oleh lima teknik. Tidak satu pun membutuhkan tingkat isolasi yang lebih
+ketat, kecuali yang kelima:</p>
+<div class="table-wrap">
+<table>
+  <caption>Anomali, teknik yang menutupnya, dan wujudnya di aplikasi bioskop ini</caption>
+  <thead><tr><th scope="col">Anomali</th><th scope="col">Teknik</th><th scope="col">Di aplikasi bioskop ini</th></tr></thead>
+  <tbody>
+    <tr><td>G0</td><td>Bawaan: kunci tulis baris di setiap tingkat, ditambah transaksi yang semua-atau-tidak</td>
+        <td>Pemesanan blok yang gagal di satu kursi menarik seluruh bloknya</td></tr>
+    <tr><td>G1a, G1b, G1c</td><td>Bawaan: MVCC, dan pemeriksaan constraint yang menunggu klaim yang belum di-commit</td>
+        <td>Notifikasi ketersediaan baru dikirim setelah commit</td></tr>
+    <tr><td>G-cursor</td><td>Teknik 3: transisi status sebagai satu <code>UPDATE</code> bersyarat</td>
+        <td>Konfirmasi, pembatalan, dan pemindaian tiket di pintu</td></tr>
+    <tr><td>G-single</td><td>Teknik 4: satu pernyataan untuk satu bacaan, atau teknik 2 untuk yang dibaca</td>
+        <td>Peta kursi dibaca dalam satu kueri</td></tr>
+    <tr><td>G2-item</td><td>Teknik 1: constraint</td>
+        <td>Constraint eksklusi <code>reservation_no_overlap</code></td></tr>
+    <tr><td>G2</td><td>Teknik 2, kunci baris induk sebelum menghitung, atau teknik 5, <code>SERIALIZABLE</code></td>
+        <td>Baris pelanggan dikunci sebelum menghitung batas 10 kursi per hari</td></tr>
+    <tr><td>Bukan Adya</td><td>Teknik 2: kunci baris yang statusnya menentukan izin</td>
+        <td>Baris pertunjukan dikunci sebagai pernyataan pertama setiap penahanan</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Teknik 1: constraint, biarkan basis data yang menolak</h3>
 <pre><code>CREATE EXTENSION IF NOT EXISTS btree_gist;  <span class="c">-- agar kolom skalar (kursi) bisa masuk indeks GiST</span>
 
 CREATE TABLE reservasi (
@@ -633,66 +937,233 @@ CREATE TABLE reservasi (
     WHERE (status IN ('held', 'confirmed'))
 );</code></pre>
 <p>Artinya: tidak boleh ada dua baris dengan <code>kursi</code> yang sama (<code>=</code>) dan
-<code>periode</code> yang tumpang tindih (<code>&amp;&amp;</code>) selama keduanya masih hidup.
-PostgreSQL memeriksanya saat menulis, terhadap data yang sudah di-<em>commit</em>, seperti indeks
-unik. Bila transaksi pertama belum selesai, transaksi kedua menunggu hasilnya, bukan menebak. Klaim
-kedua gagal dengan <code>conflicting key value violates exclusion constraint</code>. Beberapa
-konsekuensi yang dibayar mahal untuk dipelajari:</p>
+<code>periode</code> yang tumpang tindih (<code>&amp;&amp;</code>) selama keduanya masih hidup. PostgreSQL
+memeriksanya saat menulis, seperti indeks unik. Bila transaksi pertama belum selesai, transaksi kedua
+menunggu hasilnya, bukan menebak, dan klaim kedua gagal dengan <code>conflicting key value violates
+exclusion constraint</code>. Constraint mengubah konflik predikat, yang tidak bisa dikunci karena barisnya
+belum ada, menjadi konflik tulis pada satu entri indeks. Beberapa konsekuensi yang dibayar mahal untuk
+dipelajari:</p>
 <ul>
-  <li><strong>Bekerja di tingkat isolasi apa pun</strong>, termasuk <code>READ COMMITTED</code>.
-  Pelanggaran ditolak dengan SQLSTATE <code>23P01</code> (<code>exclusion_violation</code>), bukan
+  <li><strong>Bekerja di tingkat isolasi apa pun</strong>, termasuk <code>READ COMMITTED</code>. Pelanggaran
+  ditolak dengan SQLSTATE <code>23P01</code> (<code>exclusion_violation</code>), bukan
   <code>40001</code>.</li>
-  <li><strong>Jangan pernah mengulang <code>23P01</code>.</strong> Permintaan yang sama akan gagal
-  dengan cara yang sama sampai ada pembatalan. Tampilkan "kursi baru saja diambil" dan tawarkan
-  kursi lain.</li>
+  <li><strong>Jangan pernah mengulang <code>23P01</code>.</strong> Permintaan yang sama akan gagal dengan cara
+  yang sama sampai ada pembatalan. Tampilkan "kursi baru saja diambil" dan tawarkan kursi lain, tetapi jangan
+  menggantinya diam-diam dengan kursi lain: pelanggan memilih kursi tertentu, dan KUHPerdata Pasal 1320
+  mensyaratkan suatu hal tertentu sebagai objek perjanjian.</li>
   <li><strong>Jangan pasang pengecekan ketersediaan di depannya.</strong> Membaca ketersediaan untuk
   memutuskan justru pola yang rawan anomali. Pelanggaran constraint itulah mekanismenya.</li>
-  <li><strong>Status "ditahan" dan "dikonfirmasi" harus satu tabel.</strong> Satu exclusion
-  constraint tidak dapat menjangkau dua tabel. Bila tahanan dan pesanan dipisah, keduanya tidak bisa
-  diperiksa satu sama lain.</li>
+  <li><strong>Pemesanan blok harus semua-atau-tidak.</strong> Di aplikasi ini setiap kursi blok disisipkan
+  di bawah <code>SAVEPOINT</code>. Begitu satu kursi ditolak dengan <code>23P01</code>, transaksi kembali ke
+  savepoint itu, menarik kursi yang sudah masuk, menandai pesanan gagal beserta kursi penyebabnya, lalu
+  meng-commit catatan itu. Tidak ada penahanan yang meng-commit separuh pasangan, dan pelanggan diberi tahu
+  kursi mana yang perlu diganti.</li>
+  <li><strong>Status "ditahan" dan "dikonfirmasi" harus satu tabel.</strong> Satu constraint eksklusi tidak
+  dapat menjangkau dua tabel.</li>
+  <li><strong>"Sudah masuk" bukan status.</strong> Bila tiket yang sudah dipindai di pintu diberi status
+  <code>admitted</code>, barisnya jatuh di luar predikat <code>WHERE (status IN ('held',
+  'confirmed'))</code> dan kursi yang sedang diduduki pemegangnya terlepas lagi. Simpan kedatangan di kolom
+  terpisah, <code>admitted_at</code>.</li>
   <li><strong>Batas waktu tahanan tidak bisa ditaruh di predikat.</strong> Predikat constraint harus
-  <em>immutable</em>, sedangkan <code>now()</code> tidak. Karena itu predikatnya memakai
-  <code>status</code>, dan tahanan basi dikedaluwarsakan oleh penyapu terjadwal, atau seketika saat
-  ada yang memperebutkannya.</li>
-  <li><strong>Kunci baris induk lebih dulu.</strong> Di aplikasi bioskop ini, pernyataan pertama
-  setiap penahanan adalah <code>SELECT … FOR UPDATE</code> pada baris pertunjukan. Delapan penahanan
-  serentak jadi mencapai pemeriksaan eksklusi satu per satu, tidak saling <em>deadlock</em>, dan
-  pembatalan pertunjukan tidak bisa menyelinap di antaranya. Mengunci baris yang dipakai semua orang
-  di awal bukanlah "pengecekan" yang dilarang di atas.</li>
-  <li><strong>Batasnya satu basis data.</strong> Tidak ada versi terdistribusi dari constraint ini.
-  Bila sistem kedua, misalnya aplikasi loket lama, ikut menjual kursi yang sama, harus diputuskan
-  sisi mana yang berwenang. Itu keputusan, bukan sekadar detail integrasi.</li>
-  <li><strong>Rentang setengah terbuka <code>[mulai, selesai)</code></strong> membuat pemesanan
-  berurutan, 19.00–21.00 lalu 21.00–23.00, tidak dianggap tumpang tindih.</li>
+  <em>immutable</em>, sedangkan <code>now()</code> tidak. Karena itu predikatnya memakai <code>status</code>,
+  dan tahanan basi dikedaluwarsakan oleh penyapu terjadwal, di platform ini setiap 30 detik. Sampai penyapu
+  lewat, tahanan basi tetap memblokir kursinya karena ia masih memenuhi predikat. Akibatnya untuk pilihan
+  hosting dibahas di bagian 6.</li>
+  <li><strong>Rentang setengah terbuka <code>[mulai, selesai)</code></strong> membuat pemesanan berurutan,
+  19.00–21.00 lalu 21.00–23.00, tidak dianggap tumpang tindih.</li>
+  <li><strong>Batasnya satu basis data.</strong> Tidak ada versi terdistribusi dari constraint ini. Bila
+  sistem kedua, misalnya aplikasi loket lama, ikut menjual kursi yang sama, harus diputuskan sisi mana yang
+  berwenang. Itu keputusan, bukan sekadar detail integrasi.</li>
 </ul>
+<p>Constraint juga cocok sebagai sabuk kedua di belakang kunci. Pelunasan tunai di loket dijaga kunci baris
+kursi pesanannya, dan di belakangnya ada indeks unik parsial <code>… WHERE payment_channel = 'cash' AND
+status = 'paid'</code>, sehingga satu pesanan tidak mungkin tercatat lunas tunai dua kali walaupun kuncinya
+suatu hari terlewat.</p>
 
-<h3>PostgreSQL 18: <code>WITHOUT OVERLAPS</code></h3>
-<p>Sejak PostgreSQL 18, yang dirilis 25 September 2025, kunci primer dan constraint unik dapat
-ditulis dengan <code>WITHOUT OVERLAPS</code> pada kolom terakhirnya, dan kunci asing dapat memakai
-<code>PERIOD</code>. Dokumentasinya menyebut constraint semacam itu ditegakkan sebagai exclusion
-constraint dengan indeks GiST: <code>UNIQUE (id, valid_at WITHOUT OVERLAPS)</code> berperilaku
-seperti <code>EXCLUDE USING GIST (id WITH =, valid_at WITH &amp;&amp;)</code>. Kolom rentangnya tidak
-boleh kosong, dan kolom skalar di sebelahnya membutuhkan <code>btree_gist</code>. Untuk data master
-yang tidak boleh tumpang tindih, seperti periode harga, tarif, atau masa jabatan, bentuk ini lebih
-ringkas:</p>
+<h3>Teknik 2: kunci baris yang dipakai semua orang, lebih dulu</h3>
+<p>Ketika keputusan bergantung pada baris lain yang tidak ikut ditulis, seperti status pertunjukan atau
+jumlah kursi pelanggan hari ini, kunci baris itu lebih dulu. Setiap penahanan di aplikasi ini mengambil tiga
+kunci:</p>
+<ul>
+  <li><strong><code>FOR UPDATE</code> pada baris pertunjukan, sebagai pernyataan pertama.</strong> Pembatalan
+  pertunjukan tidak bisa lagi menyelinap di antara pemeriksaan dan penulisan, dan delapan penahanan serentak
+  pada satu pertunjukan mencapai pemeriksaan eksklusi satu per satu alih-alih saling <em>deadlock</em>. Aturan
+  "pembeli pertama minimal dua kursi", yang juga sebuah hitungan, ikut terserialkan oleh kunci ini.</li>
+  <li><strong><code>FOR SHARE</code> pada kursi yang akan dipesan.</strong> Menata ulang denah studio
+  menonaktifkan kursi (<code>is_active = false</code>, tidak pernah <code>DELETE</code>, karena tiket lama
+  masih merujuknya) dan menolak menonaktifkan kursi yang sedang diklaim. Kunci bersama ini membuat penahanan
+  dan penataan ulang tidak bisa saling menembus.</li>
+  <li><strong><code>FOR UPDATE</code> pada baris pelanggan, sebelum menghitung.</strong> Batas 10 kursi per
+  pelanggan per hari adalah hitungan atas baris yang belum ada, jadi tidak ada yang bisa dikunci selain
+  induknya. Mengunci baris pelanggan sendiri menyerialkan penahanan pelanggan itu dan tidak ada yang lain.
+  Tanpa kunci ini, empat penahanan pada empat pertunjukan di hari yang sama lolos semua: 12 kursi terhadap
+  batas 10.</li>
+</ul>
+<p>Kunci yang diambil semua orang di awal bukanlah "pengecekan" yang dilarang teknik 1. Kunci menentukan
+urutan datangnya transaksi; constraint tetap yang menentukan siapa yang mendapat kursi. Yang dilarang adalah
+membaca ketersediaan untuk memutuskan. Satu aturan lagi menyusul dari kisah rantai hash di bawah: ambil
+semua kunci baris yang dibutuhkan sebelum penulisan pertama yang ikut mengambil kunci bersama, dan siapkan
+percobaan ulang untuk <em>deadlock</em> (<code>40P01</code>).</p>
+
+<h3>Teknik 3: transisi status sebagai satu <code>UPDATE</code> bersyarat</h3>
+<pre><code>UPDATE reservasi SET status = 'confirmed'
+ WHERE id = $1 AND status = 'held';                   <span class="c">-- 0 baris: sudah diubah transaksi lain</span>
+
+UPDATE reservasi SET status = 'cancelled'
+ WHERE id = $1 AND status IN ('held', 'confirmed');
+
+UPDATE reservasi SET admitted_at = now()
+ WHERE token_masuk = $1 AND status = 'confirmed'
+   AND admitted_at IS NULL;                           <span class="c">-- satu tiket, satu kali masuk</span></code></pre>
+<p><em>Lost update</em> membutuhkan pembacaan dan penulisan di dua pernyataan. Tulis transisinya sebagai satu
+pernyataan bersyarat dan periksa jumlah baris yang berubah: nol berarti transaksi lain menang lebih dulu.
+Bila dua transaksi bertabrakan, yang kedua menunggu kunci baris yang pertama, lalu mengevaluasi ulang
+<code>WHERE</code>-nya terhadap baris yang baru di-commit. Ia tidak bisa menimpa perubahan yang tidak
+dilihatnya. Jangan memeriksa <code>admitted_at</code> lebih dulu dengan <code>SELECT</code>; syarat di
+dalam <code>UPDATE</code> itulah pemeriksaannya.</p>
+
+<h3>Teknik 4: satu pernyataan, satu snapshot</h3>
+<p><code>READ COMMITTED</code> mengambil snapshot baru untuk setiap pernyataan, jadi <em>read skew</em> hanya
+mungkin di antara dua pernyataan. Peta kursi aplikasi ini adalah satu kueri SQL, setiap kursi di-<em>left
+join</em> ke klaim hidupnya, sehingga sebuah commit terlihat utuh atau tidak sama sekali. Bila sebuah
+keputusan bergantung pada beberapa bacaan, kunci yang dibaca (teknik 2). Bila yang dibutuhkan hanya laporan
+yang konsisten dari beberapa kueri, jalankan di <code>REPEATABLE READ</code>, yang memakai satu snapshot
+untuk seluruh transaksi. Read skew yang tidak memutuskan apa-apa boleh dibiarkan: halaman pesanan membaca
+pesanan lalu kursinya dalam dua pernyataan, jadi muat ulang yang jatuh tepat di tengah konfirmasi bisa
+menampilkan "menunggu" di atas kursi yang sudah dikonfirmasi, dan tampilan berikutnya benar.</p>
+
+<h3>Teknik 5: <code>SERIALIZABLE</code> untuk agregat, dengan satu percobaan ulang</h3>
+<p>Bila aturannya tentang total atas banyak baris dan tidak ada satu baris pun yang bisa mewakilinya,
+misalnya kuota pemesanan aktif seluruh penyewa, jalankan transaksinya di <code>SERIALIZABLE</code>.
+PostgreSQL mendeteksi struktur berbahaya di antara transaksi yang berjalan bersamaan dan membatalkan salah
+satunya dengan <code>40001</code>. Ulangi tepat sekali: deteksinya konservatif dan bisa membatalkan pasangan
+yang sebenarnya tidak berkonflik. <code>40001</code> kedua pada permintaan yang sama berarti persaingannya
+nyata; perlakukan seperti <code>23P01</code>. Bila ada baris induk yang bisa mewakili totalnya, seperti
+pelanggan untuk "kursi per hari", <code>FOR UPDATE</code> padanya lebih murah dan bekerja di <code>READ
+COMMITTED</code>. Di bawah 18.6, deteksi itu sendiri punya celah (lihat bawah).</p>
+
+<h3>Anomali yang tidak disadari: rantai bukti yang bercabang</h3>
+<p>Log audit platform ini adalah rantai hash per penyewa: setiap baris baru menyimpan hash yang dihitung dari
+hash baris sebelumnya, sehingga baris yang diubah belakangan akan ketahuan. Fungsi trigger-nya mencari baris
+terakhir penyewa dengan <code>SELECT row_hash … ORDER BY audit_id DESC LIMIT 1</code>, tanpa kunci. Di
+<code>READ COMMITTED</code>, baris yang belum di-commit tidak terlihat, jadi dua transaksi penyewa yang sama
+yang menulis bersamaan sama-sama menautkan diri ke baris pendahulu yang sama. Rantainya bercabang, dan
+pemeriksaan rantai melaporkan baris kedua sebagai hasil pemalsuan, padahal tidak ada yang menyentuhnya.</p>
+<p>Ini pola <em>phantom</em> yang sama dengan "cek dulu, lalu simpan": membaca "baris terakhir" lalu
+menambahkan sesudahnya. Cacat seperti ini bisa bertahan lama tanpa ketahuan, karena tidak ada kode yang
+memverifikasi rantainya. Ketika ditemukan pada 25 September 2026 oleh pengujian yang sengaja menahan satu
+tulisan tetap terbuka, 34 baris log di server yang hidup masih utuh hanya karena lalu lintas demo tidak
+pernah bertabrakan. Begitu lalu lintas sungguhan bertabrakan, setiap cabang akan permanen, karena log audit
+hanya bisa ditambah, dan memperbaiki baris lama adalah pemalsuan itu sendiri. Seandainya dibiarkan, hari
+ketika seseorang memeriksa log itu sebagai bukti, ia akan gagal pada lalu lintas biasa.</p>
+<p>Perbaikannya, 15 Oktober 2026, adalah kunci <em>advisory</em> per penyewa yang diambil sebelum
+pembacaan:</p>
+<pre><code><span class="c">-- di dalam fungsi trigger, sebelum mencari baris terakhir penyewa</span>
+PERFORM pg_advisory_xact_lock(hashtext('audit_log'), hashtext(NEW.tenant_id::text));
+SELECT row_hash INTO prior_hash FROM audit_log
+ WHERE tenant_id = NEW.tenant_id ORDER BY audit_id DESC LIMIT 1;</code></pre>
+<p>Penulis kedua menunggu sampai penulis pertama commit, lalu membaca barisnya. Alternatifnya, mencatat ID
+baris pendahulu di setiap baris, ditolak: cabangnya tetap ada, dan saudara yang kalah menjadi daun yang
+tidak ditautkan siapa pun, yang bisa dihapus tanpa jejak. Harganya, tulisan teraudit satu penyewa bergiliran
+dari baris audit pertamanya sampai commit, dan itulah asal aturan urutan kunci di teknik 2.</p>
+
+<h3>Membuktikan: cabut pelindungnya, lihat anomalinya muncul</h3>
+<p>Uji konkurensi yang lulus belum membuktikan apa-apa. Jalankan setiap uji dua kali: sekali terhadap kode
+sebenarnya, sekali terhadap versi yang sengaja dilemahkan. Bila versi lemah tidak menghasilkan anomalinya,
+ujinya tidak menguji apa yang Anda kira. Karena tidak ada tingkat isolasi di bawah <code>READ
+COMMITTED</code> untuk dituju, yang dilemahkan adalah pelindung desainnya:</p>
+<ul>
+  <li>Constraint eksklusi dicabut dari skema hasil migrasi sungguhan: kedelapan penahanan serentak pada satu
+  kursi berhasil.</li>
+  <li>Kunci baris pelanggan dihapus: empat penahanan lolos hitungan, 12 kursi terhadap batas 10.</li>
+  <li><code>FOR UPDATE</code> pada pertunjukan diganti <code>SELECT</code> biasa: muncul tahanan untuk
+  pertunjukan yang sudah dibatalkan.</li>
+</ul>
+<p>Sisipkan jeda buatan di antara pemeriksaan dan penulisan lewat properti yang hanya aktif di profil uji,
+supaya dua permintaan pasti jatuh di jendela balapannya alih-alih berharap kebetulan. Semua ini hanya bisa
+diuji terhadap PostgreSQL sungguhan: proyek ini menjalankan setiap kueri terhadap PostgreSQL 18.6 yang sudah
+dimigrasi lewat Testcontainers di setiap build, dengan versi image uji yang mengikuti server yang hidup.
+Pengujian terhadap aplikasi yang hidup tetap berguna untuk menunjukkan perilakunya di jaringan dan
+konfigurasi sungguhan, tetapi ia hanya menunjukkan ketiadaan anomali pada percobaan yang dilakukan. Yang
+membuat anomalinya mustahil adalah mekanismenya.</p>
+
+<h3 id="postgresql-18-6">Yang khusus di PostgreSQL 18.6</h3>
+<p>PostgreSQL 18.6 dirilis 13 Agustus 2026 dan memuat perbaikan sejak 18.4. Tiga di antaranya menyentuh
+langsung teknik di atas:</p>
+<ul>
+  <li><strong>Deteksi konflik <code>SERIALIZABLE</code>.</strong> Sebuah konflik bisa terlewat saat
+  memeriksa indeks btree yang awalnya kosong, sehingga transaksi yang saling bertentangan diizinkan commit.
+  Bila Anda mengandalkan teknik 5, versi minimalnya 18.6.</li>
+  <li><strong><em>Index-only scan</em> GiST.</strong> Tuple indeks bisa salah didekode dan rencana
+  <em>index-only scan</em> mengeluarkan data rusak. Satu-satunya kelas operator inti yang terdampak adalah
+  <code>range_ops</code> GiST, dan hanya bila kolom rentangnya bukan kolom pertama indeks. Itulah persis
+  bentuk <code>EXCLUDE USING gist (kursi WITH =, periode WITH &amp;&amp;)</code>.</li>
+  <li><strong>Operator tidak-sama di <code>btree_gist</code>.</strong> Untuk tipe panjang-variabel seperti
+  <code>text</code>, pencarian dengan <code>&lt;&gt;</code> memakai fungsi pembanding yang salah di halaman
+  non-daun, dengan hasil salah dan kemungkinan crash. Ini relevan bagi constraint eksklusi yang memakai
+  <code>WITH &lt;&gt;</code>, misalnya "satu kandang hanya untuk satu jenis hewan".</li>
+</ul>
+<p>Catatan migrasinya juga meminta pembangunan ulang beberapa indeks setelah memasang 18.6: indeks
+<code>btree_gist</code> pada kolom <code>float4</code> atau <code>float8</code> bila kolomnya mungkin berisi
+<code>NaN</code> (perbandingannya salah), indeks <code>btree_gist</code> pada kolom <code>bit</code> atau
+<code>varbit</code> (indeksnya tidak efisien), dan indeks btree atas nilai <code>ltree</code> dengan lebih
+dari sekitar 14.653 label (perbandingannya meluap). Indeks yang menjawab salah tidak tampak rusak, dan bagi
+constraint eksklusi jawaban yang salah berarti pemesanan ganda atau kursi kosong yang ditolak. Tanyakan ke katalog, bukan ke skema yang Anda
+ingat. Kueri ini menemukan setiap indeks atas tipe-tipe itu, termasuk indeks atas ekspresi, karena ia lewat
+kelas operatornya:</p>
+<pre><code>SELECT n.nspname AS skema, c.relname AS tabel, i.relname AS indeks, am.amname AS metode,
+       pg_get_indexdef(i.oid) AS definisi
+FROM pg_index x
+JOIN pg_class      i  ON i.oid  = x.indexrelid
+JOIN pg_class      c  ON c.oid  = x.indrelid
+JOIN pg_am         am ON am.oid = i.relam
+JOIN pg_namespace  n  ON n.oid  = i.relnamespace
+WHERE n.nspname NOT IN ('pg_catalog', 'information_schema')
+  AND EXISTS (SELECT 1
+              FROM unnest(x.indclass::oid[]) AS cls(oid)
+              JOIN pg_opclass o ON o.oid = cls.oid
+              JOIN pg_type    t ON t.oid = o.opcintype
+              WHERE t.typname IN ('ltree', 'bit', 'varbit', 'float4', 'float8'))
+ORDER BY 1, 2, 3;
+
+<span class="c">-- untuk setiap baris hasilnya, di server yang sedang melayani:</span>
+REINDEX INDEX CONCURRENTLY nama_skema.nama_indeks;   <span class="c">-- tidak bisa di dalam blok transaksi</span>
+
+<span class="c">-- SQL ekstensi bisa tertinggal dari binarinya setelah naik versi</span>
+SELECT name, default_version, installed_version FROM pg_available_extensions
+ WHERE name IN ('btree_gist', 'pgcrypto');           <span class="c">-- bila tertinggal: ALTER EXTENSION btree_gist UPDATE;</span></code></pre>
+<p>Di platform ini kueri itu mengembalikan nol baris pada 22 Agustus 2026. Satu-satunya indeks GiST-nya
+adalah constraint eksklusi atas <code>uuid</code> dan <code>tstzrange</code>, dan dua tempat yang wajar untuk
+bilangan titik mengambang sengaja memakai <code>numeric</code>: uang <code>numeric(14,2)</code>, dan lintang
+serta bujur cabang <code>numeric(9,6)</code>. Keputusan menghindari <code>float</code> itu ternyata membayar
+dividen yang tidak diduga siapa pun.</p>
+
+<h3 id="without-overlaps">PostgreSQL 18: <code>WITHOUT OVERLAPS</code></h3>
+<p>Sejak PostgreSQL 18, yang dirilis 25 September 2025, kunci primer dan constraint unik dapat ditulis dengan
+<code>WITHOUT OVERLAPS</code> pada kolom terakhirnya, dan kunci asing dapat memakai <code>PERIOD</code>.
+Dokumentasinya menyebut constraint semacam itu ditegakkan sebagai exclusion constraint dengan indeks GiST:
+<code>UNIQUE (id, valid_at WITHOUT OVERLAPS)</code> berperilaku seperti <code>EXCLUDE USING GIST (id WITH =,
+valid_at WITH &amp;&amp;)</code>. Kolom rentangnya tidak boleh kosong, dan kolom skalar di sebelahnya
+membutuhkan <code>btree_gist</code>. Untuk data master yang tidak boleh tumpang tindih, seperti periode
+harga, tarif, atau masa jabatan, bentuk ini lebih ringkas:</p>
 <pre><code>CREATE TABLE harga_produk (
   produk_id     bigint        NOT NULL,
   berlaku       daterange     NOT NULL,
   harga_rupiah  numeric(14,2) NOT NULL,
   PRIMARY KEY (produk_id, berlaku WITHOUT OVERLAPS)
 );</code></pre>
-<p>Namun constraint unik tidak bisa diberi klausa <code>WHERE</code>. Untuk pemesanan, yang hanya
-melarang tumpang tindih di antara baris yang masih <code>held</code> atau <code>confirmed</code>,
-<code>EXCLUDE … WHERE</code> tetap alat yang tepat.</p>
+<p>Namun constraint unik tidak bisa diberi klausa <code>WHERE</code>. Untuk pemesanan, yang hanya melarang
+tumpang tindih di antara baris yang masih <code>held</code> atau <code>confirmed</code>, <code>EXCLUDE …
+WHERE</code> tetap alat yang tepat.</p>
 </section>
 
 <section id="domain-lain">
-<h2>3. Di luar bioskop: siapa lagi yang diuntungkan?</h2>
+<h2>5. Di luar bioskop: siapa lagi yang diuntungkan?</h2>
 <p>Catatan desain platform bioskop ini merumuskannya begini: kursi bioskop untuk satu pertunjukan dan
 kamar hotel untuk satu rentang tanggal adalah masalah yang sama bila dinyatakan dengan tepat.
 <strong>Keduanya klaim eksklusif atas satu sumber daya, untuk satu periode, di mana dua klaim yang
-tumpang tindih tidak boleh sama-sama berlaku.</strong> Setiap domain yang cocok dengan kalimat itu
-bisa memakai pola yang sama: kolom sumber daya dengan <code>=</code> dan kolom rentang dengan
+tumpang tindih tidak boleh sama-sama berlaku.</strong> Setiap domain yang cocok dengan kalimat itu bisa
+memakai pola yang sama: kolom sumber daya dengan <code>=</code> dan kolom rentang dengan
 <code>&amp;&amp;</code>. Skema platform ini sengaja dibuat generik untuk itu: tabel yang sama memetakan
 aula ke properti, kursi ke kamar, dan periode pertunjukan ke <code>[check-in, check-out)</code>.</p>
 
@@ -768,64 +1239,88 @@ aula ke properti, kursi ke kamar, dan periode pertunjukan ke <code>[check-in, ch
 <h3>Kapan pola ini bukan alat yang tepat</h3>
 <ul>
   <li><strong>Kapasitas yang dapat dipertukarkan.</strong> Constraint ini melindungi klaim atas unit
-  <em>tertentu</em>. Tiket festival tanpa nomor kursi, "kamar deluxe mana saja", atau kuota 100
-  peserta adalah masalah menghitung, bukan tumpang tindih. Hitunglah di dalam transaksi setelah
-  mengunci baris yang menjadi lingkup hitungan dengan <code>SELECT … FOR UPDATE</code>, seperti batas
-  10 kursi per pelanggan per hari di aplikasi bioskop ini, atau pakai <code>SERIALIZABLE</code> dengan
-  satu kali percobaan ulang untuk <code>40001</code>. Hotel umumnya menjual tipe kamar lebih dulu,
-  yang merupakan soal kapasitas, lalu menetapkan nomor kamar kemudian, yang merupakan soal
-  eksklusi.</li>
-  <li><strong>Aturan yang bergantung pada waktu sekarang</strong>, seperti "tahanan berlaku 10
-  menit". Predikat harus immutable, jadi simpan statusnya dan kedaluwarsakan dengan penyapu.</li>
+  <em>tertentu</em>. Tiket festival tanpa nomor kursi, "kamar deluxe mana saja", atau kuota 100 peserta
+  adalah masalah menghitung, bukan tumpang tindih. Hitunglah di dalam transaksi setelah mengunci baris yang
+  menjadi lingkup hitungan (teknik 2 di bagian 4), atau pakai <code>SERIALIZABLE</code> dengan satu kali
+  percobaan ulang untuk <code>40001</code> (teknik 5). Hotel umumnya menjual tipe kamar lebih dulu, yang
+  merupakan soal kapasitas, lalu menetapkan nomor kamar kemudian, yang merupakan soal eksklusi.</li>
+  <li><strong>Aturan yang bergantung pada waktu sekarang</strong>, seperti "tahanan berlaku 10 menit".
+  Predikat harus immutable, jadi simpan statusnya dan kedaluwarsakan dengan penyapu.</li>
   <li><strong>Bentuk geometri yang presisi.</strong> Di PostGIS, <code>&amp;&amp;</code> pada
-  <code>geometry</code> hanya membandingkan kotak pembatas (<em>bounding box</em>). Dua bidang yang
-  tidak bersentuhan pun bisa ditolak bila kotaknya beririsan, jadi larangan tumpang tindih yang
-  presisi butuh cara lain.</li>
+  <code>geometry</code> hanya membandingkan kotak pembatas (<em>bounding box</em>). Dua bidang yang tidak
+  bersentuhan pun bisa ditolak bila kotaknya beririsan, jadi larangan tumpang tindih yang presisi butuh cara
+  lain.</li>
   <li><strong>Kepemilikan yang tersebar di beberapa basis data atau layanan.</strong> Constraint hanya
   berlaku di dalam satu basis data. Data yang dipecah (<em>sharding</em>), atau sistem kedua yang ikut
   menjual unit yang sama, menghapus jaminan ini.</li>
-  <li><strong>Basis data yang tidak memilikinya.</strong> Sebelum memilih basis data, periksa apakah
-  ia sendiri bisa menegakkan aturan "tidak boleh tumpang tindih". Bila tidak, jaminan itu harus
-  dibangun ulang di aplikasi, tempat anomali di atas paling mudah lolos.</li>
+  <li><strong>Basis data yang tidak memilikinya.</strong> Sebelum memilih basis data, termasuk layanan
+  PostgreSQL terkelola, periksa apakah ia sendiri bisa menegakkan aturan "tidak boleh tumpang tindih" dan
+  mengizinkan ekstensi <code>btree_gist</code>. Bila tidak, jaminan itu harus dibangun ulang di aplikasi,
+  tempat anomali di atas paling mudah lolos.</li>
 </ul>
 </section>
 
-<section id="native-vs-jvm">
-<h2>4. Native image atau JVM panas: bentuk lalu lintas yang memilih</h2>
-<p>Platform bioskop ini sengaja dibangun dalam dua bentuk dari satu basis kode. Bentuk pertama adalah
-<em>native image</em> GraalVM (Mandrel) untuk Google Cloud Run dan Cloud SQL for PostgreSQL di region
-Jakarta. Bentuk kedua adalah JVM yang terus menyala di server on-premise. Alasannya tercatat di
-catatan desain proyek, dan diringkas di bawah ini. Cloud Run hanyalah satu contoh platform
-kontainer serverless: AWS ECS Express Mode, Azure Container Apps, Cloudflare Containers (lewat
-Worker perantara), dan Alibaba Serverless App Engine juga bisa menjalankan image OCI/Docker yang
-sama, hanya saja penagihan dan perilaku turun ke nolnya berbeda sehingga hitungan biaya di bawah
-harus diulang.</p>
+<section id="onprem-vs-serverless">
+<h2>6. On-premise atau serverless yang bisa turun ke nol</h2>
+<p>Platform kontainer serverless menjalankan image OCI/Docker tanpa server yang Anda kelola: Google Cloud
+Run, AWS ECS Express Mode, Azure Container Apps, Cloudflare Containers (lewat Worker perantara), dan Alibaba
+Serverless App Engine bisa menjalankan image yang sama. Daya tarik utamanya adalah turun ke nol: tidak ada
+permintaan, tidak ada instans, tidak ada tagihan. Pertanyaan yang menentukan untuk sistem pemesanan bukanlah
+mana yang lebih murah per permintaan, melainkan apa saja di aplikasi Anda yang harus tetap berjalan saat
+tidak ada yang mengirim permintaan. Contoh di bawah memakai Cloud Run; penagihan dan perilaku turun ke nol
+platform lain berbeda, jadi hitungannya harus diulang untuk masing-masing.</p>
+<p>Platform bioskop ini awalnya dirancang dalam dua bentuk dari satu basis kode: <em>native image</em>
+GraalVM (Mandrel) di Cloud Run dengan Cloud SQL for PostgreSQL di region Jakarta, dan JVM yang selalu
+menyala di server kantor. Yang benar-benar berjalan sampai hari ini hanya yang kedua: satu JVM di server
+on-premise tanpa GPU dengan 16 vCPU, yang dipakai bersama aplikasi lain. Bentuk Cloud Run dibekukan di
+repositori terpisah dan belum pernah di-deploy. Hitungan dan pelajarannya tetap berguna, dan diringkas di
+bawah.</p>
 
-<h3>Stack yang dipilih dan alasannya</h3>
+<h3>Yang tidak ikut turun ke nol</h3>
 <ul>
-  <li><strong>Quarkus dengan Qute dan htmx, dirender di server.</strong> Satu artefak yang
-  di-<em>deploy</em>, satu siklus rilis, dan tanpa gerbang peninjauan toko aplikasi.</li>
-  <li><strong>JDBC polos, tanpa ORM atau <em>query builder</em>.</strong> Ini menghapus satu kategori
-  risiko native image: Hibernate memetakan entitas lewat refleksi, dan kode hasil jOOQ perlu
-  didaftarkan untuk refleksi. Gantinya adalah disiplin. Setiap kueri diuji terhadap PostgreSQL
-  sungguhan yang sudah dimigrasi, lewat Testcontainers, di setiap build. Itulah yang menangkap salah
-  nama kolom, bukan kompilator.</li>
-  <li><strong>PostgreSQL 18 sebagai penjaga kebenaran.</strong> Pemesanan ganda dicegah exclusion
-  constraint, dan isolasi antarpenyewa ditegakkan <em>Row-Level Security</em> per transaksi, bukan
-  oleh filter di kode aplikasi.</li>
-  <li><strong>Notifikasi ketersediaan lewat Push API dengan Firebase Cloud Messaging</strong>, dengan
-  tabel di basis data sebagai pengganti registri di memori. Hanya bentuk ini yang cocok dengan
-  instans Cloud Run yang banyak, sementara, dan tidak bisa dialamatkan.</li>
-  <li><strong>Region Jakarta (<code>asia-southeast2</code>).</strong> Latensi rendah, dan data
-  pelanggan tetap di Indonesia tanpa perlu menunggu putusan hukum soal transfer lintas negara.</li>
+  <li><strong>Tenggat yang jatuh tempo saat tidak ada permintaan.</strong> Tahanan kursi berlaku 10 menit, dan
+  penyapu setiap 30 detik mengedaluwarsakannya, menuntaskan pertunjukan yang sudah lewat, membatalkan
+  pertunjukan yang kurang laku, serta membersihkan langganan notifikasi dan draf yang basi. Rekonsiliasi
+  pembayaran berjalan setiap 5 menit, dan tagihan penyewa setiap hari pukul 03.15. Setiap kondisi dipicu oleh
+  sebuah kejadian, tetapi jatuh temponya justru saat waktu berlalu tanpa kejadian apa pun, jadi sesuatu harus
+  bangun tepat pada tenggatnya. Layanan yang turun ke nol tidak melepas kursi yang ditahan sampai ada orang
+  yang kebetulan membuka situsnya, karena tahanan basi masih memenuhi predikat constraint.</li>
+  <li><strong>Pekerjaan setelah respons.</strong> Notifikasi ketersediaan dikirim setelah commit, tanpa
+  ditunggu, supaya kegagalannya tidak pernah membatalkan pemesanan yang sudah sah. Itu butuh CPU setelah
+  respons terkirim. Tanpa CPU yang selalu dialokasikan, CPU instans hampir nol begitu respons terkirim, dan
+  notifikasinya bisa tertunda atau hilang. Pemesanan tetap benar, tetapi peta kursi basi, dan tidak ada log
+  apa pun.</li>
+  <li><strong>Koneksi panjang.</strong> Aplikasi Android platform ini menerima pembaruan peta kursi dan
+  halaman pesanan lewat WebSocket. Cloud Run memperlakukan WebSocket sebagai permintaan panjang, paling lama
+  60 menit, dan instans yang punya satu saja koneksi WebSocket terbuka dianggap aktif sehingga CPU-nya
+  dialokasikan. Klien juga bisa dilayani instans yang berbeda, jadi dokumentasi Cloud Run sendiri meminta
+  penyimpanan data eksternal atau antrean pesan untuk menyelaraskan antarinstans. Di platform ini daftar
+  pelanggan soket disimpan di memori JVM, sehingga commit hanya sampai ke soket di proses yang sama. Itu
+  cukup di satu server yang selalu menyala, tetapi tidak untuk beberapa instans tanpa saluran bersama seperti
+  <code>LISTEN</code>/<code>NOTIFY</code> PostgreSQL atau pub/sub Redis. Langganan notifikasi push web,
+  sebaliknya, disimpan di tabel basis data, jadi tidak bergantung pada instans mana pun.</li>
+  <li><strong>Basis data.</strong> Cloud SQL ditagih per detik selama instansnya menyala. Cloud Run bisa
+  tidur, basis datanya tidak; menghentikan instans adalah tindakan manual, dan penyimpanannya tetap ditagih.
+  Jumlah instans dikali ukuran pool koneksi adalah plafon koneksi, dan menurut catatan desain proyek ini,
+  kegagalan Cloud Run dengan Cloud SQL yang paling umum adalah kehabisan koneksi, bukan kapasitas. Batasi
+  jumlah instans maksimum dengan sengaja, lalu pasang peringatan anggaran.</li>
 </ul>
+<p>Proyek ini menimbang dua cara untuk tetap turun ke nol, lalu menolak keduanya (19 Oktober 2026):
+memindahkan pekerjaan terjadwal ke panggilan Cloud Scheduler, atau menyalakan timer setiap kali tahanan atau
+pertunjukan dibuat. Timer di memori mati bersama instansnya, dan instans yang dibangunkan setiap menit
+berbiaya sama dengan instans yang selalu menyala, sementara notifikasi tetap membutuhkan CPU di luar
+permintaan. Keputusannya: <code>--min-instances=1</code> ditambah <code>--no-cpu-throttling</code>, dan
+jangan merekayasa jalan memutarinya.</p>
+<p>Hitung lantainya. Satu instans 1 vCPU yang menyala sebulan penuh adalah 30 × 86.400 ≈ 2,59 juta
+vCPU-detik; dengan tarif berbasis instans Tier 1, US$0,000018 per vCPU-detik, itu sekitar US$47 untuk
+CPU-nya saja, sebelum memori, kuota gratis, Cloud SQL, dan selisih harga Jakarta yang termasuk Tier 2. Untuk
+sistem pemesanan, "turun ke nol" berarti "turun ke satu".</p>
 
-<h3>Mengapa native image untuk Cloud Run</h3>
-<p>Cloud Run memberi tambahan CPU selama instans dinyalakan dan 10 detik sesudahnya, yaitu
-<em>startup CPU boost</em>, dan tambahan itu ikut ditagih. Untuk batas 1 vCPU, CPU-nya digandakan
-menjadi 2. Jadi startup yang lambat tidak hanya ditagih lebih lama, tetapi juga dengan CPU dua kali
-lipat. Tabel resmi Quarkus (uji 21 April 2026: Quarkus 3.34.3, JDK 25.0.2, 4 CPU) menunjukkan
-selisihnya:</p>
+<h3 id="native-vs-jvm">Native image atau JVM: hanya penting bila cold start sering</h3>
+<p>Cloud Run memberi tambahan CPU selama instans dinyalakan dan 10 detik sesudahnya, yaitu <em>startup CPU
+boost</em>, dan tambahan itu ikut ditagih. Untuk batas 1 vCPU, CPU-nya digandakan menjadi 2. Jadi startup
+yang lambat tidak hanya ditagih lebih lama, tetapi juga dengan CPU dua kali lipat. Tabel resmi Quarkus (uji
+21 April 2026: Quarkus 3.34.3, JDK 25.0.2, 4 CPU) menunjukkan selisihnya:</p>
 <div class="table-wrap">
 <table>
   <caption>Waktu sampai permintaan pertama, throughput puncak, dan memori</caption>
@@ -838,196 +1333,249 @@ selisihnya:</p>
   </tbody>
 </table>
 </div>
-<p>Native kehilangan 59% throughput puncak. Namun beban sistem pemesanan didominasi I/O, yaitu
-perjalanan bolak-balik ke basis data dan serialisasi JSON, bukan komputasi CPU yang panjang. Pada
-lalu lintas rendah dan sporadis, instans Cloud Run jarang hidup cukup lama sampai JIT sempat panas.
-Jadi native unggul di dua hal yang benar-benar ditagih: latensi startup dan detik CPU sampai respons
-pertama. Harga native sendiri adalah build yang memakan beberapa menit, dan pustaka berbasis refleksi
-yang bisa gagal hanya di native. Di proyek ini, Firebase Admin SDK perlu konfigurasi refleksi
-eksplisit, dan Web Push mentah gagal di bawah Mandrel karena penyedia kriptografi yang didaftarkan
-secara dinamis ditolak. "Native-nya berhasil di-compile" bukan bukti fiturnya jalan.</p>
-
-<h3>Kapan pindah, dan pindah ke mana</h3>
-<p>Variabelnya adalah <strong>jumlah permintaan hangat per <em>cold start</em></strong>, bukan
-pengaturan <code>min-instances</code> dan bukan perasaan bahwa lalu lintas "sudah stabil". Perkiraan
-kasarnya bisa dihitung dari tabel di atas:</p>
+<p>Native kehilangan 59% throughput puncak, karena tidak ada JIT yang belajar dari profil berjalan. Beban
+sistem pemesanan didominasi I/O, yaitu perjalanan bolak-balik ke basis data dan serialisasi, bukan komputasi
+CPU yang panjang, dan pada lalu lintas sepi instans Cloud Run jarang hidup cukup lama sampai JIT sempat
+panas. Jadi native unggul di dua hal yang ditagih: latensi startup dan detik CPU sampai respons pertama.
+Perkiraan kasar titik impasnya bisa dihitung dari tabel di atas:</p>
 <ul>
-  <li>Pada puncak, satu permintaan memakan sekitar 4 CPU ÷ 12.389 ≈ 0,32 ㎳ waktu CPU di JVM + Leyden,
-  dan 4 ÷ 5.411 ≈ 0,74 ㎳ di native. Selisihnya sekitar 0,42 ㎳ per permintaan.</li>
+  <li>Pada puncak, satu permintaan memakan sekitar 4 CPU ÷ 12.389 ≈ 0,32 ㎳ waktu CPU di JVM + Leyden, dan
+  4 ÷ 5.411 ≈ 0,74 ㎳ di native. Selisihnya sekitar 0,42 ㎳ per permintaan.</li>
   <li>Setiap cold start native menghemat (1.859 − 581) ㎳ × 2 vCPU ≈ 2,6 detik vCPU.</li>
   <li>Titik impasnya sekitar 2,6 detik ÷ 0,42 ㎳ ≈ 6.000 permintaan hangat per cold start.</li>
 </ul>
-<p>Sinyal yang bisa dicek adalah total permintaan dibagi jumlah instans yang dinyalakan, per layanan,
-dalam jendela waktu bergulir. Keduanya tampak di Cloud Monitoring. Bila tiap instans rata-rata
-melayani jauh lebih sedikit dari ribuan permintaan sebelum dimatikan, native lebih hemat. Bila
-rasionya bertahan di ribuan, pindahlah ke <strong>JVM dengan cache AOT Leyden</strong>, bukan ke JVM
-biasa. Startup dan memorinya mendekati native, build dan deploy-nya tetap JAR biasa, dan risiko
-konfigurasi refleksi khas native hilang.</p>
+<p>Sinyal yang bisa dicek adalah total permintaan dibagi jumlah instans yang dinyalakan, per layanan, dalam
+jendela waktu bergulir; keduanya tampak di Cloud Monitoring. Bila tiap instans rata-rata melayani jauh lebih
+sedikit dari ribuan permintaan sebelum dimatikan, native lebih hemat. Bila rasionya bertahan di ribuan,
+pindahlah ke <strong>JVM dengan cache AOT Leyden</strong>, bukan ke JVM biasa: startup dan memorinya mendekati
+native, build dan deploy-nya tetap JAR biasa, dan risiko konfigurasi refleksi khas native hilang.</p>
+<p>Namun hitungan itu hanya berlaku bila instans memang sering dinyalakan. Aplikasi yang wajib menjaga satu
+instans tetap menyala, seperti di atas, hanya mengalami cold start saat lonjakan menambah instans dan saat
+deploy, jadi keunggulan native menyusut ke instans tambahan itu saja. Harganya tetap dibayar penuh: build
+yang memakan beberapa menit, dan pustaka berbasis refleksi yang bisa gagal hanya di native. Di proyek ini,
+Firebase Admin SDK perlu konfigurasi refleksi eksplisit dan inisialisasi saat runtime, dan implementasi Web
+Push mentah gagal di bawah Mandrel karena penyedia kriptografi yang didaftarkan secara dinamis ditolak.
+"Native-nya berhasil di-compile" bukan bukti fiturnya jalan.</p>
 
 <h3>Tagihan ikut berubah bentuk</h3>
-<p>Catatan biaya platform ini menetapkan urutannya saat lalu lintas bergerak dari tak terduga ke
-stabil:</p>
 <ol>
-  <li><strong>Titik awal: penagihan berbasis permintaan.</strong> Bayar per permintaan, dan benar-benar
-  bisa turun ke nol. Tepat untuk bulan pertama.</li>
-  <li><strong>Langkah pertama: penagihan berbasis instans</strong>, setelah lalu lintas cukup stabil
-  sehingga instans jarang menganggur. Cloud Run punya Recommender yang meninjau lalu lintas sebulan
-  terakhir dan menyarankan peralihan ini bila hasilnya lebih murah. Biaya per permintaan, US$0,40 per
-  sejuta, hilang, dan tarif per detiknya turun. Tabel harga Google mencantumkan US$0,000018 per
-  vCPU-detik dan US$0,000002 per GiB-detik untuk berbasis instans, dibanding US$0,000024 dan
-  US$0,0000025 waktu aktif untuk berbasis permintaan: 25% dan 20% lebih murah. Itu harga Tier 1;
-  Jakarta termasuk Tier 2 yang lebih mahal, jadi bacalah baris harganya sebelum menganggarkan. Google
-  juga menyarankan berbasis instans untuk lalu lintas stabil, dan berbasis permintaan untuk lalu
-  lintas sporadis.</li>
-  <li><strong>Langkah kedua: <em>committed use discount</em> (CUD).</strong> Diskon komitmen fleksibel
-  Cloud Run kini juga berlaku untuk penagihan berbasis permintaan, tetapi jauh lebih kecil: 17%,
-  dibanding 28% untuk komitmen setahun atau 46% untuk tiga tahun pada penagihan berbasis instans.
-  Karena itu komitmen paling masuk akal setelah langkah pertama. Yang dikomitmenkan adalah belanja
-  minimum per jam, dan setelah dibeli tidak bisa dibatalkan, jadi ukurlah ke sekitar 60–70% dari
-  pemakaian rata-rata yang stabil, bukan puncaknya.</li>
+  <li><strong>Titik awal: penagihan berbasis permintaan.</strong> Bayar per permintaan, dan benar-benar bisa
+  turun ke nol, asalkan aplikasinya tidak punya tenggat dan pekerjaan latar seperti di atas.</li>
+  <li><strong>Penagihan berbasis instans</strong>, setelah lalu lintas cukup stabil sehingga instans jarang
+  menganggur, atau sejak hari pertama bila aplikasinya butuh CPU di luar permintaan: untuk sistem pemesanan,
+  langkah ini syarat, bukan pilihan. Biaya per permintaan, US$0,40 per sejuta, hilang, dan tarif per detiknya
+  turun. Tabel harga Google mencantumkan US$0,000018 per vCPU-detik dan US$0,000002 per GiB-detik untuk
+  berbasis instans, dibanding US$0,000024 dan US$0,0000025 waktu aktif untuk berbasis permintaan: 25% dan
+  20% lebih murah. Itu harga Tier 1; Jakarta termasuk Tier 2 yang lebih mahal, jadi bacalah baris harganya
+  sebelum menganggarkan. Cloud Run punya Recommender yang meninjau lalu lintas sebulan terakhir dan
+  menyarankan peralihan ini bila hasilnya lebih murah.</li>
+  <li><strong><em>Committed use discount</em> (CUD).</strong> Diskon komitmen fleksibel Cloud Run kini juga
+  berlaku untuk penagihan berbasis permintaan, tetapi jauh lebih kecil: 17%, dibanding 28% untuk komitmen
+  setahun atau 46% untuk tiga tahun pada penagihan berbasis instans. Yang dikomitmenkan adalah belanja
+  minimum per jam, dan setelah dibeli tidak bisa dibatalkan, jadi ukurlah ke sekitar 60–70% dari pemakaian
+  rata-rata yang stabil, bukan puncaknya.</li>
 </ol>
 
-<h3>Biaya lantai yang tidak ikut turun ke nol</h3>
-<p>"Serverless pasti murah untuk usaha kecil" hanya separuh benar. Catatan penerapan Cloud Run proyek
-ini mencatat beberapa hal yang tidak mengumumkan dirinya bila salah:</p>
+<h3>On-premise: JVM yang selalu panas</h3>
+<p>Di server yang menyala terus, tiga masalah di atas lenyap dengan sendirinya: tidak ada cold start,
+penyapu berjalan tepat waktu, dan daftar soket di memori sudah cukup. JIT-nya pun sudah panas: setelah
+hangat, fragmen peta kursi dilayani sekitar 8–9 ㎳ di sisi server, dibanding sekitar 80 ㎳ untuk permintaan
+pertama ketika JIT belum panas.</p>
+<p>Uji beban <em>open-loop</em> dengan wrk2 terhadap server itu mencatat sekitar 8.000 permintaan per detik
+dengan p99 sekitar 25 ㎳. Setiap tab
+peta kursi yang terbuka memolling 0,33 kali per detik, jadi itu setara sekitar 24.000 tab sekaligus. Pada
+10.000 permintaan per detik yang ditawarkan, sekitar 9.800 terlayani dengan p99 di bawah 250 ㎳, dan titik
+jenuhnya belum ditemukan. Batasnya pool koneksi basis data, bukan CPU: konfigurasi awal dengan 32 thread dan
+10 koneksi mentok di sekitar 7.600–7.900 permintaan per detik dengan p99 sampai hitungan detik, dan
+menyamakan keduanya di 16 menaikkan plafon itu. Aplikasi pemesanan lebih banyak menunggu I/O daripada
+menghitung.</p>
+<p>Pelajaran terbesarnya justru letak basis data. Saat PostgreSQL-nya layanan terkelola di Singapura, setiap
+polling peta kursi membuat sekitar 10 perjalanan bolak-balik; dengan RTT 10–30 ㎳, itu 100–300 ㎳ per
+permintaan, hampir semuanya menunggu jaringan. Setelah PostgreSQL pindah ke server yang sama lewat Unix
+socket, mediannya di sisi server 9 ㎳. Di cloud mana pun, aplikasi dan basis datanya harus berada di region
+yang sama; jarak di antara keduanya lebih mahal daripada pilihan native atau JVM. Biaya bulanan on-premise
+tetap berapa pun jumlah permintaannya, dan data pelanggan tinggal di gedung sendiri.</p>
+
+<h3>Harganya ada di operasional</h3>
+<p>Anda memegang semua yang biasanya diurus penyedia cloud, dan di proyek ini masing-masing pernah
+menggigit:</p>
 <ul>
-  <li><strong>Cloud SQL ditagih per detik selama instansnya menyala.</strong> Cloud Run bisa tidur,
-  basis datanya tidak. Menghentikan instans adalah tindakan manual, dan penyimpanannya tetap
-  ditagih.</li>
-  <li><strong>Penyapu terjadwal butuh <code>--min-instances=1</code>.</strong> Penyapu kedaluwarsa
-  tahanan (setiap 30 detik), rekonsiliasi pembayaran, dan rekap tagihan harian hanya berjalan selama
-  ada instans. Layanan yang turun ke nol tidak melepas kursi yang ditahan sampai ada orang yang
-  kebetulan membuka situsnya.</li>
-  <li><strong>Pekerjaan setelah respons butuh CPU yang selalu dialokasikan.</strong> Tanpa itu, CPU
-  hampir nol begitu respons terkirim, dan notifikasi yang dikirim setelah <em>commit</em> bisa
-  tertunda atau hilang. Pemesanan tetap benar, tetapi peta kursi basi, dan tidak ada log apa
-  pun.</li>
-  <li><strong>Jumlah instans dikali ukuran pool koneksi adalah plafon koneksi.</strong> Menurut catatan
-  desain proyek ini, kegagalan Cloud Run dengan Cloud SQL yang paling umum adalah kehabisan koneksi,
-  bukan kapasitas. Batasi jumlah instans maksimum dengan sengaja, lalu pasang peringatan anggaran.</li>
+  <li><strong>Jam.</strong> Layanan sinkronisasi waktu pernah mati tanpa ada yang tahu. Stempel waktu log
+  audit hanya sebaik jamnya, dan kedaluwarsa tahanan, QR pembayaran, serta token login membaca jam yang sama.
+  Selisih jam bahkan sempat "mengukur" batas minimum masa berlaku QR pembayaran sekitar 17 menit yang
+  ternyata tidak ada: seluruhnya selisih jam terhadap server gerbang pembayaran.</li>
+  <li><strong>Unit layanan yang bergeser.</strong> Unit systemd dipasang dengan tangan, dan salinan yang
+  berjalan pernah berbeda dari versi di repositori, dengan <em>drop-in</em> yang membuat perbedaannya tidak
+  terlihat dari kedua sisi. Menghapus drop-in itu sebagai "berlebih" akan membuat migrasi basis data berebut
+  start dengan PostgreSQL, dan gagalnya baru terlihat saat boot berikutnya.</li>
+  <li><strong>Firewall yang gagal diam-diam.</strong> Sebuah kebijakan firewall tersimpan merujuk zona yang
+  hanya ada selama Docker berjalan. Firewall yang sedang berjalan tetap memakai aturan lamanya; boot berikutnya
+  membaca ulang berkas itu, jatuh ke konfigurasi bawaan, dan menutup port aplikasi.</li>
+  <li><strong>Sertifikat TLS.</strong> Aplikasi membaca sertifikatnya sekali saat mulai, jadi perpanjangan
+  otomatis butuh hook yang me-restart layanan.</li>
+  <li><strong>Berbagi mesin.</strong> Server ini juga menjalankan aplikasi lain di port 80 dan 443, jadi
+  HTTPS aplikasi pemesanan ada di 8443, dan tidak ada GPU untuk menjalankan model bahasa sendiri.</li>
 </ul>
+<p>Semuanya tidak terlihat sampai boot berikutnya, atau sampai ada yang mengaudit. On-premise murah di
+tagihan, tetapi mahal di perhatian.</p>
 
-<h3>Mengapa JVM panas untuk on-premise</h3>
-<p>Bentuk kedua berjalan sebagai JVM biasa di server on-premise yang menyala terus. JIT-nya sudah panas.
-Dalam pengukuran mode JVM, fragmen peta kursi dilayani sekitar 8–9 ㎳ di sisi server setelah hangat,
-dibanding sekitar 80 ㎳ untuk permintaan pertama ketika JIT belum panas. Dalam uji beban
-<em>open-loop</em>, server on-premise itu menahan 3.200 permintaan per detik dengan p99 satu digit
-milidetik tanpa titik jenuh ditemukan. Itu setara sekitar 9.700 tab peta kursi yang terbuka
-bersamaan. Untuk lalu lintas yang ramai dan stabil sepanjang hari, biaya bulanannya tetap berapa pun
-jumlah permintaannya, data tinggal di gedung sendiri, dan throughput puncak JIT dimanfaatkan
-penuh.</p>
-<p>Harganya ada di operasional. Anda yang memegang jam server (stempel waktu log audit hanya sebaik
-jamnya), sertifikat TLS, unit layanan, cadangan data, dan pemutakhiran. Jam yang ternyata tidak
-tersinkron, dan unit layanan yang diam-diam berbeda dari versi di repositori, sama-sama pernah
-ditemukan di proyek ini.</p>
-
-<h3>Pilih menurut bentuk lalu lintas</h3>
+<h3>Pilih menurut tenggat dan bentuk lalu lintas</h3>
 <div class="table-wrap">
 <table>
-  <caption>Bentuk lalu lintas menentukan stack, bukan sebaliknya</caption>
-  <thead><tr><th scope="col">Bentuk lalu lintas</th><th scope="col">Contoh</th>
+  <caption>Tenggat waktu dan bentuk lalu lintas yang menentukan tempat aplikasi berjalan, bukan sebaliknya</caption>
+  <thead><tr><th scope="col">Kondisi</th><th scope="col">Contoh</th>
              <th scope="col">Pilihan yang masuk akal</th><th scope="col">Yang harus dihitung</th></tr></thead>
   <tbody>
-    <tr><td>Sepi, sporadis, musiman</td><td>bioskop independen, penyewaan gedung, klinik kecil, acara musiman</td>
-        <td>Cloud Run dengan native image, penagihan berbasis permintaan</td>
-        <td>biaya lantai Cloud SQL; <code>min-instances</code> untuk penyapu; batas instans maksimum</td></tr>
-    <tr><td>Mulai stabil</td><td>usaha yang sedang tumbuh</td>
-        <td>JVM dengan cache AOT Leyden di Cloud Run, penagihan berbasis instans, lalu CUD</td>
-        <td>rasio permintaan per cold start; komitmen 60–70% dari rata-rata</td></tr>
-    <tr><td>Ramai dan stabil sepanjang hari</td><td>jaringan bioskop besar, sistem 24 jam</td>
+    <tr><td>Tanpa tenggat dan tanpa pekerjaan latar; lalu lintas sepi dan sporadis</td>
+        <td>halaman katalog dan jadwal, API baca, alat internal, webhook yang jarang</td>
+        <td>Serverless yang benar-benar turun ke nol, penagihan berbasis permintaan; native image bila cold start sering</td>
+        <td>permintaan per cold start; biaya lantai basis data</td></tr>
+    <tr><td>Ada tenggat, pekerjaan setelah respons, atau koneksi panjang; lalu lintas sepi sampai sedang</td>
+        <td>pemesanan kursi, janji temu, sewa lapangan; bioskop independen, klinik kecil</td>
+        <td>Serverless dengan satu instans minimum dan CPU selalu dialokasikan, penagihan berbasis instans lalu CUD; atau satu VPS kecil</td>
+        <td>biaya instans minimum sebulan; basis data; plafon koneksi; saluran bersama bila instans lebih dari satu</td></tr>
+    <tr><td>Ramai dan stabil sepanjang hari, atau data harus tinggal di gedung sendiri</td>
+        <td>jaringan bioskop besar, sistem 24 jam</td>
         <td>JVM panas di server khusus: on-premise atau VPS</td>
-        <td>kapasitas tim operasional: jam, TLS, cadangan, pemutakhiran</td></tr>
+        <td>kapasitas tim operasional: jam, TLS, cadangan, firewall, pemutakhiran</td></tr>
   </tbody>
 </table>
 </div>
-<p>Karena itu, penyewa platform ini diberi tiga pilihan hosting: server on-premise milik sendiri,
-VPS penuh, atau hosting dinamis per permintaan seperti Cloud Run, atau platform kontainer serverless lain yang
-menerima image OCI/Docker yang sama. Satu basis kode, dua cara build,
-karena tidak ada satu jawaban yang benar untuk semua bentuk lalu lintas.</p>
+<p>Sebelum memilih platform serverless mana pun, jawab pertanyaan yang sama untuknya:</p>
+<ol>
+  <li>Apakah CPU tetap berjalan di antara permintaan? Notifikasi setelah respons dan pekerjaan terjadwal
+  membutuhkannya.</li>
+  <li>Bisakah satu instans tetap hangat, dan berapa biayanya sebulan?</li>
+  <li>Bagaimana jumlah instans dikali ukuran pool koneksi bertemu batas koneksi basis datanya?</li>
+  <li>Apakah PostgreSQL terkelolanya mengizinkan <code>btree_gist</code> dan <code>pgcrypto</code>, dan
+  pemilik tabel yang bukan superuser? Peran superuser atau <code>BYPASSRLS</code> tidak pernah mengevaluasi
+  kebijakan <em>row-level security</em>. Di proyek ini, dua bug nyata yang hanya muncul di bawah kebijakan
+  itu lolos dari rangkaian uji yang hijau sampai migrasinya dijalankan pemilik biasa.</li>
+  <li>Di mana status yang hidup lama disimpan, seperti soket, timer, dan sesi, bila instansnya lebih dari
+  satu?</li>
+  <li>Apakah TLS berakhir di proxy yang selalu menimpa <code>X-Forwarded-*</code>? Header itu hanya boleh
+  dipercaya di belakang proxy seperti itu. Server yang langsung terjangkau dari internet, seperti server
+  kantor ini, harus menganggapnya masukan pemanggil.</li>
+  <li>Adakah region Indonesia untuk platformnya <em>dan</em> basis datanya?</li>
+  <li>Di mana rahasia disimpan, sebagai pengganti berkas environment di server sendiri?</li>
+</ol>
+<p>Tempat aplikasi berjalan juga bukan keputusan teknis semata. Di proyek ini, pertanyaan hosting sengaja
+ditunda sampai akhir masa uji coba dengan calon penyewa pertama, bersama dua pertanyaan lain: rekening siapa yang
+menerima uang tiket, dan siapa yang mendaftar sebagai Penyelenggara Sistem Elektronik. Ketiganya sebenarnya
+satu pertanyaan: pembeli tiket ini pelanggan siapa?</p>
 
-<h3>Daftar periksa pemilihan stack</h3>
+<h3>Daftar periksa</h3>
 <ol>
   <li>Ukur bentuk lalu lintas lebih dulu: permintaan per jam, per hari, dan per cold start.</li>
+  <li>Daftar setiap tenggat dan pekerjaan latar. Masing-masing butuh proses yang terjaga.</li>
   <li>Hitung biaya lantai yang tidak bisa nol: basis data, instans minimum, dan penyimpanan.</li>
-  <li>Pastikan basis data Anda sendiri bisa menegakkan aturan "tidak boleh tumpang tindih".</li>
+  <li>Pastikan basis data Anda sendiri bisa menegakkan aturan "tidak boleh tumpang tindih", dan uji
+  pelindungnya dengan mencabutnya.</li>
   <li>Pastikan agen elektronik Anda, manusia atau AI, memberi kesempatan mengoreksi kesalahan sebelum
   transaksi mengikat.</li>
-  <li>Periksa ke mana data pelanggan mengalir, dan apakah ia keluar dari Indonesia.</li>
-  <li>Jujurlah soal kapasitas operasional tim: on-premise murah di tagihan, tetapi mahal di
-  perhatian.</li>
+  <li>Periksa ke mana data pelanggan mengalir, termasuk teks obrolan, dan apakah ia keluar dari
+  Indonesia.</li>
+  <li>Jujurlah soal kapasitas operasional tim: on-premise murah di tagihan, tetapi mahal di perhatian.</li>
 </ol>
 </section>
 
 <section id="faq" class="faq">
-<h2>5. Pertanyaan yang sering diajukan</h2>
+<h2>7. Pertanyaan yang sering diajukan</h2>
 
 <h3>Apakah agen elektronik dalam UETA 1999 berarti agen AI?</h3>
-<p>Tidak. Komentar resmi UETA menyebut agen elektronik sebagai mesin yang terbatas pada fungsi alat
-dan bekerja di dalam batasan pemrogramannya. Agen yang bertindak otonom, bukan sekadar otomatis, baru
+<p>Tidak. Komentar resmi UETA menyebut agen elektronik sebagai mesin yang terbatas pada fungsi alat dan
+bekerja di dalam batasan pemrogramannya. Agen yang bertindak otonom, bukan sekadar otomatis, baru
 diantisipasi sebagai kemungkinan di masa depan, dan penafsirannya diserahkan kepada pengadilan.</p>
 
-<h3>Apakah server web seperti Quarkus yang menerima pesanan termasuk agen elektronik?</h3>
-<p>Ya. Contoh dari perancang UETA sendiri adalah Bookseller.com, yang menerima dan mengonfirmasi
-pesanan lewat mesinnya. Aplikasi yang menahan kursi, menerima pembayaran, dan menerbitkan tiket tanpa
-ditinjau manusia adalah agen elektronik milik penjualnya.</p>
-
-<h3>Apakah PostgreSQL itu agen elektronik?</h3>
-<p>Tidak dengan sendirinya. Definisinya fungsional: agen elektronik adalah keseluruhan sarana otomatis
-yang dipakai satu pihak. Basis data adalah bagian dari mesin itu, walaupun keputusan menerima atau
-menolak klaim kursi bisa diambil di dalam PostgreSQL oleh exclusion constraint.</p>
+<h3>Apakah server web yang menerima pesanan termasuk agen elektronik?</h3>
+<p>Ya. Contoh dari perancang UETA sendiri adalah Bookseller.com, yang menerima dan mengonfirmasi pesanan
+lewat mesinnya. Aplikasi yang menahan kursi, menerima pembayaran, dan menerbitkan tiket tanpa ditinjau
+manusia adalah agen elektronik milik penjualnya, termasuk basis data di dalamnya, walaupun keputusan
+menerima atau menolak klaim kursi diambil oleh constraint di PostgreSQL.</p>
 
 <h3>Di Indonesia, siapa yang menanggung akibat hukum transaksi lewat agen elektronik?</h3>
-<p>Menurut UU ITE Pasal 21 ayat (2), penyelenggara Agen Elektronik. Kerugian akibat kelalaian
+<p>Menurut UU ITE Pasal 21 ayat (2) huruf c, penyelenggara Agen Elektronik. Kerugian karena agen gagal
+beroperasi akibat tindakan pihak ketiga juga ditanggung penyelenggara (ayat 3), kerugian karena kelalaian
 pengguna jasa ditanggung pengguna (ayat 4), dan tanggung jawab penyelenggara tidak berlaku bila dapat
 dibuktikan keadaan memaksa, kesalahan, atau kelalaian pengguna (ayat 5).</p>
 
-<h3>Apa itu exclusion constraint dengan indeks GiST?</h3>
-<p>Constraint PostgreSQL yang melarang dua baris memenuhi sekumpulan operator sekaligus, misalnya
-<code>kursi WITH =</code> dan <code>periode WITH &amp;&amp;</code>: kursi yang sama dan periode yang
-tumpang tindih. GiST adalah jenis indeks yang mendukung operator rentang seperti
-<code>&amp;&amp;</code>, dan ekstensi <code>btree_gist</code> menambahkan dukungan untuk kolom skalar
-biasa.</p>
+<h3>Fitur apa yang wajib disediakan penyelenggara agen elektronik?</h3>
+<p>PP 71/2019 Pasal 37 ayat (3) menyebut fasilitas untuk melakukan koreksi, membatalkan perintah, memberikan
+konfirmasi atau rekonfirmasi, memilih meneruskan atau berhenti, melihat informasi tawaran, mengecek status
+berhasil atau gagalnya transaksi, dan membaca perjanjian sebelum bertransaksi, sesuai karakteristik agennya.
+Ayat (1) mewajibkan informasi seperti identitas penyelenggara, syarat kontrak, jaminan privasi, dan nomor
+telepon pengaduan. Pelanggarannya dikenai sanksi administratif menurut Pasal 100.</p>
+
+<h3>Bolehkah agen AI langsung memesan atas nama pelanggan?</h3>
+<p>Sebaiknya tidak. UETA Pasal 10 ayat 2 membolehkan individu menghindari akibat kesalahannya bila agen
+elektronik pihak lain tidak memberi kesempatan untuk mencegah atau mengoreksinya, dan PP 71/2019 mewajibkan
+fitur koreksi dan konfirmasi. Biarkan agen mengusulkan, misalnya lewat peta kursi yang pilihannya sudah
+tercentang, dan biarkan pelanggan sendiri yang menekan tombol tahan dan bayar.</p>
+
+<h3>Apa itu anomali Adya?</h3>
+<p>Taksonomi anomali isolasi dari tesis Atul Adya di MIT (1999) dan makalah ICDE 2000 yang ia tulis bersama
+Barbara Liskov dan Patrick O'Neil. Setiap anomali didefinisikan sebagai siklus tertentu pada graf
+ketergantungan antartransaksi yang sudah di-commit, atau sebagai pembacaan data yang seharusnya tidak
+terlihat: G0 (siklus tulis), G1a, G1b, dan G1c (bacaan kotor), G-cursor (lost update), G-single (read skew),
+G2-item (write skew), dan G2 (phantom). Karena tidak bergantung pada penguncian, definisi itu cocok untuk
+basis data multiversi seperti PostgreSQL.</p>
 
 <h3>Mengapa tidak cukup mengecek apakah kursi masih kosong, lalu menyimpan?</h3>
 <p>Karena dua transaksi bersamaan sama-sama melihat kursi kosong dan sama-sama menyimpan.
 <code>READ COMMITTED</code> dan <code>REPEATABLE READ</code> membiarkannya; ini <em>write skew</em>.
-Exclusion constraint menolak klaim kedua saat ditulis, pada tingkat isolasi apa pun, dengan SQLSTATE
+Constraint eksklusi menolak klaim kedua saat ditulis, pada tingkat isolasi apa pun, dengan SQLSTATE
 <code>23P01</code>.</p>
 
-<h3>Apa bedanya dengan WITHOUT OVERLAPS di PostgreSQL 18?</h3>
-<p><code>WITHOUT OVERLAPS</code> adalah bentuk standar untuk kunci primer dan constraint unik atas
-rentang, dan ditegakkan sebagai exclusion constraint GiST. Cocok untuk data master seperti periode
-harga. Constraint unik tidak bisa diberi klausa <code>WHERE</code>, jadi untuk pemesanan yang hanya
-melarang tumpang tindih di antara baris yang masih aktif, <code>EXCLUDE</code> dengan
-<code>WHERE</code> tetap dibutuhkan.</p>
+<h3>Tingkat isolasi PostgreSQL mana yang mencegah anomali apa?</h3>
+<p><code>READ COMMITTED</code>, bawaan PostgreSQL, mencegah G0, G1a, G1b, dan G1c. <code>REPEATABLE
+READ</code>, yang di PostgreSQL berupa <em>snapshot isolation</em>, menambahkan lost update dan read skew.
+Hanya <code>SERIALIZABLE</code> yang juga mencegah write skew dan phantom, dengan membatalkan salah satu
+transaksi lewat SQLSTATE <code>40001</code>. <code>READ UNCOMMITTED</code> diterima tetapi berperilaku seperti
+<code>READ COMMITTED</code>.</p>
 
-<h3>Domain apa saja selain bioskop yang cocok memakai exclusion constraint?</h3>
+<h3>Apa yang perlu diperhatikan saat memakai PostgreSQL 18.6?</h3>
+<p>Versi 18.6, dirilis 13 Agustus 2026, memperbaiki deteksi konflik <code>SERIALIZABLE</code> yang bisa
+melewatkan konflik pada indeks btree yang awalnya kosong, <em>index-only scan</em> GiST atas kolom rentang
+yang bukan kolom pertama indeks, dan pencarian <code>btree_gist</code> dengan operator tidak-sama. Setelah
+naik versi, bangun ulang indeks <code>btree_gist</code> pada kolom float yang mungkin berisi
+<code>NaN</code>, indeks <code>btree_gist</code> pada kolom bit, dan indeks btree atas <code>ltree</code>.</p>
+
+<h3>Apa bedanya WITHOUT OVERLAPS di PostgreSQL 18 dengan EXCLUDE?</h3>
+<p><code>WITHOUT OVERLAPS</code> adalah bentuk standar untuk kunci primer dan constraint unik atas rentang,
+dan ditegakkan sebagai exclusion constraint GiST. Cocok untuk data master seperti periode harga. Constraint
+unik tidak bisa diberi klausa <code>WHERE</code>, jadi untuk pemesanan yang hanya melarang tumpang tindih di
+antara baris yang masih aktif, <code>EXCLUDE</code> dengan <code>WHERE</code> tetap dibutuhkan.</p>
+
+<h3>Domain apa saja selain bioskop yang cocok memakai constraint eksklusi?</h3>
 <p>Semua yang berbentuk klaim eksklusif atas satu sumber daya untuk satu periode: hotel, ruang rapat,
 lapangan olahraga, jadwal dokter dan kamar operasi, kursi kereta per segmen, sewa kendaraan dan alat,
-dermaga, shift karyawan, periode harga dan tarif, polis asuransi, serta rentang VLAN atau frekuensi.
-Untuk kapasitas yang dapat dipertukarkan, seperti tiket tanpa nomor kursi, gunakan penghitungan
-dengan penguncian baris.</p>
+dermaga, shift karyawan, periode harga dan tarif, polis asuransi, serta rentang VLAN atau frekuensi. Untuk
+kapasitas yang dapat dipertukarkan, seperti tiket tanpa nomor kursi, gunakan penghitungan dengan penguncian
+baris.</p>
+
+<h3>Bisakah sistem pemesanan benar-benar turun ke nol di serverless?</h3>
+<p>Biasanya tidak. Tahanan kursi punya tenggat yang jatuh tempo justru saat tidak ada permintaan, jadi
+penyapu terjadwal butuh satu instans yang selalu menyala; notifikasi setelah commit butuh CPU yang selalu
+dialokasikan; dan Cloud SQL tetap ditagih selama instansnya menyala. Satu instans 1 vCPU yang menyala sebulan
+sudah sekitar US$47 untuk CPU-nya saja pada tarif berbasis instans Tier 1 Cloud Run. Hitung biaya lantai itu
+sebelum memilih.</p>
 
 <h3>Kapan native image lebih hemat daripada JVM?</h3>
-<p>Saat lalu lintas sepi dan sporadis sehingga instans sering dinyalakan ulang. Dari tabel resmi
-Quarkus, satu cold start native menghemat sekitar 2,6 detik vCPU dibanding JVM dengan cache AOT
-Leyden, setara kira-kira 6.000 permintaan hangat. Bila tiap instans melayani jauh lebih sedikit dari
-itu sebelum dimatikan, native lebih hemat.</p>
-
-<h3>Apakah serverless selalu lebih murah untuk usaha kecil?</h3>
-<p>Tidak selalu. Cloud SQL tetap ditagih selama instansnya menyala, penyapu terjadwal memerlukan
-minimal satu instans, dan pekerjaan setelah respons memerlukan CPU yang selalu dialokasikan. Hitung
-biaya lantai itu sebelum memilih.</p>
+<p>Saat instans sering dinyalakan ulang. Dari tabel resmi Quarkus, satu cold start native menghemat sekitar
+2,6 detik vCPU dibanding JVM dengan cache AOT Leyden, setara kira-kira 6.000 permintaan hangat. Bila tiap
+instans melayani jauh lebih sedikit dari itu sebelum dimatikan, native lebih hemat. Aplikasi yang wajib
+menjaga satu instans tetap menyala jarang mendapat manfaat itu, karena cold start-nya hanya terjadi saat
+lonjakan dan saat deploy.</p>
 
 <h3>Kapan sebaiknya memilih JVM panas di server on-premise?</h3>
-<p>Saat lalu lintas ramai dan stabil sepanjang hari, tim sanggup mengurus operasional seperti jam,
-sertifikat TLS, cadangan, dan pemutakhiran, dan biaya bulanan yang tetap lebih menarik daripada
-tagihan per permintaan. Dalam pengujian proyek ini, satu server on-premise menahan 3.200 permintaan per
-detik dengan p99 satu digit milidetik tanpa mencapai titik jenuh.</p>
+<p>Saat lalu lintas ramai dan stabil sepanjang hari, data harus tinggal di gedung sendiri, dan tim sanggup
+mengurus jam, sertifikat TLS, cadangan, firewall, dan pemutakhiran. Dalam uji beban, satu server kantor
+proyek ini melayani sekitar 8.000 permintaan per detik dengan p99 sekitar 25 milidetik,
+dan batasnya adalah pool koneksi basis data, bukan CPU.</p>
 </section>
 
 <section id="sumber">
-<h2>6. Sumber</h2>
+<h2>8. Sumber</h2>
 <ul class="sources">
   <li>National Conference of Commissioners on Uniform State Laws, <a rel="nofollow"
   href="https://scs.nevada.edu/wp-content/uploads/2020/07/FED_Act99.pdf"><cite>Uniform Electronic
@@ -1038,18 +1586,32 @@ detik dengan p99 satu digit milidetik tanpa mencapai titik jenuh.</p>
   Computational Law Report</a>.</li>
   <li><a rel="nofollow" href="https://jdih.kemenkeu.go.id/fullText/2008/11TAHUN2008UU.htm">Undang-Undang
   Nomor 11 Tahun 2008 tentang Informasi dan Transaksi Elektronik</a>, JDIH Kementerian Keuangan: Pasal 1
-  angka 8, Pasal 21, dan Pasal 22.</li>
-  <li>PostgreSQL 18: <a rel="nofollow" href="https://www.postgresql.org/docs/18/sql-createtable.html">CREATE
+  angka 8, Pasal 6, Pasal 21, dan Pasal 22.</li>
+  <li><a rel="nofollow" href="https://peraturan.bpk.go.id/Details/122030/pp-no-71-tahun-2019">Peraturan
+  Pemerintah Nomor 71 Tahun 2019 tentang Penyelenggaraan Sistem dan Transaksi Elektronik</a>, JDIH BPK:
+  Pasal 1 angka 3, Pasal 36 sampai 39, dan Pasal 100.</li>
+  <li><a rel="nofollow" href="https://peraturan.bpk.go.id/Details/229798/uu-no-27-tahun-2022">Undang-Undang
+  Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi</a>, JDIH BPK: Pasal 56.</li>
+  <li>A. Adya, <cite lang="en">Weak Consistency: A Generalized Theory and Optimistic Implementations for
+  Distributed Transactions</cite>, tesis PhD, MIT, 1999; dan A. Adya, B. Liskov, dan P. O'Neil, <a
+  rel="nofollow" href="https://doi.org/10.1109/ICDE.2000.839388"><cite lang="en">Generalized Isolation Level
+  Definitions</cite></a>, ICDE 2000, hlm. 67–78.</li>
+  <li>PostgreSQL 18: <a rel="nofollow" href="https://www.postgresql.org/docs/18/transaction-iso.html">Transaction
+  Isolation</a>, <a rel="nofollow" href="https://www.postgresql.org/docs/18/explicit-locking.html">Explicit
+  Locking</a>, <a rel="nofollow" href="https://www.postgresql.org/docs/18/sql-createtable.html">CREATE
   TABLE</a> (<code>EXCLUDE</code> dan <code>WITHOUT OVERLAPS</code>), <a rel="nofollow"
   href="https://www.postgresql.org/docs/18/rangetypes.html">Range Types</a>, <a rel="nofollow"
-  href="https://www.postgresql.org/docs/18/btree-gist.html">btree_gist</a>, dan <a rel="nofollow"
-  href="https://www.postgresql.org/docs/18/release-18.html">catatan rilis PostgreSQL 18</a>.</li>
+  href="https://www.postgresql.org/docs/18/btree-gist.html">btree_gist</a>, <a rel="nofollow"
+  href="https://www.postgresql.org/docs/18/release-18.html">catatan rilis PostgreSQL 18</a>, dan <a
+  rel="nofollow" href="https://www.postgresql.org/docs/18/release-18-6.html">catatan rilis PostgreSQL
+  18.6</a>.</li>
   <li>Quarkus, <a rel="nofollow" href="https://quarkus.io/version/3.40/guides/building-native-image/">Building
   a native executable</a>, tabel perbandingan JVM, Leyden, dan native.</li>
   <li>Google Cloud, <a rel="nofollow" href="https://docs.cloud.google.com/run/docs/configuring/cpu">Configure
   CPU limits for services</a> (<em>startup CPU boost</em>), <a rel="nofollow"
   href="https://docs.cloud.google.com/run/docs/configuring/cpu-allocation">Billing settings for
   services</a> (pilihan penagihan dan Recommender), <a rel="nofollow"
+  href="https://docs.cloud.google.com/run/docs/triggering/websockets">Using WebSockets</a>, <a rel="nofollow"
   href="https://cloud.google.com/run/pricing">Cloud Run pricing</a> (tarif per detik dan Tier harga
   region), <a rel="nofollow"
   href="https://docs.cloud.google.com/run/docs/tips/services-cost-optimization">Best practices for
@@ -1058,26 +1620,30 @@ detik dengan p99 satu digit milidetik tanpa mencapai titik jenuh.</p>
   <a rel="nofollow"
   href="https://cloud.google.com/sql/docs/postgres/pricing">Cloud SQL for PostgreSQL pricing</a>.</li>
   <li>Loop agen, dokumentasi resmi: <a rel="nofollow" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/index.html">Quarkus LangChain4j</a>, <a rel="nofollow" href="https://docs.koog.ai/llm-providers/">Koog</a>,
+  <a rel="nofollow" href="https://docs.langchain.com/oss/python/langgraph/overview">LangGraph</a>,
   <a rel="nofollow" href="https://adk.dev/agents/models/">Google ADK</a>, <a rel="nofollow" href="https://code.claude.com/docs/en/agent-sdk/overview">Claude Agent SDK</a> dan
   <a rel="nofollow" href="https://code.claude.com/docs/en/llm-gateway">Claude Code: Other LLM gateways</a>, <a rel="nofollow" href="https://github.com/microsoft/agent-framework">Microsoft Agent Framework</a>,
   <a rel="nofollow" href="https://openai.github.io/openai-agents-python/models/">OpenAI Agents SDK</a>, serta Amazon Bedrock AgentCore
   (<a rel="nofollow" href="https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/what-is-bedrock-agentcore.html">gambaran umum</a> dan <a rel="nofollow" href="https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/harness.html">Harness</a>).</li>
-  <li>Model dan platform: Amazon Bedrock <a rel="nofollow" href="https://docs.aws.amazon.com/bedrock/latest/userguide/models-api-compatibility.html">API compatibility</a>, Amazon Nova
+  <li>Model dan platform: Amazon Bedrock <a rel="nofollow" href="https://docs.aws.amazon.com/bedrock/latest/userguide/models-region-compatibility.html">model support by AWS Region</a>
+  dan <a rel="nofollow" href="https://docs.aws.amazon.com/bedrock/latest/userguide/models-api-compatibility.html">API compatibility</a>, Amazon Nova
   <a rel="nofollow" href="https://docs.aws.amazon.com/nova/latest/userguide/agents-use-nova.html">sebagai model dasar agen</a>, Anthropic
   <a rel="nofollow" href="https://platform.claude.com/docs/en/api/openai-sdk">OpenAI SDK compatibility</a>, <a rel="nofollow" href="https://github.com/jython/jython">README Jython</a> (status Python 2.7
-  dan Jython 3), serta halaman model yang ditautkan di bagian 1. Data tabel per 13 Oktober 2026.</li>
-  <li>Catatan desain, catatan biaya, catatan penerapan Cloud Run, dan hasil pengukuran platform
-  pemesanan kursi bioskop yang menjadi dasar halaman ini. Anomali konkurensinya dibahas di <a
-  href="/adya-anomaly-probe.html">halaman Adya's Isolation Anomalies</a>.</li>
+  dan Jython 3), serta halaman model, data residency, dan penyedia dalam negeri yang ditautkan di bagian 2.
+  Data region per 15 Oktober 2026, data tabel loop per 13 Oktober 2026.</li>
+  <li>Catatan desain, catatan biaya, catatan penerapan, hasil pengukuran, dan riwayat perbaikan platform
+  pemesanan kursi bioskop yang menjadi dasar halaman ini. Percobaan anomalinya terhadap aplikasi yang hidup
+  dibahas di <a href="/adya-anomaly-probe.html">halaman Adya's Isolation Anomalies</a>.</li>
 </ul>
-<p class="note">Harga, ketersediaan layanan, dan angka tolok ukur berubah dari waktu ke waktu. Periksa
-sumber resminya sebelum mengambil keputusan.</p>
+<p class="note">Harga, ketersediaan layanan, region, dan angka tolok ukur berubah dari waktu ke waktu.
+Periksa sumber resminya sebelum mengambil keputusan.</p>
 </section>
 
 </main>
 <footer>
   <p>Ditulis oleh Claude Opus 5.5 · Diterbitkan oleh Dawud Tan ·
-  <time datetime="2026-10-11T06:54:00+07:00">11 Oktober 2026</time></p>
+  <time datetime="2026-10-11T06:54:00+07:00">11 Oktober 2026</time>, diperbarui
+  <time datetime="2026-10-22T12:45:00+07:00">22 Oktober 2026</time></p>
 </footer>
 </body>
 </html>
