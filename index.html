@@ -282,7 +282,7 @@
         {
           "@type": "Question",
           "name": "Kapan sebaiknya memilih JVM panas di server on-premise?",
-          "acceptedAnswer": {"@type": "Answer", "text": "Saat lalu lintas ramai dan stabil sepanjang hari, data harus tinggal di gedung sendiri, dan tim sanggup mengurus jam, sertifikat TLS, cadangan, firewall, dan pemutakhiran. Dalam uji beban, satu server kantor proyek ini melayani sekitar 8.000 permintaan per detik dengan p99 sekitar 25 milidetik, dan batasnya adalah pool koneksi basis data, bukan CPU."}
+          "acceptedAnswer": {"@type": "Answer", "text": "Saat lalu lintas ramai dan stabil sepanjang hari, data harus tinggal di gedung sendiri, dan tim sanggup mengurus jam, sertifikat TLS, cadangan, firewall, dan pemutakhiran. Dalam uji beban, satu server on-premise proyek ini melayani sekitar 8.000 permintaan per detik dengan p99 sekitar 25 milidetik, dan batasnya adalah pool koneksi basis data, bukan CPU."}
         }
       ]
     }
@@ -326,7 +326,7 @@
     menyala ditambah basis data, dan native image hanya membayar dirinya bila cold start sering terjadi.</li>
     <li><strong>On-premise menang saat lalu lintas stabil, data harus tinggal di gedung sendiri, dan tim
     sanggup mengurus jam, TLS, cadangan, firewall, dan pemutakhiran.</strong> Dalam uji beban, satu server
-    kantor kami melayani sekitar 8.000 permintaan per detik dengan p99 sekitar 25 ㎳.</li>
+    on-premise kami melayani sekitar 8.000 permintaan per detik dengan p99 sekitar 25 ㎳.</li>
   </ul>
 </section>
 
@@ -1271,7 +1271,7 @@ tidak ada yang mengirim permintaan. Contoh di bawah memakai Cloud Run; penagihan
 platform lain berbeda, jadi hitungannya harus diulang untuk masing-masing.</p>
 <p>Platform bioskop ini awalnya dirancang dalam dua bentuk dari satu basis kode: <em>native image</em>
 GraalVM (Mandrel) di Cloud Run dengan Cloud SQL for PostgreSQL di region Jakarta, dan JVM yang selalu
-menyala di server kantor. Yang benar-benar berjalan sampai hari ini hanya yang kedua: satu JVM di server
+menyala di server on-premise. Yang benar-benar berjalan sampai hari ini hanya yang kedua: satu JVM di server
 on-premise tanpa GPU dengan 16 vCPU, yang dipakai bersama aplikasi lain. Bentuk Cloud Run dibekukan di
 repositori terpisah dan belum pernah di-deploy. Hitungan dan pelajarannya tetap berguna, dan diringkas di
 bawah.</p>
@@ -1455,7 +1455,7 @@ tagihan, tetapi mahal di perhatian.</p>
   satu?</li>
   <li>Apakah TLS berakhir di proxy yang selalu menimpa <code>X-Forwarded-*</code>? Header itu hanya boleh
   dipercaya di belakang proxy seperti itu. Server yang langsung terjangkau dari internet, seperti server
-  kantor ini, harus menganggapnya masukan pemanggil.</li>
+  on-premise ini, harus menganggapnya masukan pemanggil.</li>
   <li>Adakah region Indonesia untuk platformnya <em>dan</em> basis datanya?</li>
   <li>Di mana rahasia disimpan, sebagai pengganti berkas environment di server sendiri?</li>
 </ol>
@@ -1569,7 +1569,7 @@ lonjakan dan saat deploy.</p>
 
 <h3>Kapan sebaiknya memilih JVM panas di server on-premise?</h3>
 <p>Saat lalu lintas ramai dan stabil sepanjang hari, data harus tinggal di gedung sendiri, dan tim sanggup
-mengurus jam, sertifikat TLS, cadangan, firewall, dan pemutakhiran. Dalam uji beban, satu server kantor
+mengurus jam, sertifikat TLS, cadangan, firewall, dan pemutakhiran. Dalam uji beban, satu server on-premise
 proyek ini melayani sekitar 8.000 permintaan per detik dengan p99 sekitar 25 milidetik,
 dan batasnya adalah pool koneksi basis data, bukan CPU.</p>
 </section>
