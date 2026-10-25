@@ -466,7 +466,7 @@
 <p>One session without a garment calibrates the rig and measures the fabric first. If PS on the fabric is off by more than 3°, a garment capture and a GPU run would be wasted. A capture script runs these steps in order, drives the camera (gphoto2) and the lights, and writes the manifests.</p>
 <ol class="steps">
   <li><b>Noise and linearity:</b> 10 dark frames (lens cap), 10 frames of an evenly lit matte white card at the all-lights shutter, and the same card at 6–8 shutter speeds either side of it.</li>
-  <li><b>Lens intrinsics:</b> about 15 ChArUco board shots at 0.7–1.1× the garment distance, tilted up to ±35°, together reaching every edge and corner of the frame.</li>
+  <li><b>Lens intrinsics:</b> about 15 shots of a second, larger ChArUco board (A2 for a 50 mm lens), its centre at the focus distance (±5 cm), tilted up to ±35°, together reaching every edge and corner of the frame. The focus is taped and f/11 keeps only about ±10 cm sharp around it; at that distance a smaller board calibrates the lens less well.</li>
   <li><b>Balls at 6 or more positions</b> spanning the garment volume:
     <ul>
       <li>the matte ball: backlit silhouette, ambient, then each light alone;</li>
@@ -591,7 +591,7 @@
 </section>
 
 <footer>
-  <p>Written by Claude Opus 5.5 for a garment-scanning project by Dawud Tan. Published 27 September 2026. Updated the same day with the light hardware, a second camera, the GPU, the fabrics the rig suits and where the .glb opens. Updated on 28 September 2026: the GPU memory estimate was corrected (Gaussian Wrapping keeps its training images in RAM, not on the GPU); the consistency test's false BUILD with 10° turntable steps was found and fixed; object masks, the COLMAP step, garment selection and a flag for the vertical blind spot were built; and the pipeline was run on meshes of Gaussian Wrapping's size. Updated on 29 September 2026: the light controller's firmware and a ready kit for a Gaussian Wrapping trial run. Updated on 1 October 2026: exposure bracketing for dark garments and how dark a fabric can be without it, a check that the fabric controls covered every height of the garment, the depth in millimetres of what the verdict flags, and a size limit for the .glb. Updated on 9 October 2026: a link to the public source code and its test suite, the light controller's replies and safety switch-off, and the one open decision on the fabric floor. Every result above comes from synthetic tests with known ground truth. The camera, lights and polarisation stay recommendations until the pilot session has measured the real rig and fabric.</p>
+  <p>Written by Claude Opus 5.5 for a garment-scanning project by Dawud Tan. Published 27 September 2026. Updated the same day with the light hardware, a second camera, the GPU, the fabrics the rig suits and where the .glb opens. Updated on 28 September 2026: the GPU memory estimate was corrected (Gaussian Wrapping keeps its training images in RAM, not on the GPU); the consistency test's false BUILD with 10° turntable steps was found and fixed; object masks, the COLMAP step, garment selection and a flag for the vertical blind spot were built; and the pipeline was run on meshes of Gaussian Wrapping's size. Updated on 29 September 2026: the light controller's firmware and a ready kit for a Gaussian Wrapping trial run. Updated on 1 October 2026: exposure bracketing for dark garments and how dark a fabric can be without it, a check that the fabric controls covered every height of the garment, the depth in millimetres of what the verdict flags, and a size limit for the .glb. Updated on 9 October 2026: a link to the public source code and its test suite, the light controller's replies and safety switch-off, and the one open decision on the fabric floor. Updated on 25 October 2026: the lens calibration shots are taken at the focus distance, on a larger board, because f/11 keeps only about ±10 cm sharp. Every result above comes from synthetic tests with known ground truth. The camera, lights and polarisation stay recommendations until the pilot session has measured the real rig and fabric.</p>
 </footer>
 
 </main>
@@ -608,7 +608,7 @@
       "description": "A garment-scanning rig for photogrammetry, photometric stereo and glTF: camera, LEDs and drivers, polarisers, colour, GPU, fabrics, and where the .glb opens.",
       "inLanguage": "en",
       "datePublished": "2026-09-27T11:18:44+07:00",
-      "dateModified": "2026-10-09T21:38:00+07:00",
+      "dateModified": "2026-10-25T11:11:00+07:00",
       "author": {"@type": "Person", "name": "Claude Opus 5.5"},
       "publisher": {"@type": "Person", "name": "Dawud Tan"},
       "mainEntityOfPage": "https://dawud-tan.github.io/garment-scan-camera-ps-gltf.html",
@@ -669,7 +669,7 @@
       ],
       "step": [
         {"@type": "HowToStep", "position": 1, "name": "Noise and linearity", "text": "Capture 10 dark frames with the lens cap on, 10 frames of an evenly lit matte white card at the all-lights shutter, and the same card at 6 to 8 shutter speeds either side of it."},
-        {"@type": "HowToStep", "position": 2, "name": "Lens intrinsics", "text": "Capture about 15 ChArUco board shots at 0.7 to 1.1 times the garment distance, tilted up to 35 degrees, together reaching every edge and corner of the frame."},
+        {"@type": "HowToStep", "position": 2, "name": "Lens intrinsics", "text": "Capture about 15 shots of a larger ChArUco board (A2 for a 50 mm lens) with its centre at the focus distance, within 5 cm, tilted up to 35 degrees, together reaching every edge and corner of the frame."},
         {"@type": "HowToStep", "position": 3, "name": "Balls at six or more positions", "text": "At each position shoot the matte ball (backlit silhouette, ambient, each light alone), then swap in the mirror ball with the lens polariser parallel and shoot ambient and each light."},
         {"@type": "HowToStep", "position": 4, "name": "Additivity", "text": "Shoot two lights on together and compare with the sum of their single-light frames."},
         {"@type": "HowToStep", "position": 5, "name": "Fabric board", "text": "Place the fabric board face-on at three heights tilted 20 degrees about the horizontal axis, and at plus and minus 30 and 50 degrees about the vertical axis; shoot each placement crossed and parallel."},
