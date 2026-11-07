@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why ENIAC Was Built: A Firing Table Is Not a Trajectory</title>
+
+<meta name="description" content="A working Java implementation of the explicit STANAG 4355 Modified Point Mass model for the German 8.8cm Flak shell, used to derive -- rather than quote -- the arithmetic behind the firing-table backlog that got ENIAC funded: why one table costs hundreds of trajectories, why most of its columns are derivatives, and why 30 seconds per trajectory is the first unit cost in history at which one machine absorbs a week of the Army's demand inside a week.">
+<meta name="keywords" content="ENIAC, firing tables, ballistics, modified point mass, STANAG 4355, Flak 18, Flak 36, numerical integration, Runge-Kutta, differential analyzer, Ballistic Research Laboratory, inverse problem, unit corrections, ARM Cortex-R, Java, exterior ballistics">
+<meta name="author" content="Dawud Tan">
+<link rel="canonical" href="https://dawud-tan.github.io/flak88-ballistics.html">
+
+<meta property="og:title" content="Why ENIAC Was Built: A Firing Table Is Not a Trajectory">
+<meta property="og:description" content="Fifteen minutes per trajectory was never the crisis. A table cell is an inverse problem, a table is a grid of them, and most of a table's columns are derivatives that each cost a whole recomputation -- so one table is hundreds of trajectories, and the Army wanted forty tables a week.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://dawud-tan.github.io/flak88-ballistics.html">
+<meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/2/2b/8.8_cm_Flak_18_36_37_1.jpg">
+<meta property="og:site_name" content="Ballistics Computation Engineering">
+<meta property="article:author" content="Dawud Tan">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Why ENIAC Was Built: A Firing Table Is Not a Trajectory">
+<meta name="twitter:description" content="A trajectory is the atom; a firing table is about 500 of them; BRL was asked for 40 tables a week and could deliver 15. That gap, not the fifteen minutes, is what bought ENIAC.">
+<meta name="twitter:image" content="https://upload.wikimedia.org/wikipedia/commons/2/2b/8.8_cm_Flak_18_36_37_1.jpg">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Why ENIAC Was Built: A Firing Table Is Not a Trajectory",
+  "description": "An essay in which a working exterior-ballistics program derives the firing-table backlog that got ENIAC funded: the inverse problem behind every table cell, the grid of cells, the correction columns that are really partial derivatives, and the resulting ledger in 1943 and modern units.",
+  "author": {
+    "@type": "Person",
+    "name": "Dawud Tan"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Ballistics Computation Engineering"
+  },
+  "datePublished": "2026-07-09T17:51:00+07:00",
+  "dateModified": "2026-09-03T11:00:00+07:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://dawud-tan.github.io/flak88-ballistics.html"
+  },
+  "about": [
+    { "@type": "Thing", "name": "ENIAC" },
+    { "@type": "Thing", "name": "Firing table" },
+    { "@type": "Thing", "name": "Exterior ballistics" },
+    { "@type": "Thing", "name": "Numerical integration" },
+    { "@type": "Thing", "name": "Modified Point Mass trajectory model" }
+  ],
+  "keywords": "ENIAC, firing tables, ballistics, modified point mass, STANAG 4355, Flak 18, numerical integration, Runge-Kutta, differential analyzer, Ballistic Research Laboratory, ARM Cortex-R"
+}
+</script>
+
+<style>
+  :root{
+    --bg:#f7f7f5; --panel:#ffffff; --text:#1d1d1f; --muted:#5b5f66;
+    --heading:#16181c; --accent:#8a1f11; --accent-soft:#f4e6e3;
+    --code-bg:#1e1e1e; --code-text:#e8e8e8; --border:#e2e1dd;
+    --font-main:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --font-code:"SFMono-Regular",Menlo,Consolas,"Liberation Mono","Courier New",monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text); font-family:var(--font-main);
+    line-height:1.6; font-size:16px; -webkit-text-size-adjust:100%;
+  }
+  .container{max-width:100%; padding:1.25rem;}
+  header.hero{padding:1.5rem 0 0.5rem;}
+  h1{font-size:1.6rem; line-height:1.25; color:var(--heading); margin:0 0 0.5rem;}
+  .subtitle{color:var(--muted); font-size:0.98rem; margin:0 0 1.25rem;}
+  .meta-line{font-size:0.82rem; color:var(--muted); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:0.6rem 0; margin-bottom:1.5rem;}
+  h2{font-size:1.28rem; color:var(--heading); margin:2.1rem 0 0.8rem; padding-bottom:0.35rem; border-bottom:2px solid var(--accent-soft);}
+  h3{font-size:1.05rem; color:var(--heading); margin:1.4rem 0 0.6rem;}
+  p{margin:0 0 1.1rem;}
+  a{color:var(--accent); text-decoration:none; border-bottom:1px solid rgba(138,31,17,0.35);}
+  a:hover{border-bottom-color:var(--accent);}
+  ul,ol{padding-left:1.3rem; margin:0 0 1.1rem;}
+  li{margin-bottom:0.5rem;}
+  code{font-family:var(--font-code); font-size:0.85em; background:var(--accent-soft); padding:0.1em 0.35em; border-radius:4px;}
+  pre{
+    background:var(--code-bg); color:var(--code-text); padding:0.9rem; border-radius:8px;
+    overflow-x:auto; font-size:0.78rem; line-height:1.5; margin:0 0 1.3rem;
+    -webkit-overflow-scrolling:touch;
+  }
+  pre code{background:none; padding:0; font-size:1em; color:inherit;}
+  blockquote{
+    margin:0 0 1.3rem; padding:0.7rem 1rem; background:var(--panel); border-left:4px solid var(--accent);
+    border-radius:0 6px 6px 0; font-style:italic; color:var(--heading); font-size:0.95rem;
+  }
+  blockquote cite{display:block; margin-top:0.4rem; font-style:normal; font-size:0.8rem; color:var(--muted);}
+  .callout{background:var(--panel); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:0 6px 6px 0; padding:0.9rem 1rem; margin:0 0 1.3rem; font-size:0.93rem;}
+  .callout strong{color:var(--accent);}
+  table{width:100%; border-collapse:collapse; margin:0 0 1.3rem; font-size:0.85rem;}
+  th,td{padding:0.45rem 0.5rem; border-bottom:1px solid var(--border); text-align:left;}
+  th{color:var(--muted); font-weight:600; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.02em;}
+  .table-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch; margin:0 0 1.3rem;}
+  .table-scroll table{margin-bottom:0;}
+  .term{margin:0 0 1.3rem;}
+  .term figcaption{font-size:0.74rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--muted);
+    margin-bottom:0.35rem; font-weight:600;}
+  .term pre{margin:0; font-size:0.72rem;}
+  .punch{background:var(--accent-soft); border:1px solid rgba(138,31,17,0.25); border-radius:8px;
+    padding:1rem 1.1rem; margin:0 0 1.3rem;}
+  .punch .n{display:block; font-size:1.7rem; font-weight:700; color:var(--accent); line-height:1.15;
+    font-family:var(--font-code);}
+  .punch .l{display:block; font-size:0.88rem; color:var(--heading); margin-top:0.3rem;}
+  .run{font-size:0.86rem;}
+  section.biblio{margin-top:2.5rem; border-top:1px solid var(--border); padding-top:1.3rem;}
+  section.biblio ol{padding-left:1.4rem;}
+  section.biblio li{font-size:0.86rem; margin-bottom:0.9rem; word-break:break-word;}
+  footer{margin-top:2.5rem; padding-top:1rem; border-top:1px solid var(--border); font-size:0.78rem; color:var(--muted); text-align:center;}
+
+  @media (min-width:700px){
+    .term pre{font-size:0.76rem;}
+    .container{max-width:860px; margin:0 auto; background:var(--panel); padding:2.6rem 3rem; border-radius:10px; box-shadow:0 6px 24px rgba(0,0,0,0.06); margin-top:1.5rem; margin-bottom:1.5rem;}
+    body{font-size:17px;}
+    h1{font-size:2.1rem;}
+    h2{font-size:1.5rem;}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header class="hero">
+  <h1>Why ENIAC Was Built: A Firing Table Is Not a Trajectory</h1>
+  <p class="subtitle">The usual story stops one step too early. Fifteen minutes per trajectory was never the crisis &mdash; and <code>Flak88ExplicitMPM.java</code>, an explicit Modified Point Mass model of the German 8.8cm Flak shell, can be made to derive the real one instead of quoting it.</p>
+  <p class="meta-line">By Dawud Tan &middot; Ballistics Computation Engineering &middot; <a rel="external nofollow noopener" href="https://gist.github.com/dawud-tan/69a4960dfe353302e0f670993e1a7472">Full source: Flak88ExplicitMPM.java</a></p>
+</header>
+
+<article>
+
+<section>
+  <h2>1. The Closed Form That Drag Destroys</h2>
+  <p>Before reading a single line of <a rel="external nofollow noopener" href="https://gist.github.com/dawud-tan/69a4960dfe353302e0f670993e1a7472"><code>Flak88ExplicitMPM.java</code></a> <a href="#ref8">[8]</a>, it is worth asking a more basic question: why does this file need a loop at all?</p>
+  <pre><code>x(t) = v&middot;cos(&theta;)&middot;t
+y(t) = v&middot;sin(&theta;)&middot;t - &frac12;&middot;g&middot;t&sup2;</code></pre>
+  <p>Plug in a time, get a position. No stepping, no iteration, no computer required beyond a pencil. That is the entire point: an idealized trajectory is not a computational problem in any meaningful sense.</p>
+  <p>Real air resists motion in a way that depends on the shell's Mach number through a curve with no algebraic formula &mdash; it rises sharply through the transonic band, peaks, and falls off smoothly on both sides, a shape that can only be read off measured data, not derived from a tidy equation. Once drag enters the equations of motion, the whole system loses its closed form. There is no algebraic expression, however complicated, that gives position as a direct function of time. The only way forward is to advance the state a small step at a time: evaluate the forces <em>now</em>, nudge position and velocity forward by an instant, evaluate again, and repeat &mdash; the "tedious loop" that gives this whole exercise its shape. Every subsequent section of this essay, and every microsecond spent computing this file's <code>rk4()</code> function, exists only because that closed form disappeared.</p>
+  <p>That argument is correct, and it is where the story is usually left. It explains why the problem needs <em>a computer</em>. It does not explain why the problem produced a <em>backlog</em> &mdash; and the backlog, not the loop, is what got ENIAC funded.</p>
+</section>
+
+<section>
+  <h2>2. Fifteen Minutes Was Never the Crisis</h2>
+  <p>This is not an abstract concern. It is the exact problem that consumed the U.S. Army's Ballistic Research Laboratory (BRL) at Aberdeen Proving Ground for the first half of the twentieth century, and in 1935 BRL acquired a copy of Vannevar Bush's differential analyzer to attack it &mdash; a machine that solved the looping problem not electronically but <em>mechanically</em>, using a train of wheel-and-disk integrators that physically traced out the solution as a continuously rotating shaft position <a href="https://en.wikipedia.org/wiki/Ballistic_Research_Laboratory" rel="external nofollow noopener">[1]</a>.</p>
+  <blockquote>
+    "A skilled person with a desk calculator could compute a 60 second trajectory in about 20 hours; the Bush differential analyzer produced the same result in 15 minutes; but the ENIAC required only 30 seconds, less than the flight time."
+    <cite>&mdash; "The ENIAC Story," U.S. Army Research Laboratory <a href="https://ftp.arl.army.mil/~mike/comphist/eniac-story.html" rel="external nofollow noopener">[2]</a></cite>
+  </blockquote>
+  <p>That quotation is where most tellings of the ENIAC story stop, and it is one step short of the point. Read it again as a manager at Aberdeen would have: a machine already exists that turns twenty hours into fifteen minutes. Fifteen minutes is fast. Fifteen minutes is not a crisis, and nobody funds a forty-ton computer to improve on it.</p>
+  <p>The crisis lives in the gap between <em>one trajectory</em> and <em>one firing table</em>, and it is the product of four multipliers that the quotation never mentions. Each of them is a structural property of what a firing table <em>is</em>, not a property of how fast a trajectory runs &mdash; which is exactly why buying a faster analyzer would not have closed the gap, and why the numbers below are worth deriving instead of quoting:</p>
+  <ol>
+    <li><strong>A table cell is an inverse problem</strong>, and the integrator can only answer the forward one. Dozens of complete trajectories per line.</li>
+    <li><strong>A table is a grid</strong> of such cells &mdash; every range, crossed with every altitude.</li>
+    <li><strong>A table is mostly derivatives, not answers.</strong> Most of its columns are partial derivatives of the answer with respect to the day's conditions, and each column costs a complete recomputation of the whole table.</li>
+    <li><strong>Tables multiply</strong> across every gun, shell, charge and fuze in the inventory, and new matériel kept arriving faster than the old tables were finished.</li>
+  </ol>
+  <p>Multiply those out and the attested figure stops being a factoid and becomes a derivation. Here is the figure, and note how carefully it is bounded:</p>
+  <blockquote>
+    "For only the most basic factors, altitude and range, the BRL had to calculate approximately two to four thousand trajectories for each pair of projectile and gun. And that was only the beginning, since a table for a typical gun like the 155-mm. Long Tom involved many other factors."
+    <cite>&mdash; <em>Bit by Bit: A History of Computing</em>, &sect;4.3 <a href="#ref3">[3]</a></cite>
+  </blockquote>
+  <p>Two to four thousand trajectories for <em>two</em> factors, and "that was only the beginning" &mdash; that clause is multiplier three, stated in 1940s terms. The rest of this article is <code>Flak88ExplicitMPM.java</code> reconstructing both halves of that sentence from scratch. Run with no arguments, the file now plays the four multipliers as four acts and prints its own arithmetic:</p>
+  <pre class="run"><code>./mvnw clean compile exec:exec</code></pre>
+  <p>Every number quoted from here on is that program's output on an ordinary desktop JVM, not a figure recalled from a history book. Where a historical figure <em>is</em> being quoted, it is cited.</p>
+</section>
+
+<section>
+  <h2>3. Multiplier One: Every Table Cell Is an Inverse Problem</h2>
+  <p>Act I of the program does the ordinary thing: fire the 8.8cm shell at 45&deg; and integrate until it lands. That costs 3,322 RK4 steps and 13,300 evaluations of the equations of motion, and it answers a question with a peculiar property &mdash; <em>nobody has ever needed the answer.</em></p>
+  <p>"Given a quadrant elevation of 45&deg;, where does the shell go?" is not a question anyone in a gun pit asks. The crew has a target, and needs the gun setting. They ask the exact inverse:</p>
+  <blockquote>Target at 8,000 m ground range and 4,000 m altitude. What elevation, and what do I set on the fuze?</blockquote>
+  <p>There is no inverse integrator. There cannot be one: the whole reason this is a numerical problem is that the forward map has no closed form, so it certainly has no closed-form inverse. The only way to answer is to <em>shoot for it</em> &mdash; fire the forward problem at a spread of elevations, find where the trajectory passes above and below the target, and squeeze. Act II does precisely that, and prints the bill:</p>
+  <figure class="term">
+    <figcaption>Act II &mdash; one table cell, solved by shooting</figcaption>
+<pre><code>  There is no inverse integrator, so the answer has to be shot for:
+
+    coarse sweep      22 complete trajectories, QE 3-85 deg in 4 deg steps
+                       7 of them diverged above QE 59 deg and were discarded
+    bracket 35-39 deg    9 bisections   -&gt; QE 35.754 deg, fuze 21.70 s
+
+  ANSWER
+    low  branch   QE 35.754 deg   fuze 21.70 s   drift 155.32 m
+    high branch   LOST -- every elevation above 59 deg diverged, so the lofted
+                  solution that also reaches this target cannot be computed here.
+
+  COST OF THIS ONE CELL: 32 complete trajectories.
+    desk calculator          640 h   = 16.0 work-weeks for one human computer
+    Bush analyzer            8.0 h
+    ENIAC                  960.0 s
+    this file               74.2 ms</code></pre>
+  </figure>
+  <p>Thirty-two complete trajectories &mdash; sixteen work-weeks of one human computer &mdash; for <em>one line</em> of one table. And note what the sweep found on the way: height-over-the-target as a function of elevation is unimodal, so a reachable target generally has <strong>two</strong> answers, a flat fast one and a lofted slow one. Both belong in the table. Against aircraft the flat one is usually the only usable one anyway, because the Zeitz&uuml;nder S/30 is a thirty-second clockwork fuze <a href="#ref10">[10]</a> and the lofted solution's time of flight does not fit inside it &mdash; a hard constraint the program marks explicitly on every row it cannot set.</p>
+</section>
+
+<section>
+  <h2>4. Multiplier Two: A Table Is a Grid of Such Cells</h2>
+  <p>One cell is not a table. An anti-aircraft table has to cover the sky: every ground range the gun reaches, crossed with every altitude an aircraft might occupy. The program's grid is a modest eleven ranges by six altitudes, and solving all sixty-six cells the way Act II solved one costs <strong>2,072 trajectories</strong>.</p>
+  <p>There is, in principle, an enormous amount of waste in that figure: a trajectory does not answer one cell, it answers <em>every cell it happens to fly through.</em> Integrate a fan of elevations once, keep the paths, and the entire grid can be read off by interpolating between neighbouring trajectories, at no further integration cost at all. The program does it both ways so the gap can be seen:</p>
+  <figure class="term">
+    <figcaption>Act III &mdash; the grid, both ways</figcaption>
+<pre><code>  (2) THE GRID:  11 ranges x 6 altitudes = 66 cells.
+      Searched cell by cell, as in Act II:  2,072 trajectories (59 cells reachable).
+
+      One fan: 83 trajectories, 59 cells filled, 1,989 trajectories saved (25x).
+      In 1943 money that is 497 analyzer-hours saved on ONE table; here, 4.61 s.
+      Mean time of flight across the fan: 48.9 s -- the historical unit costs are
+      quoted for a 60-second trajectory, so these shots are priced roughly 1:1.
+      The shortcut is checked, not assumed: both methods find the same 59 reachable
+      cells, and across all of them the interpolated answer differs from the
+      searched one by at most 0.009 deg of elevation and 0.018 s of fuze time.</code></pre>
+  </figure>
+  <p>A twenty-five-fold saving, and &mdash; importantly &mdash; the program checks the shortcut rather than trusting it: it solves the whole grid <em>both</em> ways and reports the worst disagreement between them. Nine thousandths of a degree of elevation is comfortably inside the resolution any gun can be laid to, so the interpolation is not inventing answers.</p>
+  <div class="punch">
+    <span class="n">2,072</span>
+    <span class="l">Trajectories to search this grid cell by cell &mdash; for exactly the two factors, altitude and range, that BRL bounded at "approximately two to four thousand." The program lands inside the attested band by generating a table, having never been told the band exists.</span>
+  </div>
+  <p>It is worth being clear about which of those two numbers is the historical one, because the temptation is to quote the flattering one. <strong>It is 2,072, not 83.</strong> The fan-and-interpolate shortcut is a modern luxury, and the reason BRL could not lean on it is mechanical rather than mathematical: the differential analyzer was a physical machine that had to be re-rigged for each new problem, at one or two hours per table, so "it wasn't practical to readjust the analyzer every time a new variable had to be calculated," and the bulk of the laboratory's work fell back onto the human computers <a href="#ref3">[3]</a>. A shortcut that requires cheap, arbitrary re-parameterisation is not available to a machine made of shafts and gears.</p>
+  <p>That is also the answer to a question the ENIAC story rarely raises: if the analyzer was eighty times faster than a woman with a desk calculator, why did BRL still need a hundred women? Because the analyzer was fast and rigid, and a firing table is mostly the parts that change.</p>
+</section>
+
+<section>
+  <h2>5. Multiplier Three: A Table Is Mostly Derivatives, Not Answers</h2>
+  <p>This is the multiplier the popular telling always drops, and it is the largest one.</p>
+  <p>Open a real WWII firing table and most of its columns are not the answer. They are <em>corrections</em>: how far the range moves per 1% of muzzle velocity lost to a worn barrel, per 10 m/s of range wind, per 10&deg;C of air temperature, per 10% of air density; how far the shell drifts per 10 m/s of cross wind. The gun crew needs these because Aberdeen's standard conditions are not this afternoon's conditions, and the table has to be usable without recomputing anything in the field.</p>
+  <p>Each of those columns is a numerical partial derivative of the table with respect to one condition. There is exactly one way to obtain a numerical partial derivative of a table: <strong>recompute the entire table with that one condition displaced, and difference the two.</strong> Five correction columns means six complete tables.</p>
+  <p>The Java file makes this structural rather than rhetorical. The nominal ballistics are <code>static final</code> constants; the departures from standard are five mutable knobs that the correction columns perturb one at a time:</p>
+  <pre><code>static double mvMps           = MUZZLE_VEL_MPS; // actual muzzle velocity [m/s]
+static double windAddRangeMps = 0.0;   // uniform range-wind departure [m/s]
+static double windAddCrossMps = 0.0;   // uniform cross-wind departure [m/s]
+static double tempOffsetK     = 0.0;   // air-temperature departure [K]
+static double densityScale    = 1.0;   // air-density multiplier</code></pre>
+  <p>Run the fan five more times, once per knob, and the table that comes out is a real firing table &mdash; answer columns and correction columns together:</p>
+  <figure class="term">
+    <figcaption>Act III &mdash; firing table excerpt, target altitude 4,000 m, low branch</figcaption>
+<pre><code>        C1  dQE     per +1% MV                 [deg]
+        C2  dQE     per +10 m/s tail           [deg]
+        C3  dQE     per +10 C                  [deg]
+        C4  dQE     per +10% rho               [deg]
+        C5  dDrift  per +10 m/s cross          [m]
+
+        range       QE    fuze     drift        C1        C2        C3        C4        C5
+          (m)    (deg)     (s)       (m)     (deg)     (deg)     (deg)     (deg)       (m)
+      --------------------------------------------------------------------------------
+         2000  -- no solution below QE 60 deg, where this model gives out
+         3000   55.247    8.86     15.10    -0.050    +0.196    -0.033    +0.133   +24.528
+         4000   48.041   10.58     25.58    -0.074    +0.188    -0.056    +0.226   +32.995
+         5000   42.820   12.76     41.86    -0.105    +0.174    -0.094    +0.367   +44.623
+         6000   39.224   15.36     66.62    -0.139    +0.134    -0.146    +0.551   +59.327
+         7000   36.946   18.35    103.15    -0.182    +0.072    -0.222    +0.779   +76.833
+         8000   35.754   21.70    155.35    -0.227    -0.024    -0.320    +1.059   +96.969
+         9000   35.492   25.44    227.95    -0.278    -0.157    -0.448    +1.409  +119.696
+        10000   36.077   29.62    327.42    -0.342    -0.341    -0.621    +1.884  +145.224
+        11000   37.516   34.38    464.67    -0.431    -0.608    -0.868    +2.640  +174.254   &lt;-- fuze past 30 s
+        12000   40.007   40.10    662.38    -0.580    -1.050    -1.285    +4.464  +208.376   &lt;-- fuze past 30 s</code></pre>
+  </figure>
+  <p>The signs are all physically right without being told to be: more muzzle velocity needs less elevation, warmer air is thinner air and also needs less, denser air needs more. But column C2 is the one worth staring at, because it <strong>changes sign between 7,000 and 8,000 m</strong> and nobody told it to. A tail wind carries the shell to the target's range <em>sooner</em>; short of the summit the shell is still climbing, so arriving sooner means arriving lower and wanting more elevation, while past the summit it means arriving higher and wanting less. The correction column locates the summit on its own, purely by differencing two tables.</p>
+  <p>That is what makes this multiplier so expensive and so easy to overlook. The correction columns are not decoration around the answer; in trajectory count they <em>are</em> five sixths of the table.</p>
+</section>
+
+<section>
+  <h2>6. Multiplier Four: Tables Multiply Across Mat&eacute;riel</h2>
+  <p>The three multipliers above produce one table, for one gun, firing one shell, at one charge, with one fuze. Change any of those and none of the work transfers: a different projectile has a different drag curve, a different charge has a different muzzle velocity and therefore a different fan, a different fuze has a different settable envelope.</p>
+  <p>This is the multiplier that turned a backlog into a permanent one, because it was driven by production rather than by mathematics. As new guns left the factories, each arrived needing tables that did not exist yet, and the queue grew from the front while the laboratory worked on it from the back. BRL's response was to scale the only resource that could be scaled quickly &mdash; it trained close to a hundred women, mostly mathematics graduates recruited from colleges across the Northeast, as human computers, and later contracted the Moore School to recruit and train another hundred <a href="https://en.wikipedia.org/wiki/Ballistic_Research_Laboratory" rel="external nofollow noopener">[1]</a>. It was not enough, and by 1943 the shortfall had stopped being an internal scheduling problem and started holding up the production of gun directors &mdash; the quotation is in Section 7.</p>
+</section>
+
+<section>
+  <h2>7. The Ledger That Bought ENIAC</h2>
+  <p>Act IV puts the four multipliers together and prices them. The count it uses is <strong>2,072</strong> &mdash; the searched range-and-altitude grid, the one BRL would have recognised &mdash; and not the 498-trajectory fan figure, which is this file's shortcut and not 1943's.</p>
+  <figure class="term">
+    <figcaption>Act IV &mdash; one table, four eras</figcaption>
+<pre><code>                                  per table   in context
+------------------------------------------------------------------------------------
+      desk calculator             41,440 h   21 person-years; 10 weeks for BRL's whole
+                                             100-woman section
+      Bush analyzer                519.5 h   3.1 weeks running around the clock
+                                             (incl. 1.5 h re-rigging)
+      ENIAC                        17.27 h   under a day
+      this file (measured)          4.80 s</code></pre>
+  </figure>
+  <p>The analyzer row is the cross-check, and it is the reason to trust the rest. Three point one weeks per table, reached by multiplying this program's own trajectory count by a 1943 unit cost and nothing else &mdash; against the attested claim that with the analyzer "it might still take the better part of a month to complete just one table" <a href="#ref9">[9]</a>. Nobody fed that number in.</p>
+  <p>Now the demand side, which is the number that actually mattered:</p>
+  <blockquote>
+    "Although the number of table requests reached 40 a week, BRL could only produce about 15."
+    <cite>&mdash; Ballistic Research Laboratory <a href="https://en.wikipedia.org/wiki/Ballistic_Research_Laboratory" rel="external nofollow noopener">[1]</a></cite>
+  </blockquote>
+  <p>A twenty-five-table-per-week deficit does not plateau. It compounds, and it compounds against guns already in the field &mdash; which is how a mathematics problem became a production problem. By 1943 the Moore School's director of war research was writing to his dean that "construction of directors for guns has been held up several months because it has been a physical impossibility to supply to the manufacturers the necessary ballistic data" <a href="#ref3">[3]</a>. So: what would serving forty a week actually take?</p>
+  <figure class="term">
+    <figcaption>Act IV &mdash; forty tables a week, against a week</figcaption>
+<pre><code>                                   h / week   what that would take
+------------------------------------------------------------------------------------
+      desk calculator             1,657,600   41,440 human computers -- BRL had ~100
+      Bush analyzer                  20,780   124 differential analyzers running around
+                                              the clock -- BRL had one
+      ENIAC                           690.7   4.1 ENIACs
+      this file                      0.0533   the backlog stops being a unit of time</code></pre>
+  </figure>
+  <p>Here is where an honest ledger has to resist a tidy ending. <strong>One ENIAC does not close this gap either.</strong> Forty tables a week would have taken about four of them, and ENIAC was not finished until late 1945, after the backlog it was funded to break. Any telling in which the machine arrives and the deficit vanishes is a story, not an argument.</p>
+  <p>The real argument is in the shape of that last column. Both 1943 answers are impossible &mdash; but they are impossible in different <em>ways</em>, and the difference is the entire case for spending half a million wartime dollars on eighteen thousand vacuum tubes:</p>
+  <figure class="term">
+    <figcaption>Act IV &mdash; what one machine is worth</figcaption>
+<pre><code>      one differential analyzer, flat out   0.32 tables/week  =  2.2% of BRL
+      one ENIAC, flat out                   9.73 tables/week  =   65% of BRL
+      ...the whole laboratory delivered       15 tables/week</code></pre>
+  </figure>
+  <div class="punch">
+    <span class="n">2% &rarr; 65%</span>
+    <span class="l">A machine worth about 2% of the laboratory's entire output is an improvement you schedule around. A machine worth about 65% of it is a different institution. Only a thirtyfold cut in the unit cost changes the <em>kind</em> of number the answer is &mdash; and no amount of hiring or procurement gets you there incrementally.</span>
+  </div>
+  <p>That is what "why was ENIAC built" actually resolves to. Not that fifteen minutes was slow. That a table was two thousand trajectories, the Army wanted forty tables a week, and the only lever with enough travel on it was the unit cost itself.</p>
+  <div class="callout">
+    <strong>What is cited and what is derived.</strong> The unit costs (20 hours, 15 minutes, 30 seconds), the 40-versus-15 request gap, the roughly hundred-woman computing section, the two-to-four-thousand trajectories per table and the analyzer's one-to-two-hour setup are historical figures, cited above. The trajectory count is this program's, from a table it actually generated, and every product in these three blocks is arithmetic on it &mdash; not a measurement of ENIAC's delivered throughput. Real table production also carried checking, interpolation and printing costs this ledger ignores. The claim being made is about the <em>shape</em> of the problem, not about the third significant figure.
+  </div>
+</section>
+
+<section>
+  <h2>8. Why This Shell</h2>
+  <p>The model is built around the German <strong>8.8cm Sprgr. Patr. L/4.5 (Kz)</strong> high-explosive shell, fired from the Flak 18/36 with the <strong>Zeitz&uuml;nder S/30</strong> &mdash; a genuine mechanical clockwork time fuze, not a proximity or command-detonation device. The source is <em>TM E9-369A, German 88-mm Antiaircraft Gun Materiel</em>, a declassified 1943 U.S. War Department technical manual, specifically Table 88 on pages 167&ndash;173: "FIRING TABLE FOR THE 8.8 cm FLAK 18 AND 36 WITH 8.8 cm H.E. SHELL L/4.5 (Kz) WITH TIME FUZE S/30 OR P.D. FUZE 23/28" <a href="#ref4">[4]</a>.</p>
+  <p>That combination &mdash; genuine time fuze, spin-stabilized by rifling, no ejected sub-projectiles, no rocket assist or base burn, no in-flight guidance &mdash; is precisely the "bare" configuration the STANAG 4355 Modified Point Mass standard was written for, with none of the additional-term annexes (for base-bleed rounds, submunition carriers, or guided projectiles) needed.</p>
+</section>
+
+<section>
+  <h2>9. From Implicit to Explicit: Removing the Model's <em>Other</em> Loop</h2>
+  <p>Realistic drag is not the only source of looping here. The classical STANAG 4355 Modified Point Mass model has a second, more subtle one. The yaw-of-repose vector &alpha;<sub>e</sub> &mdash; the small, steady tilt a spinning shell's nose takes relative to its flight path &mdash; enters the aerodynamic force equations, but &alpha;<sub>e</sub> itself depends on the shell's total acceleration, which in turn depends on the very aerodynamic forces it is used to compute. That circularity traditionally forces an inner predictor-corrector loop, re-evaluating the aerodynamics again and again until the velocity estimate stops changing.</p>
+  <p>Baranowski, Majewski, and Szymonik's 2020 reformulation removes this circularity entirely <a href="#ref5">[5]</a>, by three moves this file follows directly:</p>
+  <ol>
+    <li>Track velocity in <strong>spherical coordinates</strong> &mdash; speed <code>v</code>, elevation &gamma;<sub>a</sub>, azimuth &chi;<sub>a</sub> &mdash; instead of Cartesian components.</li>
+    <li>Decompose the equations of motion in a basis {e<sub>v</sub>, e<sub>&gamma;</sub>, e<sub>&chi;</sub>} aligned with the velocity vector itself, in which the component of &alpha;<sub>e</sub> perpendicular to velocity can be solved <strong>algebraically</strong> from gravity and Coriolis forces alone &mdash; forces that do not depend on the aerodynamics being solved for.</li>
+    <li>Capture the coupling between elevation-rate and azimuth-rate (the Magnus/gyroscopic effect that produces sideways drift) in a small 2&times;2 matrix built purely from the shell's current spin state.</li>
+  </ol>
+  <p>The result: every derivative &mdash; <code>vDot</code>, <code>gammaDot</code>, <code>chiDot</code>, spin decay &mdash; is computed once, in closed form, with no inner convergence loop at all.</p>
+  <div class="callout">
+    <strong>What the paper reports, and what this project actually measured.</strong> Baranowski et al. report roughly a 30% reduction in computation time from removing the corrector loop <a href="#ref5">[5]</a>. A same-order, apples-to-apples comparison built during this project's own development &mdash; an iterated Heun step against a single-pass explicit Heun step, both using the identical closed-form yaw calculation &mdash; measured a smaller, less consistent difference, on the order of 12%. The likely reason: this shell's yaw-of-repose is gravity-dominated enough that the iterated version was already converging in essentially one pass, leaving less iteration to remove in the first place. The 30% figure is the published result for the paper's own test case; 12% is what this specific shell and this specific comparison actually showed. Both are true; they are not the same measurement.
+  </div>
+</section>
+
+<section>
+  <h2>10. The State Vector and Coordinate Frame</h2>
+  <p>The trajectory is carried as a seven-element array:</p>
+  <pre><code>s[0] = x   // range (m), along the gun bore
+s[1] = y   // altitude above the gun (m), positive up
+s[2] = z   // cross-range drift (m), positive = right
+s[3] = v   // air-relative speed (m/s)
+s[4] = &gamma;a  // elevation of the velocity vector (rad)
+s[5] = &chi;a  // azimuth of the velocity vector (rad)
+s[6] = p   // spin rate (rad/s)</code></pre>
+  <p>At every evaluation point, three unit vectors are built directly from &gamma;<sub>a</sub> and &chi;<sub>a</sub>: <code>ev</code> (pointing along the current velocity), <code>e&gamma;</code> (the direction velocity would move if elevation alone increased), and <code>e&chi;</code> (likewise for azimuth). Together they form a right-handed, mutually perpendicular frame that travels with the shell &mdash; the frame the whole explicit reformulation is expressed in.</p>
+</section>
+
+<section>
+  <h2>11. Digitizing History: A Drag Curve Pulled From a 1943 Table</h2>
+  <p>The single most distinctive piece of this file is where its drag coefficients come from. Rather than digitizing a published chart or borrowing a standard reference curve, the <code>FLAK88_MACH</code> / <code>FLAK88_CD</code> arrays were reconstructed directly from Table 88's own published numbers, using a technique with real historical pedigree in exterior ballistics: for pairs of table rows, the published range, time-of-flight, and remaining velocity give an average deceleration over that interval by simple finite-differencing &mdash; no assumption about the trajectory's shape required, since both quantities are already published directly. That deceleration converts to a drag coefficient through the standard relation:</p>
+  <pre><code>CD(Mach) = -dV/dt &times; 2m / (&rho; &times; S &times; V&sup2;)</code></pre>
+  <p>The resulting curve traces the expected physical shape without being told to: a smooth transonic rise peaking near Mach&nbsp;1.2 (CD&asymp;0.41), falling off cleanly on both sides &mdash; and it was independently checked against held-out rows of the same table, reproducing published range and velocity to within roughly 0.3&ndash;2.5%.</p>
+  <div class="callout">
+    <strong>An artifact, found and fixed.</strong> Differencing adjacent rows directly produced a spurious alternating pattern below Mach&nbsp;0.85. The cause: the table's velocity column is published to the nearest whole 1&nbsp;m/s, and once deceleration weakens in the subsonic regime, that rounding becomes a large fraction of the true per-row change. Widening the comparison to rows five apart (a 500&nbsp;m baseline instead of 100&nbsp;m) averaged the rounding noise away. Below Mach&nbsp;0.80, where the derivation still degraded &mdash; likely compounded by the neglected gravity term and a sea-level-density assumption both mattering more at the table's long-range, high-altitude end &mdash; the curve is extrapolated flat rather than trusted.
+  </div>
+  <p>One more quiet confirmation sits in the atmosphere model: the table's own stated ground-level air density, 1.22 kg/m&sup3;, matches the 1976 U.S. Standard Atmosphere's sea-level value of 1.225 kg/m&sup3; to three significant figures &mdash; evidence the two data sources are speaking the same physical language.</p>
+</section>
+
+<section>
+  <h2>12. The K-Matrix and the Closed-Form Yaw of Repose</h2>
+  <p>The coupling between climb-rate and drift-rate lives in a 2&times;2 matrix:</p>
+  <pre><code>K11 = 1 - Ix_hat &times; pHat&sup2; &times; Cmag_hat
+K21 = Ix_hat &times; pHat &times; CL_hat
+detK = K11&sup2; + K21&sup2;</code></pre>
+  <p>where <code>Ix_hat</code> is the shell's dimensionless axial moment of inertia and <code>pHat</code> its dimensionless spin rate. For a right-hand-twist shell, this sign convention makes <code>K21</code> negative, which is exactly what produces the historically well-documented rightward drift of right-hand-rifled projectiles &mdash; a sign the model gets right by construction, not by fitting.</p>
+  <p>The magnitude of the yaw itself follows a closed-form expression rather than an iterated one:</p>
+  <pre><code>alpha_e&sup2; = [2&middot;Ix&middot;|p| / (&rho;&middot;v&sup3;&middot;S&middot;d&middot;CM&alpha;)]&sup2; &times; (f_e&gamma;&sup2; + f_e&chi;&sup2;)</code></pre>
+  <p>where <code>f_e&gamma;</code> and <code>f_e&chi;</code> are the gravity-plus-Coriolis force components already available without knowing the aerodynamic forces &mdash; the entire reason no iteration is needed here at all.</p>
+</section>
+
+<section>
+  <h2>13. Walking Through <code>derivs()</code></h2>
+  <p>Every call to <code>derivs()</code> does the same seven things once: build the spherical basis vectors; look up density, speed of sound, and gravity at the current altitude; look up wind and its altitude gradient (needed for the wind-shear material-derivative term the 2020 paper adds); compute the local Mach number and drag coefficient; compute Coriolis acceleration from Earth's rotation; solve the K-matrix and yaw magnitude in closed form; and finally assemble all seven derivatives. Nothing here iterates &mdash; it is the very definition of "explicit."</p>
+  <pre><code>// Azimuth rate -- note the division by cos(gamma):
+final double chiTimesCg = (K21*f_eg + K11*f_ec)*invVdetK - wdot_ec/vSafe;
+final double chiDot = (Math.abs(cg) > COS_GAMMA_GUARD) ? chiTimesCg/cg : 0.0;</code></pre>
+  <p>That division is the seed of the model's one real numerical limit, covered next.</p>
+</section>
+
+<section>
+  <h2>14. Where the Model Breaks: Near-Vertical Fire</h2>
+  <p>Steep, near-vertical engagements &mdash; ironically the geometry of a target passing almost directly overhead &mdash; expose two distinct failure modes, both by design of the mathematics rather than by coding error.</p>
+  <ul>
+    <li><strong>Physical breakdown:</strong> &alpha;<sub>e</sub> scales as <code>p/v&sup3;</code>. Near the apex of a steep shot, speed drops toward its local minimum, so this linear small-angle formula grows without bound. Real yaw physically saturates through nonlinear damping this model does not capture &mdash; a limitation of the linearization, not of reality.</li>
+    <li><strong>Coordinate singularity:</strong> dividing by <code>cos(&gamma;a)</code> to isolate <code>chiDot</code> fails exactly as &gamma;<sub>a</sub> approaches 90&deg;, the same mathematical pole that makes longitude undefined at the Earth's geographic poles. <code>COS_GAMMA_GUARD</code> prevents a crash by returning zero rather than dividing by a near-zero number, but that is a graceful failure, not a correct answer.</li>
+  </ul>
+  <p>The file now measures its own edge rather than describing it. Sweeping elevation in quarter-degree steps, the last trajectory that completes is <strong>QE 60.50&deg;</strong>; at 60.75&deg; the integration comes apart. That is a good deal lower than "near-vertical" suggests, and it is the first correction this rewrite forced: the model does not merely lose accuracy in the steep half of the sky, it loses the steep half of the sky.</p>
+  <p>Because a bare <code>while (y &gt;= 0) step;</code> loop cannot detect this &mdash; every comparison against <code>NaN</code> is false, so the loop simply falls out and returns garbage dressed as an impact &mdash; <code>fireShot()</code> now tests the state for finiteness and records where it let go. Asked to fire at 75&deg;, the program no longer prints a plausible-looking wrong answer; it prints the autopsy:</p>
+  <figure class="term">
+    <figcaption>The runaway, diagnosed</figcaption>
+<pre><code>QE 75 deg: diverges after 1718 steps at t=34.34s, alt 9865 m, v -979.7 m/s</code></pre>
+  </figure>
+  <p>A <em>negative</em> air speed is the tell. Near the summit of a steep shot the shell is slow, &alpha;<sub>e</sub><sup>2</sup> carries a 1/v<sup>6</sup>, and the yaw-drag term <code>CD&alpha;2 &times; &alpha;e&sup2;</code> grows with it; that extra drag slows the shell further, which grows the yaw further. It is a positive feedback loop, and it drives the speed through zero within a few steps. The failure is the linearization's, exactly as the source code predicted it would be &mdash; but "documented" and "diagnosed" are different things, and only the second one tells you the boundary is at 60&deg;.</p>
+  <div class="callout">
+    <strong>Why this is more than a footnote here.</strong> The half of the sky this model cannot fly is the half an anti-aircraft gun most needs. Section 3's table cell had a second, lofted solution that the search could not reach, and Section 5's excerpt has an empty row at 2,000 m for the same reason. The trajectory <em>count</em> that drives the ENIAC ledger is unaffected &mdash; those elevations were computed, and paid for, before anyone learned they diverge &mdash; but no reader should mistake this file for something that could have laid an 88 at a bomber overhead.
+  </div>
+</section>
+
+<section>
+  <h2>15. What Makes a Fire-Control Solution "Clean"</h2>
+  <p>The near-vertical breakdown mirrors a real limit in the physical fire-control chain this trajectory model would feed. A target only earns a cleanly computed intercept &mdash; rather than a fallback to unaimed barrage fire &mdash; when several conditions hold together: enough standoff distance relative to speed to keep angular tracking rate inside a servo's mechanical bandwidth; straight, constant-speed flight for the entire time of flight, since the whole prediction is a linear extrapolation; enough time in the engagement zone to achieve a stable track before the geometry changes too fast; a flight path that avoids passing near the zenith, where any tracking mount's azimuth axis must slew arbitrarily fast; and a shell fast enough, or fired close enough, that its own time of flight does not eat too much of the available engagement window.</p>
+</section>
+
+<section>
+  <h2>16. Shape and Stabilization Limits</h2>
+  <p>STANAG 4355 states its own scope rather than leaving it implicit: the equations apply to projectiles that are spin-stabilized (not fin-stabilized, which needs a different five-degrees-of-freedom model), dynamically stable (yaw disturbances must damp out, not merely fail to grow), and at least trigonally symmetric &mdash; three-fold rotational symmetry, not necessarily a perfect body of revolution. A shell with base-burn propulsion, ejected sub-projectiles, or active guidance needs additional annexed terms this bare implementation does not include.</p>
+</section>
+
+<section>
+  <h2>17. Honesty in the Constants</h2>
+  <p>Not every number in this file carries the same evidentiary weight, and the source code says so directly rather than presenting a uniform face of confidence.</p>
+  <div class="table-scroll">
+  <table>
+    <tr><th>Status</th><th>Constants</th><th>Basis</th></tr>
+    <tr><td>Measured</td><td>mass, caliber, muzzle velocity, drag curve</td><td>TM E9-369A Table 88 header + direct derivation</td></tr>
+    <tr><td>Estimated</td><td>axial moment of inertia, twist rate</td><td>Not on this firing table; scaled from a similar shell's known shape factor, or a representative value for the class</td></tr>
+    <tr><td>Representative / borrowed</td><td>CD&alpha;2, CL&alpha;, Cmag-f</td><td>Typical values for ogive-boattail HE shells; Cmag-f specifically is borrowed from a published 35mm round, a different caliber entirely</td></tr>
+  </table>
+  </div>
+  <p>The practical consequence: range, altitude, and time-of-flight predictions rest on genuinely verified data and were checked against the real table. Drift predictions rest partly on borrowed coefficients and deserve correspondingly less confidence &mdash; a distinction worth remembering before trusting any single number this code prints.</p>
+  <h3>A discrepancy worth naming</h3>
+  <p>Swept over elevation with the illustrative wind removed, this model peaks at <strong>15,876 m</strong> of ground range at QE&nbsp;43&deg;. The 8.8cm Flak 18/36's published maximum horizontal range is <strong>14,860 m</strong>. The model over-ranges by about <strong>6.8%</strong>, and the wind table accounts for only ~235&nbsp;m of the gap, so the wind is not the explanation.</p>
+  <p>The likely explanation is visible in the program's own Mach column. At QE&nbsp;45&deg;, <strong>54% of the flight sits below Mach&nbsp;0.85</strong> &mdash; precisely the band where the derived drag curve is weakest, and below Mach&nbsp;0.80 it is not derived at all but extrapolated flat. A flat C<sub>D</sub> there under-predicts subsonic drag, and a maximum-range shot spends most of its time exactly there. Fitting a drag curve on an <em>anti-aircraft</em> table, whose rows cluster at steeper angles and shorter ranges, and then asking that curve for maximum <em>ground</em> range, is extrapolation outside the data's own domain; a several-percent error is the expected price.</p>
+  <p>This matters for the range numbers and not at all for this article's argument. The trajectory count that drives Section 7's ledger is a property of the table's <em>structure</em> &mdash; a grid, searched, then differentiated five times &mdash; and would be unchanged if the drag curve were perfect.</p>
+</section>
+
+<section>
+  <h2>18. Targeting Real Silicon: the Renesas RZ/T2M</h2>
+  <p>The eventual embedded target for this class of model is a dual Arm Cortex-R52 (Armv8-R), such as Renesas's RZ/T2M, running up to 800&nbsp;MHz. Two features matter specifically for a real-time trajectory solve: 576&nbsp;KB of Tightly-Coupled Memory wired directly to each core, avoiding the cache-timing variability that would otherwise make worst-case execution time hard to bound; and a Memory Protection Unit rather than a full virtual-memory MMU, meaning no page-fault-induced timing surprises. Both push in the same direction &mdash; a real-time core that behaves identically on every single invocation, which is exactly what a fuze-timing computation should want.</p>
+</section>
+
+
+<section>
+  <h2>19. Running It, and What One Trajectory Now Costs</h2>
+  <p>The file is its own argument, so it should be runnable. With no arguments it plays all four acts; the individual pieces are addressable too:</p>
+  <pre class="run"><code>./mvnw clean compile exec:exec        # the four acts, start to finish
+
+# or, against the compiled classes directly:
+java -cp target/classes coba.Flak88ExplicitMPM            # same, all four acts
+java -cp target/classes coba.Flak88ExplicitMPM traj 45    # Act I  -- one trajectory
+java -cp target/classes coba.Flak88ExplicitMPM cell 8000 4000  # Act II -- one inverse solve
+java -cp target/classes coba.Flak88ExplicitMPM table      # Acts III + IV
+java -cp target/classes coba.Flak88ExplicitMPM bench      # measured cost per trajectory</code></pre>
+  <p>The benchmark is now part of the file rather than a remembered result, which matters: an earlier draft of this article quoted timings that the published source could not reproduce. Warmed up and taking the best of thirty runs, a full trajectory at elevations from 5&deg; to 60&deg; costs <strong>0.40 to 2.93 ms</strong> on an ordinary desktop JVM, scaling almost exactly with time of flight &mdash; 607 integration steps at 5&deg;, 4,148 at 60&deg;.</p>
+  <div class="table-scroll">
+  <table>
+    <tr><th>Computing method</th><th>Time per trajectory</th><th>Ratio to the analyzer</th></tr>
+    <tr><td>Desk calculator, by hand</td><td>&asymp; 20 hours</td><td>80&times; slower</td></tr>
+    <tr><td>Bush differential analyzer</td><td>&asymp; 15 minutes</td><td>&mdash;</td></tr>
+    <tr><td>ENIAC (1945)</td><td>&asymp; 30 seconds</td><td>30&times; faster</td></tr>
+    <tr><td><code>Flak88ExplicitMPM.java</code>, this file (JVM)</td><td>0.40&ndash;2.93 ms</td><td>307,000&times; to 2,256,000&times; faster</td></tr>
+  </table>
+  </div>
+  <div class="callout">
+    <strong>Two honesty notes worth keeping rather than smoothing over.</strong> First, these figures were measured on a general-purpose JVM, not on the ARM Cortex-R52 embedded target of Section 18. Real-time silicon would very likely be faster still, but that number has not been measured here and is not asserted as if it had been. Second, the ratio column compares against a <em>60-second</em> trajectory, the unit the historical figures are quoted for; the fan's mean time of flight is 48.9&nbsp;s, so the comparison is close to like-for-like but not exactly so.
+  </div>
+  <p>And yet the speed is the least interesting number in this article. Six orders of magnitude per trajectory is what makes the ledger in Section 7 lopsided, but it is not what made the problem hard. What made it hard was that a trajectory was never the unit of work in the first place.</p>
+</section>
+
+<section>
+  <h2>Conclusion</h2>
+  <p>The compressed version of the ENIAC story &mdash; drag has no closed form, so trajectories must be integrated, so the Army needed a fast computer &mdash; is true in every clause and still manages to leave out the reason. Fifteen minutes a trajectory was a solved problem by 1935. What was not solved, and could not be solved by making trajectories faster in increments, was that the Army did not want trajectories. It wanted tables: inverse solutions, gridded over the sky, differentiated against every condition that would differ on the day, re-issued for every new gun coming off the line. Four multipliers, each of them structural, compounding into a couple of thousand trajectories per table, and forty tables a week against a capacity of fifteen.</p>
+  <p>Writing that as running code rather than as prose changes what can be claimed, and it changes it in both directions. The trajectory count is no longer quoted from a history book: 2,072 falls out of generating an actual table, and lands inside the two-to-four-thousand band BRL reported for the same two factors. Multiplying it by a 1943 unit cost and nothing else reproduces "the better part of a month" per table on the differential analyzer, a figure the program was never given. But the same discipline forbids the tidy ending: one ENIAC does not close a forty-table-a-week deficit, it takes about four, and ENIAC arrived after the war anyway. The honest claim is narrower and more interesting than the tidy one.</p>
+  <p>Running code also volunteers things prose would have let slide. The near-vertical limit stopped being a caveat and became a measured boundary at 60.50&deg;, with a negative air speed as the fingerprint of the runaway. The drag curve's 6.8% over-range against the gun's published maximum was found rather than hidden. An earlier draft of this article quoted benchmark timings the published source could not reproduce; the benchmark is now in the file. None of that was visible while the file only knew how to fire one shell at one elevation.</p>
+  <p>What remains, and what has not changed since 1943, is the shape of the thing. An idealized trajectory needs no computer at all. A realistic one needs a loop. And a firing table &mdash; the artifact anyone actually wanted &mdash; needs that loop several hundred times over before it can answer a single question a gun crew would think to ask. Modern fire control no longer tabulates offline; it re-solves the inverse problem inside the engagement loop against the day's real weather, which is precisely why the explicit, non-iterating formulation of Section 9 is worth the trouble. The loop never disappeared. It only moved closer to the gun.</p>
+</section>
+
+<section class="biblio">
+  <h2>References</h2>
+  <ol>
+    <li id="ref1">"Ballistic Research Laboratory," <em>Wikipedia</em>. [Online]. Available: <a href="https://en.wikipedia.org/wiki/Ballistic_Research_Laboratory" rel="external nofollow noopener">https://en.wikipedia.org/wiki/Ballistic_Research_Laboratory</a>.</li>
+    <li id="ref2">"The ENIAC Story," U.S. Army Research Laboratory. [Online]. Available: <a href="https://ftp.arl.army.mil/~mike/comphist/eniac-story.html" rel="external nofollow noopener">https://ftp.arl.army.mil/~mike/comphist/eniac-story.html</a>.</li>
+    <li id="ref3">"4.3 The Ballistics Research Laboratory and Firing Tables," in <em>Bit by Bit: A History of Computing</em>, Haverford College. Original host now offline; archived copy: <a href="http://web.archive.org/web/20250122232726/http://ds-wordpress.haverford.edu/bitbybit/bit-by-bit-contents/chapter-four/the-ballistics-research-laboratory-and-firing-tables/" rel="external nofollow noopener">Internet Archive, 22 Jan. 2025</a>.</li>
+    <li id="ref4">U.S. War Department, <em>German 88-mm Antiaircraft Gun Materiel</em>, Technical Manual TM E9-369A, Washington, D.C., Jun. 1943.</li>
+    <li id="ref5">L. Baranowski, P. Majewski, and J. Szymonik, "Explicit form of the modified point mass trajectory model for the use in Fire Control Systems," <em>Bulletin of the Polish Academy of Sciences: Technical Sciences</em>, vol. 68, no. 5, pp. 1089&ndash;1098, 2020, doi: <a href="https://doi.org/10.24425/bpasts.2020.134661" rel="external nofollow noopener">10.24425/bpasts.2020.134661</a>.</li>
+    <li id="ref6">R. F. Lieske and M. L. Reiter, "Equations of Motion for a Modified Point Mass Trajectory," U.S. Army Ballistic Research Laboratory, Aberdeen Proving Ground, MD, Memorandum Report No. 1314, 1966.</li>
+    <li id="ref7">R. L. McCoy, <em>Modern Exterior Ballistics: The Launch and Flight Dynamics of Symmetric Projectiles</em>, 2nd ed. Atglen, PA, USA: Schiffer Publishing, 2012.</li>
+	<li id="ref8">D. Tan, "Flak88ExplicitMPM.java," GitHub Gist, 2026. [Online]. Available: <a href="https://gist.github.com/dawud-tan/69a4960dfe353302e0f670993e1a7472" rel="external nofollow noopener">https://gist.github.com/dawud-tan/69a4960dfe353302e0f670993e1a7472</a>.</li>
+    <li id="ref9">D. Winegrad and A. Akera, "ENIAC's 50th Anniversary: The Birth of the Information Age &mdash; A Short History of the Second American Revolution," <em>The Compass / Almanac</em>, University of Pennsylvania, vol. 42, no. 18, Feb. 1996. [Online]. Available: <a href="https://almanac.upenn.edu/archive/v42/n18/eniac.html" rel="external nofollow noopener">https://almanac.upenn.edu/archive/v42/n18/eniac.html</a>. (Source of "each firing table involved hundreds of trajectories" and "it might still take the better part of a month to complete just one table"; see also H. Polachek, "Before the ENIAC," <em>IEEE Annals of the History of Computing</em>, vol. 19, no. 2, pp. 25&ndash;30, 1997, doi: <a href="https://doi.org/10.1109/85.586069" rel="external nofollow noopener">10.1109/85.586069</a>.)</li>
+    <li id="ref10">"German Mechanical Time Fuze S/30 (Zt.Z. S/30)," in <em>Handbook of Enemy Ammunition</em>, Pamphlet No. 8, War Office, London, 1944. [Online]. Available: <a href="http://michaelhiske.de/Allierte/UK/Handbook/Pamphlet08/08_004.htm" rel="external nofollow noopener">http://michaelhiske.de/Allierte/UK/Handbook/Pamphlet08/08_004.htm</a>.</li>
+  </ol>
+</section>
+
+</article>
+
+<footer>
+  Source code discussed in this article: <a rel="external nofollow noopener" href="https://gist.github.com/dawud-tan/69a4960dfe353302e0f670993e1a7472"><code>Flak88ExplicitMPM.java</code></a>. Unit costs for the desk calculator, the differential analyzer and ENIAC are historical figures as reported in the cited sources; every trajectory count, table, ledger and timing attributed to this file was produced by running it, as described in Section 19.
+</footer>
+
+</div>
+</body>
+</html>

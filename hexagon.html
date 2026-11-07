@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Hexagon FastRPC</title>
+    <link as="style" href="/css/bootstrap.min.css"
+          rel="preload" type="text/css">
+    <link as="image" href="/img/pk.ico" rel="preload" type="image/x-icon">
+    <link as="font" href="/fonts/CharisSIL-Regular.woff2" rel="preload" type="font/woff2">
+    <link href="/css/bootstrap.min.css"
+          rel="stylesheet">
+    <link href="/img/pk.ico" rel="icon" type="image/x-icon"/>
+    <style>
+        @font-face {
+            font-display: swap;
+            font-family: "Charis SIL";
+            font-style: normal;
+            font-weight: normal;
+            src: url(/fonts/CharisSIL-Regular.woff2) format("woff2"),
+            url(/fonts/CharisSIL-Regular.woff) format("woff"),
+            url(/fonts/CharisSIL-Regular.ttf) format("truetype");
+        }
+
+        html {
+            font-size: 2.4vw;
+        }
+
+        @media all and (min-width: 1000px) {
+            html {
+                font-size: 24px;
+            }
+        }
+
+        @media all and (max-width: 520px) {
+            html {
+                font-size: 18px;
+            }
+        }
+
+        body {
+            font-family: "Charis SIL", serif;
+            line-height: 1.5;
+            font-size: 0.9rem;
+            -webkit-font-smoothing: subpixel-antialiased;
+        }
+    </style>
+</head>
+<body class="container">
+<div class="row row-cols-1">
+    <div class="col">
+        <h1 class="display-6">Pantai untuk memotret matahari hijau</h1>
+        <article>
+            <p>What do drones, robots and cameras have in common?</p>
+            <p>They can all take advantage of the DSP for higher performance in real-time tasks. In drones, that means
+                flight control; in robots, that means balance and walking; and in cameras, it means image pre- and
+                post-processing. Offloading real-time tasks from the CPU to the DSP is a big step toward higher
+                performance, with the sweetener of much lower power consumption.</p>
+            <p><strong>How To Use Hexagon DSP And FastRPC</strong></p>
+            <p>Our <a href="https://developer.qualcomm.com/software/hexagon-dsp-sdk">Hexagon SDK</a> exposes FastRPC, a
+                remote procedure call framework allowing clients to transparently make remote method invocations between
+                the Qualcomm Snapdragon processor (APPS) and the application DSP (aDSP). It’s available now on the
+                Snapdragon 8074 built into the <a href="https://developer.qualcomm.com/hardware/dragonboard-800">DragonBoard
+                    800</a>, a product of Lantronix Technologies Corporation, as well as the 8084 and 8994.</p>
+            <p>FastRPC is designed around several features that make offloading tasks as easy as possible:</p>
+            <ul>
+                <li>Initiating the remote invocation looks the same as if you called it locally, you provide the
+                    function definition via IDL (Interface Description Language).
+                </li>
+                <li>Tools auto-generate interface header and libs to handle parameter passing, cache coherency.</li>
+                <li>For FastRPC calls into dynamic modules the framework loads the aDSP module for you.</li>
+                <li>FastRPC is synchronous. That eliminates the complexity of having the kernel manage state between
+                    aDSP and APPS in an asynchronous call.
+                </li>
+            </ul>
+            <p>The diagram shows the invocation of a single method in which the client resides on APPS (e.g., Snapdragon
+                CPU) and the object resides on the aDSP (e.g., Hexagon). The stub and skel are auto-generated, you only
+                need to call the function from the applications processor and provide the implementation of that
+                function on the aDSP.</p>
+
+            <img alt="Qualcomm-image" src="/img/fastrpc_0.jpg">
+
+            <p>On an Android device that supports FastRPC, these are the steps to get your job offloaded to the
+                aDSP.</p>
+            <ol>
+                <li>Download and install the Hexagon SDK.</li>
+                <li>Describe your job’s API in IDL (Interface Description Language).</li>
+                <li>Auto generate your header, and the stub and skel libraries.</li>
+                <li>Implement your API on the DSP, link it and the skel library into a shared object, push the shared
+                    object to the device.
+                </li>
+                <li>Link the stub to your android native app and call your API.</li>
+                <li>(Optional) Create java bindings for your API and call you API from an APK.</li>
+            </ol>
+            <p>That’s it.</p>
+            <p><strong>A Drone Developer Kit?</strong></p>
+            <p>Not exactly.</p>
+            <p>But we’re seeing developers take the Snapdragon processor in that direction, and the Hexagon DSP goes
+                with it. You can do plenty more on the DSP than just multimedia, so dig in and find out for
+                yourself.</p>
+            <p>If you’re a drone or robotics developer looking for faster execution of real-time tasks with lower power
+                consumption, <a href="https://developer.qualcomm.com/software/hexagon-dsp-sdk/application">apply for
+                    access to the Hexagon SDK</a>. It includes full documentation and code samples for invoking FastRPC.
+            </p>
+            <p>And stay tuned for more how-to’s and use cases involving Hexagon.</p>
+        </article>
+    </div>
+</div>
+</body>
+</html>

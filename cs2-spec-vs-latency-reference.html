@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS2 @ 600Hz — Build &amp; Tuning Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e13; --panel:#111820; --panel-2:#141c25;
+    --border:rgba(150,180,198,.14); --border-strong:rgba(150,180,198,.28);
+    --text:#c7d3dc; --text-dim:#7d8b99; --heading:#eef3f6;
+    --accent:#3fd0c4; --accent-dim:rgba(63,208,196,.13);
+    --warn:#e3a23d; --warn-dim:rgba(227,162,61,.13);
+    --bad:#e2604d; --bad-dim:rgba(226,96,77,.10);
+    --mono:'IBM Plex Mono',ui-monospace,'SF Mono',Consolas,monospace;
+    --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+    --display:'Space Grotesk',var(--sans);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:radial-gradient(ellipse 900px 500px at 12% -8%, rgba(63,208,196,.09), transparent 60%),var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:880px;margin:0 auto;padding:52px 22px 72px;}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--text-dim);margin:0 0 22px;text-transform:uppercase;}
+  .eyebrow .verified{color:var(--accent);}
+  h1{font-family:var(--display);font-weight:600;font-size:clamp(26px,4vw,36px);line-height:1.22;color:var(--heading);letter-spacing:-.01em;margin:0 0 18px;}
+  .sub{font-size:16px;color:var(--text);max-width:66ch;margin:0;}
+  .sub strong{color:var(--heading);}
+  h2{font-family:var(--display);font-weight:600;font-size:20px;color:var(--heading);margin:0 0 6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  h3{font-family:var(--display);font-size:15.5px;font-weight:600;color:var(--heading);margin:0 0 8px;}
+  .section-sub{color:var(--text-dim);font-size:13.5px;margin:0 0 18px;}
+  section{margin-top:52px;}
+  .callout{border:1px solid var(--border-strong);border-left:3px solid var(--bad);background:var(--bad-dim);border-radius:6px;padding:16px 18px;}
+  .callout-label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--bad);margin-bottom:8px;}
+  .callout p{margin:0;color:var(--text);}
+  .callout p + p{margin-top:10px;}
+  .callout strong{color:var(--heading);}
+  .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:4px;white-space:nowrap;border:1px solid transparent;}
+  .tag-official{background:var(--accent-dim);color:var(--accent);border-color:rgba(63,208,196,.35);}
+  .tag-community{background:var(--warn-dim);color:var(--warn);border-color:rgba(227,162,61,.35);}
+  .tag-disputed{background:var(--bad-dim);color:var(--bad);border-color:rgba(226,96,77,.4);}
+  .tag-practice{background:rgba(150,180,198,.08);color:var(--text-dim);border-color:var(--border-strong);}
+  .chain-bar{display:flex;width:100%;height:34px;border-radius:6px;overflow:hidden;border:1px solid var(--border-strong);}
+  .seg{height:100%;}
+  .seg-compute{background:rgba(150,180,198,.28);}
+  .seg-lan{background:rgba(150,180,198,.42);border-left:1px solid var(--bg);border-right:1px solid var(--bg);}
+  .seg-path{background:linear-gradient(90deg,#2fb0a6,var(--accent));}
+  .chain-legend{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px;}
+  .legend-item{display:flex;gap:10px;align-items:flex-start;}
+  .swatch{width:11px;height:11px;border-radius:3px;margin-top:4px;flex-shrink:0;}
+  .swatch-compute{background:rgba(150,180,198,.5);}
+  .swatch-lan{background:rgba(150,180,198,.75);}
+  .swatch-path{background:var(--accent);}
+  .legend-item div{display:flex;flex-direction:column;gap:3px;}
+  .legend-item strong{font-size:13.5px;color:var(--heading);font-weight:600;}
+  .legend-item span{font-size:13px;color:var(--text-dim);line-height:1.5;}
+  .table-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:8px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:480px;}
+  thead th{font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-dim);text-align:left;padding:12px 16px;background:var(--panel-2);border-bottom:1px solid var(--border-strong);}
+  tbody td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text);}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover td{background:rgba(63,208,196,.04);}
+  tbody td:first-child{font-family:var(--mono);color:var(--heading);white-space:nowrap;}
+  code{font-family:var(--mono);font-size:.92em;background:var(--panel-2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;color:var(--accent);}
+  .footnote{font-size:12.5px;color:var(--text-dim);margin:12px 2px 0;}
+  .card-stack{display:flex;flex-direction:column;gap:14px;}
+  .hw-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:18px;}
+  .hw-card .tag{margin-bottom:10px;display:inline-block;}
+  .hw-card p{font-size:13.5px;color:var(--text-dim);margin:0;line-height:1.65;}
+  .hw-card p + p{margin-top:8px;}
+  .lever-list{list-style:none;margin:0 0 16px;padding:0;display:flex;flex-direction:column;gap:12px;}
+  .lever-list li{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-size:13.5px;color:var(--text-dim);line-height:1.6;}
+  .lever-list code{margin-right:2px;}
+  .note{font-size:13.5px;color:var(--text-dim);background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-top:14px;line-height:1.65;}
+  .note strong{color:var(--heading);}
+  pre.autoexec{margin-top:18px;background:var(--panel-2);border:1px solid var(--border-strong);border-radius:8px;padding:16px 18px;overflow-x:auto;font-family:var(--mono);font-size:13px;color:var(--text);line-height:1.7;}
+  pre.autoexec .hl{color:var(--accent);} pre.autoexec .cm{color:var(--text-dim);}
+  .bottomline{background:var(--panel);border:1px solid var(--border-strong);border-left:3px solid var(--accent);border-radius:6px;padding:20px 22px;}
+  .bottomline h2{margin-bottom:10px;} .bottomline p{margin:0;font-size:15px;}
+  .sources ul{list-style:none;margin:0 0 14px;padding:0;display:flex;flex-direction:column;gap:8px;}
+  .sources li{font-size:13.5px;color:var(--text-dim);}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(63,208,196,.35);}
+  a:hover{border-bottom-color:var(--accent);}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+  .page-footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--border);font-family:var(--mono);font-size:12px;color:var(--text-dim);}
+  @media (max-width:640px){.chain-legend{grid-template-columns:1fr;}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">Counter-Strike 2 · Rev. 3 · <span class="verified">validated 24 Jul 2026</span></p>
+    <h1>The 600Hz build: what's confirmed, what's corrected, what's unverified.</h1>
+    <p class="sub">Superseded the earlier 360Hz/NVIDIA-Pulsar direction with this AMD-based 600Hz target. Everything build-specific below is checked against vendor/official sources where a claim was checkable; a few items are carried through as-given because I couldn't verify them independently — flagged as such rather than silently endorsed.</p>
+  </header>
+
+  <section class="callout">
+    <span class="callout-label">Still true, regardless of build</span>
+    <p>Valve's Counter-Strike 2 listing publishes one tier — <strong>Minimum</strong> — for Windows and SteamOS/Linux, and no latency spec at all. Everything past "does it launch" — including this whole document — is a separate exercise Valve doesn't publish an answer to.</p>
+  </section>
+
+  <section class="chain-section">
+    <h2>Where a millisecond actually goes</h2>
+    <p class="section-sub">Illustrative split, not a measurement — order of magnitude only. Holds regardless of which specific build below.</p>
+    <div class="chain-bar" role="img" aria-label="Latency breakdown: 8 percent compute, 4 percent local network, 88 percent network path">
+      <div class="seg seg-compute" style="width:8%"></div>
+      <div class="seg seg-lan" style="width:4%"></div>
+      <div class="seg seg-path" style="width:88%"></div>
+    </div>
+    <div class="chain-legend">
+      <div class="legend-item"><span class="swatch swatch-compute"></span><div><strong>Compute — 8%</strong><span>Input sampling, client render, OS/driver queue.</span></div></div>
+      <div class="legend-item"><span class="swatch swatch-lan"></span><div><strong>Local network — 4%</strong><span>Router + NIC. Near-zero wired.</span></div></div>
+      <div class="legend-item"><span class="swatch swatch-path"></span><div><strong>Network path — 88%</strong><span>ISP → transit → Valve relay → server → back.</span></div></div>
+    </div>
+  </section>
+
+  <section class="specs-section">
+    <h2>Valve's published Minimum <span class="tag tag-official">Official — Steam listing</span></h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Spec</th><th>Windows</th><th>SteamOS + Linux</th></tr></thead>
+        <tbody>
+          <tr><td>OS</td><td>Windows 10</td><td>Ubuntu 20.04</td></tr>
+          <tr><td>CPU</td><td colspan="2">4 hardware threads — Intel Core i5-750 or higher</td></tr>
+          <tr><td>RAM</td><td colspan="2">8 GB</td></tr>
+          <tr><td>GPU</td><td>1 GB+ VRAM, DirectX 11 w/ Shader Model 5.0</td><td>AMD GCN+ / NVIDIA Kepler+, current Vulkan</td></tr>
+          <tr><td>Storage</td><td colspan="2">85 GB</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="footnote">The i5-750 dates to 2009 — a floor for launching CS2, not a target for 600fps.</p>
+  </section>
+
+  <section class="hw-section">
+    <h2>The 600Hz build</h2>
+    <div class="card-stack">
+
+      <article class="hw-card">
+        <span class="tag tag-official">Confirmed — AMD</span>
+        <h3>CPU — Ryzen 7 9800X3D</h3>
+        <p>Real, 8C/16T, current best-in-class for this workload. AES-NI and PCLMULQDQ called out together is more precise than my own earlier answer: GNS's AES-GCM-256 needs both — AES-NI for the encryption step, PCLMULQDQ for the GHASH authentication tag calculation inside GCM. Both are unconditional on this chip; nothing to enable.</p>
+      </article>
+
+      <article class="hw-card">
+        <span class="tag tag-official">Confirmed, one correction — AMD</span>
+        <h3>GPU — ASUS Dual Radeon RX 9060 XT 8GB</h3>
+        <p>Real card, confirmed against AMD's own product page — RDNA4, 2048 shader cores, 8GB GDDR6, $300-class. It's DisplayPort 2.1a, not 1.4 (doesn't change anything for this specific monitor's own DP1.4 input, but worth knowing if you ever pair a higher-bandwidth display). <strong>VCN 4.0 is very likely wrong</strong> — VCN versions have tracked architecture generations (RDNA2≈3.0, RDNA3≈4.0), so RDNA4 should be VCN 5.0. I don't have a source pinning the exact number down with certainty, so treat this as "probably 5.0" rather than confirmed.</p>
+      </article>
+
+      <article class="hw-card">
+        <span class="tag tag-official">Confirmed, plus a real gap in the doc — BenQ</span>
+        <h3>Display — BenQ Zowie XL2586X+</h3>
+        <p>Real, current, in stock at multiple retailers — 24.1", Fast TN, 1920×1080, 600Hz, DyAc 2. What the doc doesn't mention: BenQ's own product page states you need <strong>Windows 11, updated to the latest version</strong>, for 600Hz to work at all — worth confirming before assuming the OS side is a non-issue. Both DP1.4 and HDMI 2.1 are listed by BenQ as supporting 600Hz at this resolution, so — unlike a 1440p target — bandwidth isn't the open question here; the OS requirement is.</p>
+      </article>
+
+      <article class="hw-card">
+        <span class="tag tag-disputed">Correction</span>
+        <h3>RAM — G.Skill Flare X5 32GB DDR5-6000 <strong>CL36</strong></h3>
+        <p>The frequency is still right — DDR5-6000 is what holds AM5's Infinity Fabric at a 1:1 ratio with the memory clock, and that benefit doesn't depend on CAS latency. But CL36 is a real, measurable step down in timing tightness from the CL30 we established earlier in this build process as the actual sweet spot at this speed. Same frequency benefit, worse absolute latency. Not a functional problem, just not the tightest kit at 6000 — a CL30 kit at the same speed would be strictly better with no downside.</p>
+      </article>
+
+      <article class="hw-card">
+        <span class="tag tag-official">Confirmed</span>
+        <h3>Motherboard + NIC — ASRock B650M Pro RS (mATX) (non-E) / Realtek RTL8125BG</h3>
+        <p>The non-E reasoning is sound — this build isn't using PCIe 5.0 bandwidth for anything. The RTL8125BG's <strong>32 MSI-X vectors</strong> checks out against a real driver capability dump from actual hardware, and <strong>quad-core RSS</strong> is confirmed via Realtek's own product listings. Both numbers in the doc are accurate — this directly informs the RSS script below, since 4 hardware queues is the real ceiling, not an arbitrary choice.</p>
+      </article>
+
+      <article class="hw-card">
+        <span class="tag tag-practice">Carried through, not independently verified</span>
+        <h3>Cooler, case, PSU, router</h3>
+        <p>Phantom Spirit 120 SE dimensions/rating, Montech AIR 100 clearance, Corsair RM550x sizing, and the GL.iNet Flint 2's port speeds are presented as given — I didn't independently check these against vendor spec sheets this round. Worth a quick manual cross-check before ordering, same as any part list; nothing here struck me as implausible, I just haven't confirmed it the way I did the rest.</p>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="video-section">
+    <h2>In-game video settings</h2>
+    <p class="section-sub">Standard low-everything esports config — not controversial, matches established competitive practice. One specific claim worth flagging.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Setting</th><th>Value</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>Resolution / Refresh</td><td>1920×1080, 600Hz</td><td>Native, matches the panel</td></tr>
+          <tr><td>Vertical Sync</td><td>Disabled</td><td>Standard for this goal</td></tr>
+          <tr><td>Global Shadow Quality</td><td>Low</td><td>Genuinely one of the more expensive settings — real fps recovered going High→Low. Some competitive players run Medium/High anyway for corner visibility on maps like Nuke; a real trade-off, not a free one</td></tr>
+          <tr><td>Model/Texture/Shader/Particle Detail</td><td>Low</td><td>Standard</td></tr>
+          <tr><td>HDR</td><td>Quality, not Performance</td><td>The claimed grid-line artifact in Performance mode is specific enough to be plausible but I didn't find independent confirmation — worth testing both yourself before trusting it fully</td></tr>
+          <tr><td>FSR</td><td>Disabled</td><td>Consistent with general upscaling-latency concerns; also not doing much at native-res Low settings anyway</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="launch-section">
+    <h2>Launch options &amp; autoexec</h2>
+    <p><strong>Confirmed:</strong> CS2's actual install path still uses the legacy <code>Counter-Strike Global Offensive</code> folder name — this is real and a very common "why can't I find my cfg folder" gotcha, not an error in the doc.</p>
+    <pre class="autoexec"><code><span class="cm">// Launch Options: -console -nojoy +exec autoexec
+// autoexec.cfg</span>
+fps_max 0
+mm_dedicated_search_maxping 50
+net_client_steamdatagram_enable_override 1</code></pre>
+    <p class="footnote">Lighter than the fuller autoexec worked out earlier in this doc's history (which also set <code>rate</code> and deliberately left <code>cl_interp</code>/<code>cl_interp_ratio</code> at default rather than omitting the topic). Both are valid; worth merging if you want the fuller reasoning attached.</p>
+  </section>
+
+  <section class="radeon-section">
+    <h2>AMD Radeon Software (Adrenalin)</h2>
+    <ul class="lever-list">
+      <li><strong>Above 4G Decoding + Re-Size BAR</strong> — real technology, correctly described (full VRAM addressing instead of small windowed chunks). The specific "real improvement to 1% lows in CS2" claim isn't independently sourced here — plausible, not confirmed.</li>
+      <li><strong>Radeon Boost: Disabled</strong> — correctly described. It drops render resolution during fast mouse movement, which is exactly wrong for a game where flicks are the moment you need clarity, not less of it.</li>
+      <li><strong>Radeon Anti-Lag 2: confirm it's actually on</strong> — right instinct. Supporting it isn't the same as it being enabled by default.</li>
+    </ul>
+  </section>
+
+  <section class="nic-section">
+    <h2>GameNetworkingSockets: why RSC/LSO don't touch this traffic</h2>
+    <p class="section-sub">General mechanics, independent of which build.</p>
+    <p><strong>RSC is TCP-only</strong> — confirmed via Microsoft's own driver docs. Zero interaction with GNS's UDP traffic regardless of NIC vendor. <strong>LSO is inert here for a cleaner reason</strong>: GNS fragments messages into MTU-sized pieces at the application layer before they reach the socket, straight from Valve's own repo — nothing oversized ever reaches the NIC for segmentation offload to act on.</p>
+  </section>
+
+  <section class="os-section">
+    <h2>Windows OS &amp; NIC script</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Step</th><th>Verdict</th></tr></thead>
+        <tbody>
+          <tr><td>Power plan, HAGS, overlay disabling</td><td><span class="tag tag-practice">Standard</span> — uncontroversial</td></tr>
+          <tr><td><code>Set-NetAdapterRss -BaseProcessorNumber 2 -MaxProcessorNumber 8 -MaxProcessors 4</code></td><td><span class="tag tag-disputed">Real params, documented conflict risk</span> — see note</td></tr>
+          <tr><td>Interrupt Moderation → <code>Disabled</code></td><td><span class="tag tag-official">Correct</span> — right value this time, and the right DisplayName style for a Realtek driver (binary Enabled/Disabled, not Intel's graduated "Rate")</td></tr>
+          <tr><td>EEE / Green Ethernet / Idle Power Saving, each with <code>-ErrorAction SilentlyContinue</code></td><td><span class="tag tag-official">Good practice</span> — correctly hedges against Realtek's inconsistent property naming across driver versions</td></tr>
+          <tr><td>Flow Control, LSO, RSC + <code>netsh</code>, PCIe ASPM via <code>powercfg</code></td><td><span class="tag tag-official">Consistent with what's already validated in this build's history</span></td></tr>
+          <tr><td>No <code>-NoRestart</code> on any <code>Set-</code> command, then a final <code>Restart-NetAdapter</code></td><td><span class="tag tag-disputed">Inefficient, not wrong</span> — see note</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><strong>On the RSS command:</strong> Microsoft's own parameter reference notes <code>MaxProcessorNumber</code> and <code>MaxProcessors</code> are interdependent and "could cause conflicting settings" when both are set — which this script does. In this specific case they likely land on the same outcome (RSS populates only even-numbered logical processors on SMT systems per Windows' documented behavior, so 2→8 already resolves to four processors: 2, 4, 6, 8 — matching the RTL8125BG's real 4-queue ceiling either way), but "likely resolves the same" isn't "confirmed." Check <code>Get-NetAdapterRss</code>'s <code>IndirectionTable</code> output after applying rather than assuming.</div>
+    <div class="note"><strong>On restarts:</strong> without <code>-NoRestart</code>, each <code>Set-NetAdapterAdvancedProperty</code> call can cycle the adapter on its own — meaning this script may restart Ethernet five or six times before the explicit <code>Restart-NetAdapter</code> at the end even runs. Not broken, just needlessly disruptive. Adding <code>-NoRestart</code> to each `Set-` line and letting the final restart do the one real cycle is the cleaner version.</div>
+  </section>
+
+  <section class="power-section">
+    <h2>Power constraints (optional)</h2>
+    <p>Correctly scoped by the doc itself as a thermals/noise exercise, not an fps one — CS2 doesn't stress a CPU's full power budget the way an all-core synthetic benchmark does, and the Curve Optimizer caution ("test, not trust blindly, validate with a stress test") is exactly right, chip-to-chip silicon variance is real.</p>
+    <p><strong>One thing to double-check in your actual BIOS:</strong> the doc lists "PPT Limit (mW) to 88000." Consumer AMD BIOS UIs almost always present PPT in <strong>watts</strong>, not milliwatts — this reads like a units label error rather than a real mW field. Confirm what your specific BIOS screen actually shows before entering a number; if it's a watts field, the target value is <code>88</code>, not <code>88000</code>.</p>
+  </section>
+
+  <section class="router-section">
+    <h2>Router &amp; ISP (Biznet + OpenWrt)</h2>
+    <p>Bridge mode + PPPoE to eliminate double NAT is standard and correct. The CAKE parameters are consistent with well-established OpenWrt/SQM community guidance — <code>overhead 44</code> is the commonly-cited PPPoE-over-Ethernet figure, <code>mpu 84</code> matches standard minimum-frame guidance, and DSCP-marking outbound UDP for CAKE's diffserv prioritization (CS5 here) is a legitimate, real technique — not something I can verify the specific class-selector choice against a single canonical source, but the mechanism is sound. Measuring actual throughput before setting the 85–90% SQM ceiling, rather than trusting the plan's nominal number, is the right instinct — ISPs rarely deliver exactly what's advertised.</p>
+  </section>
+
+  <section class="bottomline">
+    <h2>Bottom line</h2>
+    <p>This build's CPU/GPU/RAM/monitor combination is genuinely ahead of what CS2 needs at 1080p Low — at these settings the game stays CPU-bound, so the GPU isn't the lever to chase further. The corrections above are all small: a units label, two parameters that might step on each other, a few redundant adapter restarts, a slightly loose RAM timing, one probably-wrong encoder version number. None of them are load-bearing errors — the overall direction of this build and script is sound, and notably better-targeted to its actual NIC (Realtek-appropriate property names, real hardware queue counts) than the more generic, Intel-flavored version worked through earlier in this document's history.</p>
+  </section>
+
+  <section class="sources">
+    <h2>Sources</h2>
+    <ul>
+      <li><a href="https://store.steampowered.com/app/730/CounterStrike_2/" target="_blank" rel="nofollow noopener">Steam — Counter-Strike 2 store page</a> — system requirements</li>
+      <li><a href="https://zowie.benq.com/en-us/monitor/xl2586x-plus.html" target="_blank" rel="nofollow noopener">BenQ Zowie — XL2586X+ official product page</a> — 600Hz spec, Windows 11 requirement</li>
+      <li><a href="https://www.amd.com/en/products/graphics/desktops/radeon/9000-series/amd-radeon-rx-9060xt-8gb.html" target="_blank" rel="nofollow noopener">AMD — Radeon RX 9060 XT (8GB) official product page</a></li>
+      <li><a href="https://www.realtek.com/en/products/connected-media-ics/item/rtl8125bg-s-cg" target="_blank" rel="nofollow noopener">Realtek — RTL8125BG(S)-CG product page</a> — RSS, MSI-X support</li>
+      <li><a href="https://learn.microsoft.com/en-us/powershell/module/netadapter/set-netadapterrss" target="_blank" rel="nofollow noopener">Microsoft Learn — Set-NetAdapterRss reference</a></li>
+      <li><a href="https://github.com/ValveSoftware/GameNetworkingSockets" target="_blank" rel="nofollow noopener">Valve — GameNetworkingSockets repository</a> — AES-GCM-256, message fragmentation</li>
+    </ul>
+    <p class="footnote">Not independently re-verified this round: Thermalright Phantom Spirit 120 SE dimensions/wattage rating, Montech AIR 100 ARGB clearance spec, Corsair RM550x sizing math, GL.iNet Flint 2 port speeds, the HDR Performance-mode grid-artifact claim, and the exact "VCN 4.0 vs 5.0" number for RDNA4.</p>
+  </section>
+
+  <footer class="page-footer">Rev. 3 — validated 24 Jul 2026. Replaces the 360Hz/NVIDIA-Pulsar build direction from earlier in this document's history with this 600Hz/AMD direction. CS2 patches can change default cvars and matchmaking behavior — re-check console values after major updates.</footer>
+
+</div>
+</body>
+</html>

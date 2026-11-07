@@ -1,0 +1,2720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- One end-to-end page: the parcel, the GNSS baseline, the total-station setout (stages 0-7)
+     and the solar gnomons (stages 8-12). The gnomon half used to be griya-sakha-gnomons.html in
+     the dsygv repo; it was merged here on 2026-09-24 and that file was deleted.
+     Two things outside this repo pin it. dsygv/setout/setout.py --selftest asserts the gnomon
+     dimensions quoted here (meridian ends +0.971 / -1.902 m, pad E -0.04..2.03 / N -1.35..0.84 m,
+     June Asr 2.380 m toward 123.4 deg) and the parcel table's verdicts. And #tool embeds
+     dsygv/setout/observe.js verbatim, HTML-escaped: change one, change the other. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<title>Qibla Setout and Solar Gnomons: A House Field Sheet from GNSS Baseline to Prayer-Time Checks</title>
+<meta name="description" content="End-to-end field sheet for a house on the qibla line: choosing an integer-arcsecond parcel, two SkyTraq PX1125R boards with Ina-CORS and RTKLIB-EX for a static baseline, total-station setout with the specs that are enough or overkill, then a meridian line and a ball-nodus gnomon that read Dhuhr and Asr from the sun and check praytime.js v3.2 to the second.">
+<meta name="keywords" content="qibla azimuth, solar gnomon, meridian line, ball nodus, praytime.js, Dhuhr, Asr, Maghrib skyline, Karney geodesic, GeographicLib, LocalCartesian, Ina-CORS, SRGI2013, RTKLIB-EX, RTKPOST, rnx2rtkp, convbin, str2str, SkyTraq PX1125R, RTCM3 MSM7, static GNSS, total station setout, ISO 17123-3, total station rental, integer arcsecond qibla, bayangan kiblat, Rashdul Qibla, grid convergence, TM-3">
+<meta name="author" content="Claude Opus 5.5">
+<link rel="canonical" href="https://dawud-tan.github.io/qibla-setout-field-sheet.html">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+
+<meta property="og:type" content="article">
+<meta property="og:title" content="Qibla Setout and Solar Gnomons: A House Field Sheet">
+<meta property="og:description" content="From choosing the parcel to reading Dhuhr and Asr off the sun: a static GNSS baseline, a rented total station, and two solar instruments that check praytime.js v3.2 to the second.">
+<meta property="og:url" content="https://dawud-tan.github.io/qibla-setout-field-sheet.html">
+<meta property="og:locale" content="en">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Qibla Setout and Solar Gnomons">
+<meta name="twitter:description" content="Static GNSS baseline, total-station setout, and a meridian line and ball-nodus gnomon that check prayer times against the sun.">
+
+<meta name="theme-color" content="#F1F4F5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0C1418" media="(prefers-color-scheme: dark)">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+/* Supplied by the artifact host at publish time; replicated here for self-hosting.
+   color-scheme keeps the native checkboxes and scrollbars in the right theme, and the
+   safe-area padding lets the page run edge to edge under a notch without hiding content.
+   The sticky bar already offsets itself by env(safe-area-inset-top). */
+:root{
+  color-scheme: light dark;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+</style>
+<style>
+:root{
+  --paper:#F1F4F5; --card:#FFFFFF; --sunk:#E7ECEE;
+  --ink:#0E1A1F; --muted:#5A6B73; --rule:#C6D2D6; --rule-soft:#DEE6E8;
+  --accent:#0A6A6E; --accent-soft:#E2F0F0;
+  --warn:#9A6206; --warn-soft:#FBF0DC;
+  --stop:#992A22; --stop-soft:#FAE8E5;
+  --ok:#1B6E45; --ok-soft:#E3F2EA;
+  --brass:#835811; --brass-soft:#E8DCC2; --brass-line:#B07F27;
+  --sun:#C9850F; --sun-soft:#F3E3BF; --mtn:#C5CDD1;
+  --display:'Archivo',system-ui,sans-serif;
+  --body:'Public Sans',system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0C1418; --card:#131F25; --sunk:#0A1216;
+    --ink:#E6EEF0; --muted:#8FA3AB; --rule:#2A3B43; --rule-soft:#1E2D34;
+    --accent:#4BC5C9; --accent-soft:#11302F;
+    --warn:#D99A2B; --warn-soft:#2E2413;
+    --stop:#E0695C; --stop-soft:#2E1716;
+    --ok:#4FBF84; --ok-soft:#112A1E;
+    --brass:#DDB771; --brass-soft:#33291A; --brass-line:#CB9C47;
+    --sun:#F2B84E; --sun-soft:#3A2E16; --mtn:#2E3942;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0C1418; --card:#131F25; --sunk:#0A1216;
+  --ink:#E6EEF0; --muted:#8FA3AB; --rule:#2A3B43; --rule-soft:#1E2D34;
+  --accent:#4BC5C9; --accent-soft:#11302F;
+  --warn:#D99A2B; --warn-soft:#2E2413;
+  --stop:#E0695C; --stop-soft:#2E1716;
+  --ok:#4FBF84; --ok-soft:#112A1E;
+  --brass:#DDB771; --brass-soft:#33291A; --brass-line:#CB9C47;
+  --sun:#F2B84E; --sun-soft:#3A2E16; --mtn:#2E3942;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:var(--body); font-size:16px; line-height:1.55;
+  margin:0; -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:52rem;margin:0 auto;padding-inline:16px;padding-block:0 72px}
+a{color:var(--accent);text-underline-offset:.16em}
+
+/* ---- sticky constant bar: the one number you need all day ---- */
+.bar{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:20;
+  background:var(--card); border-bottom:1px solid var(--rule);
+}
+.bar-in{
+  max-width:52rem;margin:0 auto;padding:10px 16px;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+}
+.bar-az{display:flex;flex-direction:column;gap:1px;min-width:0}
+.bar-az b{
+  font-family:var(--mono);font-weight:700;font-size:1.22rem;
+  letter-spacing:-.02em;color:var(--accent);font-variant-numeric:tabular-nums;
+}
+.bar-az span{
+  font-family:var(--display);font-size:.62rem;font-weight:600;
+  letter-spacing:.11em;text-transform:uppercase;color:var(--muted);
+}
+.bar-prog{margin-left:auto;display:flex;align-items:center;gap:9px}
+.bar-prog em{
+  font-family:var(--mono);font-style:normal;font-size:.8rem;
+  color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+.track{width:74px;height:5px;border-radius:3px;background:var(--sunk);overflow:hidden}
+.track i{display:block;height:100%;background:var(--accent);width:0;transition:width .22s ease}
+@media (prefers-reduced-motion:reduce){.track i{transition:none}}
+
+/* ---- masthead ---- */
+.mast{padding-block:30px 22px;border-bottom:2px solid var(--ink)}
+.eyebrow{
+  font-family:var(--display);font-size:.66rem;font-weight:600;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin:0 0 9px
+}
+h1{
+  font-family:var(--display);font-weight:700;font-size:clamp(1.85rem,7vw,2.6rem);
+  line-height:1.05;letter-spacing:-.025em;margin:0 0 12px;text-wrap:balance
+}
+.dek{margin:0;color:var(--muted);font-size:1rem;max-width:40rem}
+.meta{
+  display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:16px;
+  font-family:var(--mono);font-size:.74rem;color:var(--muted)
+}
+.meta b{color:var(--ink);font-weight:400}
+
+/* ---- contents ---- */
+nav.toc{
+  margin-top:22px;padding:12px 14px;background:var(--card);
+  border:1px solid var(--rule-soft);border-radius:4px
+}
+nav.toc .eyebrow{margin:10px 0 6px;color:var(--muted)}
+nav.toc .eyebrow:first-child{margin-top:0}
+nav.toc ol{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:4px 16px;font-size:.86rem}
+nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--rule)}
+nav.toc a:hover{border-bottom-color:var(--accent)}
+
+h2{
+  font-family:var(--display);font-weight:700;font-size:1.32rem;
+  letter-spacing:-.015em;margin:44px 0 6px;text-wrap:balance;scroll-margin-top:72px
+}
+h2 + .lede{margin:0 0 18px;color:var(--muted);font-size:.93rem;max-width:40rem}
+h3{
+  font-family:var(--display);font-weight:600;font-size:1.04rem;letter-spacing:-.01em;
+  margin:26px 0 4px;text-wrap:balance;scroll-margin-top:72px
+}
+.part{
+  margin-top:56px;padding-top:14px;border-top:2px solid var(--ink);
+  font-family:var(--display);font-size:.7rem;font-weight:600;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--muted)
+}
+.part + h2{margin-top:10px}
+p{margin:10px 0}
+ul,ol{padding-left:1.2rem}
+li{margin:5px 0}
+
+/* ---- stages ---- */
+.stage{
+  background:var(--card);border:1px solid var(--rule-soft);border-radius:4px;
+  padding:16px;margin-top:12px;scroll-margin-top:72px
+}
+.stage.done{border-color:var(--ok);background:var(--ok-soft)}
+.stage-top{display:flex;gap:12px;align-items:flex-start}
+.num{
+  flex:0 0 auto;width:27px;height:27px;border-radius:2px;
+  display:grid;place-items:center;background:var(--accent);color:var(--card);
+  font-family:var(--mono);font-weight:700;font-size:.82rem;
+}
+.stage.done .num{background:var(--ok)}
+.stage-head{flex:1;min-width:0}
+.stage-head h3{
+  font-family:var(--display);font-weight:600;font-size:1.05rem;
+  margin:1px 0 2px;letter-spacing:-.01em;text-wrap:balance
+}
+.when{
+  font-family:var(--display);font-size:.62rem;font-weight:600;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--muted)
+}
+.tick{flex:0 0 auto;width:26px;height:26px;accent-color:var(--ok);cursor:pointer;margin:1px 0 0}
+.stage-body{padding-top:11px}
+.stage-body>*:first-child{margin-top:0}
+.stage-body p{margin:9px 0;font-size:.95rem}
+.stage-body ul,.stage-body ol{margin:9px 0;padding-left:1.15rem}
+.stage-body li{margin:5px 0;font-size:.95rem}
+.why{
+  font-size:.88rem;color:var(--muted);border-left:2px solid var(--rule);
+  padding-left:11px;margin:11px 0
+}
+.why b{color:var(--ink);font-weight:600}
+
+code{
+  font-family:var(--mono);font-size:.85em;background:var(--sunk);
+  padding:.1em .34em;border-radius:2px;word-break:break-word
+}
+pre{
+  font-family:var(--mono);font-size:.78rem;line-height:1.6;background:var(--sunk);
+  border:1px solid var(--rule-soft);border-radius:3px;
+  padding:11px 13px;margin:11px 0;overflow-x:auto
+}
+pre code{background:none;padding:0;font-size:1em;word-break:normal}
+.k{color:var(--accent);font-weight:700}
+.c{color:var(--muted)}
+
+/* ---- traps: severity stripe, deliberately NOT a card ---- */
+.trap{
+  border-left:3px solid var(--stop);background:var(--stop-soft);
+  padding:12px 14px;margin-top:10px;border-radius:0 3px 3px 0
+}
+.trap.warn{border-left-color:var(--warn);background:var(--warn-soft)}
+.trap h4{
+  font-family:var(--display);font-weight:700;font-size:.93rem;margin:0 0 4px;
+  color:var(--stop);display:flex;gap:9px;align-items:baseline;flex-wrap:wrap
+}
+.trap.warn h4{color:var(--warn)}
+.trap h4 span{
+  font-family:var(--mono);font-weight:700;font-size:.78rem;
+  font-variant-numeric:tabular-nums
+}
+.trap p{margin:0;font-size:.89rem;color:var(--ink)}
+
+/* ---- tables ---- */
+.scroll{overflow-x:auto;margin:14px 0;border:1px solid var(--rule-soft);border-radius:3px}
+table{border-collapse:collapse;width:100%;font-size:.84rem;background:var(--card)}
+caption{
+  text-align:left;padding:10px 12px;background:var(--sunk);
+  font-family:var(--display);font-size:.66rem;font-weight:600;
+  letter-spacing:.11em;text-transform:uppercase;color:var(--muted);
+  border-bottom:1px solid var(--rule-soft)
+}
+th,td{padding:7px 12px;text-align:left;border-bottom:1px solid var(--rule-soft);white-space:nowrap}
+th{
+  font-family:var(--display);font-weight:600;font-size:.7rem;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--muted)
+}
+td.n,th.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+td.w{white-space:normal;min-width:15rem}
+tbody tr:last-child td{border-bottom:none}
+tr.hi td{background:var(--accent-soft);font-weight:600}
+tr.sum td{border-top:2px solid var(--ink);font-weight:600}
+table.tight th,table.tight td{padding:6px 7px}
+.tag{
+  font-family:var(--display);font-size:.63rem;font-weight:600;letter-spacing:.05em;
+  text-transform:uppercase;padding:1px 6px;border-radius:2px;white-space:nowrap
+}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.no{background:var(--stop-soft);color:var(--stop)}
+.tag.marg{background:var(--warn-soft);color:var(--warn)}
+.tag.over{background:var(--sunk);color:var(--muted)}
+
+/* ---- figure ---- */
+figure{margin:16px 0;background:var(--card);border:1px solid var(--rule-soft);border-radius:4px}
+figure .svgbox{overflow-x:auto;padding:10px}
+figure svg{display:block;margin:0 auto;max-width:100%;height:auto}
+figcaption{font-size:.84rem;color:var(--muted);padding:0 14px 12px}
+svg text{font-family:var(--mono)}
+.f-ink{fill:var(--ink)} .f-mute{fill:var(--muted)} .f-acc{fill:var(--accent)} .f-card{fill:var(--card)}
+.f-house{fill:var(--accent-soft)}
+.s-ink{stroke:var(--ink);fill:none} .s-mute{stroke:var(--muted);fill:none} .s-acc{stroke:var(--accent);fill:none}
+.s-warn{stroke:var(--warn);fill:none}
+/* gnomon figures (carried over from the gnomon plan, renamed so they cannot collide) */
+.gf-ink{fill:var(--ink)} .gf-mute{fill:var(--muted)} .gf-brass{fill:var(--brass)} .gf-sky{fill:var(--accent)}
+.gf-sun{fill:var(--sun)} .gf-room{fill:var(--brass-soft)} .gf-panel{fill:var(--card)} .gf-wall{fill:var(--muted)}
+.gf-mtn{fill:var(--mtn)} .gf-band{fill:var(--sun-soft)}
+.gl-line{stroke:var(--brass-line);fill:none} .gl-mute{stroke:var(--muted);fill:none} .gl-rule{stroke:var(--rule);fill:none}
+.gl-sky{stroke:var(--accent);fill:none} .gl-sun{stroke:var(--sun);fill:none} .gl-ink{stroke:var(--ink);fill:none}
+figure.wide svg{max-width:none}
+.numt{font-family:var(--mono);font-size:.86em}
+td.m{font-family:var(--mono);font-variant-numeric:tabular-nums}
+table.verdict td{white-space:normal;vertical-align:top;min-width:9rem}
+table.verdict td:first-child{font-family:var(--display);font-weight:600;min-width:0}
+table.budget td:last-child{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:12px;margin:14px 0}
+.cols > div{background:var(--card);border:1px solid var(--rule-soft);border-radius:4px;padding:12px 14px}
+.cols h4{font-family:var(--display);font-weight:600;font-size:.98rem;margin:0 0 4px}
+.cols p{margin:0;font-size:.92rem}
+.codebox{position:relative;margin:11px 0}
+.codebox pre{margin:0;max-height:none}
+.codebox.tall pre{max-height:34rem;overflow:auto}
+.codebox button{
+  position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:.72rem;
+  background:var(--card);color:var(--ink);border:1px solid var(--rule);border-radius:2px;
+  padding:3px 9px;cursor:pointer
+}
+
+/* ---- faq ---- */
+.faq details{border-bottom:1px solid var(--rule-soft);padding:2px 0}
+.faq summary{
+  font-family:var(--display);font-weight:600;font-size:.98rem;cursor:pointer;
+  padding:10px 0;list-style-position:outside
+}
+.faq details[open] summary{color:var(--accent)}
+.faq .a{padding:0 0 10px;font-size:.93rem}
+.faq .a p{margin:6px 0}
+
+.refs li{font-size:.9rem;margin:8px 0}
+.foot{
+  margin-top:48px;padding-top:18px;border-top:1px solid var(--rule);
+  font-size:.82rem;color:var(--muted)
+}
+.foot a{color:var(--accent)}
+a:focus-visible,input:focus-visible,button:focus-visible,summary:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px
+}
+@media print{
+  .bar,nav.toc{display:none}
+  .stage,.trap,figure{break-inside:avoid}
+  .faq details{display:block}
+}
+</style>
+
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-in">
+    <div class="bar-az">
+      <b>294.2550&deg;</b>
+      <span>Qibla azimuth &middot; 294&deg;15&prime;18&Prime; &middot; whole arcsecond</span>
+    </div>
+    <div class="bar-prog">
+      <em id="count">0 / 13</em>
+      <div class="track"><i id="fill"></i></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<header class="mast">
+  <p class="eyebrow">Field guide &middot; Sumber, Jatipohon, Grobogan</p>
+  <h1>Setting the house on the qibla line, and reading the sun from it</h1>
+  <p class="dek">One page, end to end. Choose a parcel whose qibla is a whole number of
+  arcseconds. Observe a static GNSS baseline with two SkyTraq PX1125R boards, Ina-CORS and
+  RTKLIB-EX, and carry it onto the ground with one rented total station, so the 6.0 &times;
+  10.3 m Griya Sakha footprint's central line points at the Kaaba. Then build a meridian line
+  and a ball-nodus gnomon on the same survey, and read Dhuhr and Asr from the sun to check
+  praytime.js v3.2 to the second. The thirteen stages are the procedure, in dependency order;
+  the reference part says why each setting is what it is.</p>
+  <div class="meta">
+    <span>Site <b>6.965958&deg; S, 110.9274&deg; E</b></span>
+    <span>Footprint <b>6.0 &times; 10.3 m</b></span>
+    <span>Central line <b>x = 3.0, along y</b></span>
+    <span>Nearest CORS <b>Telkom Purwodadi, 14.46 km</b></span>
+    <span>Target <b>&plusmn;1&prime; &middot; &plusmn;30 s</b></span>
+  </div>
+  <nav class="toc" aria-label="On this page">
+    <p class="eyebrow">The house on the qibla line</p>
+    <ol>
+      <li><a href="#fighting">Where the error comes from</a></li>
+      <li><a href="#parcel">Choosing the parcel</a></li>
+      <li><a href="#hardware">The receiver</a></li>
+      <li><a href="#stages">Stages 0&ndash;7</a></li>
+    </ol>
+    <p class="eyebrow">Reading the sun at the house</p>
+    <ol>
+      <li><a href="#gnomons">Verdict &amp; the code</a></li>
+      <li><a href="#s8-card">Stage 8</a></li>
+      <li><a href="#dhuhr">Dhuhr</a></li>
+      <li><a href="#asr">Asr</a></li>
+      <li><a href="#maghrib">Maghrib</a></li>
+      <li><a href="#twilight">Isha &amp; Fajr</a></li>
+      <li><a href="#house">House changes</a></li>
+      <li><a href="#check">Checking the code</a></li>
+      <li><a href="#year">Year table</a></li>
+      <li><a href="#tool">observe.js</a></li>
+    </ol>
+    <p class="eyebrow">Reference</p>
+    <ol>
+      <li><a href="#logging">Logging</a></li>
+      <li><a href="#convert">RINEX</a></li>
+      <li><a href="#cors">Ina-CORS</a></li>
+      <li><a href="#datum">Datum &amp; epoch</a></li>
+      <li><a href="#rtkpost">RTKLIB settings</a></li>
+      <li><a href="#trust">Reading the result</a></li>
+      <li><a href="#instrument">Choosing the total station</a></li>
+      <li><a href="#traps">Traps</a></li>
+      <li><a href="#faq">Questions</a></li>
+      <li><a href="#refs">Further reading</a></li>
+    </ol>
+  </nav>
+</header>
+
+<h2 id="fighting">Where the error comes from</h2>
+<p class="lede">Not the receiver, not the antenna, not the distance to the CORS &mdash; and,
+once the baseline is long enough, not the total station's arcsecond class either.</p>
+
+<p>Azimuth error is <code>&sigma; = &radic;2 &middot; &sigma;<sub>perp</sub> / D</code>. Every
+millimetre of error at your two marks gets divided by <b>D</b>, the distance between them. That
+single number dominates everything else, and it is free to change &mdash; so make the baseline
+as long as the parcel allows.</p>
+
+<div class="scroll">
+<table>
+  <caption>GNSS baseline azimuth error by baseline length</caption>
+  <thead><tr>
+    <th>Baseline D</th><th class="n">1 receiver</th><th class="n">2 receivers</th>
+    <th class="n">1 rx, across 10.3 m</th>
+  </tr></thead>
+  <tbody>
+    <tr><td>5 m</td><td class="n">3.80&prime;</td><td class="n">2.38&prime;</td><td class="n">11.4 mm</td></tr>
+    <tr class="hi"><td>15 m</td><td class="n">1.27&prime;</td><td class="n">0.79&prime;</td><td class="n">3.8 mm</td></tr>
+    <tr class="hi"><td>25 m</td><td class="n">0.76&prime;</td><td class="n">0.48&prime;</td><td class="n">2.3 mm</td></tr>
+    <tr class="hi"><td>40 m</td><td class="n">0.47&prime;</td><td class="n">0.30&prime;</td><td class="n">1.4 mm</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>The floor is the carpentry: a normal <b>10 mm masonry tolerance over 10.3 m is itself
+3.34&prime;</b> of angle. Anything at or below ~1&prime; is already invisible in the finished
+house. So 15 m of baseline is enough, 25 m is comfortable, and 5 m is not. The two marks do
+<em>not</em> have to sit inside the footprint &mdash; they only have to be intervisible for the
+total station's backsight.</p>
+
+<div class="why"><b>The one-receiver column was estimated for a 7 km base.</b> This site is
+14.46 km from Telkom Purwodadi, so read that column as optimistic. The two-receiver column is
+the direct A&rarr;B baseline, with both boards logging at once: the CORS never enters it, so
+its distance does not matter. That is the case for buying the second board.</div>
+
+<h3>The whole chain, link by link</h3>
+<p>The GNSS hands the total station one number, the azimuth of A&rarr;B. From there the
+azimuth has to survive three more hand-offs before it is a string line on a bouwplank. Here
+is where the error goes, with 25 m between the marks, two boards, a 5&Prime; instrument
+dropped onto the GNSS tribrach, and the line marked on the boards by crosshair:</p>
+<div class="scroll">
+<table>
+  <caption>Central-line azimuth, 1&sigma; &middot; from setout.py's budget</caption>
+  <thead><tr><th>Link</th><th class="n">Error</th><th>What sets it</th></tr></thead>
+  <tbody>
+    <tr><td>GNSS baseline A&rarr;B</td><td class="n">28.6&Prime;</td><td class="w">2.45 mm at each mark over 25 m</td></tr>
+    <tr><td>Orienting the circle on B</td><td class="n">7.4&Prime;</td><td class="w">one 5&Prime; pointing (7.1&Prime;) plus both centrings (2.3&Prime;)</td></tr>
+    <tr><td>Dialling the central line</td><td class="n">7.1&Prime;</td><td class="w">one pointing, plus up to 0.5&Prime; of whole-arcsecond rounding</td></tr>
+    <tr><td>Marking both ends</td><td class="n">11.0&Prime;</td><td class="w">0.5 mm per mark, over 13.3 m of bouwplank</td></tr>
+    <tr class="sum"><td>Total, root-sum-square</td><td class="n">32.3&Prime;</td><td class="w">0.54&prime; &mdash; inside the 1&prime; target, a sixth of the masonry floor</td></tr>
+  </tbody>
+</table>
+</div>
+<p>The baseline is the weakest link, which is where it should be: it is the one you can buy
+down by lengthening the line. What can quietly overtake it is not the instrument class. Hold a
+prism pole on its bubble at M0 and M1 instead of marking the boards, and the marking row alone
+becomes <b>85&Prime;</b>. Re-centre over the nails instead of reusing the GNSS tribrachs, and
+the orientation row triples. <a href="#instrument">Choosing the total station</a> works through
+both.</p>
+
+<div class="why"><b>Absolute position barely matters.</b> Sensitivity of the qibla bearing to
+position error here is <b>2.1&times;10<sup>&minus;6</sup> degrees per metre</b>. A 5 m
+absolute error moves the bearing by 0.00001&deg;. What the GNSS must deliver is the
+<em>relative vector</em> A&rarr;B to millimetres; the absolute fix only needs to be good to
+about a metre. The header azimuth is for the chosen site itself, one of the 38 points on
+110.9274&deg; E whose qibla is a whole number of arcseconds. It still reads 294&deg;15&prime;18&Prime;
+on a 1&Prime; display anywhere within about 65 m of that point. Recompute it from your real
+mark anyway; it costs one command.</div>
+
+<h2 id="parcel">Before you buy: choosing the parcel</h2>
+<p class="lede">Four things decide whether a parcel suits this house. Only one of them is on
+the certificate.</p>
+
+<h3 id="integer">Its qibla is a whole number of arcseconds</h3>
+<p><code>IntegerArcsecondQiblaDirection</code> found 38 points on 110.9274&deg; E, between
+6.94482&deg; and 6.98828&deg; S and about 130 m apart, whose qibla is exactly a whole number of
+arcseconds. This guide uses the one at 6.965958&deg; S, where the qibla is
+294&deg;15&prime;18&Prime;. Here is precisely what that does, and does not, do.</p>
+<ul>
+  <li><b>It is exact at the point.</b> setout.py reads this one as
+  294&deg;15&prime;18.00000&Prime;. That agreement needed a fix: the tool had been using a Kaaba
+  4.4 m south of the one in the search and the Qur'an app, which put the site at
+  294&deg;15&prime;17.86&Prime;. The whole-arcsecond reading survives about 65 m from the point
+  in any direction.</li>
+  <li><b>The keypad takes whole arcseconds</b>, so every dialled angle is rounded by at most
+  0.5&Prime; (0.29&Prime; 1&sigma;). The integer site removes that rounding from the qibla and
+  from every angle derived from the central line alone: the turn to true north is exactly
+  65&deg;44&prime;42&Prime;. The backsight's azimuth is never a whole number, so exactly one
+  rounding of up to 0.5&Prime; always remains, whether you zero on B or set HZ.</li>
+  <li><b>Its size.</b> Half an arcsecond is 0.025 mm over the 10.3 m line, and one sixtieth of
+  the GNSS term. It is not an accuracy gain. What it buys is auditability: the display reads
+  exactly the published number, a second person can check it without arithmetic, and no
+  fractional second is ever transcribed.</li>
+  <li><b>What it costs to keep.</b> Nothing: across the 38 points the prayer times differ by
+  6 s or less, so choosing among them for sky and size is free. Do not trade parcel length for
+  it: ten more metres of baseline, from 15 to 25 m, buy 19&Prime;.</li>
+</ul>
+
+<h3 id="skyline">Its western skyline</h3>
+<ul>
+  <li><b>Choose by skyline, not by height above sea level.</b> praytime.js v3.2 has no
+  elevation input; height only changes refraction by about 1% per 100 m, roughly 1.5 s. What
+  moves sunset is the skyline: a 10 m tree 5.7 km away already stands 0.1&deg; high, which is
+  26 s. The Qur'an project's <code>PrayTime.java</code> differs here: it adds a sea-horizon dip
+  of 0.0347&radic;h from sea level, which at 60 m is 0.27&deg;, about 71 s later than v3.2.
+  That is right over a sea horizon, not inland.</li>
+  <li><b>Criteria by direction.</b> West 280&deg;&ndash;294&deg; flat and measurable (Maghrib).
+  West 246&deg;&ndash;303&deg; clear above 30&deg; altitude (Asr). The eastern sky dark (Fajr)
+  and the western sky dark (Isha).</li>
+  <li><b>Rank the 38 points by skyline.</b> Scan them with a DEM (DEMNAS, 8 m) the same way
+  <code>IntegerArcsecondQiblaDirection</code> scans azimuths, and take the one with the lowest
+  western skyline.</li>
+</ul>
+
+<h3 id="length">Its length</h3>
+<p>The parcel sets the longest GNSS baseline you can observe, and the baseline is the weakest
+link in the whole chain. A diagonal of 25 m or more is comfortable; under 15 m the house's
+azimuth is at the mercy of the receiver. The length also decides which total station is worth
+renting: <a href="#instrument">Choosing the total station</a> has the table.</p>
+
+<h3 id="fit">Whether the turned house fits</h3>
+<p>A footprint turned onto 294&deg;15&prime;18&Prime; sits 24.26&deg; off a parcel whose sides
+run east&ndash;west and north&ndash;south. Its 6.2 &times; 10.53 m outer faces then need a
+<b>12.15 &times; 9.98 m</b> box, the long side east&ndash;west. A ring of bouwplank 1.5 m out
+needs 16.1 &times; 13.9 m. A 10 m-wide parcel whose long side runs north&ndash;south cannot take
+the house at all. Leave room near the west boundary for the gnomon post and its
+2.07 &times; 2.19 m pad, with the view toward 246&deg;&ndash;303&deg; clear above 30&deg;.</p>
+
+<h2 id="hardware">The receiver: a PX1125R board and an external antenna</h2>
+<p class="lede">A 12 &times; 16 mm multi-band RTK module on an evaluation board, with the
+antenna as a separate part you choose.</p>
+
+<div class="scroll">
+<table>
+  <caption>What the PX1125R tracks &middot; SkyTraq datasheet</caption>
+  <thead><tr><th>System</th><th>Signals</th><th>Here</th></tr></thead>
+  <tbody>
+    <tr><td>GPS</td><td>L1 C/A, L5</td><td>AR core</td></tr>
+    <tr><td>Galileo</td><td>E1, E5a</td><td>AR core</td></tr>
+    <tr><td>BeiDou</td><td>B1I, B2a</td><td>used, and plentiful over Java</td></tr>
+    <tr><td>QZSS</td><td>L1, L5</td><td>used when overhead</td></tr>
+    <tr><td>NavIC</td><td>L5</td><td>not used</td></tr>
+    <tr><td>GLONASS</td><td>none on the standard part; L1 on the PX1125R-01</td><td>left out on purpose</td></tr>
+  </tbody>
+</table>
+</div>
+<p>SkyTraq specifies it at <b>1 cm + 1 ppm</b> in RTK. It emits raw measurements at up to
+25 Hz, as RTCM&nbsp;3.x or SkyTraq raw binary. In base mode it outputs RTCM 3.3 message 1005 and
+MSM4/MSM7 for GPS (1074/1077), Galileo (1094/1097), QZSS (1114/1117) and BeiDou (1124/1127). The
+MSM7 set is the whole of this guide's GNSS data path.</p>
+<ul>
+  <li><b>The antenna is the part that matters.</b> The module needs an <em>active</em>
+  L1/L5 antenna, biased at 3.3 V, with up to 40 dB of gain and a noise figure under 2 dB.
+  Choose one with a 5/8&Prime; mount, a marked antenna reference point (ARP) and a north mark.
+  A survey-type antenna may even have an IGS calibration. For this job it does not need one:
+  the same antenna model on both marks, turned the same way, has the same phase-centre offset,
+  and it cancels out of the A&rarr;B vector.</li>
+  <li><b>A bare patch needs a ground plane.</b> Use the size its maker specifies. Failing
+  that, a flat metal disc of at least 10&ndash;15 cm, and bigger helps at L5's longer
+  wavelength. A housed survey antenna brings its own.</li>
+  <li><b>Something has to record the stream.</b> The board streams over its USB serial port;
+  a laptop or a small single-board computer running RTKLIB's <code>str2str</code> writes it to
+  a file (<a href="#logging">Logging</a>). The module itself draws about 100 mA. A USB power
+  bank runs the board and antenna all day; the laptop's battery is the real limit.</li>
+</ul>
+<p><b>Per mark:</b> the board, the antenna and its cable, a tripod, a tribrach with an optical
+plummet, and a tribrach adapter with a 5/8&Prime; stud. <b>Two marks, two sets</b> &mdash;
+about $120 for the two boards.</p>
+
+<div class="why"><b>Why not a phone.</b> A phone's antenna sits at an unpublished point
+inside the handset and was designed for cellular coexistence, not phase. Its receiver also
+duty-cycles unless told not to, and that fragments the carrier phase. The failure that follows
+is not missing calibration: it is ambiguities that do not fix, and a float solution is
+decimetres. The board has none of those problems: continuous tracking, a real ARP, a mount
+that forced-centres, and a choice of antenna.</div>
+
+<h2 id="stages">The stages</h2>
+<p class="lede">Numbered because the order is a real dependency chain, not decoration:
+no azimuth without a processed baseline, no baseline without both RINEX files.</p>
+
+<section class="stage" data-id="s0" id="s0-card">
+  <div class="stage-top">
+    <div class="num">0</div>
+    <div class="stage-head">
+      <div class="when">At the desk &middot; days before</div>
+      <h3>Check the base station before you buy or drive anywhere</h3>
+    </div>
+    <input class="tick" type="checkbox" id="s0" aria-label="Stage 0 done">
+  </div>
+  <div class="stage-body">
+    <pre><code>cd dsygv/setout
+python3 setout.py --cors -6.96596,110.9274     <span class="c"># rank the Ina-CORS stations from the site</span></code></pre>
+    <p><b>Telkom Purwodadi</b> is 14.46 km away, bearing 186&deg;. Everything else is 50 km
+    or more. Download one day of its RINEX and read the header. This five-minute check
+    decides whether the whole GNSS half works.</p>
+    <pre><code><span class="c"># open the OBS file and find this block</span>
+SYS / # / OBS TYPES   G   8 C1C L1C S1C C2W L2W S2W <span class="k">C5Q L5Q</span>
+SYS / # / OBS TYPES   E   6 C1C L1C S1C <span class="k">C5Q L5Q</span>
+SYS / # / OBS TYPES   C   6 C2I L2I S2I <span class="k">C5P L5P</span></code></pre>
+    <p>You need <b>L1 + at least one more</b> band that your board also sees. The network's
+    receivers are understood to be Leica GR50s, which track a superset of the PX1125R's
+    signals, so the hardware is compatible. What is not guaranteed is that the station's logging profile writes L5/E5a/B2a
+    into the file.</p>
+    <div class="why"><b>If L5 and E5a are absent</b>, the A-to-CORS run falls back to L1/E1/B1I
+    only. At 14.5 km a one-hour static session is still workable. It hardly matters with two
+    boards anyway, because the azimuth comes from the 25 m A&rarr;B baseline, which the CORS
+    does not enter.</div>
+    <p>Also confirm the station shows <b>green</b> in the SRGI catalogue for the day you plan to
+    observe. Red means the station was down, and the fallback is not &ldquo;use the next
+    one&rdquo; &mdash; the next one is 50 km away. The fallback is to come back tomorrow.</p>
+  </div>
+</section>
+
+<section class="stage" data-id="s1" id="s1-card">
+  <div class="stage-top">
+    <div class="num">1</div>
+    <div class="stage-head">
+      <div class="when">On site &middot; morning</div>
+      <h3>Set the two marks, A and B</h3>
+    </div>
+    <input class="tick" type="checkbox" id="s1" aria-label="Stage 1 done">
+  </div>
+  <div class="stage-body">
+    <ul>
+      <li><b>A</b> is the instrument station, <b>B</b> is the backsight. Put <b>A on the line
+      where the house's central line will run, about 4 m behind the back wall</b>. Stage 5
+      then pins the house to A. One dialled angle then sets the whole central line, and the
+      EDM's error falls along the line, where it cannot turn it. A also stays outside the
+      trench.</li>
+      <li>Put <b>B</b> as far from A as the parcel allows &mdash; 25 m or more if you can get
+      it, 15 m minimum. The far corner of the parcel is the usual answer. A road verge outside
+      the boundary is better still, if you are allowed to use it.</li>
+      <li>They must be <b>intervisible</b> at instrument height, and A must see all four corners
+      (or you will have to traverse, which throws away accuracy you just paid for).</li>
+      <li>Drive proper marks &mdash; a <b>patok</b> with a nail, or better, a short length of
+      rebar in concrete. They have to survive until the total station arrives.</li>
+      <li>Keep both clear of walls, parked vehicles, metal fences and overhead wire. Multipath is
+      the largest error you can actually control.</li>
+    </ul>
+    <div class="why"><b>Forced centring is worth more than any receiver or instrument
+    upgrade.</b> Set a tripod and tribrach over each mark, level with the optical plummet, and
+    put the GNSS antenna on the tribrach. When the total station arrives, lift the antenna off
+    A and drop the instrument onto the <em>same</em> tribrach. Lift B's antenna off and drop
+    a prism, on its own tribrach adapter, into B's tribrach. What remains of the centring error
+    is the tribrach's seating repeatability, a few tenths of a millimetre. Re-centring over the
+    nails with a plummet leaves a millimetre or so at each end instead. At 25 m that makes the
+    orientation row of the budget three times worse, which is more than a 1&Prime; instrument
+    buys back. So book the total station for the <b>same day</b> and leave the tripods
+    alone.</div>
+  </div>
+</section>
+
+<section class="stage" data-id="s2" id="s2-card">
+  <div class="stage-top">
+    <div class="num">2</div>
+    <div class="stage-head">
+      <div class="when">On site &middot; 1&ndash;2 hours</div>
+      <h3>Observe</h3>
+    </div>
+    <input class="tick" type="checkbox" id="s2" aria-label="Stage 2 done">
+  </div>
+  <div class="stage-body">
+    <p><b>Two boards ($120 total), the better way:</b> one on A and one on B, logging
+    <em>simultaneously</em> for one hour. You then process the direct A&rarr;B baseline, where
+    ionosphere, troposphere, orbit error and base-coordinate error all cancel identically and
+    ambiguities fix in seconds. The CORS is then needed only for A's absolute position, and
+    only to about a metre.</p>
+    <p><b>One board, the fallback:</b> one hour on A, then one hour on B, each processed
+    against Purwodadi. The atmosphere decorrelates over the gap and over 14.5 km, which is why
+    the one-receiver column above is worse, and optimistic here.</p>
+    <ul>
+      <li>Configure each board to emit <b>RTCM3 MSM7 at 1 Hz</b> and record it with
+      <code>str2str</code>: <a href="#logging">Logging</a> has the settings.</li>
+      <li><b>Point the antenna's north mark north</b> at both setups. Same antenna model, same
+      orientation means phase-centre error cancels in the relative vector.</li>
+      <li>Measure and <b>write down the antenna height</b> at each mark, to the millimetre, to
+      the ARP. It barely touches the azimuth, but it is the record's vertical.</li>
+      <li>Check that L5/E5a/B2a are being tracked above about 37 dB-Hz, the datasheet's RTK
+      guideline, before you commit the hour.</li>
+      <li>Do not touch the tripod mid-session. If you bump it, restart the session.</li>
+    </ul>
+    <div class="why"><b>Log RTCM3 MSM7, not SkyTraq binary.</b> RTKLIB decodes RTCM3 MSM
+    natively, and MSM7 carries full-precision phase. RTKLIB's built-in SkyTraq decoder targets
+    the old S1315F raw format, not the Phoenix engine in this module, so the binary path may
+    simply produce nothing. SkyTraq's own <em>Raw Measurement to RINEX Converter</em>, bundled
+    with the EVB, is the other safe route.</div>
+  </div>
+</section>
+
+<section class="stage" data-id="s3" id="s3-card">
+  <div class="stage-top">
+    <div class="num">3</div>
+    <div class="stage-head">
+      <div class="when">At the desk &middot; h+2 or later</div>
+      <h3>Pull the Ina-CORS RINEX</h3>
+    </div>
+    <input class="tick" type="checkbox" id="s3" aria-label="Stage 3 done">
+  </div>
+  <div class="stage-body">
+    <ol>
+      <li>Log in at <b>srgi.big.go.id</b> &rarr; <em>Unduh Data RINEX</em>. Free.</li>
+      <li>Select <b>Telkom Purwodadi</b> and the date and hours you observed.</li>
+      <li>Download the observation <em>and</em> navigation files. You need the navigation file
+      in every case: the board's RTCM stream carries no broadcast ephemeris.</li>
+    </ol>
+    <p>Take the base coordinate from the <b>published SRGI station sheet</b>, not from the
+    file's <code>APPROX POSITION XYZ</code> &mdash; that header line is an autonomous fix and
+    can be metres out. Do copy the base antenna <b>delta H/E/N</b> out of the header, though:
+    Ina-CORS publishes real values there and they are not zero. <a href="#cors">Ina-CORS</a>
+    has the service details.</p>
+  </div>
+</section>
+
+<section class="stage" data-id="s4" id="s4-card">
+  <div class="stage-top">
+    <div class="num">4</div>
+    <div class="stage-head">
+      <div class="when">At the desk</div>
+      <h3>Convert, then process in RTKLIB-EX</h3>
+    </div>
+    <input class="tick" type="checkbox" id="s4" aria-label="Stage 4 done">
+  </div>
+  <div class="stage-body">
+    <pre><code>convbin -r rtcm3 -tr <span class="k">2026/10/04 08:00:00</span> -v 3.04 -od -os -o A.obs A.rtcm3
+convbin -r rtcm3 -tr <span class="k">2026/10/04 08:00:00</span> -v 3.04 -od -os -o B.obs B.rtcm3
+rnx2rtkp -k run1.conf -ti 30 -o A.pos A.obs cors.obs cors.nav   <span class="c"># A against Purwodadi</span>
+rnx2rtkp -k run2.conf        -o B.pos B.obs A.obs    cors.nav   <span class="c"># B against A (two boards)</span></code></pre>
+    <p><b><code>-tr</code> is not optional.</b> An MSM message carries only the time of week.
+    Without the approximate date, convbin guesses the week, and a wrong guess leaves epochs
+    that will never pair with the base. <a href="#rtkpost">RTKLIB settings</a> has both config
+    files. The ones that matter most:</p>
+    <pre><code>pos1-posmode   = <span class="k">static</span>       <span class="c"># not kinematic; nothing moved</span>
+pos1-frequency = <span class="k">l1+l2+l5</span>     <span class="c"># L5/E5a/B2a land in a slot, whatever this build calls it</span>
+pos1-navsys    = <span class="k">57</span>           <span class="c"># GPS 1 + Galileo 8 + QZSS 16 + BeiDou 32; NOT 13</span>
+pos2-armode    = <span class="k">continuous</span>   <span class="c"># not fix-and-hold -- see below</span>
+<span class="k">ant2-postype   = llh</span>          <span class="c"># NOT rinexhead</span></code></pre>
+    <div class="why"><b>No GLONASS, on purpose.</b> The standard PX1125R does not track it,
+    and if yours is the -01 variant that does, leave it out anyway. GLONASS inter-channel bias
+    between mismatched receivers is the most common reason a CORS-based RTKLIB solution refuses
+    to fix. Leaving it out also settles the AR mode. <code>fix-and-hold</code> exists mainly to
+    calibrate that bias; with no bias to calibrate, there is no reason to accept its habit of
+    locking onto a wrong fix. Use <code>continuous</code>.</div>
+    <p><b>Accept nothing but a FIXED solution</b> for B against A, and for A against the CORS
+    if you went with one board. A float solution is decimetres and will quietly wreck the
+    azimuth. If it will not fix: lengthen the session, raise the elevation mask, or re-observe
+    away from whatever is reflecting.</p>
+  </div>
+</section>
+
+<section class="stage" data-id="s5" id="s5-card">
+  <div class="stage-top">
+    <div class="num">5</div>
+    <div class="stage-head">
+      <div class="when">At the desk &middot; one minute</div>
+      <h3>Compute the setout</h3>
+    </div>
+    <input class="tick" type="checkbox" id="s5" aria-label="Stage 5 done">
+  </div>
+  <div class="stage-body">
+    <pre><code>cd dsygv/setout
+python3 setout.py --selftest            <span class="c"># 27 checks, run it once</span>
+python3 setout.py --a <span class="k">&lt;latA,lonA,hA&gt;</span> --b <span class="k">&lt;latB,lonB,hB&gt;</span> \
+                  --anchor-house 3,-4 --anchor-enu 0,0 --cm 111.0</code></pre>
+    <p><code>--anchor-house 3,-4 --anchor-enu 0,0</code> pins the house so that its central
+    line runs through A, 4 m behind the back wall. That is what makes M0, M1 and both bouwplank
+    marks share one dialled angle. Out comes the qibla azimuth at A, the A&rarr;B baseline
+    azimuth, and every point in three forms: local ENU, WGS84 lat/lon, and polar setout. Each
+    angle is printed as the whole-arcsecond value to key in, beside the rounding that costs. A
+    total-station budget follows, for the instrument you give with <code>--ts</code>.</p>
+    <div class="scroll">
+    <table>
+      <caption>The station and the six points, in house coordinates</caption>
+      <thead><tr><th>Point</th><th class="n">x</th><th class="n">y</th><th>What</th></tr></thead>
+      <tbody>
+        <tr><td>A</td><td class="n">3.000</td><td class="n">&minus;4.000</td><td>instrument station, on the central line</td></tr>
+        <tr class="hi"><td>M0</td><td class="n">3.000</td><td class="n">0.000</td><td>central line, back end</td></tr>
+        <tr class="hi"><td>M1</td><td class="n">3.000</td><td class="n">10.300</td><td>central line, qibla end</td></tr>
+        <tr><td>C1</td><td class="n">0.000</td><td class="n">0.000</td><td>corner, shear wall / back</td></tr>
+        <tr><td>C2</td><td class="n">6.000</td><td class="n">0.000</td><td>corner, shear wall / back</td></tr>
+        <tr><td>C3</td><td class="n">6.000</td><td class="n">10.300</td><td>corner, shear wall / qibla</td></tr>
+        <tr><td>C4</td><td class="n">0.000</td><td class="n">10.300</td><td>corner, shear wall / qibla</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p><code>+y</code> runs along the 10.3 m central line and is aimed at the Kaaba;
+    <code>+x</code> is 90&deg; clockwise from it, to your right when you face the qibla. The two
+    200 mm shear walls stand on <code>x = 0</code> and <code>x = 6</code>; the qibla wall is the
+    6 m facade at <code>y = 10.3</code>, so prayer rows run across the width. The tool also
+    stakes the two solar gnomons (<code>MF MN MS</code>, <code>GF GP GN GS P1&ndash;P4</code>),
+    which run on true north.</p>
+  </div>
+</section>
+
+<section class="stage" data-id="s6" id="s6-card">
+  <div class="stage-top">
+    <div class="num">6</div>
+    <div class="stage-head">
+      <div class="when">On site &middot; total station day</div>
+      <h3>Stake it</h3>
+    </div>
+    <input class="tick" type="checkbox" id="s6" aria-label="Stage 6 done">
+  </div>
+  <div class="stage-body">
+    <ol>
+      <li>Drop the instrument onto A's tribrach, and a prism onto B's. Level carefully.</li>
+      <li><b>Check four settings before the first shot:</b> prism constant matches the prism;
+      scale factor 1.000000; sea-level and projection reduction off; minimum angle reading
+      1&Prime;. <a href="#traps">Traps</a> says what each one costs.</li>
+      <li>Sight <b>B</b> and <b>zero the horizontal circle</b> on it.</li>
+      <li>Dial the central line's angle and <b>lock the horizontal motion</b>. Without touching
+      it, mark where the vertical crosshair falls on the rear bouwplank and on the front one
+      &mdash; a pencil line, then a nail. No prism pole, no distance: the line needs only the
+      angle.</li>
+      <li>Along that same line of sight, set <b>M0 and M1</b> by distance. The EDM's error runs
+      along the line here and cannot turn it.</li>
+      <li>Stake <code>MF</code> and the pad points <code>GF</code>&ndash;<code>P4</code> the same
+      way, while the tribrachs are still in place: stage 8 builds on them.</li>
+      <li>The corners go by angle and distance from the table. A prism pole on a bipod is fine
+      for them: the budget puts them within 3 mm, and the masonry holds 10 mm.</li>
+      <li>Transfer to <b>bouwplank</b> (profile boards) set well outside the trench line, so the
+      marks survive excavation.</li>
+      <li><b>Sight B again at the end.</b> If the circle no longer reads zero, something moved;
+      re-mark from that point on.</li>
+    </ol>
+    <figure>
+      <div class="svgbox">
+      <svg viewBox="0 0 360 420" width="360" height="420" role="img" aria-labelledby="fig1t fig1d">
+        <title id="fig1t">Station A on the central line's extension</title>
+        <desc id="fig1d">Plan in house coordinates: the 6 by 10.3 metre footprint, the bouwplank
+        ring 1.5 metres outside it, the instrument at A four metres behind the back wall on the
+        central line, and the line of sight through M0 and M1 to a mark on the front board.
+        The backsight B is off to the lower left.</desc>
+        <rect x="106" y="111" width="144" height="213" class="s-mute" stroke-width="1.2" stroke-dasharray="5 4"/>
+        <rect x="130" y="135" width="96" height="165" class="f-house s-ink" stroke-width="1.5" style="stroke:var(--ink)"/>
+        <line x1="178" y1="364" x2="178" y2="80" class="s-acc" stroke-width="2"/>
+        <path d="M172 88 L178 74 L184 88 Z" class="f-acc"/>
+        <text x="178" y="62" font-size="11" text-anchor="middle" class="f-acc">+y &#8594; Kaaba 294&#176;15&#8242;18&#8243;</text>
+        <circle cx="178" cy="300" r="4" class="f-ink"/>
+        <text x="186" y="296" font-size="10.5" class="f-ink">M0</text>
+        <circle cx="178" cy="135" r="4" class="f-ink"/>
+        <text x="186" y="148" font-size="10.5" class="f-ink">M1</text>
+        <line x1="166" y1="324" x2="190" y2="324" class="s-warn" stroke-width="3"/>
+        <line x1="166" y1="111" x2="190" y2="111" class="s-warn" stroke-width="3"/>
+        <text x="256" y="108" font-size="10" class="f-mute">mark by</text>
+        <text x="256" y="120" font-size="10" class="f-mute">crosshair</text>
+        <text x="256" y="332" font-size="10" class="f-mute">rear board</text>
+        <text x="8" y="140" font-size="10" class="f-mute">bouwplank,</text>
+        <text x="8" y="152" font-size="10" class="f-mute">1.5 m out</text>
+        <path d="M178 364 L170 378 L186 378 Z" class="f-ink"/>
+        <text x="194" y="378" font-size="11" class="f-ink">A &#183; 4 m behind</text>
+        <line x1="178" y1="370" x2="40" y2="410" class="s-ink" stroke-width="1.3" stroke-dasharray="6 4"/>
+        <text x="40" y="400" font-size="10" class="f-ink">to B</text>
+        <path d="M150 372 A 28 28 0 0 1 178 336" class="s-ink" stroke-width="1.2"/>
+        <text x="84" y="352" font-size="10" class="f-ink">one dialled</text>
+        <text x="100" y="364" font-size="10" class="f-ink">angle</text>
+        <text x="258" y="222" font-size="10" class="f-mute">EDM error</text>
+        <text x="258" y="234" font-size="10" class="f-mute">runs along</text>
+        <text x="258" y="246" font-size="10" class="f-mute">the line</text>
+        <text x="136" y="318" font-size="9.5" class="f-mute">C1</text>
+        <text x="210" y="318" font-size="9.5" class="f-mute">C2</text>
+        <text x="136" y="152" font-size="9.5" class="f-mute">C4</text>
+        <text x="210" y="152" font-size="9.5" class="f-mute">C3</text>
+      </svg>
+      </div>
+      <figcaption>House frame, to scale except for B. With A on the central line's extension,
+      M0, M1 and both board marks sit on one ray from A. One dialled angle sets them all, and
+      the only errors that can turn the line are that angle and the two marks.</figcaption>
+    </figure>
+    <div class="why"><b>Zeroing on B beats dialling in the azimuth</b> for a rented instrument
+    at 7 a.m.: a turned angle carries no absolute number to mistype. If you do orient the
+    circle instead, set HZ to the backsight azimuth setout.py prints. On this site the central
+    line then reads exactly <b>294&deg;15&prime;18&Prime;</b>
+    (<a href="#integer">Integer-arcsecond sites</a>). Deflection of the vertical &mdash; the
+    difference between the instrument's gravity-levelled horizontal and the GNSS ellipsoid
+    normal &mdash; is about 2&Prime; here. It cancels almost entirely in a turned angle between
+    two near-horizontal targets. Ignore it.</div>
+  </div>
+</section>
+
+<section class="stage" data-id="s7" id="s7-card">
+  <div class="stage-top">
+    <div class="num">7</div>
+    <div class="stage-head">
+      <div class="when">Before anyone digs</div>
+      <h3>Verify, twice, two different ways</h3>
+    </div>
+    <input class="tick" type="checkbox" id="s7" aria-label="Stage 7 done">
+  </div>
+  <div class="stage-body">
+    <p><b>Tape check &mdash; shape.</b> Measure all four sides and both diagonals.</p>
+    <pre><code>C1-C2   6.0000 m      C1-C4  10.3000 m      C1-C3  11.9202 m
+C4-C3   6.0000 m      C2-C3  10.3000 m      C2-C4  11.9202 m</code></pre>
+    <p>Equal diagonals prove the box is square. They say <em>nothing</em> about which way it
+    points &mdash; that is entirely on the A&rarr;B baseline. Tape A&ndash;B too. It should
+    match the baseline length setout.py prints to a few millimetres. That catches a GNSS blunder
+    or a wrong antenna height the formal statistics never will.</p>
+    <p><b>Shadow check &mdash; orientation.</b> Hang a plumb line at M0 at one of these moments.
+    Its shadow should fall exactly along M0&rarr;M1. No magnetometer, no GNSS, nothing from
+    stages 0&ndash;6 involved.</p>
+    <div class="scroll">
+    <table>
+      <caption>Sun on the qibla line at this site &middot; WIB &middot; NREL SPA</caption>
+      <thead><tr><th>Date</th><th class="n">Time</th><th class="n">Sun alt</th><th>Shadow</th></tr></thead>
+      <tbody>
+        <tr><td>1 Dec 2026</td><td class="n">08:32:39</td><td class="n">45.9&deg;</td><td>points <b>at</b> qibla</td></tr>
+        <tr class="hi"><td>21 Dec 2026</td><td class="n">08:05:29</td><td class="n">37.4&deg;</td><td>points <b>at</b> qibla</td></tr>
+        <tr class="hi"><td>1 Jan 2027</td><td class="n">08:20:51</td><td class="n">39.7&deg;</td><td>points <b>at</b> qibla</td></tr>
+        <tr><td>1 May 2027</td><td class="n">14:53:10</td><td class="n">35.9&deg;</td><td>points away</td></tr>
+        <tr><td>17 Jul 2027</td><td class="n">16:25:05</td><td class="n">15.3&deg;</td><td>points away</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>This is not the two Rashdul Qibla dates &mdash; the general condition only needs the sun's
+    <em>azimuth</em> to match, and here it is met on <b>289 of 365 days</b> in 2027, with <b>121
+    moments</b> falling in the 12&ndash;45&deg; altitude window that gives a long, sharp shadow.
+    A plumb-bob shadow is penumbra-limited to roughly 3&prime;, so it will not refine a 25 m
+    baseline. It will catch a blunder instantly, and it costs nothing.</p>
+    <div class="why"><b>If you want the check to be better than the GNSS:</b> sight the sun
+    through a proper solar filter with the total station and reduce it with the SPA in the
+    Qur'an project. That reaches about 0.01&deg;. <b>Never sight the sun without a
+    filter.</b></div>
+    <p><b>Do this stage with the contractor, and hand over.</b> You produced the marks, so
+    where the house sits and which way it points are your responsibility, not the contractor's.
+    From the handover on, the contractor's job is to keep the bouwplank intact and build to it.
+    Take the tape and shadow checks together, write down the four sides, both diagonals, the
+    A&ndash;B tape and the shadow result, and both sign the sheet before anyone digs. Put that
+    split of responsibility in the contract. If a board is disturbed, the contractor stops work
+    on that line and reports it, and you re-mark it.</p>
+  </div>
+</section>
+
+<p class="part">Part two &middot; Reading the sun at the house</p>
+<h2 id="gnomons">Reading prayer times off the sun</h2>
+<p class="lede">The survey that turns the house onto the qibla also puts true north on the
+ground, and true north is all two small solar instruments need. They read Dhuhr and Asr from
+the sun at the house, and check each reading against praytime.js v3.2 to the second. Maghrib
+needs a measured skyline; Isha and Fajr need a photometer.</p>
+<div class="meta">
+  <span>Time <b>UTC+7 (WIB)</b></span>
+  <span>Code <b>praytime 3.2.0 &middot; Singapore</b></span>
+  <span>Asr <b>Standard</b></span>
+  <span>Maghrib <b>sunset + 2 min</b></span>
+  <span>Ring beam <b>&asymp; 3.2&ndash;3.5 m</b></span>
+</div>
+<div class="why"><b>What the plans do not record.</b> The fence and the western horizon are not
+in the house's drawings. The outdoor gnomon therefore stands on its own post, and uses the fence
+only if it is rigid. The skyline is something you measure and feed into the checker. The target
+is &plusmn;30 s, and the budget is hardware-store DIY; the only costly item is optional, a sky
+photometer for Fajr and Isha. Any of the 38 integer-arcsecond sites on 110.9274&deg; E moves
+every time by 6 s or less. Use your own point in the checker; everything here uses the
+294&deg;15&prime;18&Prime; one.</div>
+
+<h3 id="verdict">Verdict</h3>
+<p>For each prayer, an indoor method (a clear roof tile) next to an outdoor one (a rod on the
+fence), and what each can deliver against a &plusmn;30 s target. The last column is what a
+correct observation <em>should</em> differ from the code by, because the definitions used here
+are not all the code's defaults.</p>
+<div class="scroll"><table class="verdict">
+<thead><tr><th></th><th>Indoor: clear roof tile</th><th>Outdoor: rod on fence</th><th>Use</th><th>Achievable</th><th>Observed − code</th></tr></thead>
+<tbody>
+<tr><td>Dhuhr</td><td><span class="tag ok">best</span><br>3.20 m pinhole meridian; image crosses at 13–15 mm/min</td><td><span class="tag marg">weaker</span><br>half the speed, wind, and a bare rod gives a blurred shadow edge</td><td>Indoor</td><td class="m">±4 s</td><td class="m">+63.7 … +70.9 s</td></tr>
+<tr><td>Asr</td><td><span class="tag no">won’t fit</span><br>arc radius 3.20–5.07 m; room is 2.85 × 3.14 m</td><td><span class="tag ok">best</span><br>ball nodus at 1.50 m on a rigid post</td><td>Outdoor</td><td class="m">±6 s</td><td class="m">−2.4 … +8.7 s</td></tr>
+<tr><td>Maghrib</td><td><span class="tag no">impossible</span><br>a roof opening never sees the horizon</td><td><span class="tag no">no signal</span><br>at sunset a shadow tells you nothing about the sun’s edge and the skyline</td><td>Camera on a measured skyline</td><td class="m">±5 s instant<br>±10–40 s air</td><td class="m">−8.6 … −12.3 s<br>(0° skyline)</td></tr>
+<tr><td>Isha · Fajr</td><td><span class="tag no">no</span></td><td><span class="tag no">no</span></td><td>Sky photometry, in degrees</td><td class="m">≈ ±0.5°</td><td class="m">—</td></tr>
+</tbody></table></div>
+<div class="why"><b>The code is not the weak link.</b> With matching definitions, praytime.js
+v3.2 agrees with the NREL SPA at this site across all of 2027 to &minus;0.7&hellip;+1.0 s
+(Dhuhr), &minus;0.4&hellip;+1.5 s (Asr, converged), 0&hellip;+1.8 s (sunset),
+&minus;1.8&hellip;+1.0 s (Fajr) and &minus;1.8&hellip;+3.2 s (Isha). Almost the whole
+&plusmn;30 s is spent on the instruments and on the atmosphere.</div>
+
+<h3 id="code">What praytime.js v3.2 actually computes</h3>
+<p>The source of <code>praytime@3.2.0</code> from npm, whose tarball SHA-1 matches the
+registry, settles five facts that decide how to compare against it:</p>
+<ul>
+  <li><b>No elevation.</b> <code>location([lat, lng])</code> takes two numbers. The horizon is
+  fixed at 0.833&deg; (34&prime; refraction + 16&prime; semidiameter), with no dip term. The
+  site's height above sea level does not enter the code at all.</li>
+  <li><b>Minutes by default.</b> It rounds to the nearest minute.
+  <code>.round('none').format('x')</code> returns milliseconds, and without it nothing below
+  can be tested.</li>
+  <li><b>One iteration.</b> The sun is evaluated at fixed guesses (Asr at 13:00 local mean
+  time). With <code>iterations: 5</code>, Asr moves by &minus;3.2&hellip;+5.8 s.</li>
+  <li><b>Dhuhr is the sun's centre on the meridian.</b> Definition 3 adds the time the rest of
+  the disc takes to cross, which is 63.7&ndash;70.9 s through the year, not a constant 65 s. It
+  is longest in January, when the sun is nearest and its path is most tilted by declination;
+  the mean is 66.8 s. <code>adjust({dhuhr: '1.11 min'})</code> stays within
+  &minus;2.9&hellip;+4.3 s; the checker prints the exact figure for each date.</li>
+  <li><b>Asr is geometric.</b> It has no refraction, and it uses |lat &minus; decl| with the
+  declination at its guess time. A real shadow is lifted by refraction, which makes it reach the
+  Asr length +3.8&hellip;+6.4 s later. You measure the noon shadow at noon, and that differs by
+  up to &plusmn;5.9 s from taking the declination at the Asr instant.
+  <code>maghrib: '2 min'</code> is sunset + exactly 120 000 ms.</li>
+</ul>
+<p><code>new PrayTime('Singapore')</code> is exactly Fajr 20&deg; / Isha 18&deg;, the Kemenag
+angles.</p>
+
+<section class="stage" data-id="s8" id="s8-card">
+  <div class="stage-top">
+    <div class="num">8</div>
+    <div class="stage-head">
+      <div class="when">On site &middot; while the floor is open</div>
+      <h3>Mark the gnomon lines before the walls hide them</h3>
+    </div>
+    <input class="tick" type="checkbox" id="s8" aria-label="Stage 8 done">
+  </div>
+  <div class="stage-body">
+    <p>Both instruments run on <b>true north</b>, not on the house axes. True north lies
+    24&deg;15&prime;18&Prime; from +x toward +y, a 65&deg;44&prime;42&Prime; clockwise turn from
+    the central line. setout.py already printed their points in the same polar table as the
+    corners: <code>MF MN MS</code> for the meridian line, and <code>GF GP GN GS P1&ndash;P4</code>
+    for the pad.</p>
+    <ol>
+      <li><b>Meridian line, from its own foot.</b> Occupy the foot <code>MF</code>, sight B and
+      set the HZ setout.py prints. Then 0&deg;00&prime;00&Prime; is true north and
+      180&deg;00&prime;00&Prime; true south. Mark both on boards about 3 m out: past the
+      instrument's minimum focus and past both line ends (+0.971 / &minus;1.902 m). With a
+      5&Prime; instrument that is <b>0.67&prime;</b> including the baseline, inside the
+      line's 1&prime; allowance. Turning 65&deg;44&prime;42&Prime; off the staked central line
+      also works, at about 0.84&prime;.</li>
+      <li><b>Never stake MN and MS as two polar points from A with a prism pole.</b> A 2.87 m
+      line cannot absorb the EDM's 2 mm, and that is about 6&prime;.</li>
+      <li><b>Asr pad.</b> Stake the foot pin <code>GF</code>, the post <code>GP</code>
+      0.30 m west of it, the noon-line ends <code>GN</code>/<code>GS</code> and the pad corners
+      <code>P1&ndash;P4</code>. The pad's north&ndash;south line needs only &plusmn;0.5&deg;.
+      Without <code>--pad-foot x,y</code> the tool puts the pad 4 m past the qibla wall, a
+      placeholder; it warns if the pad overlaps the house.</li>
+      <li>Put the direction marks where they survive: nails in the ring-beam faces, or boards
+      well beyond the room. The meridian line itself is re-set later, from the real
+      aperture.</li>
+    </ol>
+  </div>
+</section>
+
+<h2 id="dhuhr">Dhuhr &mdash; a meridian line under the roof</h2>
+<p class="lede">Definition 3: the whole disc has cleared the meridian.</p>
+<div class="cols">
+  <div><h4>Indoor, roof aperture</h4><p>At 3.20 m the sun's image crosses the line at
+  13.4&ndash;15.3 mm/min, so 1 mm of construction error costs 3.9&ndash;4.4 s. A small hole gives
+  a disc with ~3 mm edges. You see it touch the line and you see it leave; leaving <em>is</em>
+  definition 3. The floor need not be level, since only the line's position matters.</p></div>
+  <div><h4>Outdoor, rod on fence</h4><p>At 1.50 m the shadow moves 6.2&ndash;7.0 mm/min, so
+  1 mm costs 8.6&ndash;9.6 s. A bare rod's shadow edge is a blur as wide as the whole two-minute
+  event, and fences sway in wind. Workable to about &plusmn;10 s with a ball nodus, but it is
+  the weaker of the two.</p></div>
+</div>
+<p><b>Why Dhuhr is the cleanest comparison:</b> refraction lifts the sun vertically, and on the
+meridian &ldquo;vertical&rdquo; is north&ndash;south, so the east&ndash;west crossing is
+untouched. Nothing atmospheric enters.</p>
+
+<section class="stage" data-id="s9" id="s9-card">
+  <div class="stage-top">
+    <div class="num">9</div>
+    <div class="stage-head">
+      <div class="when">During construction &middot; ring beam to roof</div>
+      <h3>Build the meridian room</h3>
+    </div>
+    <input class="tick" type="checkbox" id="s9" aria-label="Stage 9 done">
+  </div>
+  <div class="stage-body">
+    <ol>
+      <li><b>Aperture.</b> A 3 mm hole, drilled and deburred, in 0.3 mm brass or stainless
+      shim, set in a 150 &times; 150 mm plate held horizontal at ceiling level,
+      <b>H &asymp; 3.20 m</b>. The sharpest hole for 3.2 m is 2.6 mm; 3 mm gives up a little
+      sharpness for brightness.</li>
+      <li><b>Support.</b> A steel angle (for example L50&times;50&times;5) spanning between the
+      ring beams on grid lines y = 7.0 and y = 10.3, anchored into their side faces at
+      mid-depth, clear of the 2 + 2 D12 bars and the &#8960;8 ties at 150. Never hang it from
+      the light-steel truss or the ceiling: those move millimetres with heat and wind, and 1 mm
+      is 4 s.</li>
+      <li><b>Roof.</b> Replace one sheet above the aperture with <em>transparent</em>
+      polycarbonate of the same profile. Opal or translucent sheet scatters the light and
+      destroys the image. At a height G above the aperture it must pass the noon sun from
+      0.30 G south to 0.59 G north of the aperture's vertical; &plusmn;0.05 G east&ndash;west
+      covers &plusmn;10 min around noon. For G = 1 m, that is about 0.9 &times; 0.1 m of clear
+      sheet.</li>
+      <li><b>Plumb, then set the line.</b> Drop the foot from the real hole with a laser plumb,
+      or a heavy bob in still air, to &plusmn;0.5 mm: 1 mm east&ndash;west is 4 s. Shift the
+      north direction from stage 8 parallel onto that point. A parallel shift needs a tape, not
+      an instrument.</li>
+      <li><b>Line.</b> A 3 mm brass or stainless strip set flush in the floor, <b>2.873 m</b>
+      long: 2.822 m of image travel plus half an image at each end. For the first season, use a
+      taut 0.5 mm steel wire so the line can still be moved.</li>
+      <li><b>Calendar.</b> Ticks where the image centre sits at noon: January&ndash;June on one
+      side, July&ndash;December on the other.</li>
+      <li><b>Check it by the sun: the Indian circle.</b> Draw a circle about the foot, mark
+      where the image centre crosses it before and after noon, and bisect the chord. Do it
+      within two weeks of a solstice, when the declination barely moves. Agreement within
+      ~2&prime; with the total-station line closes the loop.</li>
+    </ol>
+    <div class="why"><b>Never set the line by marking the image at the code's noon.</b> The line
+    would then contain the code, and comparing the code against it would prove nothing. The image
+    is only about 500&ndash;750 lux (a rough estimate), so draw the room's curtains a few minutes
+    before noon.</div>
+  </div>
+</section>
+
+<figure>
+  <div class="svgbox">
+  <svg width="344" height="481" viewBox="0 0 344 481" role="img" aria-label="House plan with the meridian line in the qibla-end room">
+<rect x="50.0" y="64.0" width="108.0" height="118.8" class="gf-room"/>
+<rect x="46.4" y="64.0" width="7.2" height="370.8" class="gf-wall"/>
+<rect x="262.4" y="64.0" width="7.2" height="370.8" class="gf-wall"/>
+<rect x="50.0" y="432.1" width="216.0" height="5.4" class="gf-wall"/>
+<rect x="50.0" y="61.3" width="216.0" height="5.4" class="gf-wall"/>
+<rect x="156.2" y="64.0" width="3.6" height="370.8" class="gf-wall"/>
+<rect x="50.0" y="307.0" width="216.0" height="3.6" class="gf-wall"/>
+<rect x="50.0" y="181.0" width="216.0" height="3.6" class="gf-wall"/>
+<rect x="45.9" y="430.7" width="8.3" height="8.3" class="gf-ink"/>
+<rect x="45.9" y="304.7" width="8.3" height="8.3" class="gf-ink"/>
+<rect x="45.9" y="178.7" width="8.3" height="8.3" class="gf-ink"/>
+<rect x="45.9" y="59.9" width="8.3" height="8.3" class="gf-ink"/>
+<rect x="153.9" y="430.7" width="8.3" height="8.3" class="gf-ink"/>
+<rect x="153.9" y="304.7" width="8.3" height="8.3" class="gf-ink"/>
+<rect x="153.9" y="178.7" width="8.3" height="8.3" class="gf-ink"/>
+<rect x="153.9" y="59.9" width="8.3" height="8.3" class="gf-ink"/>
+<rect x="261.9" y="430.7" width="8.3" height="8.3" class="gf-ink"/>
+<rect x="261.9" y="304.7" width="8.3" height="8.3" class="gf-ink"/>
+<rect x="261.9" y="178.7" width="8.3" height="8.3" class="gf-ink"/>
+<rect x="261.9" y="59.9" width="8.3" height="8.3" class="gf-ink"/>
+<line x1="120.2" y1="182.8" x2="120.2" y2="64.0" class="gl-mute" stroke-width="1.2" stroke-dasharray="4 3"/>
+<line x1="57.8" y1="146.1" x2="152.1" y2="103.6" class="gl-line" stroke-width="3.2" stroke-linecap="round"/>
+<line x1="150.4" y1="104.4" x2="148.3" y2="99.8" class="gl-line" stroke-width="1.3"/>
+<line x1="139.1" y1="109.5" x2="137.0" y2="104.9" class="gl-line" stroke-width="1.3"/>
+<line x1="121.5" y1="117.4" x2="119.4" y2="112.8" class="gl-line" stroke-width="1.3"/>
+<line x1="99.0" y1="127.5" x2="96.9" y2="123.0" class="gl-line" stroke-width="1.3"/>
+<line x1="77.9" y1="137.1" x2="75.8" y2="132.5" class="gl-line" stroke-width="1.3"/>
+<line x1="62.0" y1="144.2" x2="60.0" y2="139.6" class="gl-line" stroke-width="1.3"/>
+<line x1="58.6" y1="145.8" x2="56.5" y2="141.2" class="gl-line" stroke-width="1.3"/>
+<line x1="59.4" y1="145.4" x2="61.4" y2="150.0" class="gl-line" stroke-width="1.3"/>
+<line x1="71.2" y1="140.1" x2="73.2" y2="144.7" class="gl-line" stroke-width="1.3"/>
+<line x1="91.4" y1="131.0" x2="93.5" y2="135.6" class="gl-line" stroke-width="1.3"/>
+<line x1="113.1" y1="121.2" x2="115.1" y2="125.8" class="gl-line" stroke-width="1.3"/>
+<line x1="133.8" y1="111.9" x2="135.9" y2="116.5" class="gl-line" stroke-width="1.3"/>
+<line x1="147.9" y1="105.5" x2="150.0" y2="110.1" class="gl-line" stroke-width="1.3"/>
+<line x1="151.2" y1="104.0" x2="153.3" y2="108.6" class="gl-line" stroke-width="1.3"/>
+<circle cx="120.2" cy="118.0" r="4.2" class="gf-ink"/>
+<text x="127.2" y="111.0" font-size="10.5" class="gf-ink">foot</text>
+<text x="55.8" y="163.1" font-size="10.5" class="gf-brass">21 Jun</text>
+<text x="112.1" y="94.6" font-size="10.5" class="gf-brass">21 Dec</text>
+<text x="54.3" y="173.8" font-size="9.5" class="gf-mute">steel angle</text>
+<line x1="282.0" y1="110.8" x2="322.1" y2="92.7" class="gl-ink" stroke-width="1.6"/>
+<line x1="322.1" y1="92.7" x2="316.8" y2="100.0" class="gl-ink" stroke-width="1.6"/>
+<line x1="322.1" y1="92.7" x2="313.2" y2="91.9" class="gl-ink" stroke-width="1.6"/>
+<text x="318.1" y="84.7" font-size="12" font-weight="500" class="gf-ink">N</text>
+<line x1="158.0" y1="54.0" x2="158.0" y2="24.0" class="gl-sky" stroke-width="1.8"/>
+<path d="M153.0,31.0 L158.0,22.0 L163.0,31.0 Z" class="gf-sky"/>
+<text x="158.0" y="17.0" font-size="11" text-anchor="middle" class="gf-sky">+y qibla 294°15′18″</text>
+<text x="50.0" y="456.8" font-size="10" text-anchor="middle" class="gf-mute">x 0</text>
+<text x="158.0" y="456.8" font-size="10" text-anchor="middle" class="gf-mute">x 3</text>
+<text x="266.0" y="456.8" font-size="10" text-anchor="middle" class="gf-mute">x 6</text>
+<text x="42.0" y="438.3" font-size="10" text-anchor="end" class="gf-mute">0</text>
+<text x="42.0" y="312.3" font-size="10" text-anchor="end" class="gf-mute">3.5</text>
+<text x="42.0" y="186.3" font-size="10" text-anchor="end" class="gf-mute">7</text>
+<text x="42.0" y="67.5" font-size="10" text-anchor="end" class="gf-mute">10.3</text>
+<text x="276.0" y="456.8" font-size="10" class="gf-mute">+x →</text>
+</svg>
+  </div>
+  <figcaption>To scale, in the house frame that <span class="numt">setout.py</span> stakes: +y is the qibla, +x is 90° clockwise from it. The meridian line (brass) runs at <span class="numt">24°15′18″</span> from +x toward +y, which is true north, in the qibla-end room (grid x 0–3, y 7–10.3; clear 2.85 × 3.14 m). The dot is the foot, the plumb point of the aperture. The dashed line is the steel angle spanning the ring beams.</figcaption>
+</figure>
+<div class="scroll"><table>
+<thead><tr><th>Point</th><th>House x, y (m)</th><th>From foot</th></tr></thead>
+<tbody>
+<tr><td>Foot (plumb of aperture)</td><td class="m">1.950, 8.800</td><td class="m">allowed x 1.83–2.07, y 7.83–9.79</td></tr>
+<tr><td>North end (21 Dec + margin)</td><td class="m">2.835, 9.199</td><td class="m">0.971 m north</td></tr>
+<tr><td>South end (21 Jun + margin)</td><td class="m">0.216, 8.019</td><td class="m">1.902 m south</td></tr>
+</tbody></table></div>
+<p>Any of the six rooms works with the same offsets. The foot must sit at least 1.734 m from the
+room's &minus;x face, 0.885 m from +x, 0.781 m from &minus;y and 0.399 m from +y.</p>
+
+<h3>Calendar ticks</h3>
+<p>Distance of the noon image centre from the foot along the line (+ north). The second column
+scales to your measured H. Values are for 2027; other years differ by up to about &plusmn;2 mm
+per metre of H near the equinoxes.</p>
+<div class="scroll"><table>
+<thead><tr><th>Date</th><th>H = 3.20 m</th><th>Per metre of H</th><th>Note</th></tr></thead>
+<tbody><tr><td>1 Jan</td><td class="n">+0.920 m</td><td class="n">+287.7 mm</td><td></td></tr>
+<tr><td>1 Feb</td><td class="n">+0.576 m</td><td class="n">+179.9 mm</td><td></td></tr>
+<tr><td>1 Mar</td><td class="n">+0.040 m</td><td class="n">+12.5 mm</td><td></td></tr>
+<tr><td>3 Mar</td><td class="n">-0.003 m</td><td class="n">-0.8 mm</td><td>sun at zenith, image under the hole</td></tr>
+<tr><td>20 Mar</td><td class="n">-0.376 m</td><td class="n">-117.6 mm</td><td>equinox</td></tr>
+<tr><td>1 Apr</td><td class="n">-0.646 m</td><td class="n">-201.7 mm</td><td></td></tr>
+<tr><td>1 May</td><td class="n">-1.290 m</td><td class="n">-403.2 mm</td><td></td></tr>
+<tr><td>1 Jun</td><td class="n">-1.772 m</td><td class="n">-553.7 mm</td><td></td></tr>
+<tr><td>21 Jun</td><td class="n">-1.877 m</td><td class="n">-586.5 mm</td><td>south end</td></tr>
+<tr><td>1 Jul</td><td class="n">-1.853 m</td><td class="n">-579.1 mm</td><td></td></tr>
+<tr><td>1 Aug</td><td class="n">-1.494 m</td><td class="n">-466.9 mm</td><td></td></tr>
+<tr><td>1 Sep</td><td class="n">-0.877 m</td><td class="n">-274.1 mm</td><td></td></tr>
+<tr><td>23 Sep</td><td class="n">-0.392 m</td><td class="n">-122.6 mm</td><td>equinox</td></tr>
+<tr><td>1 Oct</td><td class="n">-0.217 m</td><td class="n">-67.8 mm</td><td></td></tr>
+<tr><td>12 Oct</td><td class="n">+0.018 m</td><td class="n">+5.8 mm</td><td>sun at zenith, image under the hole</td></tr>
+<tr><td>1 Nov</td><td class="n">+0.414 m</td><td class="n">+129.3 mm</td><td></td></tr>
+<tr><td>1 Dec</td><td class="n">+0.845 m</td><td class="n">+263.9 mm</td><td></td></tr>
+<tr><td>21 Dec</td><td class="n">+0.946 m</td><td class="n">+295.5 mm</td><td>north end</td></tr></tbody></table></div>
+
+<h3>Reading</h3>
+<ol>
+  <li>Film the line from a tripod, with a time source in frame: a second phone showing GPS or
+  NTP time to 0.1 s. Alternatively, log the phone clock's offset against a time server before
+  and after.</li>
+  <li>From the video, read <b>T1</b> (leading edge touches the line) and <b>T2</b> (trailing
+  edge leaves it). The centre is (T1 + T2)/2.</li>
+  <li>Dhuhr by definition 3 is T2. The hole's own size blurs the edge, so T2 read directly runs
+  a few seconds late, and T2 &minus; T1 comes out longer than twice the semi-duration by exactly
+  that blur. Report both T2 and centre + semi-duration (the checker prints the semi-duration),
+  and trust the second.</li>
+</ol>
+<div class="scroll"><table class="budget">
+<thead><tr><th>Error source (indoor, H = 3.20 m)</th><th>Allowance</th><th>Time</th></tr></thead>
+<tbody>
+<tr><td>Line azimuth</td><td class="m">±1′</td><td>±2.2 s</td></tr>
+<tr><td>Line vs. plumb of hole, east–west</td><td class="m">±0.5 mm</td><td>±2.2 s</td></tr>
+<tr><td>Support movement</td><td class="m">±0.3 mm</td><td>±1.3 s</td></tr>
+<tr><td>Edge reading on video</td><td class="m">±0.5 mm</td><td>±2.2 s</td></tr>
+<tr><td>Clock</td><td class="m"></td><td>±0.3 s</td></tr>
+<tr><td>Code’s own solar model</td><td class="m"></td><td>±1.0 s</td></tr>
+<tr class="sum"><td>Root-sum-square</td><td></td><td>±4 s</td></tr>
+</tbody></table></div>
+<p>The line-azimuth row is what stage 8 buys: 0.67&prime; set from the foot against B, inside
+the 1&prime; allowance. An error of 1&prime; costs at most 2.2 s (June), and nothing on the
+zenith days, 3 March and 12 October.</p>
+
+<h2 id="asr">Asr &mdash; a ball nodus outdoors</h2>
+<p class="lede">Shadow = height + the shadow at midday.</p>
+<p><b>Why the roof tile fails.</b> The Asr shadow is H(1 + tan z&#8320;) long, where z&#8320; is
+the noon zenith distance. With the aperture at 3.20 m that is 3.20&ndash;5.07 m, so the image
+lands beyond the room's walls on every day of the year.</p>
+<p><b>The one indoor variant that fits</b> is a hole in the qibla wall at about 1.5 m. At Asr the
+sun is 48.6&deg; left to 9.1&deg; right of that wall's normal, 32&ndash;45&deg; up, and the image
+lands 1.5&ndash;2.4 m into the room. But then the floor must be level to &plusmn;0.5 mm across
+2 m, which a tiled floor almost never is: 1 mm per metre costs about 10 s. Outdoors you can build
+the surface level from scratch.</p>
+
+<section class="stage" data-id="s10" id="s10-card">
+  <div class="stage-top">
+    <div class="num">10</div>
+    <div class="stage-head">
+      <div class="when">Any time after stage 8</div>
+      <h3>Build the post and the pad</h3>
+    </div>
+    <input class="tick" type="checkbox" id="s10" aria-label="Stage 10 done">
+  </div>
+  <div class="stage-body">
+    <ol>
+      <li><b>Post.</b> Rigid and free-standing: a 60 &times; 60 mm steel box section in a
+      concrete footing, or a small RC pier. Mount on the fence only if it is solid masonry or
+      concrete; panel fences sway.</li>
+      <li><b>Nodus.</b> A 60 mm ball on a 0.30 m horizontal arm pointing east from the post,
+      with the ball centre exactly <b>H = 1.500 m</b> above the pad and at least 0.10 m above any
+      fence top to its west. The post must end at the arm so that it never shades the ball. A
+      ball is needed because a pinhole image outdoors is too faint to see: roughly 500 lux
+      against the 10 000+ lux of open skylight. A ball's shadow is dark. At Asr the ball is up to
+      2.8 m from its shadow, where the sun's disc blurs the edge by 26 mm; at 60 mm the ball still
+      leaves a dark core at least 34 mm wide.</li>
+      <li><b>Pad.</b> From the foot (the plumb point of the ball centre), east
+      &minus;0.04 &rarr; +2.03 m and north &minus;1.35 &rarr; +0.84 m, i.e. 2.07 &times; 2.19 m.
+      For the dry season only (15 Apr&ndash;31 Aug) a quarter-annulus of radius
+      1.92&ndash;2.38 m toward 107&deg;&ndash;123&deg; is enough. The surface should be matte and
+      light, with every working point within &plusmn;0.5 mm of one horizontal plane (use a
+      water-tube level and a straightedge); 1 mm of height at the arc costs 3&ndash;4.5 s.</li>
+      <li><b>Marks.</b> A brass pin at the foot, and a north&ndash;south line through it for the
+      noon shadow. Here &plusmn;0.5&deg; of azimuth is plenty, because the noon shadow's
+      <em>length</em> hardly depends on it. Do not engrave fixed Asr arcs: near the equinoxes the
+      radius changes by up to 11 mm a day, so it is set each day.</li>
+    </ol>
+  </div>
+</section>
+
+<figure>
+  <div class="svgbox">
+  <svg width="413" height="372" viewBox="0 0 413 372" role="img" aria-label="Plan of the outdoor gnomon pad">
+<rect x="112.4" y="56.7" width="244.3" height="258.4" class="gf-panel" stroke-width="1.2" style="stroke:var(--muted)"/>
+<line x1="117.2" y1="56.7" x2="117.2" y2="315.1" class="gl-line" stroke-width="2.4"/>
+<path d="M316.9,46.0 A227.9,227.9 0 0 1 332.9,82.4" class="gl-mute" stroke-width="1"/>
+<circle cx="325.7" cy="63.8" r="3.6" class="gf-sun"/>
+<circle cx="117.2" cy="104.9" r="3.2" class="gf-brass"/>
+<path d="M311.4,79.0 A208.8,208.8 0 0 1 321.8,113.9" class="gl-mute" stroke-width="1"/>
+<circle cx="317.3" cy="96.2" r="3.6" class="gf-sun"/>
+<circle cx="117.2" cy="124.0" r="3.2" class="gf-brass"/>
+<path d="M294.2,128.2 A179.2,179.2 0 0 1 296.3,159.4" class="gl-mute" stroke-width="1"/>
+<circle cx="296.0" cy="143.7" r="3.6" class="gf-sun"/>
+<circle cx="117.2" cy="153.6" r="3.2" class="gf-brass"/>
+<path d="M328.4,180.9 A212.7,212.7 0 0 1 320.8,217.2" class="gl-mute" stroke-width="1"/>
+<circle cx="325.4" cy="199.3" r="3.6" class="gf-sun"/>
+<circle cx="117.2" cy="191.5" r="3.2" class="gf-brass"/>
+<path d="M351.9,237.0 A248.4,248.4 0 0 1 334.2,276.5" class="gl-mute" stroke-width="1"/>
+<circle cx="343.9" cy="257.1" r="3.6" class="gf-sun"/>
+<circle cx="117.2" cy="227.2" r="3.2" class="gf-brass"/>
+<path d="M362.5,280.1 A275.0,275.0 0 0 1 337.2,320.8" class="gl-mute" stroke-width="1"/>
+<circle cx="350.7" cy="301.0" r="3.6" class="gf-sun"/>
+<circle cx="117.2" cy="253.8" r="3.2" class="gf-brass"/>
+<path d="M363.9,287.2 A279.5,279.5 0 0 1 337.3,328.0" class="gl-mute" stroke-width="1"/>
+<circle cx="351.5" cy="308.2" r="3.6" class="gf-sun"/>
+<circle cx="117.2" cy="258.3" r="3.2" class="gf-brass"/>
+<path d="M357.2,254.9 A259.6,259.6 0 0 1 336.3,295.0" class="gl-mute" stroke-width="1"/>
+<circle cx="347.6" cy="275.4" r="3.6" class="gf-sun"/>
+<circle cx="117.2" cy="238.4" r="3.2" class="gf-brass"/>
+<path d="M338.3,200.1 A225.5,225.5 0 0 1 327.2,237.8" class="gl-mute" stroke-width="1"/>
+<circle cx="333.6" cy="219.2" r="3.6" class="gf-sun"/>
+<circle cx="117.2" cy="204.3" r="3.2" class="gf-brass"/>
+<path d="M305.9,146.7 A189.0,189.0 0 0 1 304.7,179.6" class="gl-mute" stroke-width="1"/>
+<circle cx="306.0" cy="163.2" r="3.6" class="gf-sun"/>
+<circle cx="117.2" cy="167.8" r="3.2" class="gf-brass"/>
+<path d="M307.2,93.8 A199.9,199.9 0 0 1 315.1,127.8" class="gl-mute" stroke-width="1"/>
+<circle cx="311.9" cy="110.6" r="3.6" class="gf-sun"/>
+<circle cx="117.2" cy="132.9" r="3.2" class="gf-brass"/>
+<path d="M315.9,53.1 A223.7,223.7 0 0 1 330.7,89.2" class="gl-mute" stroke-width="1"/>
+<circle cx="324.1" cy="70.8" r="3.6" class="gf-sun"/>
+<circle cx="117.2" cy="109.1" r="3.2" class="gf-brass"/>
+<text x="343.6" y="326.4" font-size="10" text-anchor="end" class="gf-ink">21 Jun · R 2.38</text>
+<text x="318.1" y="52.4" font-size="10" text-anchor="end" class="gf-ink">21 Dec · R 1.94</text>
+<text x="304.1" y="143.2" font-size="10" text-anchor="start" class="gf-ink">3 Mar · R 1.50</text>
+<text x="304.9" y="157.1" font-size="10" text-anchor="start" class="gf-ink">12 Oct · R 1.51</text>
+<text x="109.2" y="263.6" font-size="10" text-anchor="end" class="gf-brass">21 Jun noon</text>
+<text x="109.2" y="107.5" font-size="10" text-anchor="end" class="gf-brass">21 Dec noon</text>
+<line x1="81.8" y1="155.8" x2="117.2" y2="155.8" class="gl-ink" stroke-width="1.5"/>
+<rect x="78.2" y="152.3" width="7.1" height="7.1" class="gf-ink"/>
+<circle cx="117.2" cy="155.8" r="3.5" class="gf-panel" style="stroke:var(--ink)" stroke-width="1.5"/>
+<text x="78.2" y="146.3" font-size="10" class="gf-mute">post</text>
+<text x="124.2" y="148.8" font-size="10" class="gf-ink">ball · foot</text>
+<line x1="58.2" y1="73.2" x2="58.2" y2="35.4" class="gl-ink" stroke-width="1.6"/>
+<path d="M53.2,43.7 L58.2,33.1 L63.2,43.7 Z" class="gf-ink"/>
+<text x="66.2" y="41.3" font-size="12" font-weight="500" class="gf-ink">N</text>
+<line x1="235.2" y1="329.3" x2="353.2" y2="329.3" class="gl-ink" stroke-width="1.6"/>
+<line x1="235.2" y1="324.5" x2="235.2" y2="334.0" class="gl-ink" stroke-width="1.6"/>
+<line x1="353.2" y1="324.5" x2="353.2" y2="334.0" class="gl-ink" stroke-width="1.6"/>
+<text x="294.2" y="323.3" font-size="10" text-anchor="middle" class="gf-mute">1 m</text>
+<text x="356.7" y="50.7" font-size="10" text-anchor="end" class="gf-mute">pad 2.07 × 2.19 m</text>
+</svg>
+  </div>
+  <figcaption>Pad plan to scale, true north up. Brass dots are the noon shadow centres; orange dots are the Asr shadow centres on the 1st of each month, each on its arc of radius H + s₀. The post is shown west of the ball, on its arm.</figcaption>
+</figure>
+
+<h3>Reading</h3>
+<ol>
+  <li><b>Noon.</b> Mark the centre of the ball's shadow on the north&ndash;south line, taking the
+  midpoint of its dark core's two edges. s&#8320; is the distance from the foot to that mark.
+  The checker predicts s&#8320;; a big mismatch means H or the foot is wrong.</li>
+  <li><b>Set today's arc.</b> Hook a steel tape over the foot pin, set it to
+  <b>R = H + s&#8320;</b>, and scribe a short arc around today's direction (the checker prints
+  it).</li>
+  <li><b>Asr.</b> Film the arc and time the dark core's front edge and back edge crossing it.
+  Asr is the mean of the two. The shadow moves 13&ndash;19 mm/min along its length.</li>
+  <li>Compare with the checker's &ldquo;expect obs &minus; code&rdquo;, which already includes
+  refraction and the noon-declination convention.</li>
+</ol>
+<div class="scroll"><table class="budget">
+<thead><tr><th>Error source (H = 1.50 m)</th><th>Allowance</th><th>Time</th></tr></thead>
+<tbody>
+<tr><td>Ball-centre height H</td><td class="m">±0.5 mm</td><td>±2.3 s</td></tr>
+<tr><td>Foot position</td><td class="m">±0.5 mm</td><td>±2.3 s</td></tr>
+<tr><td>Noon shadow s₀</td><td class="m">±0.5 mm</td><td>±2.3 s</td></tr>
+<tr><td>Pad height at the arc</td><td class="m">±0.5 mm</td><td>±2.3 s</td></tr>
+<tr><td>Shadow-centre timing (two edges)</td><td class="m">±1 mm</td><td>±3 s</td></tr>
+<tr><td>Refraction model, T and P</td><td class="m"></td><td>±1 s</td></tr>
+<tr><td>Code’s own solar model</td><td class="m"></td><td>±1.5 s</td></tr>
+<tr class="sum"><td>Root-sum-square</td><td></td><td>±6 s</td></tr>
+</tbody></table></div>
+
+<h2 id="maghrib">Maghrib &mdash; the limb against a measured skyline</h2>
+<p class="lede">Complete sunset + 2 minutes.</p>
+<p>Neither the roof tile nor the rod works. A roof opening only admits sun from high in the sky.
+At sunset a rod's shadow just stretches and fades, telling you nothing about where the sun's edge
+is relative to the skyline. The event you need is the upper limb meeting the skyline, so the
+instrument is a camera and the calibration is the skyline itself.</p>
+
+<section class="stage" data-id="s11" id="s11-card">
+  <div class="stage-top">
+    <div class="num">11</div>
+    <div class="stage-head">
+      <div class="when">Once &middot; a clear evening</div>
+      <h3>Measure the skyline and set up the camera station</h3>
+    </div>
+    <input class="tick" type="checkbox" id="s11" aria-label="Stage 11 done">
+  </div>
+  <div class="stage-body">
+    <ol>
+      <li><b>Station.</b> Pick a spot where the skyline across 280&deg;&ndash;294&deg; is clear
+      and distant; that is where the dry-season sun sets, 0.7&deg;&ndash;14&deg; left of the
+      qibla. Height helps clear trees, and changes nothing in the code.</li>
+      <li><b>Measure the skyline once,</b> from the camera position, with the total station: its
+      vertical angle every 0.5&deg; of azimuth from 244&deg; to 296&deg;, <b>in both faces</b>.
+      Any angle class is ample, but a rented instrument's vertical index error does not cancel
+      in a single face, and it can be tens of seconds. Save the pairs as &ldquo;azimuth
+      altitude&rdquo; lines; <code>--horizon-file</code> uses them. 1&prime; of skyline is
+      4.4 s of sunset.</li>
+      <li><b>Record.</b> Phone or camera on a tripod, video from three minutes before, with a
+      time source in frame. <b>Never look through an optical viewfinder or binoculars.</b> The
+      last frame with any sunlight is your sunset; Maghrib is 120 s later.</li>
+      <li><b>Log temperature and pressure.</b> Refraction scales with P/T, and the checker takes
+      <code>--T</code> and <code>--P</code>.</li>
+    </ol>
+  </div>
+</section>
+
+<p><b>What to expect.</b> Against the code's sunset, a correct observation on a true 0&deg;
+skyline comes 8.6&ndash;12.3 s early at 28 &deg;C / 1005 hPa (5.5&ndash;9.2 s at 24 &deg;C /
+1010 hPa), because warm air refracts less than the code's fixed 34&prime;. Every arcminute of
+skyline above 0&deg; makes it another 4.4 s earlier. On top of that, refraction at the horizon
+wanders from night to night by several arcminutes, worth &plusmn;10&ndash;40 s here. So
+&plusmn;30 s is a fair target for the mean of many clear evenings, not for any single one.</p>
+<figure class="wide">
+  <div class="svgbox">
+  <svg width="690" height="250" viewBox="0 0 690 250" role="img" aria-label="Western skyline with sunset azimuths and mountains">
+<rect x="461.0" y="42.0" width="138.0" height="154.0" class="gf-band"/>
+<text x="530.0" y="53.4" font-size="10" text-anchor="middle" class="gf-mute">dry-season sunsets</text>
+<line x1="44" y1="152.0" x2="664" y2="152.0" class="gl-rule" stroke-width="1"/>
+<text x="38" y="155.5" font-size="10" text-anchor="end" class="gf-mute">0.5°</text>
+<line x1="44" y1="108.0" x2="664" y2="108.0" class="gl-rule" stroke-width="1"/>
+<text x="38" y="111.5" font-size="10" text-anchor="end" class="gf-mute">1.0°</text>
+<line x1="44" y1="64.0" x2="664" y2="64.0" class="gl-rule" stroke-width="1"/>
+<text x="38" y="67.5" font-size="10" text-anchor="end" class="gf-mute">1.5°</text>
+<path d="M254.0,196.0 L272.0,174.0 L290.0,196.0 Z" class="gf-mtn" style="stroke:var(--muted)" stroke-width="0.8"/>
+<path d="M199.0,196.0 L239.0,123.8 L279.0,196.0 Z" class="gf-mtn" style="stroke:var(--muted)" stroke-width="0.8"/>
+<path d="M136.0,196.0 L167.0,92.2 L198.0,196.0 Z" class="gf-mtn" style="stroke:var(--muted)" stroke-width="0.8"/>
+<path d="M70.0,196.0 L103.0,73.7 L136.0,196.0 Z" class="gf-mtn" style="stroke:var(--muted)" stroke-width="0.8"/>
+<path d="M114.0,196.0 L163.0,76.3 L212.0,196.0 Z" class="gf-mtn" style="stroke:var(--muted)" stroke-width="0.8"/>
+<text x="272.0" y="168.0" font-size="9.5" text-anchor="middle" class="gf-ink">Slamet 0.25°</text>
+<text x="239.0" y="117.8" font-size="9.5" text-anchor="middle" class="gf-ink">Dieng 0.82°</text>
+<text x="167.0" y="105.2" font-size="9.5" text-anchor="middle" class="gf-ink">Sindoro 1.18°</text>
+<text x="107.0" y="67.7" font-size="9.5" text-anchor="end" class="gf-ink">Sumbing 1.39°</text>
+<text x="159.0" y="70.3" font-size="9.5" text-anchor="start" class="gf-ink">Ungaran 1.36°</text>
+<line x1="44" y1="196.0" x2="664" y2="196.0" class="gl-ink" stroke-width="1.3"/>
+<text x="38" y="199.5" font-size="10" text-anchor="end" class="gf-mute">0°</text>
+<line x1="337.0" y1="196.0" x2="337.0" y2="159.0" class="gl-sun" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="337.0" y="153.8" font-size="9.5" text-anchor="middle" class="gf-mute">Semarang glow</text>
+<line x1="504.0" y1="196.0" x2="504.0" y2="159.0" class="gl-sun" stroke-width="1" stroke-dasharray="2 2"/>
+<text x="504.0" y="153.8" font-size="9.5" text-anchor="middle" class="gf-mute">Demak glow</text>
+<line x1="606.5" y1="196.0" x2="606.5" y2="42.0" class="gl-sky" stroke-width="1.5" stroke-dasharray="5 3"/>
+<text x="602.5" y="38.5" font-size="10" text-anchor="end" class="gf-sky">qibla 294.26°</text>
+<circle cx="131.1" cy="196.0" r="3.8" class="gf-sun"/>
+<text x="131.1" y="214" font-size="9.5" text-anchor="middle" class="gf-ink">Jan</text>
+<circle cx="190.7" cy="196.0" r="3.8" class="gf-sun"/>
+<text x="190.7" y="214" font-size="9.5" text-anchor="middle" class="gf-ink">Feb</text>
+<circle cx="286.6" cy="196.0" r="3.8" class="gf-sun"/>
+<text x="286.6" y="214" font-size="9.5" text-anchor="middle" class="gf-ink">Mar</text>
+<circle cx="408.8" cy="196.0" r="3.8" class="gf-sun"/>
+<text x="408.8" y="214" font-size="9.5" text-anchor="middle" class="gf-ink">Apr</text>
+<circle cx="514.9" cy="196.0" r="3.8" class="gf-sun"/>
+<text x="514.9" y="214" font-size="9.5" text-anchor="middle" class="gf-ink">May</text>
+<circle cx="585.2" cy="196.0" r="3.8" class="gf-sun"/>
+<text x="585.2" y="214" font-size="9.5" text-anchor="middle" class="gf-ink">Jun</text>
+<circle cx="595.8" cy="196.0" r="3.8" class="gf-sun"/>
+<text x="595.8" y="230" font-size="9.5" text-anchor="middle" class="gf-ink">Jul</text>
+<circle cx="544.5" cy="196.0" r="3.8" class="gf-sun"/>
+<text x="544.5" y="230" font-size="9.5" text-anchor="middle" class="gf-ink">Aug</text>
+<circle cx="446.4" cy="196.0" r="3.8" class="gf-sun"/>
+<text x="446.4" y="230" font-size="9.5" text-anchor="middle" class="gf-ink">Sep</text>
+<circle cx="331.0" cy="196.0" r="3.8" class="gf-sun"/>
+<text x="331.0" y="230" font-size="9.5" text-anchor="middle" class="gf-ink">Oct</text>
+<circle cx="217.7" cy="196.0" r="3.8" class="gf-sun"/>
+<text x="217.7" y="230" font-size="9.5" text-anchor="middle" class="gf-ink">Nov</text>
+<circle cx="143.3" cy="196.0" r="3.8" class="gf-sun"/>
+<text x="143.3" y="230" font-size="9.5" text-anchor="middle" class="gf-ink">Dec</text>
+<text x="44" y="246" font-size="9.5" class="gf-mute">Jan–Jun top row · Jul–Dec bottom row</text>
+<text x="64" y="18" font-size="10" text-anchor="middle" class="gf-mute">240°</text>
+<line x1="64" y1="22" x2="64" y2="27" class="gl-mute" stroke-width="1"/>
+<text x="164" y="18" font-size="10" text-anchor="middle" class="gf-mute">250°</text>
+<line x1="164" y1="22" x2="164" y2="27" class="gl-mute" stroke-width="1"/>
+<text x="264" y="18" font-size="10" text-anchor="middle" class="gf-mute">260°</text>
+<line x1="264" y1="22" x2="264" y2="27" class="gl-mute" stroke-width="1"/>
+<text x="364" y="18" font-size="10" text-anchor="middle" class="gf-mute">270°</text>
+<line x1="364" y1="22" x2="364" y2="27" class="gl-mute" stroke-width="1"/>
+<text x="464" y="18" font-size="10" text-anchor="middle" class="gf-mute">280°</text>
+<line x1="464" y1="22" x2="464" y2="27" class="gl-mute" stroke-width="1"/>
+<text x="564" y="18" font-size="10" text-anchor="middle" class="gf-mute">290°</text>
+<line x1="564" y1="22" x2="564" y2="27" class="gl-mute" stroke-width="1"/>
+<text x="664" y="18" font-size="10" text-anchor="middle" class="gf-mute">300°</text>
+<line x1="664" y1="22" x2="664" y2="27" class="gl-mute" stroke-width="1"/>
+<text x="664" y="246" font-size="9.5" text-anchor="end" class="gf-mute">← south · facing west · north →</text>
+</svg>
+  </div>
+  <figcaption>The western horizon as you face it. Dots: where the sun sets on the 1st of each month. Grey: volcano summits from approximate coordinates, plotted with Earth curvature and standard terrestrial refraction (k = 0.13); confirm them with DEMNAS or a horizon tool before relying on them. From mid-October to early March, sunsets at 246°–262° drop behind 0.25°–1.4° of mountains, 1–6 minutes before the code’s sunset, and those are the rainy months anyway. The shaded band is the dry-season window, sunsets at 280°–293.5° over the Demak lowland.</figcaption>
+</figure>
+
+<h2 id="twilight">Isha and Fajr &mdash; not a sun or shadow problem</h2>
+<p><b>No sun-disc or shadow method exists.</b> With the sun 18&deg; below the horizon, the lowest
+directly sunlit air above you is about 330 km up (410 km at 20&deg;). Nothing near you is in
+sunlight: there is no disc to project and no shadow to cast. What the angles describe is
+<em>twilight</em>: sunlight scattered by the high atmosphere.</p>
+<p><b>What you can observe is the sky's brightness against time.</b></p>
+<ul>
+  <li><b>Instrument.</b> A sky-quality photometer logging every 30&ndash;60 s, at the zenith or
+  about 15&deg; above the sun's azimuth (Fajr 66&deg;&ndash;114&deg;, Isha
+  246&deg;&ndash;294&deg;). Or a camera in full manual (fixed ISO, shutter and aperture, RAW) on
+  an interval timer.</li>
+  <li><b>Fajr</b> is the first rise of the curve above its night floor. By eye, it is the
+  horizontal white band along the eastern horizon (fajr &#7779;&#257;diq), not the tilted cone
+  of zodiacal light (fajr k&#257;dhib), which is prominent at this latitude.</li>
+  <li><b>Isha</b> is the curve settling onto its night floor. By eye, it is the last of the
+  western glow (shafaq).</li>
+  <li><b>Compare in degrees, not minutes.</b> <code>bun observe.js --from DATE --at HH:MM:SS</code>
+  gives the sun's depression at your instant. The code's 20&deg; and 18&deg; are exactly what you
+  are testing. Here 1&deg; is about 4.4 min. Photometric studies in Indonesia disagree by
+  several degrees, so always quote the sky conditions with the angle.</li>
+  <li><b>Conditions.</b> Moon below the horizon, clear sky, dry season. The light domes of
+  Semarang (267&deg;, 56 km) and Demak (284&deg;, 33 km) sit exactly where the western glow
+  fades, so Isha is the harder of the two here. The east (Blora, 90&deg;, 54 km) is darker:
+  start with Fajr.</li>
+</ul>
+
+<h2 id="house">What the house has to change</h2>
+<ul>
+  <li><b>The qibla-end room becomes the meridian room:</b> steel angle, aperture plate, one clear
+  roof sheet, and a floor inlay. About 12 kg of steel: an L50&times;50&times;5 over the 3.07 m
+  clear span between the ring beams is 11.6 kg, plus the plate and anchors. That is 0.03% of the
+  roof mass, so the seismic model and its verification are unaffected. What needs the
+  engineer's sign-off is the anchors, which go into the ring beams between their bars.</li>
+  <li><b>Keep the sunset station off the house.</b> A 3.0 &times; 3.3 m, 120 mm RC roof deck is
+  about 2.9 t at roof level against the 37.8 t modelled. It would shift T&#8321;, the modal mass
+  ratios and the base shear, and the structural verification would have to be re-run. A
+  free-standing mast or platform near the west boundary leaves the verified structure alone.</li>
+  <li><b>The qibla wall faces 294&deg;15&prime;18&Prime;,</b> 0.7&deg;&ndash;14&deg; right of every
+  dry-season sunset (as does the gable, if the ridge runs along the long axis). A high window
+  there gives an indoor sunset view straight along the qibla.</li>
+  <li><b>Outdoor gnomon</b> on its own post near the west boundary, pad to its east, with the view
+  toward 246&deg;&ndash;303&deg; kept clear above 30&deg;.</li>
+</ul>
+
+<h2 id="check">Checking the result against the code</h2>
+<section class="stage" data-id="s12" id="s12-card">
+  <div class="stage-top">
+    <div class="num">12</div>
+    <div class="stage-head">
+      <div class="when">Ten clear days or more</div>
+      <h3>Observe, log, and compare with praytime.js</h3>
+    </div>
+    <input class="tick" type="checkbox" id="s12" aria-label="Stage 12 done">
+  </div>
+  <div class="stage-body">
+    <div class="codebox"><button type="button" data-copy="c1">Copy</button><pre id="c1">cd setout                                             # dsygv/setout: observe.js + praytime.js 3.2.0
+python3 setout.py --selftest                          # 27 checks, including this page's line and pad sizes
+python3 setout.py --a LAT,LON,H --b LAT,LON,H --pad-foot X,Y   # corners, meridian line, pad, TS budget
+python3 setout.py --ts-table 12x25                    # which total-station class the parcel needs
+bun observe.js --from 2027-06-21                      # code times + what each instrument should show
+bun observe.js --from 2027-06-21 --hin 3.207 --hout 1.503 --T 27 --P 1006
+bun observe.js --from 2027-06-21 --horizon-file skyline.txt
+bun observe.js --from 2027-06-21 --at 04:31:10        # sun depression at a twilight observation
+bun observe.js --from 2027-01-01 --days 365 --csv &gt; year.csv</pre></div>
+    <p><b>Log each day:</b> date &middot; T1 &middot; T2 &middot; noon-image position &middot;
+    s&#8320; &middot; Asr front and back edge times &middot; sunset last frame &middot; skyline
+    altitude at the sunset azimuth &middot; T &middot; P &middot; sky and moon notes &middot;
+    clock offset.</p>
+    <p><b>Residual = observed &minus; code &minus; expected offset</b>, with the expected offset
+    taken from the checker for that date. Over ten or more days, the mean is your bias and the
+    spread is your precision. Because the code's own error is under 2 s, a steady bias beyond
+    about 5 s is the instrument (or, at sunset, the air), not the code.</p>
+  </div>
+</section>
+<p><code>setout/praytime.js</code> is byte-identical to <code>src/praytime.js</code> in the npm
+tarball <code>praytime-3.2.0.tgz</code> (SHA-1 <code>aeb2c93e9358bf076f3ddd631181bff40db844cc</code>).
+It is vendored on purpose: v3.2 is what is being tested.</p>
+<p><b>How the checker was verified:</b> across every day of 2027 it agrees with an independent
+NREL SPA harness to &minus;0.5&hellip;+1.0 s for transit and T2, &minus;0.3&hellip;+1.4 s for
+Asr, 0&hellip;+1.6 s for sunset, and &plusmn;0.007&deg; for sunset azimuth. The SPA is the Qur'an
+project's <code>SolarPosition</code>, compiled with plain <code>javac</code>.</p>
+
+<h2 id="year">Year table</h2>
+<p>For 2027 at the 294&deg;15&prime;18&Prime; site: indoor H = 3.20 m, outdoor H = 1.50 m,
+28 &deg;C, 1005 hPa, 0&deg; skyline. &ldquo;Toward&rdquo; is the azimuth from the foot to the Asr
+shadow.</p>
+<div class="scroll"><table>
+<thead><tr><th>Date</th><th>Noon image</th><th>Semi-dur.</th><th>Dhuhr T2 − code</th><th>Asr radius</th><th>Toward</th><th>Asr obs − code</th><th>Sunset az</th><th>Sunset obs − code</th></tr></thead>
+<tbody><tr><td class="m">1 Jan</td><td class="n">0.920 N</td><td class="n">70.7 s</td><td class="n">+70.8 s</td><td class="n">1.931 m</td><td class="n">66.2°</td><td class="n">+8.6 s</td><td class="n">246.7°</td><td class="n">-8.1 s</td></tr>
+<tr><td class="m">15 Jan</td><td class="n">0.809 N</td><td class="n">69.8 s</td><td class="n">+69.9 s</td><td class="n">1.879 m</td><td class="n">68.5°</td><td class="n">+8.4 s</td><td class="n">248.6°</td><td class="n">-8.1 s</td></tr>
+<tr><td class="m">1 Feb</td><td class="n">0.576 N</td><td class="n">68.0 s</td><td class="n">+68.0 s</td><td class="n">1.770 m</td><td class="n">73.4°</td><td class="n">+7.0 s</td><td class="n">252.7°</td><td class="n">-8.3 s</td></tr>
+<tr><td class="m">15 Feb</td><td class="n">0.325 N</td><td class="n">66.4 s</td><td class="n">+66.4 s</td><td class="n">1.652 m</td><td class="n">79.1°</td><td class="n">+5.4 s</td><td class="n">257.1°</td><td class="n">-8.4 s</td></tr>
+<tr><td class="m">1 Mar</td><td class="n">0.040 N</td><td class="n">65.2 s</td><td class="n">+65.1 s</td><td class="n">1.519 m</td><td class="n">86.1°</td><td class="n">+3.9 s</td><td class="n">262.3°</td><td class="n">-8.6 s</td></tr>
+<tr><td class="m">15 Mar</td><td class="n">0.265 S</td><td class="n">64.4 s</td><td class="n">+64.3 s</td><td class="n">1.624 m</td><td class="n">93.5°</td><td class="n">-0.4 s</td><td class="n">267.8°</td><td class="n">-8.7 s</td></tr>
+<tr><td class="m">1 Apr</td><td class="n">0.646 S</td><td class="n">64.2 s</td><td class="n">+64.2 s</td><td class="n">1.803 m</td><td class="n">101.8°</td><td class="n">-1.0 s</td><td class="n">274.5°</td><td class="n">-8.9 s</td></tr>
+<tr><td class="m">15 Apr</td><td class="n">0.956 S</td><td class="n">64.7 s</td><td class="n">+64.7 s</td><td class="n">1.948 m</td><td class="n">108.0°</td><td class="n">-0.8 s</td><td class="n">279.7°</td><td class="n">-9.1 s</td></tr>
+<tr><td class="m">1 May</td><td class="n">1.290 S</td><td class="n">65.7 s</td><td class="n">+65.8 s</td><td class="n">2.105 m</td><td class="n">114.1°</td><td class="n">+0.5 s</td><td class="n">285.1°</td><td class="n">-9.5 s</td></tr>
+<tr><td class="m">15 May</td><td class="n">1.544 S</td><td class="n">66.9 s</td><td class="n">+66.9 s</td><td class="n">2.224 m</td><td class="n">118.3°</td><td class="n">+2.2 s</td><td class="n">288.9°</td><td class="n">-10.0 s</td></tr>
+<tr><td class="m">1 Jun</td><td class="n">1.772 S</td><td class="n">68.1 s</td><td class="n">+68.1 s</td><td class="n">2.331 m</td><td class="n">121.9°</td><td class="n">+4.7 s</td><td class="n">292.1°</td><td class="n">-10.5 s</td></tr>
+<tr><td class="m">15 Jun</td><td class="n">1.866 S</td><td class="n">68.6 s</td><td class="n">+68.6 s</td><td class="n">2.375 m</td><td class="n">123.2°</td><td class="n">+6.7 s</td><td class="n">293.4°</td><td class="n">-10.8 s</td></tr>
+<tr><td class="m">1 Jul</td><td class="n">1.853 S</td><td class="n">68.4 s</td><td class="n">+68.5 s</td><td class="n">2.369 m</td><td class="n">123.0°</td><td class="n">+8.4 s</td><td class="n">293.2°</td><td class="n">-10.8 s</td></tr>
+<tr><td class="m">15 Jul</td><td class="n">1.738 S</td><td class="n">67.7 s</td><td class="n">+67.7 s</td><td class="n">2.315 m</td><td class="n">121.3°</td><td class="n">+9.1 s</td><td class="n">291.6°</td><td class="n">-10.6 s</td></tr>
+<tr><td class="m">1 Aug</td><td class="n">1.494 S</td><td class="n">66.3 s</td><td class="n">+66.3 s</td><td class="n">2.200 m</td><td class="n">117.4°</td><td class="n">+8.8 s</td><td class="n">288.1°</td><td class="n">-10.3 s</td></tr>
+<tr><td class="m">15 Aug</td><td class="n">1.234 S</td><td class="n">65.1 s</td><td class="n">+65.1 s</td><td class="n">2.078 m</td><td class="n">113.0°</td><td class="n">+7.9 s</td><td class="n">284.1°</td><td class="n">-9.9 s</td></tr>
+<tr><td class="m">1 Sep</td><td class="n">0.877 S</td><td class="n">64.0 s</td><td class="n">+64.0 s</td><td class="n">1.911 m</td><td class="n">106.3°</td><td class="n">+6.7 s</td><td class="n">278.2°</td><td class="n">-9.5 s</td></tr>
+<tr><td class="m">15 Sep</td><td class="n">0.569 S</td><td class="n">63.7 s</td><td class="n">+63.8 s</td><td class="n">1.767 m</td><td class="n">100.0°</td><td class="n">+5.9 s</td><td class="n">272.9°</td><td class="n">-9.2 s</td></tr>
+<tr><td class="m">1 Oct</td><td class="n">0.217 S</td><td class="n">64.0 s</td><td class="n">+64.1 s</td><td class="n">1.602 m</td><td class="n">92.2°</td><td class="n">+5.4 s</td><td class="n">266.7°</td><td class="n">-8.9 s</td></tr>
+<tr><td class="m">15 Oct</td><td class="n">0.081 N</td><td class="n">64.8 s</td><td class="n">+65.0 s</td><td class="n">1.538 m</td><td class="n">85.0°</td><td class="n">+0.8 s</td><td class="n">261.3°</td><td class="n">-8.7 s</td></tr>
+<tr><td class="m">1 Nov</td><td class="n">0.414 N</td><td class="n">66.5 s</td><td class="n">+66.5 s</td><td class="n">1.694 m</td><td class="n">76.9°</td><td class="n">+1.8 s</td><td class="n">255.4°</td><td class="n">-8.7 s</td></tr>
+<tr><td class="m">15 Nov</td><td class="n">0.647 N</td><td class="n">68.2 s</td><td class="n">+68.1 s</td><td class="n">1.804 m</td><td class="n">71.8°</td><td class="n">+3.3 s</td><td class="n">251.3°</td><td class="n">-8.6 s</td></tr>
+<tr><td class="m">1 Dec</td><td class="n">0.845 N</td><td class="n">69.9 s</td><td class="n">+69.7 s</td><td class="n">1.896 m</td><td class="n">67.7°</td><td class="n">+5.4 s</td><td class="n">247.9°</td><td class="n">-8.5 s</td></tr>
+<tr><td class="m">15 Dec</td><td class="n">0.934 N</td><td class="n">70.8 s</td><td class="n">+70.7 s</td><td class="n">1.938 m</td><td class="n">65.9°</td><td class="n">+7.3 s</td><td class="n">246.4°</td><td class="n">-8.3 s</td></tr></tbody></table></div>
+
+<h2 id="tool">observe.js</h2>
+<p>Lives at <code>dsygv/setout/observe.js</code>, next to the vendored <code>praytime.js</code> it
+tests. Its solar model is the code's own series, evaluated at the real instant, plus the
+Earth&ndash;Sun distance for the disc size. It needs Bun and nothing else.</p>
+<div class="codebox tall"><button type="button" data-copy="c2">Copy</button><pre id="c2">// observe.js -- what a home gnomon should show, next to what praytime.js v3.2 says.
+//
+//   bun observe.js --from 2027-06-21 --days 3                 (site defaults below)
+//   bun observe.js --from 2027-06-21 --hin 3.207 --hout 1.503 --horizon 0.12
+//   bun observe.js --from 2027-01-01 --days 365 --csv &gt; year.csv
+//
+// Needs praytime.js v3.2 next to this file, or --praytime &lt;path&gt;. setout/praytime.js IS that
+// file, unmodified from npm praytime@3.2.0 (src/praytime.js; tarball sha1
+// aeb2c93e9358bf076f3ddd631181bff40db844cc; MIT, see praytime.LICENSE). It is vendored on
+// purpose: v3.2 is the thing under test, so it must not drift with an upgrade.
+// The house-side counterpart is setout.py, which stakes both gnomons; the design,
+// dimensions and procedures are in qibla-setout-field-sheet.html (quarkus repo), served at
+// https://dawud-tan.github.io/qibla-setout-field-sheet.html -- part two, stages 8-12.
+//
+// Definitions (the ones asked for, not the code&#x27;s defaults):
+//   Dhuhr   = trailing (east) limb leaves the meridian plane  (PrayTimes &quot;A Note on Dhuhr&quot;, def. 3)
+//   Asr     = shadow = height + shadow at midday, both measured, i.e. with refraction
+//   Maghrib = upper limb gone below the real skyline, + 2 min
+// Solar model: the same low-precision series praytime.js uses (checked against the NREL
+// SPA at this site: &lt;= 1.1 s for transit, &lt;= 1.5 s for Asr, &lt;= 1.8 s for sunset), plus
+// the Earth-Sun distance, which the code does not need but the disc size does.
+
+const path = require(&#x27;path&#x27;);
+const fs = require(&#x27;fs&#x27;);
+
+const A = Object.fromEntries(process.argv.slice(2).join(&#x27; &#x27;).split(&#x27;--&#x27;).filter(Boolean)
+    .map(s =&gt; s.trim().split(/\s+/)).map(([k, ...v]) =&gt; [k, v.length ? v.join(&#x27; &#x27;) : true]));
+const num = (k, d) =&gt; (A[k] === undefined ? d : Number(A[k]));
+
+const LAT = num(&#x27;lat&#x27;, -6.96595767);   // 294deg15&#x27;18&quot; integer-arcsecond qibla site on 110.9274 E
+const LON = num(&#x27;lon&#x27;, 110.9274);
+const TZ = num(&#x27;tz&#x27;, 7);               // WIB
+const H_IN = num(&#x27;hin&#x27;, 3.20);         // roof-aperture height above the meridian line, m
+const H_OUT = num(&#x27;hout&#x27;, 1.50);       // outdoor gnomon: ball-nodus centre height above its pad, m
+const T = num(&#x27;T&#x27;, 28), P = num(&#x27;P&#x27;, 1005);
+const DAYS = num(&#x27;days&#x27;, 1);
+const HORIZON = num(&#x27;horizon&#x27;, 0);     // apparent skyline altitude at the sunset azimuth, deg
+const from = (A.from || new Date().toISOString().slice(0, 10)).split(&#x27;-&#x27;).map(Number);
+
+const { PrayTime } = require(A.praytime || path.join(__dirname, &#x27;praytime.js&#x27;));
+const code = new PrayTime(&#x27;Singapore&#x27;)                    // fajr 20, isha 18 = Kemenag
+    .adjust({ asr: &#x27;Standard&#x27;, maghrib: &#x27;2 min&#x27;, dhuhr: &#x27;0 min&#x27; })
+    .location([LAT, LON]).utcOffset(TZ).round(&#x27;none&#x27;).format(&#x27;x&#x27;);
+const codeConv = new PrayTime(&#x27;Singapore&#x27;)
+    .adjust({ asr: &#x27;Standard&#x27;, maghrib: &#x27;2 min&#x27;, dhuhr: &#x27;0 min&#x27;, iterations: 5 })
+    .location([LAT, LON]).utcOffset(TZ).round(&#x27;none&#x27;).format(&#x27;x&#x27;);
+
+// Skyline profile: lines of &quot;azimuth altitude&quot; in degrees, measured from the eye/screen
+// position with the total station. Linear interpolation; flat HORIZON if absent.
+let profile = null;
+if (A[&#x27;horizon-file&#x27;]) {
+    profile = fs.readFileSync(A[&#x27;horizon-file&#x27;], &#x27;utf8&#x27;).split(&#x27;\n&#x27;)
+        .map(l =&gt; l.trim().split(/[\s,]+/).map(Number)).filter(p =&gt; p.length &gt;= 2 &amp;&amp; !isNaN(p[1]))
+        .sort((a, b) =&gt; a[0] - b[0]);
+}
+const skyline = az =&gt; {
+    if (!profile) return HORIZON;
+    for (let i = 1; i &lt; profile.length; i++)
+        if (az &lt;= profile[i][0]) {
+            const [a0, h0] = profile[i - 1], [a1, h1] = profile[i];
+            return h0 + (h1 - h0) * (az - a0) / (a1 - a0);
+        }
+    return profile[profile.length - 1][1];
+};
+
+const rad = Math.PI / 180, deg = 180 / Math.PI;
+const mod = (a, b) =&gt; ((a % b) + b) % b;
+
+// Sun at UT instant t (ms): the praytime.js series, evaluated at the real instant.
+function sun(t) {
+    const D = t / 864e5 - 10957.5;
+    const g = mod(357.529 + 0.98560028 * D, 360);
+    const q = mod(280.459 + 0.98564736 * D, 360);
+    const L = mod(q + 1.915 * Math.sin(g * rad) + 0.020 * Math.sin(2 * g * rad), 360);
+    const e = 23.439 - 0.00000036 * D;
+    const RA = mod(Math.atan2(Math.cos(e * rad) * Math.sin(L * rad), Math.cos(L * rad)) * deg / 15, 24);
+    const dec = Math.asin(Math.sin(e * rad) * Math.sin(L * rad)) * deg;
+    let eqt = q / 15 - RA;
+    eqt = mod(eqt + 12, 24) - 12;
+    const r = 1.00014 - 0.01671 * Math.cos(g * rad) - 0.00014 * Math.cos(2 * g * rad);
+    const ut = mod(t / 36e5, 24);
+    const H = mod(15 * (ut + LON / 15 + eqt - 12) + 180, 360) - 180;       // local hour angle
+    const sa = Math.sin(LAT * rad) * Math.sin(dec * rad) + Math.cos(LAT * rad) * Math.cos(dec * rad) * Math.cos(H * rad);
+    const alt = Math.asin(sa) * deg;
+    const az = mod(Math.atan2(-Math.cos(dec * rad) * Math.sin(H * rad),
+        Math.sin(dec * rad) * Math.cos(LAT * rad) - Math.cos(dec * rad) * Math.sin(LAT * rad) * Math.cos(H * rad)) * deg, 360);
+    return { dec, H, alt, az, sd: 0.266564 / r };
+}
+
+// Saemundsson, on a TRUE altitude, scaled to local P and T. Degrees.
+const refr = a =&gt; (a &lt; -2 ? 0 : (P / 1010) * (283 / (273 + T)) * 1.02 / (60 * Math.tan((a + 10.3 / (a + 5.11)) * rad)));
+
+function bisect(f, a, b) {
+    let fa = f(a);
+    for (let i = 0; i &lt; 60; i++) {
+        const m = (a + b) / 2, fm = f(m);
+        if ((fm &gt; 0) === (fa &gt; 0)) { a = m; fa = fm; } else b = m;
+    }
+    return (a + b) / 2;
+}
+
+function day(y, mo, d) {
+    const t0 = Date.UTC(y, mo - 1, d) - TZ * 36e5;                  // local midnight, UT ms
+    const c = code.times([y, mo, d]), cc = codeConv.times([y, mo, d]);
+
+    const transit = bisect(t =&gt; sun(t).H, t0 + 10.5 * 36e5, t0 + 13 * 36e5);
+    const n = sun(transit);
+    const offMeridian = t =&gt; { const s = sun(t); return Math.cos(s.dec * rad) * Math.sin(s.H * rad); };
+    const sinSD = Math.sin(n.sd * rad);
+    const T1 = bisect(t =&gt; offMeridian(t) + sinSD, transit - 3e5, transit);   // leading limb reaches the plane
+    const T2 = bisect(t =&gt; offMeridian(t) - sinSD, transit, transit + 3e5);   // trailing limb leaves it (Dhuhr)
+
+    const altNoonApp = n.alt + refr(n.alt);
+    const z0 = 90 - altNoonApp;
+    const asrAlt = Math.atan(1 / (1 + Math.tan(z0 * rad))) * deg;           // apparent
+    const asr = bisect(t =&gt; { const s = sun(t); return s.alt + refr(s.alt) - asrAlt; }, transit + 6e4, transit + 6 * 36e5);
+
+    const set = bisect(t =&gt; {
+        const s = sun(t), limb = s.alt + s.sd;
+        return limb + refr(limb) - skyline(s.az);
+    }, transit + 3 * 36e5, transit + 8 * 36e5);
+
+    const gnomon = H =&gt; {
+        const s0 = H * Math.tan(z0 * rad);
+        const sa = sun(asr), aApp = (sa.alt + refr(sa.alt)) * rad;
+        const vNoon = H * Math.cos(n.dec * rad) * (2 * Math.PI / 86400) / Math.sin(altNoonApp * rad) * 60e3; // mm/min
+        const a2 = sun(asr + 6e4), a2App = (a2.alt + refr(a2.alt)) * rad;
+        const vAsr = (H / Math.tan(a2App) - H / Math.tan(aApp)) * 1e3;                             // mm/min
+        return {
+            noonOffset: s0, noonSide: n.dec &gt; LAT ? &#x27;S&#x27; : &#x27;N&#x27;,
+            noonImage: [H / Math.sin(altNoonApp * rad) * 2 * n.sd * rad * 1e3, H / Math.sin(altNoonApp * rad) ** 2 * 2 * n.sd * rad * 1e3],
+            vNoon, asrRadius: H + s0, asrDir: mod(sa.az + 180, 360), vAsr,
+            asrImageRadial: H / Math.sin(aApp) ** 2 * 2 * n.sd * rad * 1e3,
+        };
+    };
+    return { c, cc, transit, T1, T2, semidur: (T2 - transit) / 1e3, asr, set, maghrib: set + 12e4, z0, asrAlt,
+             setAz: sun(set).az, gin: gnomon(H_IN), gout: gnomon(H_OUT) };
+}
+
+const hms = t =&gt; {
+    const ds = mod(Math.round(t / 100) + TZ * 36000, 864000);            // tenths of a second, rounded once
+    const h = Math.floor(ds / 36000), m = Math.floor(ds / 600) % 60, x = (ds % 600) / 10;
+    return `${String(h).padStart(2, &#x27;0&#x27;)}:${String(m).padStart(2, &#x27;0&#x27;)}:${x.toFixed(1).padStart(4, &#x27;0&#x27;)}`;
+};
+const sgn = x =&gt; (x &gt;= 0 ? &#x27;+&#x27; : &#x27;&#x27;) + x.toFixed(1);
+
+// --at HH:MM:SS : where was the sun (true, unrefracted) at that local instant? This is how a
+// twilight observation (SQM curve knee, first horizontal dawn band) is compared with the
+// code&#x27;s 20 / 18 degree angles: in degrees of depression, not in minutes.
+if (A.at) {
+    const [hh, mm, ss] = A.at.split(&#x27;:&#x27;).map(Number);
+    const t = Date.UTC(from[0], from[1] - 1, from[2]) - TZ * 36e5 + ((hh * 60 + mm) * 60 + (ss || 0)) * 1e3;
+    const s = sun(t), s2 = sun(t + 6e4);
+    console.log(`${from.join(&#x27;-&#x27;)} ${A.at} UTC+${TZ}: sun altitude ${s.alt.toFixed(3)} deg (depression ${(-s.alt).toFixed(3)}), `
+        + `azimuth ${s.az.toFixed(2)} deg, changing ${((s2.alt - s.alt)).toFixed(4)} deg/min`);
+    const c = code.times(from);
+    console.log(`code fajr ${hms(c.fajr)} (sun -20)   code isha ${hms(c.isha)} (sun -18)`);
+    process.exit(0);
+}
+
+if (A.csv) console.log(&#x27;date,code_dhuhr,code_asr,code_sunset,code_maghrib,code_fajr,code_isha,transit,T1,T2,asr_obs,sunset_obs,maghrib_obs,&#x27;
+    + &#x27;noon_offset_in,asr_radius_out,asr_dir_out,set_az&#x27;);
+for (let i = 0; i &lt; DAYS; i++) {
+    const dt = new Date(Date.UTC(from[0], from[1] - 1, from[2]) + i * 864e5);
+    const [y, mo, d] = [dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate()];
+    const r = day(y, mo, d), c = r.c;
+    const iso = dt.toISOString().slice(0, 10);
+    if (A.csv) {
+        console.log([iso, c.dhuhr, c.asr, c.sunset, c.maghrib, c.fajr, c.isha, r.transit, r.T1, r.T2, r.asr, r.set, r.maghrib,
+            r.gin.noonOffset.toFixed(4), r.gout.asrRadius.toFixed(4), r.gout.asrDir.toFixed(2), r.setAz.toFixed(2)]
+            .map(v =&gt; (typeof v === &#x27;number&#x27; &amp;&amp; v &gt; 1e12 ? Math.round(v) : v)).join(&#x27;,&#x27;));
+        continue;
+    }
+    const g = r.gin, o = r.gout;
+    console.log(`\n${iso}   lat ${LAT}  lon ${LON}  UTC+${TZ}   (praytime.js v3.2, Singapore = fajr 20 / isha 18, asr Standard, maghrib 2 min, round none)`);
+    console.log(`  code   fajr ${hms(c.fajr)}  dhuhr ${hms(c.dhuhr)}  asr ${hms(c.asr)}  sunset ${hms(c.sunset)}  maghrib ${hms(c.maghrib)}  isha ${hms(c.isha)}`);
+    console.log(`         (5 iterations: asr ${sgn((r.cc.asr - c.asr) / 1e3)} s, isha ${sgn((r.cc.isha - c.isha) / 1e3)} s, fajr ${sgn((r.cc.fajr - c.fajr) / 1e3)} s vs the default 1)`);
+    console.log(`  DHUHR  meridian line, roof aperture H=${H_IN.toFixed(3)} m`);
+    console.log(`         image ${g.noonImage[0].toFixed(1)} x ${g.noonImage[1].toFixed(1)} mm, ${g.noonOffset.toFixed(3)} m ${g.noonSide} of the plumb foot, moving ${g.vNoon.toFixed(1)} mm/min`);
+    console.log(`         T1 leading edge touches line ${hms(r.T1)}   centre ${hms(r.transit)}   T2 trailing edge leaves (Dhuhr) ${hms(r.T2)}`);
+    console.log(`         expect  T2 - code dhuhr = ${sgn((r.T2 - c.dhuhr) / 1e3)} s   (semi-duration ${r.semidur.toFixed(1)} s)`);
+    console.log(`  ASR    ball-nodus gnomon, ball centre H=${H_OUT.toFixed(3)} m: arc radius ${o.asrRadius.toFixed(3)} m (= H + noon ${o.noonOffset.toFixed(3)} m ${o.noonSide}), toward azimuth ${o.asrDir.toFixed(1)}`);
+    console.log(`         penumbra ${o.asrImageRadial.toFixed(1)} mm along the shadow, shadow moving ${o.vAsr.toFixed(1)} mm/min; sun apparent alt ${r.asrAlt.toFixed(3)} deg`);
+    console.log(`         shadow centre on arc ${hms(r.asr)}   expect obs - code asr = ${sgn((r.asr - c.asr) / 1e3)} s`);
+    console.log(`  MAGHRIB upper limb below skyline (${profile ? &#x27;profile&#x27; : HORIZON.toFixed(3) + &#x27; deg&#x27;}) at az ${r.setAz.toFixed(2)}: ${hms(r.set)}  +2 min = ${hms(r.maghrib)}`);
+    console.log(`         expect obs - code = ${sgn((r.set - c.sunset) / 1e3)} s   (T ${T} C, P ${P} hPa; night-to-night refraction scatter is larger than this)`);
+}
+</pre></div>
+
+<p class="part">Reference</p>
+
+<h2 id="logging">Configuring and logging the board</h2>
+<p class="lede">What stage 2 needs from each PX1125R, and how to know the hour was not
+wasted.</p>
+<ol>
+  <li><b>Configure once, at the desk.</b> Connect the EVB's USB, which enumerates as a serial
+  port. In SkyTraq's <em>GNSS Viewer</em>, put the RTK mode to <b>base</b>. Its survey-in
+  position does not matter, since nothing downstream uses it. Enable RTCM&nbsp;3 output of
+  <b>1077, 1097, 1117 and 1127</b> (MSM7 for GPS, Galileo, QZSS and BeiDou) plus 1005, at
+  <b>1 Hz</b>. Save to SRAM <em>and</em> flash, so the setting survives the power bank
+  being unplugged.</li>
+  <li><b>Record with RTKLIB's <code>str2str</code></b> on whatever the board is plugged
+  into:
+  <pre><code>str2str -in serial://ttyUSB0:115200 -out file://A.rtcm3     <span class="c"># Linux; ttyACM0 on some hosts</span>
+str2str -in serial://COM5:115200    -out file://A.rtcm3     <span class="c"># Windows</span></code></pre>
+  115200 baud is the module's default. Four constellations of MSM7 at 1 Hz use a fraction of
+  it.</li>
+  <li><b>Before you walk away</b>, confirm the file is growing, and that GNSS Viewer shows L5,
+  E5a and B2a tracked, not just L1. Note the start time in local time <em>and</em> UTC. The
+  date is what convbin's <code>-tr</code> needs later.</li>
+  <li><b>Stop cleanly.</b> Stop <code>str2str</code> before unplugging, so the last
+  buffer is written.</li>
+</ol>
+<div class="why"><b>The raw-binary alternative.</b> The board can also stream SkyTraq raw
+binary, which SkyTraq's Raw Measurement to RINEX Converter turns into RINEX. Use it if the
+RTCM path ever gives you trouble. Do not feed that binary to RTKLIB's own
+<code>-r stq</code> decoder, which was written for an older SkyTraq raw format.</div>
+
+<h2 id="convert">Converting to RINEX</h2>
+<pre><code>convbin -r rtcm3 -tr 2026/10/04 08:00:00 -v 3.04 -od -os -o A.obs A.rtcm3</code></pre>
+<ul>
+  <li><code>-tr</code> is the approximate start, in GPS time, near enough to pick the right
+  week. MSM carries only time-of-week; without it, a file converted a week later lands a week
+  wrong.</li>
+  <li><code>-od -os</code> keep Doppler and signal strength. RTKLIB uses the Doppler in slip
+  detection, and the SNR mask needs the signal strength.</li>
+  <li>No <code>-n</code>. The base-mode output list carries no ephemeris messages, so the
+  navigation data comes from the Ina-CORS <code>.nav</code> file. Both runs use it.</li>
+  <li>Open <code>A.obs</code> and check two things: the <code>SYS / # / OBS TYPES</code> lines
+  list L5/E5a/B2a observables, and the epochs sit on whole seconds.</li>
+</ul>
+<p>RTKCONV, the GUI, does the same job, and its RTCM options have the same approximate-time
+field.</p>
+
+<h2 id="cors">Base station data from Ina-CORS</h2>
+<p>In Central Java, Ina-CORS &mdash; run by Badan Informasi Geospasial &mdash; is the reference
+network. Its receivers are understood to be Leica GR50s.</p>
+<div class="scroll">
+<table>
+  <caption>What the service gives you</caption>
+  <tbody>
+    <tr><th>Where</th><td><a href="https://srgi.big.go.id/" rel="noopener">srgi.big.go.id</a> &rarr; Unduh Data RINEX, free, login required</td></tr>
+    <tr><th>Epoch interval</th><td>30 s &mdash; a one-hour session nets about 120 matched epochs</td></tr>
+    <tr><th>File duration</th><td>24 h</td></tr>
+    <tr><th>Latency</th><td>h&minus;2 &mdash; today's data appears about two hours late</td></tr>
+    <tr><th>Archive</th><td>about 1 year back from today</td></tr>
+    <tr><th>Availability</th><td>green = present, red = station was down</td></tr>
+    <tr><th>Distance tiers</th><td>0&ndash;30 km optimal, 30&ndash;50 km medium, post-processing to about 80 km</td></tr>
+  </tbody>
+</table>
+</div>
+<ul>
+  <li><b>The coordinate.</b> Use the station's preview or description page on the Jaring
+  Kontrol Geodesi map for the published coordinate, never the RINEX header's
+  <code>APPROX POSITION XYZ</code>. With one board it transfers into A one-for-one. With two
+  boards it only has to be right to a metre or so.</li>
+  <li><b>Distance.</b> Accuracy degrades with distance as residual troposphere and
+  ionosphere stop cancelling; it is not a hard cutoff. At 14.46 km broadcast ionosphere is
+  usually adequate. Try ionosphere-free or estimated STEC if the fix is reluctant.</li>
+  <li><b>The time series.</b> Check the station's time-series page too. If the CORS has been
+  displaced by an earthquake since its coordinate was published, that is where it shows.</li>
+</ul>
+
+<h2 id="datum">Which datum and epoch you are working in</h2>
+<p>SRGI2013 is a <b>semi-dynamic</b> datum. Coordinates refer to a fixed reference epoch, and a
+deformation model carries them forward or back. Indonesia sits at the junction of several
+plates, so this is tens of centimetres over a decade.</p>
+<ul>
+  <li><b>SRGI2013 epoch 2012.0</b> is the original realisation, tied to <b>ITRF2008</b>;
+  <b>epoch 2021.0</b> is tied to <b>ITRF2014</b>.</li>
+  <li>BIG's deformation model is built from Ina-CORS and JKG displacement vectors, kriged on a
+  0.1&deg; grid and bilinearly interpolated to your point, through the Transformasi Epok
+  menu.</li>
+  <li>Going from epoch 2012.0 to 2021.0 is <b>two steps</b>: ITRF2008 &rarr; ITRF2014 at the
+  same epoch first, then the epoch transformation. Not one.</li>
+</ul>
+<div class="why"><b>None of this touches the azimuth.</b> A and B drift together, so the
+<em>vector</em> between them is unchanged. The qibla bearing moves 2.1&times;10<sup>&minus;6</sup>
+degrees per metre of absolute error. The epoch matters for the coordinate you file with the
+certificate, not for the setout. Get it right for the record, and do not let it hold up the
+setout.</div>
+<p><b>For the record:</b> RTKLIB reports latitude, longitude and <em>ellipsoidal</em> height in
+the frame and epoch of the base coordinate you entered. Apply the antenna height if you did not
+enter it as <code>ant1-antdelu</code>. Transform to your target epoch with SRGI's Transformasi
+&amp; Konversi Koordinat, which also gives UTM 49S or TM-3. For height above sea level, use
+BIG's INAGEOID2020, not RTKLIB's built-in EGM96, which is nowhere near good enough for
+Indonesia.</p>
+
+<h2 id="rtkpost">RTKLIB-EX settings for the two runs</h2>
+<p class="lede">RTKLIB-EX is the project formerly called demo5:
+<a href="https://github.com/rtklibexplorer/RTKLIB" rel="noopener">github.com/rtklibexplorer/RTKLIB</a>,
+with prebuilt Windows binaries on its Releases page and the manual at
+<a href="https://rtkexplorer.com/pdfs/manual_demo5.pdf" rel="noopener">rtkexplorer.com/pdfs/manual_demo5.pdf</a>.</p>
+
+<div class="scroll">
+<table>
+  <caption>Starting settings &middot; test alternatives against your own data</caption>
+  <thead><tr><th>Setting</th><th>Value</th><th>Why</th></tr></thead>
+  <tbody>
+    <tr><td>Positioning mode</td><td>static</td><td class="w">One constant position for the whole session, not a track</td></tr>
+    <tr><td>Frequencies</td><td><code>l1+l2+l5</code></td><td class="w">The board has L1 and L5, no L2. Builds differ in which slot L5/E5a/B2a use; three slots include it either way. Confirm L5 residuals exist in the output</td></tr>
+    <tr><td>Filter</td><td>combined</td><td class="w">Forward and backward, measurably better than forward-only for static</td></tr>
+    <tr><td>Elevation mask</td><td>15&deg;</td><td class="w">Cuts the worst multipath</td></tr>
+    <tr><td>AR elevation mask</td><td>20&deg;</td><td class="w">Keeps low, reflection-prone satellites out of ambiguity resolution</td></tr>
+    <tr><td>SNR mask</td><td>about 35 dB-Hz</td><td class="w">The datasheet's RTK guideline is 37 dB-Hz; relax it if too few satellites survive</td></tr>
+    <tr><td>Constellations</td><td><code>navsys = 57</code></td><td class="w">GPS 1 + Galileo 8 + QZSS 16 + BeiDou 32. No GLONASS (4)</td></tr>
+    <tr><td>AR mode</td><td>continuous</td><td class="w">No GLONASS bias to calibrate, so no reason for fix-and-hold</td></tr>
+    <tr><td>AR threshold / lock count</td><td>3 / 10</td><td class="w">Ratio 3 is the usual bar; lock count asks for sustained lock before trusting an ambiguity</td></tr>
+    <tr><td>Ionosphere</td><td>broadcast</td><td class="w">Run 2 is 25 m long and iono cancels outright. For run 1 at 14.5 km, try iono-free if it will not fix</td></tr>
+    <tr><td>Troposphere</td><td>Saastamoinen</td><td class="w">Estimate ZTD only if there is real height difference</td></tr>
+    <tr><td>Base position</td><td>llh, typed in</td><td class="w">Run 1: the published CORS coordinate. Run 2: A, from run 1. Never <code>rinexhead</code></td></tr>
+    <tr><td>Antenna file</td><td><code>igs20.atx</code></td><td class="w">Corrects the CORS antenna, whose type and calibration are known. Nothing is needed for your two identical antennas</td></tr>
+  </tbody>
+</table>
+</div>
+
+<pre><code><span class="c"># both run1.conf and run2.conf start with these lines (rnx2rtkp takes one -k)</span>
+pos1-posmode       = static
+pos1-soltype       = combined
+pos1-frequency     = l1+l2+l5
+pos1-elmask        = 15
+pos1-snrmask_r     = on
+pos1-snrmask_L1    = 35,35,35,35,35,35,35,35,35   <span class="c"># per 10&deg; of elevation</span>
+pos1-snrmask_L5    = 35,35,35,35,35,35,35,35,35
+pos1-navsys        = 57             <span class="c"># 1 GPS + 8 Galileo + 16 QZSS + 32 BeiDou</span>
+pos1-ionoopt       = brdc
+pos1-tropopt       = saas
+pos2-armode        = continuous
+pos2-arthres       = 3
+pos2-arelmask      = 20
+pos2-arlockcnt     = 10
+out-solformat      = llh
+ant1-anttype       =                <span class="c"># your antenna: no calibration needed</span>
+ant1-antdelu       = <span class="k">&lt;height to ARP, m&gt;</span>
+file-rcvantfile    = igs20.atx
+
+<span class="c"># run1.conf -- A against Telkom Purwodadi</span>
+ant2-postype       = llh            <span class="c"># NOT rinexhead</span>
+ant2-pos1          = -7.0960799055556
+ant2-pos2          = 110.91420790556
+ant2-pos3          = <span class="k">&lt;ellipsoidal height, SRGI station sheet&gt;</span>
+ant2-anttype       = <span class="k">&lt;antenna type from the CORS RINEX header&gt;</span>
+ant2-antdele       = <span class="k">&lt;delta E&gt;</span>
+ant2-antdeln       = <span class="k">&lt;delta N&gt;</span>
+ant2-antdelu       = <span class="k">&lt;delta H&gt;</span>
+
+<span class="c"># run2.conf -- B against A, both boards at 1 Hz, no interval mismatch</span>
+ant2-postype       = llh
+ant2-pos1          = <span class="k">&lt;A latitude from A.pos&gt;</span>
+ant2-pos2          = <span class="k">&lt;A longitude&gt;</span>
+ant2-pos3          = <span class="k">&lt;A ellipsoidal height&gt;</span>
+ant2-anttype       =                <span class="c"># the same model as ant1: offsets cancel</span>
+ant2-antdelu       = <span class="k">&lt;A's antenna height&gt;</span></code></pre>
+
+<div class="why"><b>Epoch interval, run 1 only.</b> The CORS logs at 30 s and your board at
+1 Hz. Left alone, most rover epochs are differenced against stale base data. Either decimate
+with <code>-ti 30</code>, which aligns epochs exactly but makes slip detection across the gaps
+harder, or leave the rover at 1 Hz and let <code>pos2-maxage</code> pair within tolerance. Run
+both; they should agree to a few millimetres. Run 2 has no such problem.</div>
+<div class="trap warn">
+  <h4>Verify every option name <span>against your release's sample config</span></h4>
+  <p>RTKLIB-EX has renamed and added options across versions, frequency selection and SNR masks
+  in particular. <code>rnx2rtkp</code> will happily run with a default you did not intend when it
+  meets a name it does not recognise. Diff your file against the shipped sample before trusting
+  a result.</p>
+</div>
+
+<h2 id="trust">Reading and trusting the result</h2>
+<p>In the <code>.pos</code> output, <b>Q=1</b> is fixed: integer ambiguities resolved, the
+millimetre-class result. <b>Q=2</b> is float, decimetres at best, and <b>Q=5</b> is
+single-point. Check the AR ratio is comfortably above 3, and more importantly that the fix
+<em>held</em> through the back half of the session instead of flickering. The sdE/sdN/sdU
+columns are formal uncertainties, not guarantees.</p>
+<ol>
+  <li><b>Split the hour.</b> Process the first and second halves of the session separately.
+  Agreement of B-against-A within a couple of millimetres beats any single run's statistics,
+  because it tests the real multipath instead of the filter's opinion of itself.</li>
+  <li><b>Tape A&ndash;B.</b> A steel tape checks the baseline length to a few millimetres, with
+  no GNSS involved. It cannot check the direction; it does catch a gross error.</li>
+  <li><b>BIG's online post-processing</b> is a free cross-check for A's absolute position. It
+  may choose a different base than you did; if it rejects the file, that is not evidence the
+  data is bad.</li>
+  <li><b>The shadow check</b> in stage 7 is the independent test of direction.</li>
+</ol>
+
+<h2 id="instrument">Choosing the total station</h2>
+<p class="lede">What the rented instrument has to be good enough for on this job, and where
+paying for a better one stops showing up in the house.</p>
+
+<p>The instrument's whole task is to carry the A&rarr;B azimuth from B onto the ground: orient
+on B, dial the line, and let someone mark it. The LocalCartesian ENU frame about A in which
+setout.py computes every point is flat to within 0.1&Prime; across the parcel: meridian
+convergence over 25 m east of A is 0.099&Prime;. A plane-surveying instrument therefore
+carries it with no projection correction at all &mdash; provided it applies none of its own
+(<a href="#traps">Traps</a>). The model is in <code>dsygv/setout/tsspec.py</code>, and
+<code>setout.py --selftest</code> checks it against a simulation of the staking itself.</p>
+
+<h3>How to read a spec sheet</h3>
+<ul>
+  <li><b>Angle accuracy</b> is quoted to ISO 17123-3 (or DIN 18723): the standard deviation of
+  one horizontal direction measured in <em>both</em> faces. Staking is single-face, so one
+  pointing is &radic;2 times the sheet figure, and an angle between two pointings twice it. A
+  5&Prime; instrument turns a staked angle to about 10&Prime;. On Topcon and Sokkia models the
+  last digit is usually the class &mdash; GM-55, CX-105, iM-55 are 5&Prime;; GM-52, CX-102,
+  iM-52 are 2&Prime; &mdash; but confirm it on the sheet.</li>
+  <li><b>Distance accuracy</b> is <code>&plusmn;(a mm + b ppm &times; D)</code>, typically
+  2 mm + 2 ppm to a prism and 3 mm + 2 ppm reflectorless. Inside a parcel the ppm part is
+  nothing: 2 ppm over 50 m is 0.1 mm. <b>Compare instruments on the fixed part.</b></li>
+</ul>
+
+<h3>The central line, instrument by instrument</h3>
+<div class="scroll">
+<table>
+  <caption>25 m two-board baseline &middot; GNSS alone 28.6&Prime;</caption>
+  <thead><tr><th>Instrument</th><th>Centring</th><th>Marking</th><th class="n">Total</th><th class="n">Arcmin</th></tr></thead>
+  <tbody>
+    <tr><td>1&Prime;</td><td>forced</td><td>crosshair on board</td><td class="n">30.8&Prime;</td><td class="n">0.51</td></tr>
+    <tr><td>2&Prime;</td><td>forced</td><td>crosshair on board</td><td class="n">31.0&Prime;</td><td class="n">0.52</td></tr>
+    <tr class="hi"><td>5&Prime;</td><td>forced</td><td>crosshair on board</td><td class="n">32.3&Prime;</td><td class="n">0.54</td></tr>
+    <tr><td>10&Prime;</td><td>forced</td><td>crosshair on board</td><td class="n">36.6&Prime;</td><td class="n">0.61</td></tr>
+    <tr><td>20&Prime;</td><td>forced</td><td>crosshair on board</td><td class="n">50.4&Prime;</td><td class="n">0.84</td></tr>
+    <tr><td>1&Prime;</td><td>re-set over nail</td><td>crosshair on board</td><td class="n">32.8&Prime;</td><td class="n">0.55</td></tr>
+    <tr><td>5&Prime;</td><td>re-set over nail</td><td>crosshair on board</td><td class="n">34.3&Prime;</td><td class="n">0.57</td></tr>
+    <tr><td>5&Prime;</td><td>forced</td><td>prism on tripod at M0, M1</td><td class="n">33.5&Prime;</td><td class="n">0.56</td></tr>
+    <tr><td>5&Prime;</td><td>forced</td><td>prism pole on bipod</td><td class="n">52.2&Prime;</td><td class="n">0.87</td></tr>
+    <tr><td>5&Prime;</td><td>forced</td><td>prism pole by hand</td><td class="n">90.2&Prime;</td><td class="n">1.50</td></tr>
+    <tr><td>1&Prime;</td><td>forced</td><td>prism pole by hand</td><td class="n">89.7&Prime;</td><td class="n">1.49</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Three things come out of that table, and none of them is on a spec sheet:</p>
+<ol>
+  <li><b>Going from 5&Prime; to 1&Prime; buys 1.5&Prime;</b> &mdash; 0.08 mm over the 10.3 m
+  line. The masonry cannot hold a tenth of that.</li>
+  <li><b>A 5&Prime; instrument on the GNSS tribrach beats a 1&Prime; one re-centred over the
+  nail.</b> Centring is divided by the backsight length, and a millimetre at each end of a 25 m
+  backsight is 12&Prime;.</li>
+  <li><b>A hand-held prism pole fails the job with any instrument.</b> Two marks 10.3 m apart,
+  each off by the 3 mm a pole bubble allows, are worth 85&Prime; on their own. A perfect
+  instrument still leaves 1.49&prime;. Mark the line by crosshair on the boards. The pole is
+  for corners, where 3 mm against a 10 mm tolerance is fine.</li>
+</ol>
+
+<h3>By parcel size</h3>
+<p>The parcel sets the longest baseline you can observe, and the baseline sets how much of the
+budget is left for the instrument. The table puts A on the central line's extension and B at
+the far corner, both 1 m in from the boundaries, with two boards, forced centring and
+board-marked lines:</p>
+<div class="scroll">
+<table class="tight">
+  <caption>setout.py --ts-table &middot; two boards, forced centring</caption>
+  <thead><tr>
+    <th>Parcel</th><th class="n">D</th><th class="n">GNSS</th><th class="n">Needed</th><th class="n">Overkill</th>
+    <th class="n">@5&Prime;</th><th>1&Prime;</th><th>2&Prime;</th><th>3&Prime;</th><th>5&Prime;</th><th>7&Prime;</th><th>10&Prime;</th><th>20&Prime;</th>
+  </tr></thead>
+  <tbody>
+    <tr><td>8 &times; 15 m</td><td class="n">14.3 m</td><td class="n">49.9&Prime;</td><td class="n">&le;12.6&Prime;</td><td class="n">&le;5.1&Prime;</td><td class="n">52.2&Prime;</td>
+      <td><span class="tag over">over</span></td><td><span class="tag over">over</span></td><td><span class="tag over">over</span></td><td><span class="tag over">over</span></td><td><span class="tag ok">ok</span></td><td><span class="tag ok">ok</span></td><td><span class="tag marg">marg</span></td></tr>
+    <tr><td>10 &times; 20 m</td><td class="n">19.7 m</td><td class="n">36.3&Prime;</td><td class="n">&le;9.4&Prime;</td><td class="n">&le;3.8&Prime;</td><td class="n">39.3&Prime;</td>
+      <td><span class="tag over">over</span></td><td><span class="tag over">over</span></td><td><span class="tag over">over</span></td><td><span class="tag ok">ok</span></td><td><span class="tag ok">ok</span></td><td><span class="tag marg">marg</span></td><td><span class="tag no">no</span></td></tr>
+    <tr class="hi"><td>12 &times; 25 m</td><td class="n">25.1 m</td><td class="n">28.5&Prime;</td><td class="n">&le;7.5&Prime;</td><td class="n">&le;3.1&Prime;</td><td class="n">32.2&Prime;</td>
+      <td><span class="tag over">over</span></td><td><span class="tag over">over</span></td><td><span class="tag over">over</span></td><td><span class="tag ok">ok</span></td><td><span class="tag ok">ok</span></td><td><span class="tag marg">marg</span></td><td><span class="tag no">no</span></td></tr>
+    <tr><td>15 &times; 30 m</td><td class="n">30.9 m</td><td class="n">23.2&Prime;</td><td class="n">&le;6.3&Prime;</td><td class="n">&le;2.6&Prime;</td><td class="n">27.6&Prime;</td>
+      <td><span class="tag over">over</span></td><td><span class="tag over">over</span></td><td><span class="tag ok">ok</span></td><td><span class="tag ok">ok</span></td><td><span class="tag marg">marg</span></td><td><span class="tag marg">marg</span></td><td><span class="tag no">no</span></td></tr>
+    <tr><td>20 &times; 40 m</td><td class="n">42.0 m</td><td class="n">17.0&Prime;</td><td class="n">&le;5.0&Prime;</td><td class="n">&le;2.0&Prime;</td><td class="n">22.6&Prime;</td>
+      <td><span class="tag over">over</span></td><td><span class="tag over">over</span></td><td><span class="tag ok">ok</span></td><td><span class="tag ok">ok</span></td><td><span class="tag marg">marg</span></td><td><span class="tag marg">marg</span></td><td><span class="tag no">no</span></td></tr>
+  </tbody>
+</table>
+</div>
+<ul>
+  <li><b>Needed</b> is the coarsest class whose whole contribution, centring included, stays
+  under half of everything else: it adds at most 12% to the total.</li>
+  <li><b>Overkill</b> is where the angle class stops buying 2%: a better class cannot be seen
+  in the result. A class is marked <span class="tag over">over</span> only when a coarser one on
+  the list is already enough.</li>
+  <li><span class="tag marg">marg</span> adds 12&ndash;41%. <span class="tag no">no</span>
+  means the instrument, not the GNSS, has become the weakest link. You paid for a baseline and
+  threw it away.</li>
+</ul>
+<p><b>The counter-intuitive part: a small parcel cannot use a good instrument.</b> A short
+parcel means a short baseline, and its GNSS error swamps anything the instrument adds, so
+coarse classes pass. The bigger the parcel, the more the class matters &mdash; but even on
+20 &times; 40 m, 5&Prime; is enough and 1&ndash;2&Prime; buys nothing. With <b>one board</b>
+the GNSS term grows by 60%. The needed class loosens to &le;20.0, 14.7, 11.6, 9.6 and 7.3&Prime;
+down the same rows, which only strengthens the verdict. With <b>re-set centring</b> it tightens
+to &le;7.7&ndash;3.7&Prime;, and a 5&Prime; instrument turns marginal from 12 &times; 25 m up.
+Check any parcel with <code>setout.py --ts-table 9x18 12x25</code>.</p>
+
+<h3>What to rent</h3>
+<div class="scroll">
+<table>
+  <caption>Indicative day rates, two Indonesian rental lists, checked 23 Sep 2026</caption>
+  <thead><tr><th>Kit</th><th class="n">Rp / day</th><th>For this job</th></tr></thead>
+  <tbody>
+    <tr><td>Digital theodolite (angles only)</td><td class="n">150.000</td><td class="w"><span class="tag ok">enough</span> for the qibla line, if it is 5&ndash;10&Prime; and has a detachable tribrach. The line needs only the angle. M0/M1 and the corners go by steel tape, and the rectangle is more work</td></tr>
+    <tr class="hi"><td>Total station, prism only (5&Prime; class)</td><td class="n">200.000&ndash;250.000</td><td class="w"><span class="tag ok">right-sized</span>: the angle, the distances, the corners and the gnomon points in one visit</td></tr>
+    <tr><td>Total station with reflectorless laser</td><td class="n">300.000</td><td class="w">convenience only: nothing here needs a distance without a prism</td></tr>
+    <tr><td>1&Prime; / robotic</td><td class="n">not listed</td><td class="w"><span class="tag over">overkill</span> on every parcel above</td></tr>
+  </tbody>
+</table>
+</div>
+<p>An operator is charged separately. Prices from
+<a href="https://totalstation.co.id/product/rental-sewa-total-station-alat-survey-lainya/" rel="noopener">CV.BNT</a>
+and <a href="https://dinargeo.co.id/harga-sewa-total-station/" rel="noopener">Dinar Geoinstrument</a>;
+ask for a quote with the accessories below included.</p>
+
+<h3>The other attributes, in the order they bite</h3>
+<div class="scroll">
+<table>
+  <caption>Check before you sign the rental slip</caption>
+  <thead><tr><th>Attribute</th><th>Want</th><th>Why, here</th></tr></thead>
+  <tbody>
+    <tr><td>Tribrach</td><td>detachable, Wild/Leica-style 3-lug</td><td class="w">Forced centring onto the GNSS tribrach is worth more than any class. An instrument with a fixed base cannot do it. Try your GNSS adapter in the rental tribrach before the day</td></tr>
+    <tr><td>Backsight target</td><td>prism with its own tribrach adapter</td><td class="w">It drops into B's tribrach. A pole held at B is the same 3 mm problem at the far end</td></tr>
+    <tr><td>Minimum reading</td><td>1&Prime;, and set to it</td><td class="w">Some 5&Prime; instruments step the display in 5&Prime;, where 294&deg;15&prime;18&Prime; cannot even be shown. The keypad takes whole arcseconds; that is fine (<a href="#integer">why</a>)</td></tr>
+    <tr><td>Minimum focus</td><td>about 1.3 m or less</td><td class="w">Nothing A sights may be closer. It is why A sits 4 m behind the back wall, and why the meridian direction goes on boards 3 m out rather than on the line’s own ends</td></tr>
+    <tr><td>Compensator</td><td>dual-axis preferred</td><td class="w">Single-axis is acceptable: axis tilt costs <code>i &middot; tan h</code>, and every sight here is near-horizontal</td></tr>
+    <tr><td>Calibration</td><td>a recent certificate, plus a two-face check</td><td class="w">Collimation cancels between near-horizontal backsight and foresight, so single-face staking survives a small one. The vertical index error does not cancel: measure the skyline in both faces</td></tr>
+    <tr><td>Distance</td><td>2&ndash;3 mm + 2 ppm, fine mode</td><td class="w">With A on the line the EDM cannot turn the house. It only places M0/M1 and the corners, within 2&ndash;4 mm of a 10 mm tolerance</td></tr>
+    <tr><td>Reflectorless, robotics, onboard stakeout</td><td>not needed</td><td class="w">The polar table is typed in; the line is marked by eye</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>The gnomon lines, with the same instrument</h3>
+<p>The meridian line is 2.873 m on true north with a 1&prime; allowance. Set from its own foot
+against B it comes to 0.67&prime;; staked as two polar points from A with a prism pole, about
+6&prime;, because a 2.9 m line cannot absorb the EDM's 2 mm (<a href="#s8-card">stage 8</a>).
+The Maghrib skyline is vertical angles, where 1&prime; is 4.4 s of sunset: any class is ample,
+but measure in both faces (<a href="#s11-card">stage 11</a>). The Asr pad's north&ndash;south
+line needs only &plusmn;0.5&deg;.</p>
+
+<h2 id="traps">Ways to be wrong by more than everything above</h2>
+<p class="lede">Each of these dwarfs the entire error budget. Check them before you worry
+about anything else.</p>
+
+<div class="trap">
+  <h4>Centreline vs. wall face <span>100&ndash;115 mm</span></h4>
+  <p>Every coordinate the tool emits is a column or wall <em>centreline</em>, matching the grid
+  that <code>Geometry.kt</code> analyses. The 200 mm shear walls put outer faces at
+  <code>x = &minus;0.100</code> and <code>6.100</code>; the 230 mm columns put faces at
+  <code>y = &minus;0.115</code> and <code>10.415</code>. Agree with the mandor which one the
+  bouwplank carries, out loud, before anyone strings a line.</p>
+</div>
+
+<div class="trap">
+  <h4>Prism constant <span>17.5&ndash;30 mm</span></h4>
+  <p>A prism is 0, &minus;17.5 or &minus;30 mm, and the instrument has to be told which. A
+  mismatch moves every staked distance by the difference. It cannot turn the line when A is on
+  it, but it moves M0, M1 and every corner.</p>
+</div>
+
+<div class="trap">
+  <h4>Instrument scale factor <span>400 ppm = 5.3 mm</span></h4>
+  <p>ENU distances are ground distances. An instrument left on a UTM scale factor (0.9996) or
+  a sea-level reduction shrinks every one of them. Over 13.3 m that is 5.3 mm. Set the scale
+  to 1.000000 and the reductions off.</p>
+</div>
+
+<div class="trap">
+  <h4>BPN TM-3 grid north <span>&minus;10.39&prime; / +11.45&prime;</span></h4>
+  <p>That is the frame your parcel certificate is in, and its grid north is not true north.
+  At this site it is off by more than ten arcminutes, in opposite directions depending on
+  whether you are in the CM 109.5&deg; or CM 112.5&deg; zone. Work in ENU, where north
+  <em>is</em> geodetic north, and never take a bearing off the certificate.</p>
+</div>
+
+<div class="trap">
+  <h4>Prism pole on a short line <span>85&Prime; to 6&prime;</span></h4>
+  <p>A hand-held pole's bubble allows about 3 mm. On the 10.3 m central line that is 85&Prime;.
+  On the 2.87 m meridian line, with the EDM's error added, it is 6&prime;. Lines are marked
+  by crosshair. Poles are for points.</p>
+</div>
+
+<div class="trap warn">
+  <h4>A spherical qibla formula <span>+7.40&prime;</span></h4>
+  <p>Great-circle-on-a-sphere is wrong by more than seven arcminutes here &mdash; larger than
+  your whole measurement budget. Use the ellipsoidal geodesic. A rhumb line, if anyone suggests
+  one, is out by <b>135&prime;</b>.</p>
+</div>
+
+<div class="trap warn">
+  <h4><code>pos1-navsys = 13</code> <span>no BeiDou</span></h4>
+  <p>13 is GPS + GLONASS + Galileo. It turns on the one system the board does not track and
+  turns off BeiDou, which it does. The value is a bit mask: GPS 1, SBAS 2, GLONASS 4, Galileo 8,
+  QZSS 16, BeiDou 32. This board wants 57.</p>
+</div>
+
+<div class="trap warn">
+  <h4>RTCM without a date <span>no fix, ever</span></h4>
+  <p>Convert an MSM log without <code>-tr</code> and convbin may put it in the wrong GPS week.
+  Base and rover then never share an epoch, and the solution fails with no helpful message.</p>
+</div>
+
+<div class="trap warn">
+  <h4>Unmatched epoch intervals <span>float solution</span></h4>
+  <p>The CORS logs at 30 s and your board at 1 Hz. Left alone, most rover epochs get
+  differenced against stale base data, and the solution may never fix. Decimate with
+  <code>-ti 30</code>, or let <code>pos2-maxage</code> pair within tolerance &mdash; but choose
+  one deliberately.</p>
+</div>
+
+<section class="faq" id="faq">
+<h2>Questions and answers</h2>
+
+<details>
+  <summary>Can a PX1125R board really deliver a millimetre-class baseline?</summary>
+  <div class="a"><p>For a short static baseline with a fixed solution, yes. SkyTraq specifies
+  1 cm + 1 ppm for RTK, and a static hour over 25 m averages well below that. What decides it
+  is the antenna and the site, not the module: an active L1/L5 antenna, a ground plane if it
+  is a bare patch, open sky, and the same antenna model turned the same way on both marks.</p></div>
+</details>
+
+<details>
+  <summary>Does the PX1125R track GLONASS?</summary>
+  <div class="a"><p>The standard part does not. It tracks GPS/QZSS L1/L5, Galileo E1/E5a,
+  BeiDou B1I/B2a and NavIC L5; the PX1125R-01 variant adds GLONASS L1. Leave GLONASS out either
+  way. Its inter-channel bias between different receivers is the most common reason a
+  CORS-based solution will not fix, and <code>navsys = 57</code> excludes it.</p></div>
+</details>
+
+<details>
+  <summary>Why log RTCM3 MSM7 instead of SkyTraq raw binary?</summary>
+  <div class="a"><p>RTKLIB decodes RTCM3 MSM natively, and MSM7 carries full-precision phase.
+  RTKLIB's SkyTraq decoder was written for an older raw format than this module's, so the binary
+  path may produce nothing. If you do log binary, convert it with SkyTraq's own Raw Measurement
+  to RINEX Converter.</p></div>
+</details>
+
+<details>
+  <summary>With two boards, do I need the CORS at all?</summary>
+  <div class="a"><p>For the azimuth, no. The A&rarr;B baseline is processed directly, and the
+  qibla bearing moves only 2.1&times;10<sup>&minus;6</sup> degrees per metre of error in A's
+  absolute position. You still want A's coordinate to about a metre for the qibla computation,
+  and properly for the record. That is what the CORS run gives you.</p></div>
+</details>
+
+<details>
+  <summary>How long do I need to log?</summary>
+  <div class="a"><p>An hour with two boards on a 25 m baseline is generous. Ambiguities on a
+  line that short fix in seconds; the hour is for averaging multipath, which decorrelates only
+  over hundreds of seconds. With one board against a CORS 14.5 km away, take one to two hours
+  per mark. Split either into halves at the desk for a repeatability check.</p></div>
+</details>
+
+<details>
+  <summary>Which total station should I rent?</summary>
+  <div class="a"><p>A 5&Prime; total station with a detachable tribrach and a prism with its own
+  tribrach adapter for the backsight. It is enough on every parcel from 8 &times; 15 to
+  20 &times; 40 m. Book it for the day you observe, so it can drop onto the GNSS tribrach
+  without re-centring. For the qibla line alone, a 5&ndash;10&Prime; digital theodolite and a
+  steel tape are also enough.</p></div>
+</details>
+
+<details>
+  <summary>Is a 1&Prime; instrument worth it?</summary>
+  <div class="a"><p>No. On a 25 m baseline it improves the central line from 32.3&Prime; to
+  30.8&Prime;, 0.08 mm over 10.3 m. Forced centring and marking the line on the boards by
+  crosshair each matter more than the whole difference between classes.</p></div>
+</details>
+
+<details>
+  <summary>Does an integer-arcsecond parcel make the setout more accurate?</summary>
+  <div class="a"><p>By at most half an arcsecond, which is one sixtieth of the GNSS error. The
+  keypad takes whole arcseconds, and the integer site means the qibla and the 65&deg;44&prime;42&Prime;
+  turn to true north need no rounding. The backsight still does. Its real value is that the
+  display shows exactly the published number, so anyone can audit it.</p></div>
+</details>
+
+<details>
+  <summary>Why does the epoch of my coordinate matter in Indonesia?</summary>
+  <div class="a"><p>SRGI2013 is semi-dynamic and the ground moves: tens of centimetres a
+  decade. Epoch 2012.0 ties to ITRF2008 and 2021.0 to ITRF2014, and converting between them is
+  two steps. It matters for the coordinate you file with the certificate, and not at all for
+  the azimuth, because A and B move together.</p></div>
+</details>
+
+<details>
+  <summary>Can I use PPP instead of a base station?</summary>
+  <div class="a"><p>For A's absolute position, as a cross-check, yes. For the azimuth it is
+  the wrong tool: two simultaneous boards 25 m apart cancel the atmosphere and the orbits
+  outright, where PPP has to model them and converge.</p></div>
+</details>
+<details>
+  <summary>Why a meridian line indoors for Dhuhr but a ball outdoors for Asr?</summary>
+  <div class="a"><p>A 3 mm hole 3.20 m above the floor throws a sharp sun image that crosses a line at 13 to 15 mm a minute, which is what makes Dhuhr good to about 4 seconds. The Asr shadow from that height would be 3.20 to 5.07 m long, beyond the room's walls every day of the year. Outdoors a pinhole image is too faint to see against open skylight, so the Asr gnomon uses a 60 mm ball whose shadow has a dark core.</p></div>
+</details>
+
+<details>
+  <summary>Why does an observed Dhuhr come about a minute after the code's?</summary>
+  <div class="a"><p>praytime.js v3.2 gives the moment the sun's centre crosses the meridian. Definition 3 waits for the whole disc to clear it, which takes another 63.7 to 70.9 seconds depending on the date, not a constant 65. The checker prints the exact figure for each day, so the comparison is against that, not against zero.</p></div>
+</details>
+
+<details>
+  <summary>Can a shadow measure Isha or Fajr?</summary>
+  <div class="a"><p>No. With the sun 18 to 20 degrees below the horizon, the lowest sunlit air is 330 to 410 km up, so nothing near you casts a shadow. What can be measured is the sky's brightness against time, with a sky-quality photometer or a camera on fixed settings, compared with the code in degrees of solar depression rather than in minutes.</p></div>
+</details>
+</section>
+
+<h2 id="refs">Further reading</h2>
+<ul class="refs">
+  <li>SkyTraq, <em>PX1125R Centimeter-Level GNSS Receiver</em> datasheet &mdash; signals, RTCM
+  message lists for rover and base modes, antenna requirements, and the RTK usage guideline
+  (<a href="https://www.skytraq.com.tw/" rel="noopener">skytraq.com.tw</a>).</li>
+  <li>rtklibexplorer, <a href="https://rtklibexplorer.wordpress.com/" rel="noopener">rtklibexplorer.wordpress.com</a>,
+  and the RTKLIB-EX manual &mdash; the source for most of the RTKLIB settings above.</li>
+  <li>Badan Informasi Geospasial SRGI pages: Jaring Kontrol Geodesi, Model Deformasi,
+  Transformasi &amp; Konversi Koordinat, Model Geoid and Unduh Data Rinex, at
+  <a href="https://srgi.big.go.id/" rel="noopener">srgi.big.go.id</a>.</li>
+  <li>ISO 17123-3, <em>Field procedures for testing geodetic and surveying instruments &mdash;
+  Theodolites</em>, and ISO 17123-4 for electro-optical distance meters &mdash; what the numbers
+  on a spec sheet mean.</li>
+  <li>C. F. F. Karney (2013), &ldquo;Algorithms for geodesics&rdquo;, <em>Journal of
+  Geodesy</em> 87, 43&ndash;55 &mdash; the geodesic behind the qibla azimuth.</li>
+  <li>I. Reda &amp; A. Andreas, <a href="NREL_SPA.pdf">Solar Position Algorithm for Solar
+  Radiation Applications</a> (NREL) &mdash; the algorithm behind the shadow table and the
+  gnomon checker's verification.</li>
+  <li><code>praytime@3.2.0</code> on npm, the code under test, and PrayTimes.org's &ldquo;A Note
+  on Dhuhr&rdquo;, whose definition 3 the meridian line reads.</li>
+</ul>
+
+<div class="foot">
+  <p><b>Tooling</b> &mdash; <code>dsygv/setout/</code>: <code>setout.py</code> (stakeout,
+  whole-arcsecond dial values, total-station budget and a 27-check self-test),
+  <code>tsspec.py</code> (the total-station model and the parcel table), <code>geolib.py</code>
+  (Vincenty inverse, ECEF&harr;ENU, grid convergence), <code>cors.py</code> (station ranking),
+  <code>gnomon.py</code> (the two solar gnomons), and <code>observe.js</code> with the vendored
+  <code>praytime.js</code> it tests. Python is standard library only; <code>observe.js</code>
+  needs Bun.</p>
+  <p><b>Verified</b> &mdash; LocalCartesian ENU azimuth against the geodesic inverse:
+  0.0097&Prime; over 46.9 m. Central line re-derived from its own lat/lon and re-solved to the
+  Kaaba: 0.007&Prime;. Vincenty against the Karney implementation in the Qur'an project, on
+  the same Kaaba coordinate: 294.267388007&deg; from both. This site: 294&deg;15&prime;18.00000&Prime;.
+  The total-station model against a simulation of the staking: within 0.3%. Shadow table: the
+  Qur'an project's <code>BayanganKiblat</code> and NREL SPA port, at 60 m.</p>
+  <p><b>Scale</b> &mdash; 1&deg; of azimuth error is about 107.5 km at the Kaaba, from
+  <code>R&middot;sin&sigma;&middot;&delta;</code> over 75.3&deg; of arc.</p>
+  <p><b>Estimates, marked</b> &mdash; mountain positions in the skyline figure are approximate,
+  and the brightness figures are rough; both are marked where used. Every other gnomon number was
+  computed for this site with praytime.js 3.2.0 and the NREL SPA port from the Qur'an project.</p>
+  <p><b>Not a specification</b> &mdash; accuracy figures describe typical outcomes under the
+  stated conditions. Rental prices are indicative and dated. Ina-CORS data, the deformation
+  model and the geoid are BIG products under BIG's terms of use.</p>
+</div>
+
+</div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://dawud-tan.github.io/qibla-setout-field-sheet.html#article",
+      "headline": "Setting the house on the qibla line, and reading the sun from it",
+      "name": "Qibla Setout and Solar Gnomons: A House Field Sheet from GNSS Baseline to Prayer-Time Checks",
+      "description": "End-to-end field sheet: choosing an integer-arcsecond parcel, a static GNSS baseline with two SkyTraq PX1125R boards, total-station setout with the specs that are enough or overkill, then a meridian line and a ball-nodus gnomon that check praytime.js v3.2 against the sun.",
+      "inLanguage": "en",
+      "datePublished": "2026-09-05",
+      "dateModified": "2026-09-24",
+      "author": {
+        "@type": "Person",
+        "name": "Claude Opus 5.5"
+      },
+      "proficiencyLevel": "Expert",
+      "articleSection": "GNSS surveying",
+      "dependencies": "SkyTraq PX1125R evaluation boards with external L1/L5 antennas, RTKLIB-EX, Python 3, Ina-CORS RINEX data, a total station, Bun for observe.js, a sky-quality photometer (optional)",
+      "keywords": "qibla azimuth, SkyTraq PX1125R, RTCM3 MSM7, RTKLIB-EX, static GNSS, Ina-CORS, SRGI2013, total station, ISO 17123-3, integer arcsecond, solar gnomon, meridian line, praytime.js, Dhuhr, Asr",
+      "about": [
+        {
+          "@type": "Thing",
+          "name": "Qibla",
+          "sameAs": "https://en.wikipedia.org/wiki/Qibla"
+        },
+        {
+          "@type": "Thing",
+          "name": "Surveying",
+          "sameAs": "https://en.wikipedia.org/wiki/Surveying"
+        },
+        {
+          "@type": "Thing",
+          "name": "Total station",
+          "sameAs": "https://en.wikipedia.org/wiki/Total_station"
+        }
+      ],
+      "mentions": [
+        {
+          "@type": "Thing",
+          "name": "SkyTraq PX1125R",
+          "description": "Multi-band L1/L5 RTK GNSS receiver module."
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "RTKLIB-EX",
+          "alternateName": "demo5",
+          "applicationCategory": "Scientific software",
+          "url": "https://github.com/rtklibexplorer/RTKLIB"
+        },
+        {
+          "@type": "Organization",
+          "name": "Badan Informasi Geospasial",
+          "alternateName": "Geospatial Information Agency of Indonesia",
+          "url": "https://srgi.big.go.id/"
+        },
+        {
+          "@type": "Thing",
+          "name": "SRGI2013",
+          "description": "Indonesia's semi-dynamic national geospatial reference system."
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "praytime.js",
+          "softwareVersion": "3.2.0",
+          "applicationCategory": "Library"
+        }
+      ],
+      "mainEntityOfPage": {
+        "@id": "https://dawud-tan.github.io/qibla-setout-field-sheet.html"
+      }
+    },
+    {
+      "@type": "HowTo",
+      "@id": "https://dawud-tan.github.io/qibla-setout-field-sheet.html#howto",
+      "name": "How to set a house on the qibla azimuth and read prayer times from the sun at it",
+      "inLanguage": "en",
+      "totalTime": "P2D",
+      "tool": [
+        {
+          "@type": "HowToTool",
+          "name": "Two SkyTraq PX1125R evaluation boards with active L1/L5 antennas"
+        },
+        {
+          "@type": "HowToTool",
+          "name": "Two tripods with tribrachs and 5/8 inch adapters"
+        },
+        {
+          "@type": "HowToTool",
+          "name": "A 5 arcsecond total station with a detachable tribrach, and a prism with tribrach adapter"
+        },
+        {
+          "@type": "HowToTool",
+          "name": "Steel tape and plumb line"
+        },
+        {
+          "@type": "HowToTool",
+          "name": "3 mm aperture plate, steel angle, clear roof sheet and brass floor strip"
+        },
+        {
+          "@type": "HowToTool",
+          "name": "60 mm ball nodus on a rigid post over a levelled pad"
+        }
+      ],
+      "supply": [
+        {
+          "@type": "HowToSupply",
+          "name": "RTKLIB-EX (str2str, convbin, rnx2rtkp)"
+        },
+        {
+          "@type": "HowToSupply",
+          "name": "Ina-CORS RINEX observation and navigation files"
+        },
+        {
+          "@type": "HowToSupply",
+          "name": "setout.py from dsygv/setout"
+        }
+      ],
+      "step": [
+        {
+          "@type": "HowToStep",
+          "position": 1,
+          "name": "Check the base station",
+          "url": "https://dawud-tan.github.io/qibla-setout-field-sheet.html#s0-card",
+          "text": "Rank the Ina-CORS stations from the site, and read the nearest one's RINEX header for L5/E5a observables and its availability for the observation day."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 2,
+          "name": "Set the two marks",
+          "url": "https://dawud-tan.github.io/qibla-setout-field-sheet.html#s1-card",
+          "text": "Put A on the extension of the future central line about 4 m behind the back wall and B as far away as the parcel allows, intervisible, on tribrachs that stay in place until the total station arrives."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 3,
+          "name": "Observe",
+          "url": "https://dawud-tan.github.io/qibla-setout-field-sheet.html#s2-card",
+          "text": "Log RTCM3 MSM7 at 1 Hz from a PX1125R board on each mark simultaneously for an hour, antennas turned north, heights recorded."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 4,
+          "name": "Pull the Ina-CORS RINEX",
+          "url": "https://dawud-tan.github.io/qibla-setout-field-sheet.html#s3-card",
+          "text": "Download the observation and navigation files and take the base coordinate from the published station sheet, not the RINEX header."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 5,
+          "name": "Convert and process",
+          "url": "https://dawud-tan.github.io/qibla-setout-field-sheet.html#s4-card",
+          "text": "Convert with convbin using the approximate date, then process A against the CORS and B against A in static mode with navsys 57, accepting only fixed solutions."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 6,
+          "name": "Compute the setout",
+          "url": "https://dawud-tan.github.io/qibla-setout-field-sheet.html#s5-card",
+          "text": "Run setout.py with the house pinned to A so the central line runs through it, and read the whole-arcsecond angles and the total-station budget."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 7,
+          "name": "Stake it",
+          "url": "https://dawud-tan.github.io/qibla-setout-field-sheet.html#s6-card",
+          "text": "Drop the total station onto A's tribrach, zero on B, dial the central line once and mark it on the bouwplank by crosshair, then set M0, M1 and the corners."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 8,
+          "name": "Verify",
+          "url": "https://dawud-tan.github.io/qibla-setout-field-sheet.html#s7-card",
+          "text": "Tape the sides, diagonals and A-B, and check the orientation with a plumb-line shadow at a tabulated moment."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 9,
+          "name": "Mark the gnomon lines",
+          "url": "https://dawud-tan.github.io/qibla-setout-field-sheet.html#s8-card",
+          "text": "While the floor is open, occupy the meridian foot, backsight B, and mark true north and south on boards about 3 m out; stake the Asr pad's foot, post and corners."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 10,
+          "name": "Build the meridian room",
+          "url": "https://dawud-tan.github.io/qibla-setout-field-sheet.html#s9-card",
+          "text": "Fix a 3 mm aperture 3.20 m up on a steel angle between the ring beams, under a clear roof sheet; plumb the real hole, shift the north line onto it, lay the 2.873 m line and check it with the Indian circle."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 11,
+          "name": "Build the post and the pad",
+          "url": "https://dawud-tan.github.io/qibla-setout-field-sheet.html#s10-card",
+          "text": "Set a 60 mm ball 1.500 m above a pad levelled to 0.5 mm, on a rigid post, with a north-south noon line through the foot."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 12,
+          "name": "Measure the skyline",
+          "url": "https://dawud-tan.github.io/qibla-setout-field-sheet.html#s11-card",
+          "text": "From the camera position, measure the skyline's vertical angle every 0.5 degrees from 244 to 296 degrees in both faces, for the Maghrib comparison."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 13,
+          "name": "Observe and compare",
+          "url": "https://dawud-tan.github.io/qibla-setout-field-sheet.html#s12-card",
+          "text": "Film the meridian line, the Asr arc and the sunset with a time source in frame, log the conditions, and compare each reading with the checker's expected offset from praytime.js v3.2 over ten or more days."
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://dawud-tan.github.io/qibla-setout-field-sheet.html#faq",
+      "inLanguage": "en",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Can a PX1125R board really deliver a millimetre-class baseline?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "For a short static baseline with a fixed solution, yes. SkyTraq specifies 1 cm + 1 ppm for RTK, and a static hour over 25 m averages well below that. What decides it is the antenna and the site: an active L1/L5 antenna, a ground plane if it is a bare patch, open sky, and the same antenna model turned the same way on both marks."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does the PX1125R track GLONASS?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The standard part does not. It tracks GPS/QZSS L1/L5, Galileo E1/E5a, BeiDou B1I/B2a and NavIC L5; the PX1125R-01 variant adds GLONASS L1. Leave GLONASS out either way, because its inter-channel bias between different receivers is the most common reason a CORS-based solution will not fix."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why log RTCM3 MSM7 instead of SkyTraq raw binary?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "RTKLIB decodes RTCM3 MSM natively and MSM7 carries full-precision phase. RTKLIB's SkyTraq decoder was written for an older raw format than this module's, so the binary path may produce nothing. Binary logs can be converted with SkyTraq's own Raw Measurement to RINEX Converter."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "With two boards, do I need the CORS at all?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "For the azimuth, no: the A-to-B baseline is processed directly, and the qibla bearing moves only 2.1e-6 degrees per metre of error in A's absolute position. The CORS run gives A's coordinate to about a metre for the qibla computation, and properly for the record."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How long do I need to log?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "An hour with two boards on a 25 m baseline is generous; the hour averages multipath, which decorrelates only over hundreds of seconds. With one board against a CORS 14.5 km away, take one to two hours per mark, and split either into halves at the desk for a repeatability check."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which total station should I rent?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A 5 arcsecond total station with a detachable tribrach and a prism with its own tribrach adapter for the backsight. It is enough on every parcel from 8 x 15 to 20 x 40 m. Book it for the day you observe so it can drop onto the GNSS tribrach without re-centring. For the qibla line alone, a 5 to 10 arcsecond digital theodolite and a steel tape are also enough."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is a 1 arcsecond instrument worth it?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. On a 25 m baseline it improves the central line from 32.3 to 30.8 arcseconds, 0.08 mm over 10.3 m. Forced centring and marking the line on the boards by crosshair each matter more than the whole difference between classes."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does an integer-arcsecond parcel make the setout more accurate?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "By at most half an arcsecond, one sixtieth of the GNSS error. The keypad takes whole arcseconds, and the integer site means the qibla and the 65 degree 44 minute 42 second turn to true north need no rounding, though the backsight still does. Its real value is that the display shows exactly the published number, so anyone can audit it."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why does the epoch of my coordinate matter in Indonesia?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SRGI2013 is semi-dynamic and the ground moves tens of centimetres a decade. Epoch 2012.0 ties to ITRF2008 and 2021.0 to ITRF2014, and converting between them is two steps. It matters for the coordinate filed with the certificate, not for the azimuth, because A and B move together."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I use PPP instead of a base station?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "For A's absolute position, as a cross-check, yes. For the azimuth it is the wrong tool: two simultaneous boards 25 m apart cancel the atmosphere and the orbits outright, where PPP has to model them and converge."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why a meridian line indoors for Dhuhr but a ball outdoors for Asr?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A 3 mm hole 3.20 m above the floor throws a sharp sun image that crosses a line at 13 to 15 mm a minute, which is what makes Dhuhr good to about 4 seconds. The Asr shadow from that height would be 3.20 to 5.07 m long, beyond the room's walls every day of the year. Outdoors a pinhole image is too faint to see against open skylight, so the Asr gnomon uses a 60 mm ball whose shadow has a dark core."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why does an observed Dhuhr come about a minute after the code's?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "praytime.js v3.2 gives the moment the sun's centre crosses the meridian. Definition 3 waits for the whole disc to clear it, which takes another 63.7 to 70.9 seconds depending on the date, not a constant 65. The checker prints the exact figure for each day, so the comparison is against that, not against zero."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can a shadow measure Isha or Fajr?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. With the sun 18 to 20 degrees below the horizon, the lowest sunlit air is 330 to 410 km up, so nothing near you casts a shadow. What can be measured is the sky's brightness against time, with a sky-quality photometer or a camera on fixed settings, compared with the code in degrees of solar depression rather than in minutes."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+<script>
+(function(){
+  var KEY = 'jatipohon-setout-v1';
+  var ticks = Array.prototype.slice.call(document.querySelectorAll('.tick'));
+  var fill = document.getElementById('fill');
+  var count = document.getElementById('count');
+
+  function load(){
+    try { return JSON.parse(localStorage.getItem(KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+  function save(state){
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  }
+  function paint(){
+    var done = 0;
+    ticks.forEach(function(t){
+      var card = t.closest('.stage');
+      if (card) card.classList.toggle('done', t.checked);
+      if (t.checked) done++;
+    });
+    var pct = ticks.length ? (done / ticks.length) * 100 : 0;
+    fill.style.width = pct + '%';
+    count.textContent = done + ' / ' + ticks.length;
+  }
+
+  var state = load();
+  ticks.forEach(function(t){
+    if (state[t.id]) t.checked = true;
+    t.addEventListener('change', function(){
+      var s = load();
+      s[t.id] = t.checked;
+      save(s);
+      paint();
+    });
+  });
+  paint();
+
+  // Copy buttons on the code boxes. The clipboard can refuse (an old browser, a file:// page);
+  // selecting the text is the fallback, so the reader can still copy it by hand.
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-copy]'), function(b){
+    b.addEventListener('click', function(){
+      var el = document.getElementById(b.getAttribute('data-copy'));
+      function selectIt(){
+        var r = document.createRange(); r.selectNodeContents(el);
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        b.textContent = 'Selected';
+      }
+      try {
+        navigator.clipboard.writeText(el.textContent).then(function(){
+          b.textContent = 'Copied';
+          setTimeout(function(){ b.textContent = 'Copy'; }, 1600);
+        }, selectIt);
+      } catch (e) { selectIt(); }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+
+    <!-- ═══ Primary SEO Meta ═══ -->
+    <title>Minimum-Cost Guided Reentry Vehicle (GRV): Antipodal 20,000 km Delivery at 100–200 m CEP</title>
+    <meta name="description"
+          content="Technical analysis of a cost-optimized GNC architecture for a blunt-cone guided reentry vehicle (GRV) achieving 100–200 m circular error probable (CEP) at antipodal range (~20,000 km). Covers stellar-inertial navigation, GNSS apogee fix, predictor-corrector bank-to-steer, ablation asymmetry mitigation, corrected despin timing, and survivability cost-effectiveness ranking.">
+    <meta name="keywords"
+          content="guided reentry vehicle, GRV, circular error probable, CEP, ballistic missile guidance, GNC architecture, bank-to-steer guidance, predictor-corrector, stellar-inertial navigation, antipodal trajectory, minimum-energy trajectory, hypersonic reentry, blunt cone reentry vehicle, PICA thermal protection, ablation asymmetry, ICBM guidance, despin timing, GNSS apogee fix, WGS84 geodesic degeneracy, penetration aids, MaRV, MIRV, boost-glide vehicle, HGV, HRG IMU, LRG IMU">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="author" content="Claude Sonnet 4.6">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="30 days">
+    <link rel="canonical" href="https://dawud-tan.github.io/guided-reentry-vehicle.html">
+
+    <!-- ═══ Open Graph / Facebook ═══ -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://dawud-tan.github.io/guided-reentry-vehicle.html">
+    <meta property="og:title"
+          content="Minimum-Cost Guided Reentry Vehicle (GRV): Antipodal 20,000 km Delivery at 100–200 m CEP">
+    <meta property="og:description"
+          content="Cost-optimized GNC architecture for a blunt-cone GRV achieving 100–200 m CEP at ~20,000 km antipodal range. Stellar-inertial navigation, GNSS apogee fix, bank-to-steer guidance, corrected despin timing, and survivability cost ranking.">
+    <meta property="og:image"
+          content="https://dawud-tan.github.io/img/blunt-cone-ballistic-reentry-vehicle-2.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt"
+          content="Colorized technical cross-section of blunt-cone ballistic reentry vehicle with annotated subsystems">
+    <meta property="og:site_name" content="Technical Systems Analysis">
+    <meta property="og:locale" content="en_US">
+    <meta property="article:published_time" content="2026-07-12T00:00:00+07:00">
+    <meta property="article:modified_time" content="2026-07-12T00:00:00+07:00">
+    <meta property="article:section" content="Aerospace Engineering">
+    <meta property="article:tag" content="guided reentry vehicle">
+    <meta property="article:tag" content="GNC systems">
+    <meta property="article:tag" content="bank-to-steer guidance">
+    <meta property="article:tag" content="antipodal trajectory">
+    <meta property="article:tag" content="CEP">
+    <meta property="article:tag" content="predictor-corrector">
+    <meta property="article:tag" content="MIRV">
+    <meta property="article:tag" content="survivability analysis">
+
+    <!-- ═══ Twitter Card ═══ -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title"
+          content="Minimum-Cost Guided Reentry Vehicle (GRV): Antipodal 20,000 km at 100–200 m CEP">
+    <meta name="twitter:description"
+          content="Technical GNC architecture for 100–200 m CEP at antipodal range (~20,000 km). Stellar-inertial navigation, GNSS apogee fix, predictor-corrector bank-to-steer, ablation mitigation, and survivability cost-effectiveness.">
+    <meta name="twitter:image"
+          content="https://dawud-tan.github.io/img/blunt-cone-ballistic-reentry-vehicle-2.png">
+    <meta name="twitter:image:alt"
+          content="Colorized technical cross-section of blunt-cone ballistic reentry vehicle">
+
+    <!-- ═══ Favicon & Resource Hints ═══ -->
+    <link href="/img/pk.ico" rel="icon" type="image/x-icon"/>
+    <link as="style"
+          href="/css/bootstrap.min.css"
+          rel="preload" type="text/css">
+    <link as="script"
+          href="/js/bootstrap.bundle.min.js"
+          rel="preload" type="text/javascript">
+    <link href="/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <!-- ═══ JSON-LD Structured Data ═══ -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "TechArticle",
+          "@id": "https://dawud-tan.github.io/guided-reentry-vehicle.html#article",
+          "headline": "Minimum-Cost Guided Reentry Vehicle for Antipodal (~20,000 km) Delivery at 100–200 m CEP",
+          "alternativeHeadline": "Cost-Optimized GNC Architecture for Antipodal Ballistic Reentry Vehicles",
+          "description": "A cost-optimized guidance, navigation, and control (GNC) architecture for a ballistic reentry vehicle achieving 100–200 m circular error probable (CEP) at true antipodal range (~20,000 km). Covers stellar-inertial navigation, GNSS apogee fix, predictor-corrector bank-to-steer guidance, ablation asymmetry mitigation, corrected despin timing, and survivability cost-effectiveness analysis.",
+          "url": "https://dawud-tan.github.io/guided-reentry-vehicle.html",
+          "datePublished": "2026-07-12T00:00:00+07:00",
+          "dateModified": "2026-07-12T00:00:00+07:00",
+          "image": {
+            "@type": "ImageObject",
+            "url": "https://dawud-tan.github.io/img/blunt-cone-ballistic-reentry-vehicle-2.png",
+            "caption": "Colorized technical cross-section of a blunt-cone ballistic reentry vehicle",
+            "width": 1200,
+            "height": 630
+          },
+          "author": {
+            "@type": "Organization",
+            "name": "Claude Sonnet 4.6"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "Technical Systems Analysis"
+          },
+          "inLanguage": "en",
+          "keywords": ["guided reentry vehicle", "CEP", "bank-to-steer", "predictor-corrector", "stellar-inertial navigation", "antipodal trajectory", "minimum-energy trajectory", "blunt cone", "GNC", "ICBM guidance", "ablation asymmetry", "despin timing", "GNSS apogee fix", "WGS84 geodesic", "MIRV", "penetration aids", "MaRV", "survivability"],
+          "articleSection": "Aerospace Engineering",
+          "proficiencyLevel": "Expert",
+          "timeRequired": "PT25M",
+          "about": {
+            "@type": "Thing",
+            "name": "Guided Reentry Vehicle",
+            "description": "A ballistic missile reentry vehicle with onboard guidance, navigation, and control systems to achieve high terminal accuracy, measured as circular error probable (CEP)."
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://dawud-tan.github.io/guided-reentry-vehicle.html#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is a guided reentry vehicle (GRV)?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "A guided reentry vehicle (GRV) is the terminal payload section of a ballistic missile equipped with onboard guidance, navigation, and control (GNC) systems. Unlike an unguided ballistic reentry vehicle, a GRV actively corrects its trajectory during atmospheric reentry to achieve high accuracy at the target — measured as circular error probable (CEP). Key GNC elements include a navigation-grade inertial measurement unit (IMU), an optional GNSS receiver for midcourse state correction, and an aerodynamic control system such as bank-to-steer via a single-axis roll actuator on a blunt-cone body."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What does CEP (Circular Error Probable) mean in ballistic missile guidance?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Circular Error Probable (CEP) is the radius of a circle, centered on the target, within which 50% of warhead impacts will fall under repeated firings. A CEP of 100 m means half of all shots land within 100 m of the aim point. At antipodal range (~20,000 km), unguided ballistic reentry vehicles accumulate 5,000–15,000 m CEP from atmospheric wind bias, density uncertainty, Coriolis residuals, and ablation asymmetry. Guided reentry vehicles with predictor-corrector bank-to-steer can reduce this to 100–200 m CEP at the same range."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What is the minimum-energy trajectory (MET) for an antipodal ballistic missile?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "The minimum-energy trajectory (MET) for an antipodal (~20,000 km) ballistic missile achieves an apogee of approximately 4,800 km altitude with a flight time of 32–36 minutes, a reentry angle of 20–25°, and a delta-V requirement of approximately 6.5–7.0 km/s from the surface. The MET minimizes propellant consumption and launch vehicle mass, making it the preferred trajectory for cost-constrained designs. Depressed trajectories reduce flight time to 20–25 minutes but demand 8.5–10 km/s delta-V, translating into 2–3 times more propellant mass for the same payload via the Tsiolkovsky rocket equation."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How does bank-to-steer predictor-corrector guidance work on a reentry vehicle?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Bank-to-steer predictor-corrector guidance steers the reentry vehicle by rolling it to orient its aerodynamic lift vector in the desired correction direction. At the reentry interface (~120 km altitude), the guidance computer initializes with the GPS-corrected state vector propagated through the plasma blackout by the shock-isolated IMU. It numerically integrates the predicted trajectory to impact using pre-loaded aerodynamic tables (C_A and C_N as functions of Mach number and angle of attack), compares the predicted impact point to the target, computes an optimal bank-angle command, executes via the single-axis roll actuator, and repeats the loop at 1–5 Hz. The algorithm runs on a radiation-hardened ARM or LEON processor at approximately 200 MIPS. Heritage includes Apollo Entry guidance and NASA's FNPEG/NPC algorithm."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Why is a 20° half-angle blunt cone the preferred reentry vehicle geometry for cost-constrained designs?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "A 20° half-angle blunt cone with L/D ≈ 0.3–0.4 is cost-optimal because it provides sufficient lateral correction authority (approximately 94 km at Mach 15 despin) to null 100–200 m of accumulated trajectory error, exhibits inherent aerodynamic stability at hypervelocity without pitch or yaw actuators, accommodates ablative PICA or carbon-phenolic TPS at 10–15% of RV mass, and requires only a single roll actuator for bank-to-steer. Higher L/D geometries cost 2–8 times more through added TPS mass, pitch/yaw actuation, and complex aerodynamic databases — unnecessary for a 100–200 m CEP target. The geometry has extensive heritage from the Mk-12 MIRV, Apollo Command Module, and Pershing II programs."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What is the antipodal geodesic degeneracy problem and how is it resolved for launch azimuth selection?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "On a perfect sphere, all great-circle azimuths from a launch point reach the exact antipodal point at identical range (~20,015 km) and flight time — the Lambert problem's normal matrix is singular and the launch azimuth is mathematically undefined. WGS84 ellipsoid flattening (f = 1/298.257) breaks this degeneracy: paths through higher latitudes traverse a smaller-circumference Earth and are geodetically shorter. For equatorially symmetric launch-target pairs, the two shortest geodesics are the meridional paths (azimuth ≈ 0° northward or ≈ 180° southward). The geodesic length advantage scales as Δs ≈ f·π·R_E·sin²φ₁ — approximately 4 km at 14° latitude and 25 km at 38° latitude. Final selection uses Karney's inverse geodesic algorithm (GeographicLib) and is governed primarily by overflight sovereignty constraints."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How does GPS/GNSS achieve meter-level accuracy at 4,800 km apogee altitude?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "At apogee (~4,800 km altitude), the RV is below the orbital shells of GPS (20,200 km), BeiDou MEO (21,500 km), and GLONASS (19,100 km), so all GNSS satellites occupy the lower hemisphere relative to the receiver. Position dilution of precision (PDOP) is typically better than standard ground conditions because satellites span nearly a full hemisphere below. A shielded, radiation-hardened multi-constellation, multi-frequency receiver (GPS L1/L2/L5, BeiDou B1/B2a, GLONASS L1/L2) achieves 0.5–2 m position accuracy (1σ) at apogee. The L5 and B2a signals use a 10.23 Mcps chip rate — 10 times better pseudorange resolution than L1 C/A — enabling reliable carrier-phase ambiguity resolution before the plasma blackout."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Why must reentry vehicle despin occur at Mach 15 rather than Mach 5–8?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Available lateral correction authority scales strongly with dynamic pressure and time remaining to impact. At Mach 8 (~20 km altitude, ~35 s to impact), usable correction is only approximately 50–80 m — barely sufficient for the optimistic 100 m CEP target with no margin for aerodynamic model errors. At Mach 15 (~45 km altitude, ~100 s to impact), available correction authority is approximately 94 km — about 600 times greater — providing enormous margin against model uncertainty and atmospheric density variation. The correct sequence is: maintain spin through peak heating (Mach 20 to Mach 15, altitude 60–45 km), then actively despin over approximately 20 seconds at Mach 15 using the cold-gas RCS, activating predictor-corrector guidance with 90–120 seconds of correction time remaining."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What are the most cost-effective survivability measures for a ballistic reentry vehicle?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Ranked by cost-effectiveness: (1) Boost-phase IR signature reduction — +3–5% cost; (2) LO nose tip (SiC/C-C) — +5–10% cost, TRL 9; (3) X-band radar decoys — +7–10% cost, highly effective against radar-primary interceptors, TRL 9; (4) IR-heated decoys — +20–25% cost, effective against multi-spectral kill vehicles, TRL 7; (5) MaRV terminal maneuver — +50–60% cost, defeats terminal interceptors at cost of increased CEP, TRL 8; (6) MIRV — +100–130% cost, exhausts interceptor magazines, TRL 9; (7) BGV/HGV — +200–300% cost, justified only against mature layered exo-atmospheric defenses, TRL 6. Programme evidence (ARRW exceeded $20M/round before cancellation; DF-17 estimated at 3–5× a comparable ballistic missile) refutes claims that BGV/HGV is cost-competitive with ballistic systems."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What is the total GNC hardware cost for achieving 100–200 m CEP at antipodal range?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "The complete GNC suite costs approximately $85,000–245,000 at low production volume: navigation-grade HRG or LRG IMU ($30,000–80,000), star tracker ($15,000–30,000), shielded RHBD multi-band GNSS receiver ($10,000–40,000), single-axis roll actuator ($10,000–30,000), cold-gas RCS ($5,000–15,000), Ka-band/W-band radar altimeter ($10,000–30,000), and guidance software/aerodynamic database ($5,000–20,000). Mandatory hypersonic wind tunnel characterization and Monte Carlo dispersion analysis add approximately $2–5 million as a separate program cost. The GNC cost adder remains below 15% of total bus cost — the single highest-leverage investment in the programme for accuracy improvement."
+              }
+            }
+          ]
+        },
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://dawud-tan.github.io/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Guided Reentry Vehicle",
+              "item": "https://dawud-tan.github.io/guided-reentry-vehicle.html"
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+
+    <style>
+        /* ── Article enhancements ── */
+        .article-meta { font-size: .875rem; color: #6c757d; }
+        blockquote {
+            background: #f8f9fa;
+            border-left: 4px solid #0d6efd;
+            padding: .75rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 .375rem .375rem 0;
+            font-family: monospace;
+            font-size: .95rem;
+        }
+        .toc-root { list-style: decimal; padding-left: 1.25rem; }
+        .toc-sub  { list-style: lower-alpha; padding-left: 1.25rem; margin-top: .25rem; }
+        .toc-root a, .toc-sub a { text-decoration: none; color: var(--bs-body-color); }
+        .toc-root a:hover, .toc-sub a:hover { text-decoration: underline; color: #0d6efd; }
+        section[id] { scroll-margin-top: 1.25rem; }
+        .glossary-term { font-weight: 600; }
+        .ref-list { counter-reset: ref-counter; list-style: none; padding-left: 0; }
+        .ref-list li {
+            counter-increment: ref-counter;
+            padding-left: 2.5rem;
+            position: relative;
+            margin-bottom: .6rem;
+        }
+        .ref-list li::before {
+            content: "[" counter(ref-counter) "]";
+            position: absolute;
+            left: 0;
+            font-weight: 700;
+            color: #0d6efd;
+        }
+        .carousel-caption { background: rgba(0,0,0,.45); border-radius: .375rem; padding: .35rem .75rem; }
+        .carousel-caption p { margin: 0; font-size: .85rem; }
+    </style>
+</head>
+<body class="container mt-3">
+
+<!-- ═══ Breadcrumb Navigation ═══ -->
+<nav aria-label="breadcrumb" class="mt-1 mb-2">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="https://dawud-tan.github.io/">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Guided Reentry Vehicle</li>
+    </ol>
+</nav>
+
+<div class="row row-cols-1 g-4 mt-1">
+
+    <!-- ═══ Article Header ═══ -->
+    <header>
+        <h1>Minimum-Cost Guided Reentry Vehicle for Antipodal (~20,000 km) Delivery at 100–200 m CEP</h1>
+        <p class="article-meta mt-2">
+            <span><strong>Published:</strong> 12 July 2026</span>&nbsp;·&nbsp;
+            <span><strong>Category:</strong> Aerospace Engineering / Ballistic Systems</span>&nbsp;·&nbsp;
+            <span><strong>Reading time:</strong> ≈ 25 min</span>
+        </p>
+        <div class="d-flex flex-wrap gap-2 mt-2">
+            <span class="badge bg-secondary">Guided Reentry Vehicle</span>
+            <span class="badge bg-secondary">CEP</span>
+            <span class="badge bg-secondary">Bank-to-Steer</span>
+            <span class="badge bg-secondary">Predictor-Corrector</span>
+            <span class="badge bg-secondary">Stellar-Inertial Navigation</span>
+            <span class="badge bg-secondary">Antipodal Trajectory</span>
+            <span class="badge bg-secondary">Minimum-Energy Trajectory</span>
+            <span class="badge bg-secondary">Blunt Cone RV</span>
+            <span class="badge bg-secondary">GNC Systems</span>
+            <span class="badge bg-secondary">Survivability Analysis</span>
+        </div>
+    </header>
+
+    <hr>
+
+    <!-- ═══ Carousel ═══ -->
+    <figure class="mb-0">
+        <div class="carousel slide" data-bs-ride="carousel" id="cross">
+            <div class="carousel-inner">
+                <div class="carousel-item">
+                    <img alt="Technical cross-section of blunt-cone ballistic reentry vehicle — monochrome schematic"
+                         class="rounded d-block w-100 img-fluid"
+                         src="/img/blunt-cone-ballistic-reentry-vehicle-1.png">
+                    <div class="carousel-caption d-block">
+                        <p>Technical cross-section (monochrome schematic)</p>
+                    </div>
+                </div>
+                <div class="carousel-item active">
+                    <img alt="Colorized technical cross-section of blunt-cone ballistic reentry vehicle with annotated GNC subsystems"
+                         class="rounded d-block w-100 img-fluid"
+                         src="/img/blunt-cone-ballistic-reentry-vehicle-2.png">
+                    <div class="carousel-caption d-block">
+                        <p>Colorized technical cross-section with subsystem annotations</p>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" data-bs-slide="prev" data-bs-target="#cross" type="button">
+                <span aria-hidden="true" class="carousel-control-prev-icon"></span>
+                <span class="visually-hidden" lang="id">sebelumnya</span>
+            </button>
+            <button class="carousel-control-next" data-bs-slide="next" data-bs-target="#cross" type="button">
+                <span aria-hidden="true" class="carousel-control-next-icon"></span>
+                <span class="visually-hidden" lang="id">sesudahnya</span>
+            </button>
+        </div>
+        <figcaption class="text-center text-muted small mt-2">
+            <strong>Figure 1.</strong> Blunt-cone ballistic reentry vehicle — 20° half-angle configuration with
+            ablative thermal protection system (TPS). Toggle between monochrome schematic and colorized subsystem view
+            using the carousel controls.
+        </figcaption>
+    </figure>
+
+    <!-- ═══ Table of Contents ═══ -->
+    <div class="card" id="toc">
+        <div class="card-header d-flex justify-content-between align-items-center py-2">
+            <strong>Table of Contents</strong>
+            <button aria-controls="toc-body" aria-expanded="true" class="btn btn-sm btn-outline-secondary"
+                    data-bs-target="#toc-body" data-bs-toggle="collapse" type="button">Toggle</button>
+        </div>
+        <div class="collapse show" id="toc-body">
+            <div class="card-body py-2">
+                <ol class="toc-root mb-0">
+                    <li><a href="#abstract">Abstract</a></li>
+                    <li><a href="#s1">The Antipodal Trajectory Problem</a>
+                        <ol class="toc-sub">
+                            <li><a href="#s1-1">Unique Physical Constraints</a></li>
+                            <li><a href="#s1-2">The Near-Antipodal Singularity and Its Implications for Accuracy</a></li>
+                        </ol>
+                    </li>
+                    <li><a href="#s2">Azimuth Selection at Antipodal Range</a>
+                        <ol class="toc-sub">
+                            <li><a href="#s2-1">The Nature of the Geodesic Degeneracy</a></li>
+                            <li><a href="#s2-2">Launch Elevation Angle — The Keplerian Constraint</a></li>
+                            <li><a href="#s2-3">Azimuth Selection Criteria</a></li>
+                            <li><a href="#s2-4">Why the Guided Vehicle Is Less Sensitive to Azimuth</a></li>
+                        </ol>
+                    </li>
+                    <li><a href="#s3">Cost Drivers and the Rocket Equation Constraint</a>
+                        <ol class="toc-sub">
+                            <li><a href="#s3-1">The Cost-Per-Delivered-Payload Framework</a></li>
+                            <li><a href="#s3-2">The Rocket Equation Dominates GNC Architecture Selection</a></li>
+                            <li><a href="#s3-3">Error Budget at Antipodal Range</a></li>
+                        </ol>
+                    </li>
+                    <li><a href="#s4">Vehicle Configuration</a>
+                        <ol class="toc-sub">
+                            <li><a href="#s4-1">Reentry Vehicle Geometry</a></li>
+                            <li><a href="#s4-2">Thermal Protection System</a></li>
+                            <li><a href="#s4-3">Propulsion Architecture: Hybrid Development, All-Solid Production</a></li>
+                        </ol>
+                    </li>
+                    <li><a href="#s5">Guidance, Navigation, and Control Architecture</a>
+                        <ol class="toc-sub">
+                            <li><a href="#s5-1">The Three-Phase GNC Problem</a></li>
+                            <li><a href="#s5-2">Boost Phase GNC</a></li>
+                            <li><a href="#s5-3">Midcourse Phase GNC: The GPS Apogee Fix</a></li>
+                            <li><a href="#s5-4">Terminal Phase GNC: Predictor-Corrector Bank-to-Steer</a></li>
+                        </ol>
+                    </li>
+                    <li><a href="#s6">Ablation Asymmetry Mitigation and the Corrected Despin Timeline</a>
+                        <ol class="toc-sub">
+                            <li><a href="#s6-1">The Slow-Spin Strategy</a></li>
+                            <li><a href="#s6-2">The Critical Despin Timing Correction</a></li>
+                            <li><a href="#s6-3">The Correctly Sequenced Despin Timeline</a></li>
+                        </ol>
+                    </li>
+                    <li><a href="#s7">Error Budget by Phase and CEP Closure</a>
+                        <ol class="toc-sub">
+                            <li><a href="#s7-1">Phase-by-Phase Error Contributions</a></li>
+                            <li><a href="#s7-2">GNC Cost Summary</a></li>
+                            <li><a href="#s7-3">The Absolute Accuracy Floor</a></li>
+                        </ol>
+                    </li>
+                    <li><a href="#s8">Survivability Analysis</a>
+                        <ol class="toc-sub">
+                            <li><a href="#s8-1">Framing: Threat Layers and the Intercept Chain</a></li>
+                            <li><a href="#s8-2">Trajectory Shaping — Correcting the BGV Cost Claim</a></li>
+                            <li><a href="#s8-3">Exo-Atmospheric Decoys — Technical Nuances on Effectiveness</a></li>
+                            <li><a href="#s8-4">Low-Observable Nose Tip — Correct Assessment with One Caveat</a></li>
+                            <li><a href="#s8-5">Complete Survivability Measure Set and Cost-Effectiveness Ranking</a></li>
+                            <li><a href="#s8-6">Recommended Packages by Threat Environment</a></li>
+                        </ol>
+                    </li>
+                    <li><a href="#s9">Synthesised Architecture</a></li>
+                    <li><a href="#s10">Conclusion</a></li>
+                    <li><a href="#faq">Frequently Asked Questions</a></li>
+                    <li><a href="#glossary">Glossary of Key Terms</a></li>
+                    <li><a href="#references">References and Further Reading</a></li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ Abstract ═══ -->
+    <section id="abstract">
+        <h2>Abstract</h2>
+        <p>This article develops a cost-optimized guidance, navigation, and control (GNC) architecture for a ballistic
+            reentry vehicle designed to achieve 100–200 m circular error probable (CEP) at true antipodal range
+            (~20,000 km great-circle distance) on a minimum-energy trajectory. Beginning from first principles of
+            astrodynamics, atmospheric physics, and estimation theory, it derives why the dominant error sources at
+            this range — atmospheric variability, ablation asymmetry, and inertial drift through plasma blackout —
+            cannot be suppressed by additional sensing alone, but can be closed by a carefully sequenced combination
+            of navigation-grade inertial measurement, stellar-inertial update, multi-band GNSS at apogee, and
+            predictor-corrector bank-to-steer entry guidance.</p>
+        <p>The article integrates an original architecture proposal with subsequent physics-driven critiques and
+            corrections, arriving at a synthesized design that achieves 100 m CEP at minimum lifecycle cost. It
+            further addresses the geodesic degeneracy problem at antipodal range — how to select a unique launch
+            azimuth and elevation when infinitely many great-circle paths connect an antipodal pair — and concludes
+            with a rigorous cost-effectiveness analysis of survivability measures, correcting several common
+            misconceptions about boost-glide vehicle economics.</p>
+        <p>The central conclusion is that the correct design philosophy for this accuracy tier is to absorb reentry
+            physics in software and pre-flight characterization rather than in expensive terminal sensors or exotic
+            aerodynamic geometries, and to invest in survivability through layered, low-cost penetration aids rather
+            than trajectory exotica.</p>
+    </section>
+
+    <hr>
+
+    <!-- ═══ Section 1 ═══ -->
+    <section id="s1">
+        <h2>1. The Antipodal Trajectory Problem</h2>
+
+        <section id="s1-1">
+            <h3>1.1 Unique Physical Constraints</h3>
+            <p>Before addressing architecture, the antipodal geometry imposes unusual constraints that dominate all
+                design choices. At approximately 20,000 km great-circle range, two trajectory families are physically
+                accessible.</p>
+            <p>The <strong>minimum-energy trajectory (MET)</strong> achieves apogee at approximately 4,800 km
+                altitude with a flight time of 32–36 minutes, a reentry angle of 20–25°, and a delta-V requirement
+                from the surface of approximately 6.5–7.0 km/s. The <strong>depressed trajectory (DT)</strong>
+                reduces flight time to 20–25 minutes but at the cost of a reentry angle of 30–45° and a delta-V
+                requirement of 8.5–10 km/s. A <strong>lofted trajectory</strong> above 8,000 km apogee is also
+                physically possible, but its very shallow reentry angle of 15–18° creates severe atmospheric entry
+                stability challenges and extreme integrated heat loads.</p>
+            <p>For cost minimization, the MET is strongly preferred. The depressed trajectory's delta-V penalty
+                translates directly into 2–3 times the propellant mass for the same payload, which cascades through
+                the Tsiolkovsky rocket equation into a substantially larger and costlier launch vehicle. The lofted
+                trajectory magnifies heat load and atmospheric path length beyond what the blunt-cone TPS
+                architecture can absorb economically.</p>
+        </section>
+
+        <section id="s1-2">
+            <h3>1.2 The Near-Antipodal Singularity and Its Implications for Accuracy</h3>
+            <p>At exactly the antipodal point, the Lambert problem has a degenerate azimuth: all launch azimuths
+                are equivalent in the two-body problem on a perfect sphere. In practice this means that cross-range
+                and downrange errors are azimuth-symmetric — the error ellipse becomes nearly circular — and the
+                trajectory passes through high-drag, high-heating regimes regardless of azimuth. For the MET, the
+                atmospheric path length at reentry is near its maximum for the given entry velocity, and Coriolis
+                deflection integrated over 35 minutes at all latitudes accumulates to values of order 15–20 km
+                before correction.</p>
+            <p>This geometry carries a structural advantage for the guidance problem: the near-circular error
+                ellipse means there is no strongly preferred miss direction, and the long flight time gives onboard
+                systems time to refine state estimates. It is a geometry that rewards good midcourse navigation more
+                generously than shorter-range trajectories.</p>
+        </section>
+    </section>
+
+    <hr>
+
+    <!-- ═══ Section 2 ═══ -->
+    <section id="s2">
+        <h2>2. Azimuth Selection at Antipodal Range</h2>
+
+        <section id="s2-1">
+            <h3>2.1 The Nature of the Geodesic Degeneracy</h3>
+            <p>On a perfect sphere the degeneracy is exact and complete. The distance between antipodal points is
+                πR<sub>E</sub> ≈ 20,015 km for every azimuth, the flight time on the MET is identical for every
+                azimuth, and the Lambert problem has no unique solution — the normal matrix is singular. The launch
+                azimuth is literally undefined in the two-body problem on a sphere.</p>
+            <p>On the <strong>WGS84 ellipsoid</strong> (flattening f = 1/298.257), the degeneracy is broken because
+                Earth's polar radius (b = 6,356,752 m) is shorter than its equatorial radius (a = 6,378,137 m).
+                Different azimuths traverse different latitude bands, and paths that reach high latitudes cross a
+                smaller-circumference Earth — making them geodetically shorter. The inverse geodesic problem
+                (Karney 2013, implemented in GeographicLib) gives a finite, well-defined set of minimum-length
+                geodesics.</p>
+            <p>For launch-target pairs that are symmetric about the equator (φ₂ = −φ₁, λ₂ = λ₁ + 180°), the
+                <strong>two shortest geodesics are the meridional paths</strong> — azimuth ≈ 0° (northward, over
+                the pole, down the antipodal meridian) and azimuth ≈ 180° (southward, over the opposite pole).
+                The equatorial paths (azimuth ≈ 90° and 270°) are the longest. The geodesic length advantage of
+                the meridional paths scales as:</p>
+            <blockquote>
+                <strong>Δs ≈ f · πR<sub>E</sub> · sin²φ₁</strong>
+            </blockquote>
+            <p>For a launch at φ₁ = 14.26° (Nigeria/Niger region): Δs ≈ <strong>~4 km</strong>. For a launch at
+                φ₁ = 37.80° (southern Indian Ocean): Δs ≈ <strong>~25 km</strong>. The saving is modest in
+                absolute terms, but through the rocket equation even a 25 km reduction in effective range
+                translates into a non-trivial propellant saving at the margins of the mass budget.</p>
+        </section>
+
+        <section id="s2-2">
+            <h3>2.2 Launch Elevation Angle — The Keplerian Constraint</h3>
+            <p>Once azimuth is selected, the launch flight path angle γ₀ above the local horizontal is determined
+                by the orbital mechanics of the transfer ellipse. For an antipodal MET, both endpoints lie at the
+                semi-latus rectum positions of the transfer ellipse (true anomaly θ = π/2 at launch,
+                θ = 3π/2 at target). From the conic section geometry:</p>
+            <blockquote>
+                <strong>tan(γ₀) = e</strong> &nbsp;→&nbsp; <strong>γ₀ = arctan(e)</strong>
+            </blockquote>
+            <p>where e is the eccentricity of the transfer ellipse. With apogee at
+                h<sub>a</sub> ≈ 4,800 km:</p>
+            <blockquote>
+                r<sub>a</sub> = 6,371 + 4,800 = 11,171 km &nbsp;→&nbsp;
+                e = 1 − R<sub>E</sub>/r<sub>a</sub> ≈ <strong>0.43</strong>
+                &nbsp;→&nbsp; <strong>γ₀ ≈ 23.3°</strong>
+            </blockquote>
+            <p>The launch speed (ideal, non-rotating spherical Earth) is approximately 8.61 km/s. With Earth's
+                rotational assist (up to 0.46 km/s at the equator, latitude-weighted by cos φ) and gravity losses
+                during ascent (~1 km/s typical), the net propulsive delta-V budget is approximately 8.5–9.5 km/s —
+                consistent with ICBM-class boosters.</p>
+            <p>The elevation angle γ₀ ≈ 23° is effectively <strong>independent of azimuth</strong> for the MET:
+                different azimuths change the geodesic length by only Δs as computed above, shifting e and γ₀ by
+                a fraction of a degree. The launch elevation is set by range, not azimuth.</p>
+        </section>
+
+        <section id="s2-3">
+            <h3>2.3 Azimuth Selection Criteria</h3>
+            <p>With WGS84 narrowing the optimal candidates to two azimuths (≈0° and ≈180°), final selection uses
+                the following criteria in approximate priority order.</p>
+            <p><strong>Fuel efficiency.</strong> Both meridional azimuths give the same geodesic length by
+                equatorial symmetry of the pair. This confirms intermediate azimuths cost more propellant but does
+                not discriminate between the two optimal paths.</p>
+            <p><strong>Coriolis correction burden.</strong> For a northward trajectory (azimuth ≈ 0°), Coriolis
+                deflection accumulates rightward during ascent in the Northern Hemisphere and leftward during
+                descent in the Southern Hemisphere — partially self-cancelling over 35 minutes. The bank-to-steer
+                guidance corrects whatever accumulates, making this criterion secondary for a guided vehicle.</p>
+            <p><strong>Atmospheric characterization quality.</strong> The northward path may traverse
+                better-sampled atmosphere (radiosondes, NWP coverage) than the southward path over remote ocean
+                and polar regions, or vice versa depending on launch latitude and season.</p>
+            <p><strong>Overflight and sovereignty.</strong> This is typically the dominant operational constraint.
+                A southward azimuth from a low-latitude Northern Hemisphere launch site traverses international
+                waters and uninhabited ocean rather than sovereign territory, making it strongly preferred for
+                operational reasons regardless of the geodetic optimum.</p>
+            <p><strong>Reentry heading geometry.</strong> The reentry azimuth at the target equals the launch
+                azimuth ± 180° by symmetry of the meridional path. Bank-to-steer correction capability is
+                symmetric about the velocity vector, so neither reentry heading is inherently preferred for the
+                guidance algorithm.</p>
+        </section>
+
+        <section id="s2-4">
+            <h3>2.4 Why the Guided Vehicle Is Less Sensitive to Azimuth Than an Unguided One</h3>
+            <p>For an unguided ballistic projectile, azimuth selection is critical because Coriolis deflection,
+                atmospheric density profile, and wind field all vary dramatically between northward and southward
+                paths, with no mechanism to correct the resulting errors. A wrong azimuth choice could add several
+                kilometres of systematic miss.</p>
+            <p>For the guided vehicle with predictor-corrector bank-to-steer, the azimuth selection affects the
+                initial reference trajectory of the guidance law but not the fundamental correction capability.
+                The guidance actively compensates for Coriolis accumulation, density variation, and wind bias on
+                whichever path is flown, within the ~94 km of available correction authority at Mach 15 despin.
+                Azimuth choice therefore matters primarily for fuel efficiency and operational constraints, not
+                terminal accuracy — which is the architecturally correct outcome of investing in closed-loop
+                guidance.</p>
+        </section>
+    </section>
+
+    <hr>
+
+    <!-- ═══ Section 3 ═══ -->
+    <section id="s3">
+        <h2>3. Cost Drivers and the Rocket Equation Constraint</h2>
+
+        <section id="s3-1">
+            <h3>3.1 The Cost-Per-Delivered-Payload Framework</h3>
+            <p>Total system cost per unit of delivered payload decomposes as:</p>
+            <blockquote>
+                C<sub>total</sub> = (C<sub>vehicle</sub> + C<sub>propellant</sub> + C<sub>GNC</sub> +
+                C<sub>reentry</sub> + C<sub>integration</sub> + C<sub>operation</sub>) / payload_mass_delivered
+            </blockquote>
+            <p>The critical lever is that GNC cost trades against vehicle cost: a cheaper, less accurate bare
+                vehicle requires expensive precision GNC; but an over-engineered GNC suite on a small payload also
+                fails the optimization. The cost-minimum lies between these extremes, and its location is set by
+                the rocket equation.</p>
+        </section>
+
+        <section id="s3-2">
+            <h3>3.2 The Rocket Equation Dominates GNC Architecture Selection</h3>
+            <p>For a two-stage vehicle to antipodal range on the MET (delta-V approximately 7.0 km/s), with
+                I<sub>sp</sub> = 350 s (LOX/kerosene):</p>
+            <blockquote>
+                m₀ / m<sub>payload</sub> = exp(ΔV / (I<sub>sp</sub> · g₀)) × (staging factor) ≈ 50–80
+            </blockquote>
+            <p>This means every kilogram of GNC hardware in the reentry vehicle corresponds to approximately
+                50–80 kg of launch mass, which at current vehicle economics represents $50,000–500,000 per
+                kilogram. GNC mass is therefore extraordinarily expensive at this range. The cost-optimal GNC
+                architecture is the lightest system that achieves the required accuracy, not the most capable one
+                available.</p>
+        </section>
+
+        <section id="s3-3">
+            <h3>3.3 Error Budget at Antipodal Range</h3>
+            <p>Scaling the dominant error sources to 20,000 km range reveals the following unguided error
+                contributions (1σ):</p>
+            <div class="table-responsive-sm">
+                <table class="table align-middle table-striped-columns table-hover table-sm">
+                    <thead>
+                    <tr>
+                        <th scope="col">Error Source</th>
+                        <th scope="col">Scaling Law</th>
+                        <th scope="col">Magnitude at 20,000 km (unguided)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Launch angle (0.01 mrad 1σ)</td>
+                        <td>∝ R</td>
+                        <td>~200 m</td>
+                    </tr>
+                    <tr>
+                        <td>Atmospheric wind (systematic bias)</td>
+                        <td>∝ R</td>
+                        <td>4,000–10,000 m</td>
+                    </tr>
+                    <tr>
+                        <td>Density / drag uncertainty</td>
+                        <td>∝ R</td>
+                        <td>2,000–6,000 m</td>
+                    </tr>
+                    <tr>
+                        <td>Coriolis residual after correction</td>
+                        <td>∝ R²</td>
+                        <td>2,000–5,000 m</td>
+                    </tr>
+                    <tr>
+                        <td>Ablation asymmetry</td>
+                        <td>Threshold + ∝ R</td>
+                        <td>500–3,000 m</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Total RSS (unguided)</strong></td>
+                        <td></td>
+                        <td><strong>~5,000–15,000 m CEP</strong></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>The dominant terms — atmospheric bias and ablation asymmetry — are both stochastic and not
+                computable from pre-launch data alone. Any architecture targeting 100–200 m CEP must address them
+                actively.</p>
+        </section>
+    </section>
+
+    <hr>
+
+    <!-- ═══ Section 4 ═══ -->
+    <section id="s4">
+        <h2>4. Vehicle Configuration</h2>
+
+        <section id="s4-1">
+            <h3>4.1 Reentry Vehicle Geometry</h3>
+            <p>A <strong>20° half-angle blunt cone</strong> with L/D approximately 0.3–0.4 represents the
+                cost-optimal choice. It provides sufficient lateral correction authority to null 100–200 m of
+                accumulated trajectory error, exhibits inherent aerodynamic stability at hypervelocity without
+                active pitch and yaw control, admits a simple ablative TPS solution, and requires only a
+                single-axis roll actuator for bank-to-steer guidance. It carries well-established hypersonic
+                aerodynamic heritage from the Mk-12, Apollo Command Module, and Pershing II programs.</p>
+            <p>Higher L/D geometries — slender cones or lifting bodies — provide greater correction authority at
+                2–8 times system cost through increased TPS mass, pitch and yaw actuation, more complex
+                aerodynamic databases, and more demanding structural design. For the 100–200 m CEP requirement
+                this additional authority is not needed and should not be purchased.</p>
+        </section>
+
+        <section id="s4-2">
+            <h3>4.2 Thermal Protection System</h3>
+            <p>At antipodal range on the MET, total heat load is 30–50 kJ/cm² — significantly higher than for
+                steep ICBM reentries at similar velocity because the shallower angle produces a longer atmospheric
+                transit at elevated heating rates. Ablative TPS of PICA or carbon-phenolic class is the correct
+                choice: mass-efficient, well-characterized, single-use, and scalable. TPS mass fraction is
+                approximately 10–15% of RV mass. Peak ablation mass loss of 5–15% of TPS mass shifts the centre
+                of gravity by less than 1% of vehicle length — a trim angle perturbation of approximately 0.5°,
+                well within predictor-corrector correction authority.</p>
+            <p>Nose radius selection is a meaningful trade. A larger nose reduces peak stagnation heating
+                (scaling as R<sub>nose</sub><sup>−½</sup>) but increases drag. For a 500 kg class RV, an optimal
+                nose radius of 0.3–0.5 m balances peak heating against range shortfall.</p>
+        </section>
+
+        <section id="s4-3">
+            <h3>4.3 Propulsion Architecture: Hybrid Development, All-Solid Production</h3>
+            <p>The development configuration most readily leverages existing infrastructure by pairing a
+                LOX/kerosene first stage (I<sub>sp</sub> ~ 330–360 s at sea level) with a storable propellant
+                second stage. This minimises development risk and allows borrowing from existing launch vehicle
+                families.</p>
+            <p>However, the cryogenic first stage carries a lifecycle penalty incompatible with long-term silo or
+                submarine basing. Liquid oxygen must be loaded within hours of launch, requiring insulated ground
+                support equipment, chill-down procedures, and sustained cryogenic infrastructure. The all-solid
+                production configuration — HTPB/AP/aluminum composite propellant, graphite-epoxy filament-wound
+                case — eliminates these constraints. The I<sub>sp</sub> penalty relative to LOX/kerosene (vacuum
+                I<sub>sp</sub> ~285–295 s versus ~350 s) translates into approximately a 25–40% increase in gross
+                lift-off mass for the same payload and range. This is offset by elimination of cryogenic ground
+                support infrastructure, simplification of stage interfaces, and a 20–30% reduction in lifecycle
+                fueling and maintenance cost. All-solid is the minimum-cost endpoint for a long-service antipodal
+                system; the hybrid is appropriate for the development phase.</p>
+        </section>
+    </section>
+
+    <hr>
+
+    <!-- ═══ Section 5 ═══ -->
+    <section id="s5">
+        <h2>5. Guidance, Navigation, and Control Architecture</h2>
+
+        <section id="s5-1">
+            <h3>5.1 The Three-Phase GNC Problem</h3>
+            <p>The GNC problem decomposes into three phases with distinct accuracy requirements and dominant error
+                sources.</p>
+            <p>During the <strong>boost phase</strong> (0–300 s), the objective is trajectory shaping and
+                minimisation of exit state errors, limited by IMU drift during powered flight and thrust vector
+                control precision. During the <strong>midcourse and coast phase</strong> (300–2,100 s), the
+                objective is state estimation refinement, limited by IMU drift over 30+ minutes, residual Coriolis
+                and Earth oblateness perturbations, and unmodelled gravitational anomalies. During the
+                <strong>terminal and reentry phase</strong> (2,100–2,200 s), the objective is active trajectory
+                correction through a 2–3 minute plasma blackout, limited by aerodynamic model uncertainty,
+                ablation asymmetry, atmospheric density variation, and IMU propagation under high vibration.</p>
+        </section>
+
+        <section id="s5-2">
+            <h3>5.2 Boost Phase GNC</h3>
+            <p><strong>IMU selection.</strong> The boost phase requires a navigation-grade inertial measurement
+                unit. Required performance: gyro drift below 0.001°/hr and accelerometer bias below 50 μg —
+                navigation grade, achievable with a laser ring gyroscope (LRG) or hemispherical resonator
+                gyroscope (HRG) at $30,000–80,000 per unit at low production volume.</p>
+            <p><strong>Stellar-inertial update.</strong> A single star tracker fix during late boost or early
+                coast reduces accumulated gyro drift by 10–100 times. Even a fixed-boresight star tracker using
+                a single bright reference star provides sufficient attitude knowledge to calibrate the IMU heading
+                error that would otherwise grow to tens of metres over the coast phase. Cost: $15,000–30,000 —
+                among the highest value-for-money investments in the entire GNC suite.</p>
+            <p><strong>Thrust vector control.</strong> The second stage nozzle is gimballed for pitch and yaw
+                control during powered flight. Single-axis roll control for the RV is handled separately by the
+                cold-gas RCS system.</p>
+        </section>
+
+        <section id="s5-3">
+            <h3>5.3 Midcourse Phase GNC: The GPS Apogee Fix</h3>
+            <p>At apogee (approximately 4,800 km altitude), the RV is below the orbital shells of GPS
+                (20,200 km), BeiDou MEO (21,500 km), and GLONASS (19,100 km). Position dilution of precision
+                (PDOP) at apogee is typically better than standard terrestrial conditions because satellites are
+                distributed across nearly a full hemisphere below the receiver.</p>
+            <p>The appropriate GNSS receiver is a shielded, rad-hard-by-design (RHBD) multi-constellation,
+                multi-frequency unit tracking GPS L1/L2/L5, BeiDou B1/B2a, and GLONASS L1/L2 simultaneously —
+                not a bespoke radiation-hardened heritage unit tracking only L1/L2. The L5 and B2a signals use
+                a 10.23 Mcps chip rate versus 1.023 Mcps for L1 C/A, providing 10 times better pseudorange
+                resolution. Multi-constellation tracking with diverse geometric configurations enables the
+                Extended Kalman Filter to resolve carrier-phase ambiguities more reliably before the reentry
+                blackout. Achievable position accuracy at apogee: 0.5–2 m (1σ), versus 2–5 m for heritage
+                L1/L2-only units. Modern RHBD techniques — triple-modular redundancy, error-correcting memories,
+                hardened flip-flop libraries — can now be implemented in commercial foundry processes at costs
+                approaching COTS, eliminating the historical cost premium for radiation tolerance.</p>
+            <p><strong>Cold-gas RCS.</strong> During midcourse, the cold-gas RCS (4–6 jets, total impulse
+                ~500–2,000 N·s, mass ~5 kg) handles attitude control only — maintaining GNSS antenna orientation
+                and star tracker boresight. It does not perform trajectory correction manoeuvres.</p>
+        </section>
+
+        <section id="s5-4">
+            <h3>5.4 Terminal Phase GNC: Predictor-Corrector Bank-to-Steer</h3>
+            <p><strong>Guidance law.</strong> The predictor-corrector bank-to-steer algorithm (heritage: Apollo
+                Entry, modern: NASA FNPEG/NPC) initialises at the reentry interface (~120 km altitude) with the
+                GPS-updated state vector propagated through the blackout period by the shock-isolated IMU. It
+                numerically integrates the predicted trajectory forward to impact using pre-loaded aerodynamic
+                tables, compares the predicted impact point to the target, computes a bank-angle correction,
+                executes via the single-axis roll actuator, and iterates at 1–5 Hz throughout the remainder of
+                the trajectory. Onboard computation required — Runge-Kutta integration of the six-DOF equations
+                of motion at 1–5 Hz, plus L²-norm minimisation — is well within the capability of a
+                radiation-hardened ARM or LEON processor at approximately 200 MIPS.</p>
+            <p><strong>Single-axis roll actuator.</strong> Bank-to-steer requires only a single
+                electromechanical actuator for RV roll control, generating approximately 10 N·m of torque.
+                Mechanically simple, low-mass, low-cost, with extensive flight heritage.</p>
+            <p><strong>Aerodynamic database.</strong> Pre-loaded tables of C<sub>A</sub> and C<sub>N</sub> as
+                functions of Mach number and angle of attack must be validated in a hypersonic wind tunnel at
+                flight-representative conditions (Mach 15–20), with uncertainty bounds characterised to ±0.5–1%
+                through Monte Carlo dispersion analysis. A ±2.5% uncertainty in ballistic coefficient
+                β = m/(C<sub>D</sub>·A) would, unguided, translate to a range error of approximately 500 km.
+                With the predictor-corrector active, this is largely corrected in real time; the residual from
+                ±0.5–1% model uncertainty contributes 50–100 m to the terminal error — within the CEP
+                budget.</p>
+            <p><strong>Radar altimeter.</strong> A Ka-band or W-band radar altimeter is included as a
+                post-blackout vertical channel update, primarily valuable for submunition fuzing timing. It
+                provides no lateral or downrange update; all horizontal accuracy depends on the IMU and
+                predictor-corrector. Cost addition: $10,000–30,000.</p>
+        </section>
+    </section>
+
+    <hr>
+
+    <!-- ═══ Section 6 ═══ -->
+    <section id="s6">
+        <h2>6. Ablation Asymmetry Mitigation and the Corrected Despin Timeline</h2>
+
+        <section id="s6-1">
+            <h3>6.1 The Slow-Spin Strategy</h3>
+            <p>Slow axial spin during reentry at 1–3 Hz averages the heating over the circumference, suppresses
+                localised hot spots, stabilises attitude against coning and transonic pitch divergence, and limits
+                trim angle variation to below 0.2°. Spin-up during the coast phase uses the cold-gas RCS,
+                consuming approximately 0.1% of total propellant mass.</p>
+        </section>
+
+        <section id="s6-2">
+            <h3>6.2 The Critical Despin Timing Correction</h3>
+            <p>The Mach 5–8 despin timing proposed in some earlier analyses is physically inadequate for closing
+                the 100–200 m CEP budget. The quantitative argument is decisive.</p>
+            <p>At Mach 8 (~2.7 km/s) and approximately 20 km altitude (density ~0.088 kg/m³), the available
+                lateral acceleration for a blunt cone with L/D ≈ 0.3 is approximately 0.24 m/s². With roughly
+                35 seconds remaining to impact, the maximum achievable lateral displacement is:</p>
+            <blockquote>
+                Δx<sub>max</sub> ≈ ½ × 0.24 × 35² ≈ <strong>150 m</strong>
+            </blockquote>
+            <p>In practice, with model uncertainty and finite guidance loop bandwidth, usable correction
+                authority at Mach 8 despin is approximately 50–80 m — marginally sufficient for the optimistic
+                CEP target and completely insufficient for the conservative end, with no margin for model
+                mismatch.</p>
+            <p>At Mach 15 (~5.0 km/s) and approximately 45 km altitude (density ~0.002 kg/m³):</p>
+            <blockquote>
+                a<sub>lateral</sub> ≈ 0.3 × (½ × 0.002 × 5000² × 1.5 × 0.5) / 300 ≈
+                <strong>18.75 m/s²</strong>
+            </blockquote>
+            <p>With approximately 100 seconds remaining to impact, the maximum lateral displacement is:</p>
+            <blockquote>
+                Δx<sub>max</sub> ≈ ½ × 18.75 × 100² ≈ <strong>94 km</strong>
+            </blockquote>
+            <p>The correction authority at Mach 15–18 despin is approximately 600 times greater than at Mach 8.
+                For a required correction of only 100–200 m against 94 km of available authority, the
+                predictor-corrector operates with enormous margin — small uncertainties in aerodynamic
+                coefficients or atmospheric density that would destabilise a Mach 8 guidance solution are
+                completely absorbed.</p>
+        </section>
+
+        <section id="s6-3">
+            <h3>6.3 The Correctly Sequenced Despin Timeline</h3>
+            <p><strong>Phase 1</strong> (reentry interface to Mach 20, altitude above ~60 km): maintain spin at
+                1–3 Hz. Heating is building but manageable at ~100–500 W/cm². Spin averages initial azimuthal
+                asymmetry in the TPS surface.</p>
+            <p><strong>Phase 2</strong> (Mach 20 to Mach 15, altitude 60–45 km): peak heating at
+                500–2,000 W/cm². Vehicle remains spinning. Spin is performing its primary function — averaging
+                the most intense heating pulse.</p>
+            <p><strong>Phase 3</strong> (Mach 15, altitude ~45 km): peak heating has subsided. Active cold-gas
+                despin is executed using the jets already manifested for midcourse attitude control. For a blunt
+                cone with moment of inertia I ~ 20 kg·m² spinning at 2 Hz (angular momentum ~250 N·m·s), four
+                opposing jets at 15 cm moment arm and 20 N thrust deliver approximately 12 N·m of despin torque,
+                achieving full despin in approximately 20 seconds — within the existing cold-gas propellant
+                budget.</p>
+            <p><strong>Phase 4</strong> (Mach 15 to impact, ~90–120 seconds): predictor-corrector bank-to-steer
+                guidance activates with full correction authority and broad margin against model uncertainty.</p>
+        </section>
+    </section>
+
+    <hr>
+
+    <!-- ═══ Section 7 ═══ -->
+    <section id="s7">
+        <h2>7. Error Budget by Phase and CEP Closure</h2>
+
+        <section id="s7-1">
+            <h3>7.1 Phase-by-Phase Error Contributions</h3>
+            <p>With the corrected architecture fully implemented, the 1σ error contributions by phase are:</p>
+            <div class="table-responsive-sm">
+                <table class="table align-middle table-striped-columns table-hover table-sm">
+                    <thead>
+                    <tr>
+                        <th scope="col">Phase</th>
+                        <th scope="col">1σ Contribution</th>
+                        <th scope="col">Limiting Factor</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Boost</td>
+                        <td>10–20 m</td>
+                        <td>Nav-grade IMU + stellar update</td>
+                    </tr>
+                    <tr>
+                        <td>Midcourse</td>
+                        <td>20–50 m</td>
+                        <td>GPS fix accuracy at apogee</td>
+                    </tr>
+                    <tr>
+                        <td>Reentry</td>
+                        <td>50–150 m</td>
+                        <td>Predictor-corrector vs. aero uncertainty + IMU blackout propagation</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Total RSS</strong></td>
+                        <td><strong>~107 m (1σ)</strong></td>
+                        <td><strong>CEP ≈ 126 m</strong></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>The 100 m CEP end of the budget is achievable when despin timing is corrected and the aerodynamic
+                database is validated to ±0.5% uncertainty. The 200 m CEP represents the conservative bound
+                under ±1% aero uncertainty and less favourable atmospheric conditions.</p>
+        </section>
+
+        <section id="s7-2">
+            <h3>7.2 GNC Cost Summary</h3>
+            <div class="table-responsive-sm">
+                <table class="table align-middle table-striped-columns table-hover table-sm">
+                    <thead>
+                    <tr>
+                        <th scope="col">GNC Component</th>
+                        <th scope="col">Unit Cost (Low Volume)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Navigation-grade HRG or LRG IMU</td>
+                        <td>$30,000–80,000</td>
+                    </tr>
+                    <tr>
+                        <td>Star tracker (single unit, fixed boresight)</td>
+                        <td>$15,000–30,000</td>
+                    </tr>
+                    <tr>
+                        <td>Shielded multi-band GNSS receiver (RHBD)</td>
+                        <td>$10,000–40,000</td>
+                    </tr>
+                    <tr>
+                        <td>Single-axis roll actuator</td>
+                        <td>$10,000–30,000</td>
+                    </tr>
+                    <tr>
+                        <td>Cold-gas RCS (despin + midcourse attitude)</td>
+                        <td>$5,000–15,000</td>
+                    </tr>
+                    <tr>
+                        <td>Radar altimeter (Ka-band / W-band)</td>
+                        <td>$10,000–30,000</td>
+                    </tr>
+                    <tr>
+                        <td>Guidance software and aerodynamic database</td>
+                        <td>$5,000–20,000</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Total GNC cost adder</strong></td>
+                        <td><strong>$85,000–245,000</strong></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>Wind tunnel characterisation of the aerodynamic database and Monte Carlo dispersion analysis are
+                mandatory programme costs and should be budgeted separately at approximately $2–5 million for a
+                complete hypersonic characterisation campaign at Mach 15–20.</p>
+        </section>
+
+        <section id="s7-3">
+            <h3>7.3 The Absolute Accuracy Floor</h3>
+            <p>Even with the corrected architecture, the practical CEP floor without terminal sensing is
+                approximately 80–120 m, set primarily by unmodelled atmospheric density variation in the terminal
+                30 km and IMU propagation through the plasma blackout. Reaching below 10 m CEP would require an
+                active terminal seeker at 5–15 times the current GNC budget. For the 100–200 m requirement, this
+                investment is not warranted.</p>
+        </section>
+    </section>
+
+    <hr>
+
+    <!-- ═══ Section 8 ═══ -->
+    <section id="s8">
+        <h2>8. Survivability Analysis</h2>
+
+        <section id="s8-1">
+            <h3>8.1 Framing: Threat Layers and the Intercept Chain</h3>
+            <p>Modern ballistic missile defence operates across three engagement phases. During boost phase
+                (first 200–300 s), directed energy and fast-intercept weapons (not widely deployed) can attempt
+                intercept while the booster is still thrusting. During midcourse phase (the dominant engagement
+                window for current systems), exo-atmospheric kill vehicles such as the Ground-Based Interceptor
+                (GBI) with its Exoatmospheric Kill Vehicle (EKV) and the SM-3 family can engage above the
+                atmosphere. During terminal phase, atmospheric interceptors — THAAD (engagement altitude
+                40–150 km), PAC-3 MSE (up to ~40 km), and naval variants — engage the incoming RV.</p>
+            <p>Each survivability measure must be evaluated against the specific engagement layer it is intended
+                to defeat, its true cost impact on the baseline architecture, and its technical maturity.</p>
+        </section>
+
+        <section id="s8-2">
+            <h3>8.2 Trajectory Shaping — Correcting the BGV Cost Claim</h3>
+            <p>A boost-glide vehicle (BGV) or hypersonic glide vehicle (HGV) defeats midcourse intercept by
+                flying within the atmosphere throughout the midcourse phase, denying the exo-atmospheric
+                engagement window. This is a genuine and powerful capability. However, the claim that a BGV
+                results in a net-zero or negative cost delta versus a pure ballistic ICBM does not survive
+                scrutiny against programme data and inverts the actual cost relationship in two ways.</p>
+            <p>First, the booster savings are smaller than implied. A hypersonic glide vehicle must be
+                accelerated to approximately Mach 20 at the glide release point. Because the glide phase is not
+                free — aerodynamic drag continuously bleeds energy throughout the 15,000+ km glide path — the
+                effective launch delta-V is only modestly less than for a ballistic trajectory. The booster
+                saving is real but marginal: roughly 10–20% delta-V reduction versus MET, not the factor implied
+                by simple staging analysis.</p>
+            <p>Second, the heat tax vastly exceeds the structural cost of a simple reentry cone. A blunt-cone RV
+                on a 35-minute MET traverses the sensible atmosphere for approximately 150 km over 2–3 minutes.
+                A hypersonic glide vehicle traverses thousands of kilometres of upper atmosphere at Mach 10–20
+                for 20–30 minutes. The integrated heat load is not comparable — it is an entirely different
+                engineering problem requiring either active cooling loops, ultra-high-temperature ceramic
+                composite (UHTCC) structures, or oxidation-protected carbon-carbon airframes. Programme evidence
+                is unambiguous: the US Air Force's ARRW programme was cancelled in part due to unit costs
+                exceeding $20M per round; the Chinese DF-17 is estimated at 3–5 times the unit cost of a
+                comparable-range ballistic missile. The BGV is the highest-cost survivability measure on the
+                list, appropriate only when the threat specifically requires defeating a layered exo-atmospheric
+                defence against which decoys and MIRV are insufficient.</p>
+        </section>
+
+        <section id="s8-3">
+            <h3>8.3 Exo-Atmospheric Decoys — Technical Nuances on Effectiveness</h3>
+            <p>Simple inflatable mylar balloon decoys coated with metallic paint create radar cross-sections in
+                vacuum that are indistinguishable from a heavy warhead on X-band radar, forcing the defender to
+                expend $20M+ interceptors against $5,000–10,000 balloons. The deployment mechanism (spring and
+                gas canister) carries heritage from 1960s penetration aids programmes. These two facts are
+                correct.</p>
+            <p>However, effectiveness against modern kill vehicles is overstated if the analysis stops there.
+                The discrimination challenge for defenders has evolved considerably.</p>
+            <p>A reentry vehicle of 200–500 kg is significantly warmer than a mylar balloon in the midcourse
+                thermal environment. Solar heating warms both objects, but the warhead retains heat from its
+                boost phase and from differential solar loading on its denser mass. Long-wave infrared (LWIR)
+                sensors on modern EKVs — including the planned Redesigned Kill Vehicle (RKV) programme and the
+                current EKV Block II — are specifically designed to exploit this thermal contrast. Simple cheap
+                decoys defeat X-band radar discrimination but are more vulnerable to IR discrimination.</p>
+            <p>The countermeasure to thermal discrimination is active heating of decoys — electrical resistance
+                heaters or small exothermic chemical packets embedded in the balloon structure. This restores
+                effectiveness against multi-spectral kill vehicles but increases decoy cost substantially from
+                the baseline $5,000–10,000 estimate to approximately $50,000–100,000 per decoy and complicates
+                the deployment mechanism. The correct framing is therefore that X-band radar decoys alone are
+                highly cost-effective against radar-primary interceptors, but defeating a modern multi-spectral
+                EKV requires the heated variant at notably higher cost.</p>
+        </section>
+
+        <section id="s8-4">
+            <h3>8.4 Low-Observable Nose Tip — Correct Assessment with One Caveat</h3>
+            <p>Replacing the metallic heat shield tip with a silicon-carbide (SiC) or carbon-carbon nose cap
+                reduces nose-on RCS by approximately 10–15 dBsm. The cost impact is modest: SiC is more
+                expensive to machine than standard carbon-phenolic, but the mass is very small, adding
+                approximately 5–10% to RV unit cost. This is worth including in every configuration above the
+                baseline.</p>
+            <p>The caveat is timing. During plasma blackout (peak reentry heating, Mach 20 to approximately
+                Mach 5), the vehicle is surrounded by a conductive plasma sheath that creates its own
+                electromagnetic return regardless of nose material properties. The LO nose tip provides no
+                benefit during the peak heating phase. Its value is realised in the late terminal phase below
+                approximately Mach 5, after plasma dissipation — which is also when terminal-phase THAAD and
+                PAC-3 engagements occur. The nose tip directly compresses the tracking timeline for those
+                terminal interceptors, which is a genuine and meaningful benefit.</p>
+        </section>
+
+        <section id="s8-5">
+            <h3>8.5 Complete Survivability Measure Set and Cost-Effectiveness Ranking</h3>
+            <p>Beyond the two measures discussed, a complete survivability analysis includes additional layers
+                operating at different engagement phases.</p>
+            <p><strong>Boost-phase infrared signature reduction</strong> is nearly free. Optimised nozzle
+                geometry and low-emission coatings add approximately 3–5% to propulsion cost and reduce
+                boost-phase track range against DSP/SBIRS infrared space surveillance constellations by
+                approximately 20%. The leverage is limited because modern infrared space surveillance has broad
+                area coverage and high sensitivity, but narrowing the initial track window compresses the
+                defender's timeline. Worth including at any cost level.</p>
+            <p><strong>Terminal maneuvering RV (MaRV)</strong> with higher L/D (~0.8–1.2) and pitch/yaw
+                authority adds approximately 50–60% to RV cost. By introducing lateral acceleration throughout
+                the terminal phase, it defeats the fire-control solution for THAAD and PAC-3 MSE, which require
+                a predictable trajectory to compute an intercept point. The important trade is accuracy: higher
+                L/D and active terminal maneuvering increases terminal CEP from the 100–200 m regime toward
+                500 m–2 km, because the guidance must divide its authority between trajectory correction and
+                evasive maneuver. This is acceptable for some delivery missions and not others.</p>
+            <p><strong>MIRV (Multiple Independently targetable Reentry Vehicles)</strong> is the most
+                cost-effective survivability measure at the system level. A missile defence system has a finite
+                interceptor magazine. Delivering eight RVs per booster instead of one exhausts that magazine
+                regardless of single-shot kill probability per engagement. The cost increase is approximately
+                100–130% (post-boost bus, multiple RV procurement, navigation upgrade) but the survivability
+                gain against magazine-limited defences is the largest of any practical option short of BGV. This
+                is how operational Cold War systems actually addressed the layered defence problem.</p>
+            <p>The complete cost-effectiveness ranking is summarised below.</p>
+            <div class="table-responsive-sm">
+                <table class="table align-middle table-striped-columns table-hover table-sm">
+                    <thead>
+                    <tr>
+                        <th scope="col">Measure</th>
+                        <th scope="col">Phase Defeated</th>
+                        <th scope="col">Cost Increase</th>
+                        <th scope="col">P<sub>k</sub> Reduction</th>
+                        <th scope="col">TRL</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Boost IR reduction</td>
+                        <td>Boost (partial)</td>
+                        <td>+3–5%</td>
+                        <td>Low (~20%)</td>
+                        <td>7</td>
+                    </tr>
+                    <tr>
+                        <td>LO nose tip (SiC/C-C)</td>
+                        <td>Terminal</td>
+                        <td>+5–10%</td>
+                        <td>Moderate (~35%)</td>
+                        <td>9</td>
+                    </tr>
+                    <tr>
+                        <td>X-band radar decoys only</td>
+                        <td>Midcourse</td>
+                        <td>+7–10%</td>
+                        <td>High vs radar-only (~55%)</td>
+                        <td>9</td>
+                    </tr>
+                    <tr>
+                        <td>Decoys + IR heaters</td>
+                        <td>Midcourse</td>
+                        <td>+20–25%</td>
+                        <td>High vs multi-spectral (~72%)</td>
+                        <td>7</td>
+                    </tr>
+                    <tr>
+                        <td>MaRV terminal maneuver</td>
+                        <td>Terminal</td>
+                        <td>+50–60%</td>
+                        <td>High terminal (~78%)</td>
+                        <td>8</td>
+                    </tr>
+                    <tr>
+                        <td>MaRV + full decoy suite</td>
+                        <td>Midcourse + Terminal</td>
+                        <td>+65–75%</td>
+                        <td>Very high (~88%)</td>
+                        <td>7</td>
+                    </tr>
+                    <tr>
+                        <td>MIRV bus</td>
+                        <td>All (magazine)</td>
+                        <td>+100–130%</td>
+                        <td>Very high (~92%)</td>
+                        <td>9</td>
+                    </tr>
+                    <tr>
+                        <td>BGV / HGV</td>
+                        <td>Midcourse (exo)</td>
+                        <td>+200–300%</td>
+                        <td>Highest (~94%)</td>
+                        <td>6</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="s8-6">
+            <h3>8.6 Recommended Packages by Threat Environment</h3>
+            <p><strong>Single-layer defence (midcourse-only, e.g. early GBI fielding):</strong> LO nose tip +
+                X-band radar decoys + IR heaters. Cost increase approximately 30%. Midcourse P<sub>k</sub> drops
+                to near zero; terminal layer is not present. This is the minimum effective package against an
+                exo-atmospheric interceptor-only architecture.</p>
+            <p><strong>Two-layer defence (midcourse + THAAD terminal):</strong> Add MaRV capability to the
+                above. Cost increase approximately 75–80%. Both engagement layers are simultaneously degraded.
+                Accept the accuracy trade (CEP ~500 m) or invest in an improved aerodynamic model to recover
+                some precision in the MaRV configuration.</p>
+            <p><strong>Three-layer defence (midcourse + THAAD + PAC-3 / Aegis terminal):</strong> The practical
+                answer is MIRV rather than continued escalation of single-RV survivability measures. Exhausting
+                the interceptor magazine is more reliable than attempting to outmaneuver every engagement layer
+                with a single vehicle. Cost increase approximately 120%. This is the operationally validated
+                approach from the Cold War era.</p>
+            <p><strong>Layered exo-atmospheric midcourse defence at scale (e.g. expanded GMD with advanced
+                    discrimination):</strong> The BGV/HGV architecture becomes the correct choice only here,
+                when even MIRV plus a full decoy suite is insufficient because the defender's midcourse
+                discrimination capability has matured to the point where decoys are reliably identified. At this
+                tier, the cost premium of the HGV is the operational entry price. Below this tier, it is not
+                cost-justified.</p>
+        </section>
+    </section>
+
+    <hr>
+
+    <!-- ═══ Section 9 ═══ -->
+    <section id="s9">
+        <h2>9. Synthesised Architecture</h2>
+        <p>The complete corrected and validated architecture for minimum-cost antipodal delivery at 100–200 m
+            CEP with baseline survivability is as follows.</p>
+        <p><strong>Propulsion.</strong> Two-stage configuration with all-solid production propulsion.
+            Minimum-energy trajectory with apogee at approximately 4,800 km altitude. LOX/kerosene first stage
+            acceptable for the development phase; all-solid (HTPB/AP/Al composite, graphite-epoxy case) is the
+            production endpoint, accepting a 25–40% GLOM increase in exchange for full lifecycle cost reduction
+            and elimination of cryogenic basing infrastructure.</p>
+        <p><strong>Reentry vehicle.</strong> Blunt cone, 20° half-angle, L/D ≈ 0.3, PICA or carbon-phenolic
+            ablative TPS at approximately 10–15% of RV mass, SiC or carbon-carbon nose cap for terminal LO,
+            nose radius 0.3–0.5 m. Roll control only via single-axis electromechanical actuator.</p>
+        <p><strong>GNC suite.</strong></p>
+        <ul>
+            <li>Navigation-grade HRG or LRG IMU with shock isolation mount (resonant frequency 20–50 Hz,
+                isolation &gt;40 dB above 200 Hz)
+            </li>
+            <li>Single star tracker for stellar-inertial update during late boost or early coast</li>
+            <li>Shielded RHBD multi-band GNSS receiver (GPS L1/L2/L5, BeiDou B1/B2a, GLONASS L1/L2) for
+                apogee position fix
+            </li>
+            <li>Cold-gas RCS (4–6 jets, ~500–2,000 N·s total impulse, ~5 kg) for midcourse attitude control
+                and active Mach 15 despin
+            </li>
+            <li>Single-axis roll actuator for bank-to-steer</li>
+            <li>Predictor-corrector guidance algorithm on radiation-hardened ARM/LEON processor at ~200 MIPS
+            </li>
+            <li>Ka-band or W-band radar altimeter for post-blackout vertical channel update</li>
+        </ul>
+        <p><strong>Azimuth selection.</strong> Compute both meridional geodesics on WGS84 using Karney's
+            inverse algorithm. Select based on operational/sovereignty constraints (typically the southward
+            azimuth for Northern Hemisphere launches). Launch elevation γ₀ ≈ 23.3° above local horizontal,
+            independent of azimuth. Initialise predictor-corrector reference trajectory on the selected WGS84
+            geodesic.</p>
+        <p><strong>Spin/despin sequence.</strong> Spin-up to 1–3 Hz during coast using cold-gas RCS. Maintain
+            spin through peak heating (Mach 20 to Mach 15, altitude 60–45 km). Active cold-gas despin over
+            approximately 20 seconds at Mach 15. Predictor-corrector bank-to-steer guidance active from Mach 15
+            to impact with approximately 90–120 seconds of correction time and ~94 km of theoretical correction
+            authority.</p>
+        <p><strong>Baseline survivability package.</strong> LO SiC nose tip (included in RV design), 2–3
+            inflatable exo-atmospheric decoys with IR heating elements deployed at reentry interface. Total
+            survivability cost adder: approximately 25–30% of RV unit cost. Effective against single-layer
+            radar-primary midcourse defence and compresses terminal tracking timeline.</p>
+        <p><strong>Pre-flight characterisation.</strong> Hypersonic wind tunnel characterisation of
+            C<sub>A</sub> and C<sub>N</sub> to ±0.5–1% uncertainty. Monte Carlo dispersion analysis with
+            ±2.5% ballistic coefficient scatter and atmospheric climatology ensemble. These are mandatory
+            programme costs.</p>
+        <p><strong>Achievable performance.</strong> CEP approximately 100–130 m at antipodal range under
+            nominal conditions, 150–200 m under conservative aerodynamic and atmospheric uncertainty
+            assumptions. Survivability against single-layer midcourse defence: high. Survivability against
+            two-layer defence without MaRV upgrade: moderate.</p>
+    </section>
+
+    <hr>
+
+    <!-- ═══ Section 10 ═══ -->
+    <section id="s10">
+        <h2>10. Conclusion</h2>
+        <p>The architecture presented here demonstrates that 100–200 m CEP at antipodal range is achievable
+            within a cost-constrained design philosophy that absorbs reentry physics in software, closed-loop
+            guidance, and pre-flight characterisation rather than in expensive terminal sensors, high-L/D
+            geometries, or complex multi-axis control systems. The GNC cost adder remains below 15% of total
+            bus cost.</p>
+        <p>Four physics-driven refinements from the original proposal are necessary and sufficient to close the
+            CEP budget reliably: correcting the despin transition timing from Mach 5–8 to Mach 15–18; adopting
+            a shielded multi-band GNSS receiver architecture; migrating to all-solid propulsion in production;
+            and resolving the antipodal azimuth degeneracy through WGS84 geodetic computation followed by
+            operational constraint evaluation rather than geometric intuition.</p>
+        <p>On survivability, the correct rank ordering by cost-effectiveness is: LO nose tip first (nearly
+            free), simple radar decoys second (very cheap, high leverage against radar-only discrimination),
+            heated decoys third (moderate cost, restores effectiveness against multi-spectral kill vehicles),
+            MaRV fourth (significant cost, defeats terminal layer at the price of reduced accuracy), MIRV fifth
+            (highest practical leverage against magazine-limited defences), and BGV/HGV last (justified only
+            against a mature exo-atmospheric defence architecture). The common claim that hypersonic glide
+            vehicles are cost-competitive with ballistic systems is not supported by programme data; they are
+            the most expensive option on the list and should be selected only when the threat specifically
+            requires it.</p>
+        <p>The single highest-leverage investment in the entire programme — combining stellar-inertial update
+            during boost with multi-band GPS at apogee — collapses the error budget from the 5–15 km unguided
+            baseline to approximately 100–200 m for a GNC cost increase of roughly 2–3 times the baseline
+            expenditure. Everything beyond this point, whether in accuracy or survivability, costs progressively
+            more for progressively smaller returns. Understanding that frontier is the central contribution of
+            this analysis.</p>
+    </section>
+
+    <hr>
+
+    <!-- ═══ FAQ ═══ -->
+    <section id="faq">
+        <h2>Frequently Asked Questions</h2>
+        <p class="text-muted small mb-3">The following questions address the most common technical queries
+            arising from this analysis, formatted for direct reference.</p>
+
+        <div class="accordion" id="faqAccordion">
+
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="faq-h1">
+                    <button aria-controls="faq-c1" aria-expanded="false"
+                            class="accordion-button collapsed"
+                            data-bs-target="#faq-c1" data-bs-toggle="collapse" type="button">
+                        What is a guided reentry vehicle (GRV)?
+                    </button>
+                </h3>
+                <div aria-labelledby="faq-h1" class="accordion-collapse collapse"
+                     data-bs-parent="#faqAccordion" id="faq-c1">
+                    <div class="accordion-body">
+                        A guided reentry vehicle (GRV) is the terminal payload section of a ballistic missile
+                        equipped with onboard guidance, navigation, and control (GNC) systems. Unlike an unguided
+                        ballistic reentry vehicle, a GRV actively corrects its trajectory during atmospheric
+                        reentry to achieve high accuracy — measured as circular error probable (CEP) — at the
+                        target. Key GNC elements include a navigation-grade inertial measurement unit (IMU), an
+                        optional GNSS receiver for midcourse state correction, and an aerodynamic control system
+                        such as bank-to-steer via a single-axis roll actuator on a blunt-cone body. At antipodal
+                        range (~20,000 km), active guidance is the only mechanism capable of reducing CEP from
+                        the ~5,000–15,000 m unguided baseline to the 100–200 m target.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="faq-h2">
+                    <button aria-controls="faq-c2" aria-expanded="false"
+                            class="accordion-button collapsed"
+                            data-bs-target="#faq-c2" data-bs-toggle="collapse" type="button">
+                        What does CEP (Circular Error Probable) mean in ballistic missile guidance?
+                    </button>
+                </h3>
+                <div aria-labelledby="faq-h2" class="accordion-collapse collapse"
+                     data-bs-parent="#faqAccordion" id="faq-c2">
+                    <div class="accordion-body">
+                        Circular Error Probable (CEP) is the radius of a circle, centered on the target, within
+                        which 50% of warhead impacts will fall under repeated firings. A CEP of 100 m means half
+                        of all shots land within 100 m of the aim point. At antipodal range (~20,000 km),
+                        unguided ballistic reentry vehicles accumulate 5,000–15,000 m CEP from atmospheric wind
+                        bias (4,000–10,000 m), density/drag uncertainty (2,000–6,000 m), Coriolis residuals
+                        (2,000–5,000 m), and ablation asymmetry (500–3,000 m). Guided reentry vehicles with
+                        predictor-corrector bank-to-steer and a GPS apogee fix can reduce this to 100–200 m CEP
+                        (RSS ~107 m, CEP ≈ 126 m nominal) at the same range.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="faq-h3">
+                    <button aria-controls="faq-c3" aria-expanded="false"
+                            class="accordion-button collapsed"
+                            data-bs-target="#faq-c3" data-bs-toggle="collapse" type="button">
+                        What is the minimum-energy trajectory (MET) for an antipodal ballistic missile?
+                    </button>
+                </h3>
+                <div aria-labelledby="faq-h3" class="accordion-collapse collapse"
+                     data-bs-parent="#faqAccordion" id="faq-c3">
+                    <div class="accordion-body">
+                        The minimum-energy trajectory (MET) for an antipodal (~20,000 km) ballistic missile
+                        achieves an apogee of approximately 4,800 km altitude with a flight time of 32–36
+                        minutes, a reentry angle of 20–25°, and a delta-V requirement of approximately 6.5–7.0
+                        km/s from the surface. The MET minimizes propellant consumption and launch vehicle mass,
+                        making it the preferred trajectory for cost-constrained designs. Depressed trajectories
+                        reduce flight time to 20–25 minutes but demand 8.5–10 km/s delta-V, translating into
+                        2–3 times more propellant mass for the same payload via the Tsiolkovsky rocket equation.
+                        Lofted trajectories above 8,000 km apogee incur extreme heat loads and atmospheric
+                        instability penalties that preclude ablative TPS solutions.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="faq-h4">
+                    <button aria-controls="faq-c4" aria-expanded="false"
+                            class="accordion-button collapsed"
+                            data-bs-target="#faq-c4" data-bs-toggle="collapse" type="button">
+                        How does bank-to-steer predictor-corrector guidance work on a reentry vehicle?
+                    </button>
+                </h3>
+                <div aria-labelledby="faq-h4" class="accordion-collapse collapse"
+                     data-bs-parent="#faqAccordion" id="faq-c4">
+                    <div class="accordion-body">
+                        Bank-to-steer predictor-corrector guidance steers the reentry vehicle by rolling it to
+                        orient its aerodynamic lift vector in the desired correction direction. At the reentry
+                        interface (~120 km altitude), the guidance computer initializes with the GPS-corrected
+                        state vector propagated through the plasma blackout by the shock-isolated IMU. It
+                        numerically integrates the predicted trajectory to impact using pre-loaded aerodynamic
+                        tables (C<sub>A</sub> and C<sub>N</sub> vs. Mach and angle of attack), compares the
+                        predicted impact point to the target, computes an optimal bank-angle command, executes
+                        via the single-axis roll actuator, and repeats the loop at 1–5 Hz. The algorithm runs on
+                        a radiation-hardened ARM or LEON processor at approximately 200 MIPS. Heritage includes
+                        Apollo Entry guidance and NASA's FNPEG/NPC algorithm. Only one actuator (roll) is
+                        required — no pitch or yaw actuation — making the system mechanically simple and
+                        low-cost.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="faq-h5">
+                    <button aria-controls="faq-c5" aria-expanded="false"
+                            class="accordion-button collapsed"
+                            data-bs-target="#faq-c5" data-bs-toggle="collapse" type="button">
+                        Why is a 20° half-angle blunt cone the preferred reentry vehicle geometry?
+                    </button>
+                </h3>
+                <div aria-labelledby="faq-h5" class="accordion-collapse collapse"
+                     data-bs-parent="#faqAccordion" id="faq-c5">
+                    <div class="accordion-body">
+                        A 20° half-angle blunt cone with L/D ≈ 0.3–0.4 is cost-optimal because it provides
+                        sufficient lateral correction authority (approximately 94 km at Mach 15 despin) to null
+                        100–200 m of accumulated trajectory error, exhibits inherent aerodynamic stability at
+                        hypervelocity without pitch or yaw actuators, accommodates ablative PICA or
+                        carbon-phenolic TPS at 10–15% of RV mass, and requires only a single roll actuator for
+                        bank-to-steer. Higher L/D geometries (slender cones, lifting bodies) provide greater
+                        correction authority at 2–8 times the system cost through added TPS mass, pitch/yaw
+                        actuation, and complex aerodynamic databases — all unnecessary for a 100–200 m CEP
+                        target. The geometry carries extensive heritage from the Mk-12 MIRV, Apollo Command
+                        Module, and Pershing II programs.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="faq-h6">
+                    <button aria-controls="faq-c6" aria-expanded="false"
+                            class="accordion-button collapsed"
+                            data-bs-target="#faq-c6" data-bs-toggle="collapse" type="button">
+                        What is the antipodal geodesic degeneracy problem and how is it resolved?
+                    </button>
+                </h3>
+                <div aria-labelledby="faq-h6" class="accordion-collapse collapse"
+                     data-bs-parent="#faqAccordion" id="faq-c6">
+                    <div class="accordion-body">
+                        On a perfect sphere, all great-circle azimuths from a launch point reach the exact
+                        antipodal point at identical range (~20,015 km) and flight time — the Lambert problem's
+                        normal matrix is singular and the launch azimuth is mathematically undefined. WGS84
+                        ellipsoid flattening (f = 1/298.257) breaks this degeneracy: paths through higher
+                        latitudes traverse a smaller-circumference Earth and are geodetically shorter. For
+                        equatorially symmetric launch-target pairs, the two shortest geodesics are the meridional
+                        paths (azimuth ≈ 0° northward or ≈ 180° southward). The geodesic length advantage scales
+                        as Δs ≈ f·π·R<sub>E</sub>·sin²φ₁ — approximately 4 km at 14° latitude and 25 km at
+                        38° latitude. Final azimuth selection uses Karney's inverse geodesic algorithm
+                        (GeographicLib) and is governed primarily by overflight sovereignty constraints, not
+                        fuel savings.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="faq-h7">
+                    <button aria-controls="faq-c7" aria-expanded="false"
+                            class="accordion-button collapsed"
+                            data-bs-target="#faq-c7" data-bs-toggle="collapse" type="button">
+                        How does GPS/GNSS achieve meter-level accuracy at 4,800 km apogee altitude?
+                    </button>
+                </h3>
+                <div aria-labelledby="faq-h7" class="accordion-collapse collapse"
+                     data-bs-parent="#faqAccordion" id="faq-c7">
+                    <div class="accordion-body">
+                        At apogee (~4,800 km altitude), the RV is below the orbital shells of GPS (20,200 km),
+                        BeiDou MEO (21,500 km), and GLONASS (19,100 km), so all GNSS satellites occupy the
+                        lower hemisphere relative to the receiver. Position dilution of precision (PDOP) is
+                        typically better than standard ground conditions because satellites span nearly a full
+                        hemisphere below. A shielded, radiation-hardened multi-constellation, multi-frequency
+                        receiver (GPS L1/L2/L5, BeiDou B1/B2a, GLONASS L1/L2) achieves 0.5–2 m position
+                        accuracy (1σ). The L5 and B2a signals use a 10.23 Mcps chip rate — 10 times better
+                        pseudorange resolution than L1 C/A (1.023 Mcps) — enabling reliable carrier-phase
+                        ambiguity resolution before the plasma blackout. Modern RHBD design techniques eliminate
+                        the historical cost premium for radiation tolerance.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="faq-h8">
+                    <button aria-controls="faq-c8" aria-expanded="false"
+                            class="accordion-button collapsed"
+                            data-bs-target="#faq-c8" data-bs-toggle="collapse" type="button">
+                        Why must reentry vehicle despin occur at Mach 15 rather than Mach 5–8?
+                    </button>
+                </h3>
+                <div aria-labelledby="faq-h8" class="accordion-collapse collapse"
+                     data-bs-parent="#faqAccordion" id="faq-c8">
+                    <div class="accordion-body">
+                        Available lateral correction authority scales with dynamic pressure and time remaining to
+                        impact. At Mach 8 (~20 km altitude, ~35 s to impact), usable correction is only
+                        approximately 50–80 m — barely sufficient for the optimistic 100 m CEP target with no
+                        margin for aerodynamic model errors. At Mach 15 (~45 km altitude, ~100 s to impact),
+                        available correction authority is approximately 94 km — about 600 times greater —
+                        providing enormous margin against model uncertainty and atmospheric density variation.
+                        Despin at Mach 5–8 physically cannot close the 100–200 m CEP budget. The correct
+                        sequence is: maintain spin through peak heating (Mach 20 to Mach 15, altitude 60–45 km),
+                        then actively despin over approximately 20 seconds at Mach 15 using the cold-gas RCS,
+                        then activate predictor-corrector guidance with 90–120 seconds of correction time
+                        remaining.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="faq-h9">
+                    <button aria-controls="faq-c9" aria-expanded="false"
+                            class="accordion-button collapsed"
+                            data-bs-target="#faq-c9" data-bs-toggle="collapse" type="button">
+                        What are the most cost-effective survivability measures for a reentry vehicle?
+                    </button>
+                </h3>
+                <div aria-labelledby="faq-h9" class="accordion-collapse collapse"
+                     data-bs-parent="#faqAccordion" id="faq-c9">
+                    <div class="accordion-body">
+                        Ranked by cost-effectiveness against modern ballistic missile defense: (1) Boost-phase
+                        IR signature reduction — +3–5% cost, low P<sub>k</sub> reduction; (2) LO nose tip
+                        (SiC/C-C) — +5–10% cost, compresses terminal tracking timeline, TRL 9; (3) X-band
+                        radar decoys — +7–10% cost, highly effective against radar-primary interceptors, TRL 9;
+                        (4) IR-heated decoys — +20–25% cost, effective against multi-spectral EKVs, TRL 7;
+                        (5) MaRV terminal maneuver — +50–60% cost, defeats terminal interceptors at cost of
+                        increased CEP (~500 m–2 km), TRL 8; (6) MIRV — +100–130% cost, exhausts interceptor
+                        magazines, TRL 9; (7) BGV/HGV — +200–300% cost, justified only against mature layered
+                        exo-atmospheric defenses, TRL 6. Programme evidence (ARRW &gt;$20M/round; DF-17 at
+                        3–5× ballistic cost) refutes claims that BGV/HGV is cost-competitive.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="faq-h10">
+                    <button aria-controls="faq-c10" aria-expanded="false"
+                            class="accordion-button collapsed"
+                            data-bs-target="#faq-c10" data-bs-toggle="collapse" type="button">
+                        What is the total GNC hardware cost for achieving 100–200 m CEP at antipodal range?
+                    </button>
+                </h3>
+                <div aria-labelledby="faq-h10" class="accordion-collapse collapse"
+                     data-bs-parent="#faqAccordion" id="faq-c10">
+                    <div class="accordion-body">
+                        The complete GNC suite costs approximately $85,000–245,000 at low production volume:
+                        navigation-grade HRG or LRG IMU ($30,000–80,000), star tracker ($15,000–30,000),
+                        shielded RHBD multi-band GNSS receiver ($10,000–40,000), single-axis roll actuator
+                        ($10,000–30,000), cold-gas RCS ($5,000–15,000), Ka-band/W-band radar altimeter
+                        ($10,000–30,000), and guidance software/aerodynamic database ($5,000–20,000). Mandatory
+                        hypersonic wind tunnel characterization and Monte Carlo dispersion analysis add
+                        approximately $2–5 million as a separate program cost. The GNC cost adder remains below
+                        15% of total bus cost. The single highest-leverage investment — combining stellar-inertial
+                        update during boost with multi-band GPS at apogee — collapses the error budget from
+                        5–15 km unguided to approximately 100–200 m CEP.
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /accordion -->
+    </section>
+
+    <hr>
+
+    <!-- ═══ Glossary ═══ -->
+    <section id="glossary">
+        <h2>Glossary of Key Terms</h2>
+        <dl class="row">
+            <dt class="col-sm-3 col-lg-2 glossary-term">BGV / HGV</dt>
+            <dd class="col-sm-9 col-lg-10">Boost-Glide Vehicle / Hypersonic Glide Vehicle. A reentry system
+                accelerated to high speed and released to glide through the upper atmosphere on aerodynamic lift,
+                denying the exo-atmospheric midcourse engagement window. Unit cost is estimated at 3–5× a
+                comparable ballistic system.</dd>
+
+            <dt class="col-sm-3 col-lg-2 glossary-term">CEP</dt>
+            <dd class="col-sm-9 col-lg-10">Circular Error Probable. The radius within which 50% of impacts fall,
+                centered on the intended target. The standard accuracy metric for ballistic and guided
+                weapons.</dd>
+
+            <dt class="col-sm-3 col-lg-2 glossary-term">EKV</dt>
+            <dd class="col-sm-9 col-lg-10">Exoatmospheric Kill Vehicle. The homing kill vehicle carried by the
+                Ground-Based Interceptor (GBI), designed to intercept ballistic missiles above the atmosphere
+                during the midcourse phase. Modern variants (EKV Block II) include long-wave infrared (LWIR)
+                sensors for multi-spectral decoy discrimination.</dd>
+
+            <dt class="col-sm-3 col-lg-2 glossary-term">GNC</dt>
+            <dd class="col-sm-9 col-lg-10">Guidance, Navigation, and Control. The integrated system of sensors,
+                computers, and actuators that determines where the vehicle is (navigation), computes the required
+                trajectory correction (guidance), and executes it (control).</dd>
+
+            <dt class="col-sm-3 col-lg-2 glossary-term">GNSS</dt>
+            <dd class="col-sm-9 col-lg-10">Global Navigation Satellite System. Generic term covering GPS (US),
+                GLONASS (Russia), BeiDou (China), and Galileo (EU). This design uses a multi-constellation
+                receiver for the apogee position fix to maximize geometric diversity and positioning
+                accuracy.</dd>
+
+            <dt class="col-sm-3 col-lg-2 glossary-term">HRG / LRG</dt>
+            <dd class="col-sm-9 col-lg-10">Hemispherical Resonator Gyroscope / Laser Ring Gyroscope.
+                Navigation-grade inertial sensors with gyro drift below 0.001°/hr and accelerometer bias below
+                50 μg, suitable for the full boost and coast phases without external position reference.
+                Unit cost: $30,000–80,000.</dd>
+
+            <dt class="col-sm-3 col-lg-2 glossary-term">IMU</dt>
+            <dd class="col-sm-9 col-lg-10">Inertial Measurement Unit. A sensor package combining three-axis
+                gyroscopes and accelerometers to track position, velocity, and attitude without external signals.
+                Prone to drift over time (tens of metres over a 35-minute coast); corrected by stellar-inertial
+                update and the GNSS apogee fix.</dd>
+
+            <dt class="col-sm-3 col-lg-2 glossary-term">L/D</dt>
+            <dd class="col-sm-9 col-lg-10">Lift-to-Drag ratio. For a blunt cone with 20° half-angle,
+                L/D ≈ 0.3–0.4. Higher L/D provides more lateral correction authority but at significantly higher
+                system cost and structural complexity. For the 100–200 m CEP requirement, L/D ≈ 0.3 is
+                sufficient.</dd>
+
+            <dt class="col-sm-3 col-lg-2 glossary-term">MaRV</dt>
+            <dd class="col-sm-9 col-lg-10">Maneuvering Reentry Vehicle. A reentry vehicle with higher L/D
+                (~0.8–1.2) and pitch/yaw actuation that performs evasive terminal maneuvers to defeat interceptor
+                fire-control solutions, at the cost of increased CEP (500 m–2 km).</dd>
+
+            <dt class="col-sm-3 col-lg-2 glossary-term">MET</dt>
+            <dd class="col-sm-9 col-lg-10">Minimum-Energy Trajectory. The ballistic arc requiring the least
+                delta-V for a given range. For antipodal range, MET achieves apogee at ~4,800 km altitude with
+                a delta-V requirement of ~6.5–7.0 km/s, flight time of 32–36 minutes, and reentry angle of
+                20–25°.</dd>
+
+            <dt class="col-sm-3 col-lg-2 glossary-term">MIRV</dt>
+            <dd class="col-sm-9 col-lg-10">Multiple Independently targetable Reentry Vehicle. A post-boost bus
+                carrying several independently guided warheads, defeating magazine-limited defences by exhausting
+                interceptor inventory. Cost increase ~100–130% over single-RV configuration; the most
+                cost-effective survivability measure at system level.</dd>
+
+            <dt class="col-sm-3 col-lg-2 glossary-term">PDOP</dt>
+            <dd class="col-sm-9 col-lg-10">Position Dilution of Precision. A dimensionless measure of GNSS
+                satellite geometry quality; lower PDOP means better positioning. At apogee (~4,800 km), PDOP is
+                typically better than standard ground conditions because all satellites lie in the lower
+                hemisphere.</dd>
+
+            <dt class="col-sm-3 col-lg-2 glossary-term">PICA</dt>
+            <dd class="col-sm-9 col-lg-10">Phenolic Impregnated Carbon Ablator. A high-performance ablative
+                thermal protection material — mass-efficient, well-characterized, and scalable — suitable for the
+                30–50 kJ/cm² heat loads encountered on an antipodal MET reentry.</dd>
+
+            <dt class="col-sm-3 col-lg-2 glossary-term">RCS</dt>
+            <dd class="col-sm-9 col-lg-10">Reaction Control System. In this design, a cold-gas nitrogen or
+                helium thruster system (4–6 jets, total impulse ~500–2,000 N·s, mass ~5 kg) used for midcourse
+                attitude control (maintaining GNSS and star tracker orientation) and active despin at Mach
+                15.</dd>
+
+            <dt class="col-sm-3 col-lg-2 glossary-term">RHBD</dt>
+            <dd class="col-sm-9 col-lg-10">Radiation-Hardened By Design. An IC design approach using
+                triple-modular redundancy, error-correcting memories, and hardened cell libraries to tolerate
+                ionizing radiation at apogee altitude, implementable in commercial foundry processes at
+                near-COTS cost.</dd>
+
+            <dt class="col-sm-3 col-lg-2 glossary-term">RSS</dt>
+            <dd class="col-sm-9 col-lg-10">Root Sum Square. The statistical method for combining independent
+                1σ error contributions: RSS = √(σ₁² + σ₂² + σ₃² + …). The phase-by-phase RSS of 10–20 m
+                (boost), 20–50 m (midcourse), and 50–150 m (reentry) yields ~107 m total (1σ), corresponding
+                to CEP ≈ 126 m.</dd>
+
+            <dt class="col-sm-3 col-lg-2 glossary-term">TPS</dt>
+            <dd class="col-sm-9 col-lg-10">Thermal Protection System. The ablative material covering the RV
+                exterior that absorbs and dissipates heat during atmospheric reentry via pyrolysis and mass
+                ejection. PICA or carbon-phenolic at 10–15% of RV mass is appropriate for 30–50 kJ/cm²
+                antipodal MET heat loads.</dd>
+
+            <dt class="col-sm-3 col-lg-2 glossary-term">WGS84</dt>
+            <dd class="col-sm-9 col-lg-10">World Geodetic System 1984. The standard Earth reference ellipsoid
+                used in GPS and modern geodetic applications (a = 6,378,137 m, f = 1/298.257). Its polar
+                flattening breaks the perfect-sphere antipodal azimuth degeneracy, enabling unique geodesic
+                solutions via Karney's inverse algorithm.</dd>
+        </dl>
+    </section>
+
+    <hr>
+
+    <!-- ═══ References ═══ -->
+    <section id="references">
+        <h2>References and Further Reading</h2>
+        <ol class="ref-list">
+            <li>
+                Karney, C.F.F. (2013). "Algorithms for geodesics."
+                <em>Journal of Geodesy</em>, 87(1), 43–55.
+                <a href="https://doi.org/10.1007/s00190-012-0578-z"
+                   rel="external nofollow noopener" target="_blank">doi:10.1007/s00190-012-0578-z</a> —
+                Authoritative algorithm for the WGS84 inverse geodesic problem used for antipodal azimuth
+                selection in Section 2.
+            </li>
+            <li>
+                GeographicLib library. Karney, C.F.F.
+                <a href="https://geographiclib.sourceforge.io/"
+                   rel="external nofollow noopener" target="_blank">geographiclib.sourceforge.io</a> —
+                Open-source C++/Python/Java/JavaScript implementation of Karney's geodesic algorithms,
+                directly applicable to the azimuth selection problem in Section 2.
+            </li>
+            <li>
+                Lu, P. (2014). "Entry Guidance: A Unified Method."
+                <em>Journal of Guidance, Control, and Dynamics</em>, 37(3), 713–728.
+                <a href="https://doi.org/10.2514/1.G000019"
+                   rel="external nofollow noopener" target="_blank">doi:10.2514/1.G000019</a> —
+                Foundational paper for the FNPEG/NPC predictor-corrector bank-to-steer algorithm discussed
+                in Section 5.4.
+            </li>
+            <li>
+                National Geospatial-Intelligence Agency. <em>NGA.STND.0036 — Department of Defense World
+                    Geodetic System 1984</em> (2014 update).
+                <a href="https://earth-info.nga.mil/"
+                   rel="external nofollow noopener" target="_blank">earth-info.nga.mil</a> —
+                Official WGS84 specification underpinning the geodetic computations and ellipsoidal parameters
+                cited throughout Section 2.
+            </li>
+            <li>
+                Tauber, M.E. and Sutton, K. (1991). "Stagnation-Point Radiative Heating Relations for Earth and
+                Mars Entries." <em>Journal of Spacecraft and Rockets</em>, 28(1), 40–42.
+                <a href="https://doi.org/10.2514/3.26206"
+                   rel="external nofollow noopener" target="_blank">doi:10.2514/3.26206</a> —
+                Stagnation heating scaling laws (R<sub>nose</sub><sup>−½</sup> dependence) referenced in the
+                TPS nose radius trade of Section 4.2.
+            </li>
+            <li>
+                Congressional Research Service. "Hypersonic Weapons: Background and Issues for Congress."
+                Report R45811 (updated periodically).
+                <a href="https://crsreports.congress.gov/product/pdf/R/R45811"
+                   rel="external nofollow noopener" target="_blank">crsreports.congress.gov</a> —
+                Programme cost evidence for ARRW cancellation and BGV/HGV unit cost data cited in
+                Sections 8.2 and 8.5.
+            </li>
+            <li>
+                NASA Technical Reports Server (NTRS) — Apollo Entry guidance documentation and FNPEG
+                heritage papers.
+                <a href="https://ntrs.nasa.gov/"
+                   rel="external nofollow noopener" target="_blank">ntrs.nasa.gov</a> —
+                Primary repository for Apollo Entry guidance design reports underpinning the bank-to-steer
+                heritage discussion in Section 5.4.
+            </li>
+            <li>
+                Tsiolkovsky, K.E. (1903). "Exploration of Outer Space by Means of Rocket Devices."
+                Digitized archive via
+                <a href="https://archive.org/search?query=tsiolkovsky+rocket+equation"
+                   rel="external nofollow noopener" target="_blank">Internet Archive</a> —
+                Rocket equation derivation underlying the mass fraction analysis in Section 3.2.
+            </li>
+        </ol>
+    </section>
+
+    <hr>
+
+    <!-- ═══ Disclaimer ═══ -->
+    <footer class="mb-4">
+        <p class="text-muted fst-italic small">Prepared as a technical systems analysis for educational and
+            reference purposes. All cost figures are order-of-magnitude estimates appropriate for conceptual
+            design trades and should not be treated as procurement data. Performance figures are derived from
+            open-source astrodynamics, atmospheric physics, and guidance literature; no classified or
+            export-controlled data were used or implied.</p>
+    </footer>
+
+</div><!-- /row -->
+
+<script src="/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

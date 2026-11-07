@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en-ID">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="Dawud Tan">
+
+<!-- Standard SEO Meta Tags -->
+<title>CGK → China Museum of Fujian-Taiwan Kinship — Route &amp; Visit Guide</title>
+<meta name="description" content="A practical travel and transit guide for Indonesian descendants flying from Jakarta (CGK) to the China Museum of Fujian-Taiwan Kinship in Quanzhou. Compare costs, routes, and local apps.">
+<meta name="keywords" content="CGK to Quanzhou, China Museum of Fujian-Taiwan Kinship, Fujian travel guide, Jakarta to Xiamen flight, Chinese genealogy research Quanzhou">
+<link rel="canonical" href="https://dawud-tan.github.io/cgk-to-fujian-taiwan-kinship-museum-guide-en.html" />
+
+<!-- Bidirectional Hreflang for SEO -->
+<link rel="alternate" hreflang="en" href="https://dawud-tan.github.io/cgk-to-fujian-taiwan-kinship-museum-guide-en.html" />
+<link rel="alternate" hreflang="id" href="https://dawud-tan.github.io/cgk-to-fujian-taiwan-kinship-museum-guide-id.html" />
+<link rel="alternate" hreflang="x-default" href="https://dawud-tan.github.io/cgk-to-fujian-taiwan-kinship-museum-guide-id.html" />
+
+<!-- Open Graph / Social Sharing Tags -->
+<meta property="og:title" content="CGK → China Museum of Fujian-Taiwan Kinship Transit Guide">
+<meta property="og:description" content="Compare routes from Jakarta to Quanzhou for family lineage research. Includes transport costs, local app tips, and high-speed rail directions.">
+<meta property="og:url" content="https://dawud-tan.github.io/cgk-to-fujian-taiwan-kinship-museum-guide-en.html">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_ID">
+
+<!-- Combined JSON-LD for AI Search Engines (Article + FAQPage) -->
+<script type="application/ld+json">
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "CGK → China Museum of Fujian-Taiwan Kinship — Route & Visit Guide",
+    "description": "A shortcut for fellow descendants in Indonesia tracing their family's Cho̍k-phó͘ (族谱) at the museum's genealogy archive in Quanzhou.",
+    "author": {
+      "@type": "Person",
+      "name": "Dawud Tan"
+    },
+    "datePublished": "2026-07-09T17:51:00+07:00",
+    "dateModified": "2026-07-09T17:51:00+07:00",
+    "audience": {
+      "@type": "Audience",
+      "geographicArea": {
+        "@type": "Country",
+        "name": "Indonesia"
+      }
+    },
+    "about": [
+      {
+        "@type": "Place",
+        "name": "China Museum of Fujian-Taiwan Kinship",
+        "alternateName": "中国闽台缘博物馆"
+      }
+    ]
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the cheapest route from Jakarta to the China Museum of Fujian-Taiwan Kinship?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Route A (via Xiamen) is typically the cheapest and simplest option. It costs approximately US$129–235 (Rp2.320.000–4.230.000) one-way and involves one direct flight to Xiamen followed by a subway, high-speed rail, and city bus transfer."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need a physical transit card to ride buses in Quanzhou?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No physical transit card is required. You can use the Alipay app (linked to a foreign Visa/Mastercard) to generate a city-specific Transit QR code that scans on Xiamen Metro and Quanzhou city buses."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How much does it cost to enter the China Museum of Fujian-Taiwan Kinship?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Admission to the museum and its genealogy center is completely free. However, you are required to reserve your visit in advance using a valid ID or through the museum's official WeChat account."
+        }
+      }
+    ]
+  }
+]
+</script>
+
+<!-- Leaflet CSS for Interactive Map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#2A2420; --ink-soft:#746C5E; --paper:#FBF7EF; --paper-alt:#F2E9D8;
+    --red:#8C2F2F; --red-deep:#6E2424; --red-tint:#F3E3E0;
+    --gold:#A9793A; --gold-tint:#F1E4C6;
+    --green:#3E7A4C; --green-tint:#E3EEE3;
+    --line:#E1D6C1; --link:#2E5C8A;
+    --radius:12px;
+    --font-display:'Fraunces','Noto Serif SC',Georgia,serif;
+    --font-body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans SC',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--font-body);
+    font-size:16.5px; line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--link);}
+  a:focus-visible, button:focus-visible{outline:2.5px solid var(--red); outline-offset:2px;}
+  .wrap{max-width:640px; margin:0 auto; padding:0 18px 64px;}
+  header.hero{padding:28px 18px 18px; text-align:center;}
+  .seal{width:46px; height:46px; color:var(--red); margin:0 auto 10px;}
+  h1{
+    font-family:var(--font-display); font-weight:700;
+    font-size:clamp(1.5rem, 5.5vw, 2.05rem);
+    line-height:1.2; margin:0 0 6px; color:var(--red);
+  }
+  h1 .zh{display:block; font-size:0.62em; font-weight:600; color:var(--red-deep); margin-top:2px;}
+  .tagline{
+    font-family:var(--font-display); font-style:italic; font-weight:500;
+    color:var(--ink); font-size:1.02rem; max-width:34em; margin:10px auto 4px;
+  }
+  .meta-line{color:var(--ink-soft); font-size:0.86rem; margin-top:6px;}
+  .intro{font-size:0.96rem; color:var(--ink); margin:18px 0; padding:0 2px;}
+  .intro .rate-note{color:var(--ink-soft); font-size:0.88rem;}
+
+  nav.jumpnav{
+    position:sticky; top:0; z-index:20; background:rgba(251,247,239,0.94);
+    backdrop-filter:saturate(140%) blur(6px);
+    border-bottom:1px solid var(--line);
+    display:flex; gap:8px; overflow-x:auto; padding:10px 14px;
+    scrollbar-width:none;
+  }
+  nav.jumpnav::-webkit-scrollbar{display:none;}
+  nav.jumpnav a{
+    flex:0 0 auto; font-size:0.82rem; font-weight:600; text-decoration:none;
+    color:var(--red-deep); background:var(--red-tint); border:1px solid var(--line);
+    padding:7px 13px; border-radius:999px; white-space:nowrap;
+  }
+  nav.jumpnav a.lang-btn {
+    background: #fff;
+    border-color: var(--gold);
+    color: var(--ink);
+  }
+  nav.jumpnav a:active{background:var(--gold-tint);}
+
+  #map {
+    height: 380px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    margin: 16px 0;
+    z-index: 1;
+  }
+
+  section{margin-top:34px;}
+  h2{
+    font-family:var(--font-display); font-weight:700; color:var(--red);
+    font-size:1.32rem; margin:0 0 4px; padding-bottom:8px;
+    border-bottom:2px solid var(--red); display:flex; align-items:baseline; gap:8px;
+  }
+  h2 .n{font-size:0.62em; color:var(--gold); font-weight:600;}
+  .subline{color:var(--ink-soft); font-size:0.85rem; font-style:italic; margin:8px 0 16px;}
+  h3.subhead{
+    font-family:var(--font-display); font-weight:600; color:var(--red-deep);
+    font-size:1.05rem; margin:22px 0 6px;
+  }
+
+  .legend-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:14px 0 6px;
+  }
+  .legend-item{
+    display:flex; align-items:center; gap:9px; background:var(--paper-alt);
+    border:1px solid var(--line); border-radius:var(--radius); padding:9px 11px;
+    font-size:0.86rem;
+  }
+  .legend-item .e{font-size:1.25rem; flex:0 0 auto;}
+  .caption{color:var(--ink-soft); font-size:0.8rem; font-style:italic; margin-top:8px;}
+
+  .step{
+    border:1px solid var(--line); border-radius:var(--radius); background:#fff;
+    padding:12px 13px; margin-bottom:9px;
+  }
+  .step:nth-child(even){background:var(--paper-alt);}
+  .step-head{display:flex; align-items:flex-start; gap:10px;}
+  .step-emoji{font-size:1.4rem; line-height:1.3; flex:0 0 auto;}
+  .step-title{font-weight:600; font-size:0.97rem; margin:0; padding-top:1px;}
+  .step-title a{text-decoration:underline; text-decoration-color:var(--gold); text-underline-offset:2px; color:var(--red-deep);}
+  .step-detail{color:var(--ink-soft); font-size:0.82rem; font-style:italic; margin:4px 0 0 34px;}
+  .step-cost{margin:8px 0 0 34px; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;}
+  .cost-main{font-weight:700; color:var(--red); font-size:0.92rem;}
+  .cost-free{font-weight:700; color:var(--green); font-size:0.92rem;}
+  .cost-sub{color:var(--ink-soft); font-size:0.78rem;}
+
+  .subtotal{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    background:var(--gold-tint); border:1.5px solid var(--gold); border-radius:var(--radius);
+    padding:12px 14px; margin-top:4px; font-weight:700; color:var(--red-deep);
+  }
+  .subtotal .val{text-align:right;}
+  .subtotal small{display:block; font-weight:600; color:var(--ink-soft); font-size:0.72rem;}
+
+  .compare-row{border-bottom:1px solid var(--line); padding:11px 2px;}
+  .compare-row:last-of-type{border-bottom:none;}
+  .compare-label{font-weight:700; font-size:0.86rem; margin:0 0 6px;}
+  .compare-values{display:flex; flex-direction:column; gap:5px;}
+  .compare-val{font-size:0.88rem; display:flex; gap:7px; align-items:baseline;}
+  .tag{
+    flex:0 0 auto; font-size:0.68rem; font-weight:700; border-radius:5px;
+    padding:1px 6px; color:#fff;
+  }
+  .tag-a{background:var(--red);} .tag-b{background:var(--gold);}
+  .takeaway{
+    margin-top:14px; padding:12px 14px; background:var(--paper-alt);
+    border-left:4px solid var(--red); border-radius:6px; font-size:0.88rem;
+  }
+
+  .app-block{margin-bottom:20px;}
+  .app-block p{margin:6px 0; font-size:0.93rem;}
+  .app-block .lead{color:var(--red-deep); font-weight:700;}
+  .bullets{margin:8px 0 0; padding-left:0; list-style:none;}
+  .bullets li{position:relative; padding-left:18px; margin-bottom:7px; font-size:0.93rem;}
+  .bullets li::before{content:"•"; position:absolute; left:2px; color:var(--gold); font-weight:700;}
+
+  .notes-list{margin:10px 0 0; padding-left:0; list-style:none;}
+  .notes-list li{position:relative; padding-left:18px; margin-bottom:9px; font-size:0.88rem; color:var(--ink);}
+  .notes-list li::before{content:"•"; position:absolute; left:2px; color:var(--red);}
+
+  /* FAQ Styles */
+  .faq-section {
+    margin-top: 30px;
+  }
+  .faq-item {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px dashed var(--line);
+  }
+  .faq-item:last-of-type {
+    border-bottom: none;
+  }
+  .faq-q {
+    font-weight: 700;
+    color: var(--red-deep);
+    margin: 0 0 6px;
+    font-size: 0.95rem;
+  }
+  .faq-a {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--ink);
+  }
+
+  footer{margin-top:44px; padding-top:18px; border-top:1px solid var(--line); text-align:center; color:var(--ink-soft); font-size:0.78rem;}
+
+  @media (min-width:640px){
+    body{font-size:17px;}
+    .wrap{padding:0 24px 72px;}
+    header.hero{padding:40px 18px 22px;}
+    .legend-grid{grid-template-columns:1fr 1fr 1fr 1fr;}
+    .compare-values{flex-direction:row; gap:22px;}
+    .compare-row{display:flex; align-items:baseline; justify-content:space-between;}
+    .compare-label{flex:0 0 190px; margin:0;}
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .step, .legend-item{transition:transform .15s ease;}
+    .step:active{transform:scale(0.99);}
+  }
+</style>
+</head>
+<body>
+<main>
+<header class="hero">
+  <svg class="seal" viewBox="0 0 64 64" aria-hidden="true">
+    <rect x="5" y="5" width="54" height="54" rx="7" fill="none" stroke="currentColor" stroke-width="3.2" transform="rotate(-3 32 32)"/>
+    <text x="32" y="42" text-anchor="middle" font-family="'Noto Serif SC',serif" font-size="30" fill="currentColor" transform="rotate(-3 32 32)">缘</text>
+  </svg>
+  <h1>CGK → China Museum of Fujian-Taiwan Kinship<span class="zh">中国闽台缘博物馆</span></h1>
+  <p class="tagline">A shortcut for fellow descendants tracing their family's Cho̍k-phó͘ (族谱) at the museum's genealogy archive.</p>
+  <p class="meta-line">Route cost comparison &amp; multi-day research-visit guide · date flexible: today – 11 Aug 2026 or later</p>
+</header>
+
+<nav class="jumpnav" aria-label="Jump to section">
+  <a href="cgk-to-fujian-taiwan-kinship-museum-guide-id.html" class="lang-btn" title="Ganti ke versi Bahasa Indonesia">🇮🇩 Baca dalam Bahasa Indonesia</a>
+  <a href="#map-view">Interactive Map</a>
+  <a href="#legend">Legend</a>
+  <a href="#route-a">Route A</a>
+  <a href="#route-b">Route B</a>
+  <a href="#compare">Compare</a>
+  <a href="#apps">Apps &amp; Tips</a>
+  <a href="#faq">FAQ</a>
+  <a href="#notes">Notes</a>
+</nav>
+
+<div class="wrap">
+
+<p class="intro">
+  This compares two ways to reach the museum from Jakarta (CGK) — one-way, per adult, economy class — and adds practical
+  apps for a multi-day research stay. Flight fares are dynamic, so figures below are indicative ranges gathered from
+  current fare listings (early July 2026), not locked quotes — recheck close to your booking date.
+  <span class="rate-note">Approx. exchange rates used throughout: 1 USD ≈ Rp18.000; 1 CNY (¥) ≈ Rp2.650.</span>
+</p>
+
+<section id="map-view">
+  <h2><span class="n">§</span>Regional Overview</h2>
+  <p class="subline">Interactive map showing key WGS84 transit coordinates and the museum location.</p>
+  <div id="map"></div>
+</section>
+
+<section id="legend">
+  <h2><span class="n">§</span>Emoji Legend</h2>
+  <div class="legend-grid">
+    <div class="legend-item"><span class="e">✈️</span>Flight</div>
+    <div class="legend-item"><span class="e">🚶</span>Walk / on-foot transfer</div>
+    <div class="legend-item"><span class="e">🚇</span>Metro / subway</div>
+    <div class="legend-item"><span class="e">🚄</span>D-class / high-speed train</div>
+    <div class="legend-item"><span class="e">🚌</span>Bus</div>
+    <div class="legend-item"><span class="e">🚉</span>Train / metro station</div>
+    <div class="legend-item"><span class="e">🚏</span>Bus stop</div>
+    <div class="legend-item"><span class="e">🏛️</span>Museum (destination)</div>
+  </div>
+  <p class="caption">Same emoji = same category throughout, in both routes.</p>
+</section>
+
+<section id="route-a">
+  <h2><span class="n">A</span>Via Xiamen (XMN)</h2>
+  <p class="subline">1 flight + subway + high-speed rail + city bus · 4 paid legs · tap a place name to open it in Amap</p>
+
+  <div class="step">
+    <div class="step-head"><span class="step-emoji">✈️</span>
+      <p class="step-title"><a href="https://surl.amap.com/tBiLbcb2aK" rel="external nofollow noopener" target="_blank">Flight to Xiamen (XMN)</a></p></div>
+    <p class="step-detail">MF 868 or SC 2154 · direct · ≈5h30m · arrive Terminal 3, Gaoqi</p>
+    <p class="step-cost"><span class="cost-main">US$125–230</span><span class="cost-sub">≈Rp2.250.000–4.140.000</span></p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="step-emoji">🚶</span>
+      <p class="step-title"><a href="https://surl.amap.com/13bvKNg1a8Ty" rel="external nofollow noopener" target="_blank">Walk to Gaoqi Metro Station (高崎地铁站)</a></p></div>
+    <p class="step-cost"><span class="cost-free">Free</span></p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="step-emoji">🚇</span>
+      <p class="step-title">Metro Line 1 → Xiamen North</p></div>
+    <p class="step-detail">toward Yanei/Iwanai (岩内) · ≈10 stops · ≈28 min</p>
+    <p class="step-cost"><span class="cost-main">¥6–7</span><span class="cost-sub">≈Rp15.900–18.550</span></p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="step-emoji">🚉</span>
+      <p class="step-title"><a href="https://surl.amap.com/tTIjhhb22Cc" rel="external nofollow noopener" target="_blank">Xiamen North Railway Station (厦门北站)</a></p></div>
+    <p class="step-detail">alight here, follow signs to rail concourse</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="step-emoji">🚄</span>
+      <p class="step-title">D-class train (动车) → Quanzhou</p></div>
+    <p class="step-detail">2nd class · ≈27–30 min</p>
+    <p class="step-cost"><span class="cost-main">¥20–26</span><span class="cost-sub">≈Rp53.000–68.900</span></p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="step-emoji">🚉</span>
+      <p class="step-title"><a href="https://surl.amap.com/f3J9kJqi1Gt" rel="external nofollow noopener" target="_blank">Quanzhou Railway Station (泉州站)</a></p></div>
+    <p class="step-detail">alight here</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="step-emoji">🚶</span>
+      <p class="step-title"><a href="https://surl.amap.com/IiXprIf4fn" rel="external nofollow noopener" target="_blank">Walk to bus stop (福厦高铁泉州站)</a></p></div>
+    <p class="step-cost"><span class="cost-free">Free</span></p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="step-emoji">🚌</span>
+      <p class="step-title">Bus 203路</p></div>
+    <p class="step-detail">flat single-ticket fare</p>
+    <p class="step-cost"><span class="cost-main">¥1</span><span class="cost-sub">≈Rp2.650</span></p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="step-emoji">🚏</span>
+      <p class="step-title"><a href="https://surl.amap.com/CpHbmWZdvv" rel="external nofollow noopener" target="_blank">Museum Bus Stop (闽台缘博物馆站)</a></p></div>
+    <p class="step-detail">alight here</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="step-emoji">🏛️</span>
+      <p class="step-title"><a href="https://surl.amap.com/ok0TgqD0n4" rel="external nofollow noopener" target="_blank">China Museum of Fujian-Taiwan Kinship</a></p></div>
+    <p class="step-detail">free admission · ID or WeChat reservation needed</p>
+    <p class="step-cost"><span class="cost-free">Free</span></p>
+  </div>
+
+  <div class="subtotal"><span>Route A Subtotal</span><span class="val">US$129–235<small>≈Rp2.320.000–4.230.000</small></span></div>
+</section>
+
+<section id="route-b">
+  <h2><span class="n">B</span>Via Manila (MNL) → Jinjiang (JJN)</h2>
+  <p class="subline">2 flights + 2 buses · 4 paid legs · tap a place name to open it in Amap</p>
+
+  <div class="step">
+    <div class="step-head"><span class="step-emoji">✈️</span>
+      <p class="step-title">Flight to Manila (MNL)</p></div>
+    <p class="step-detail">5J 760 Cebu Pacific · direct · ≈4h35m</p>
+    <p class="step-cost"><span class="cost-main">US$70–115</span><span class="cost-sub">≈Rp1.260.000–2.070.000</span></p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="step-emoji">✈️</span>
+      <p class="step-title"><a href="https://surl.amap.com/6WmFyPZ1812y" rel="external nofollow noopener" target="_blank">Flight to Jinjiang, Quanzhou (JJN)</a></p></div>
+    <p class="step-detail">PR 356 Philippine Airlines · direct · ≈2h–2h30m</p>
+    <p class="step-cost"><span class="cost-main">US$72–154</span><span class="cost-sub">≈Rp1.296.000–2.772.000</span></p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="step-emoji">🚶</span>
+      <p class="step-title"><a href="https://surl.amap.com/CiPFZM1dY8" rel="external nofollow noopener" target="_blank">Walk to airport bus stop (泉州晋江机场站)</a></p></div>
+    <p class="step-cost"><span class="cost-free">Free</span></p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="step-emoji">🚌</span>
+      <p class="step-title">Bus K602路</p></div>
+    <p class="step-detail">→ Zhanqian Square · near-full route</p>
+    <p class="step-cost"><span class="cost-main">¥4</span><span class="cost-sub">≈Rp10.600</span></p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="step-emoji">🚏</span>
+      <p class="step-title"><a href="https://surl.amap.com/OjHPrk1yd5t" rel="external nofollow noopener" target="_blank">Zhanqian Square Bus Stop (站前广场站)</a></p></div>
+    <p class="step-detail">alight here</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="step-emoji">🚶</span>
+      <p class="step-title"><a href="https://surl.amap.com/IiXprIf4fn" rel="external nofollow noopener" target="_blank">Transfer (walk) to Quanzhou Station stop</a></p></div>
+    <p class="step-detail">福厦高铁泉州站公交站</p>
+    <p class="step-cost"><span class="cost-free">Free</span></p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="step-emoji">🚌</span>
+      <p class="step-title">Bus 203路</p></div>
+    <p class="step-detail">flat single-ticket fare</p>
+    <p class="step-cost"><span class="cost-main">¥1</span><span class="cost-sub">≈Rp2.650</span></p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="step-emoji">🚏</span>
+      <p class="step-title"><a href="https://surl.amap.com/CpHbmWZdvv" rel="external nofollow noopener" target="_blank">Museum Bus Stop (闽台缘博物馆站)</a></p></div>
+    <p class="step-detail">alight here</p>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="step-emoji">🏛️</span>
+      <p class="step-title"><a href="https://surl.amap.com/ok0TgqD0n4" rel="external nofollow noopener" target="_blank">China Museum of Fujian-Taiwan Kinship</a></p></div>
+    <p class="step-detail">free admission · ID or WeChat reservation needed</p>
+    <p class="step-cost"><span class="cost-free">Free</span></p>
+  </div>
+
+  <div class="subtotal"><span>Route B Subtotal</span><span class="val">US$143–270<small>≈Rp2.570.000–4.855.000</small></span></div>
+</section>
+
+<section id="compare">
+  <h2><span class="n">§</span>Cost Comparison</h2>
+
+  <div class="compare-row">
+    <p class="compare-label">International flight(s)</p>
+    <div class="compare-values">
+      <div class="compare-val"><span class="tag tag-a">A</span>US$125–230 (1 flight)</div>
+      <div class="compare-val"><span class="tag tag-b">B</span>US$142–269 (2 flights)</div>
+    </div>
+  </div>
+  <div class="compare-row">
+    <p class="compare-label">Local transport (China)</p>
+    <div class="compare-values">
+      <div class="compare-val"><span class="tag tag-a">A</span>¥27–34 (≈US$4–5)</div>
+      <div class="compare-val"><span class="tag tag-b">B</span>¥5 (≈US$0.7)</div>
+    </div>
+  </div>
+  <div class="compare-row">
+    <p class="compare-label">Museum admission</p>
+    <div class="compare-values">
+      <div class="compare-val"><span class="tag tag-a">A</span>Free</div>
+      <div class="compare-val"><span class="tag tag-b">B</span>Free</div>
+    </div>
+  </div>
+  <div class="compare-row">
+    <p class="compare-label">Total (USD)</p>
+    <div class="compare-values">
+      <div class="compare-val"><span class="tag tag-a">A</span><strong>US$129–235</strong></div>
+      <div class="compare-val"><span class="tag tag-b">B</span><strong>US$143–270</strong></div>
+    </div>
+  </div>
+  <div class="compare-row">
+    <p class="compare-label">Total (≈ IDR)</p>
+    <div class="compare-values">
+      <div class="compare-val"><span class="tag tag-a">A</span><strong>Rp2.320.000–4.230.000</strong></div>
+      <div class="compare-val"><span class="tag tag-b">B</span><strong>Rp2.570.000–4.855.000</strong></div>
+    </div>
+  </div>
+  <div class="compare-row">
+    <p class="compare-label">Transport legs</p>
+    <div class="compare-values">
+      <div class="compare-val"><span class="tag tag-a">A</span>Flight + subway + rail + bus</div>
+      <div class="compare-val"><span class="tag tag-b">B</span>2 flights + 2 buses</div>
+    </div>
+  </div>
+
+  <p class="takeaway">Route A is usually the cheaper, simpler option — one flight plus rail, fewer transfers. Route B can
+  occasionally undercut it if a deep Cebu Pacific promo fare lines up, but it relies on two separately-ticketed flights
+  through Manila, so double-check the layover length and whether baggage is through-checked.</p>
+</section>
+
+<section id="apps">
+  <h2><span class="n">§</span>Apps &amp; Practical Tips</h2>
+  <p class="subline">For researching family lineage at the museum over several days — getting around, sleeping, eating and communicating without overspending.</p>
+
+  <div class="app-block">
+    <h3 class="subhead">Getting Around &amp; Paying</h3>
+    <p><span class="lead">Alipay (支付宝)</span> is the one to set up first — link a foreign Visa/Mastercard, verify with your
+    passport, then open the "Transport" (交通出行) tab to generate a city-specific Transit QR. That single code scans you
+    through Xiamen Metro Line 1 and every Quanzhou city bus (203, K602) — no physical transit card needed. WeChat Pay works
+    the same way as a backup.</p>
+  </div>
+
+  <div class="app-block">
+    <h3 class="subhead">Booking Trains, Flights &amp; Hotels — Your "Local Traveloka"</h3>
+    <p><span class="lead">Trip.com</span> (the international arm of Ctrip) is the closest match — book the Xiamen
+    North→Quanzhou D-class train, both flights, and hotels in one English-language app with foreign-card payment.
+    Important: Chinese law requires hotels to register foreign passports with police, and not every hotel is set up to
+    do this — always switch on Trip.com's "Guests from all countries accepted" filter, and carry your physical passport
+    to check-in.</p>
+  </div>
+
+  <div class="app-block">
+    <h3 class="subhead">Where to Sleep (5 Nights) Near the Museum</h3>
+    <ul class="bullets">
+      <li>Vienna Hotel (维也纳酒店·泉州西湖店), 北清东路128号 — literally next to the museum's east side, 4.4/5 rating, from
+      ≈¥295/night (≈US$43 / ≈Rp774.000). Best pick if you want to walk over each day.</li>
+      <li>Budget alternative: 7 Days Inn (7天连锁酒店) branches in Fengze/Licheng — from ≈¥140–160/night, a short bus or Didi
+      ride away; always confirm the specific branch accepts foreign passports before booking.</li>
+      <li>5-night rough range: ≈¥1.475–2.600 (≈US$217–380 / ≈Rp3.900.000–6.840.000), depending which tier you pick.</li>
+    </ul>
+  </div>
+
+  <div class="app-block">
+    <h3 class="subhead">Cheap Eats While You Research</h3>
+    <p><span class="lead">Amap (高德地图)</span> — the app behind all the links above — already covers this: it gained a full
+    English interface in 2025, and its "Food" (美食) tab shows ratings, photos and price-per-person, so it doubles as a
+    restaurant finder with no new download. Dianping (大众点评) has deeper photo reviews but stays Chinese-only; open it as
+    a WeChat Mini Program and use WeChat's "Translate Full Page" to read it in English. Skip Meituan/Ele.me's delivery
+    function specifically — that's the GoFood-style ordering you wanted to avoid — their listings are still fine to
+    browse.</p>
+    <p><span class="lead">Note:</span> the museum's immediate neighbourhood (West Lake / foot of Qingyuan Mountain) is
+    mostly parkland and institutional buildings, not a dining strip. The real concentration of cheap, authentic Minnan
+    food is ≈3–4km south, around West Street / Kaiyuan Temple old town — a ¥10–15 Didi ride or a short bus hop. Two
+    worth checking current hours for on Amap/Dianping: Dongxing Beef Shop (东兴牵肉店, beef soup + rice ≈¥19) and Xingyuan
+    Gucuo Restaurant (兴源古厝餐馆, home-style Minnan food in a restored old courtyard house).</p>
+  </div>
+
+  <div class="app-block">
+    <h3 class="subhead">Exploring Huanshan Community → Qingyuan Subdistrict → Fengze District</h3>
+    <p><span class="lead">Good news:</span> Huanshan Community (环山社区) sits right at the foot of Qingyuan Mountain, inside
+    the very same subdistrict as the museum — this is local, close-in territory, not a long haul. Didi (滴滴出行) —
+    English interface, foreign card, also runs as a WeChat mini-program — is the easiest way to hop between specific
+    addresses. Public buses cover this pocket well too (202, 601, K1, and the L1 heritage tourist line all serve the
+    Qingyuan Mountain area), so relying on public transport instead of ride-hailing is entirely workable.</p>
+  </div>
+
+  <div class="app-block">
+    <h3 class="subhead">Language: Hokkien or Mandarin</h3>
+    <p><span class="lead">Honestly,</span> a verified Indonesian↔Hokkien translator app doesn't really exist yet — what
+    turns up online is mostly generic AI-wrapper novelty sites with no real accuracy vetting, and mainstream tools
+    (Google Translate, Baidu Translate) only support Mandarin. The practical route: lean on Mandarin — both handle
+    Indonesian↔Mandarin well, and museum/archive staff will be fluent in it regardless of Hokkien being the home dialect.
+    For a few warm Hokkien phrases out in the community, "Simply Learn Hokkien-Taiwanese" (a phrasebook app with an
+    Indonesian interface option) covers greetings and basics.</p>
+  </div>
+
+  <div class="app-block">
+    <h3 class="subhead">Bonus: the Museum's Own Genealogy Center</h3>
+    <p><span class="lead">The museum runs</span> a dedicated 闽台寻根溯源服务交流中心 (Fujian-Taiwan Root-Seeking Service &amp;
+    Exchange Center) — built for exactly this kind of family-history research. Open daily 9:00–17:00 (last entry 16:30),
+    closed Mondays except public holidays. Admission is free, but reserve each day's visit through the "中国闽台缘博物馆"
+    or "泉州市博物馆" WeChat official account — worth doing every night for a 5-day run.</p>
+  </div>
+</section>
+
+<!-- Added FAQ Section linked with JSON-LD -->
+<section id="faq" class="faq-section">
+  <h2><span class="n">§</span>Frequently Asked Questions</h2>
+  
+  <div class="faq-item">
+    <p class="faq-q">What is the cheapest route from Jakarta to the China Museum of Fujian-Taiwan Kinship?</p>
+    <p class="faq-a">Route A (via Xiamen) is typically the cheapest and simplest option. It costs approximately US$129–235 (Rp2.320.000–4.230.000) one-way and involves one direct flight to Xiamen followed by a subway, high-speed rail, and city bus transfer.</p>
+  </div>
+
+  <div class="faq-item">
+    <p class="faq-q">Do I need a physical transit card to ride buses in Quanzhou?</p>
+    <p class="faq-a">No physical transit card is required. You can use the Alipay app (linked to a foreign Visa/Mastercard) to generate a city-specific Transit QR code that scans on Xiamen Metro and Quanzhou city buses.</p>
+  </div>
+
+  <div class="faq-item">
+    <p class="faq-q">How much does it cost to enter the China Museum of Fujian-Taiwan Kinship?</p>
+    <p class="faq-a">Admission to the museum and its genealogy center is completely free. However, you are required to reserve your visit in advance using a valid ID or through the museum's official WeChat account.</p>
+  </div>
+</section>
+
+<section id="notes">
+  <h2><span class="n">§</span>Notes &amp; Assumptions</h2>
+  <ul class="notes-list">
+    <li>Fares are one-way, per adult, economy/standard class, gathered in early July 2026 for travel between now and
+    mid-August 2026 — treat as planning estimates, not locked quotes.</li>
+    <li>Ground-transport fares assume single-ride cash/QR payment; Xiamen's e-Tong Card or Quanzhou's QuanTong Card may
+    shave a small discount off metro/bus fares.</li>
+    <li>The museum is free to enter but closed Mondays (except public holidays); bring a valid ID or reserve ahead via
+    WeChat, especially if visiting several days running.</li>
+    <li>Costs above exclude checked-baggage fees, seat selection, visas/entry permits, and travel insurance.</li>
+    <li>With your date flexible through mid-August, keep comparing fares — midweek departures are typically cheaper
+    than weekends on both routes.</li>
+  </ul>
+</section>
+
+</main>
+<footer>
+  Maintained by Dawud Tan. Built as a practical shortcut, not an endorsement — outbound links are marked <code>rel="external nofollow"</code>.
+</footer>
+
+</div>
+
+<!-- Leaflet JS Initialization -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+  // Center map between Quanzhou hubs and museum
+  const map = L.map('map').setView([24.952, 118.560], 12);
+  
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+  // Key coordinate markers
+  const museumMarker = L.marker([24.9315, 118.5833]).addTo(map)
+    .bindPopup('<b>China Museum of Fujian-Taiwan Kinship</b><br>中国闽台缘博物馆');
+    
+  const qzStationMarker = L.marker([24.9625, 118.5491]).addTo(map)
+    .bindPopup('<b>Quanzhou Railway Station</b><br>High-speed rail hub');
+    
+  const jinjiangAirportMarker = L.marker([24.7961, 118.5528]).addTo(map)
+    .bindPopup('<b>Jinjiang International Airport (JJN)</b>');
+</script>
+
+</body>
+</html>
