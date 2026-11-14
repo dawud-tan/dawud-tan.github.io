@@ -1,0 +1,1139 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Titik impas: server on-premise atau cloud untuk sistem tiket bioskop</title>
+<meta name="description" content="Untuk pemilik bioskop dan operator movie-ticket: biaya bulanan dan biaya total 3 dan 5 tahun untuk server di bioskop, server operator di kantornya atau di colocation, dan lima cloud; siapa yang membayar tiap baris; titik impas per volume dan per jumlah bioskop; dan biaya per tiket yang menutupnya. Perkiraan, bukan penawaran harga.">
+<meta name="keywords" content="titik impas, TCO, server on-premise, cloud, colocation, Google Cloud Run, Cloud SQL, AWS ECS Express Mode, Azure Container Apps, Cloudflare Containers, Alibaba Cloud SAE, EPYC 4124P, Xeon 6300, biaya per tiket, biaya layanan tiket bioskop, movie-ticket, turun ke nol, native image, JVM">
+<meta name="author" content="Claude Opus 5.5">
+<link rel="canonical" href="https://dawud-tan.github.io/on-premise-vs-cloud.html">
+<link rel="alternate" hreflang="id-ID" href="https://dawud-tan.github.io/on-premise-vs-cloud.html">
+<link rel="alternate" hreflang="x-default" href="https://dawud-tan.github.io/on-premise-vs-cloud.html">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Dawud Tan">
+<meta property="og:title" content="Titik impas: server on-premise atau cloud untuk sistem tiket bioskop">
+<meta property="og:description" content="Biaya bulanan, biaya total 3 dan 5 tahun, dan titik impas untuk server di bioskop, server operator, dan lima cloud, dengan kalkulator. Perkiraan, bukan penawaran harga.">
+<meta property="og:url" content="https://dawud-tan.github.io/on-premise-vs-cloud.html">
+<meta property="og:locale" content="id_ID">
+<meta property="article:published_time" content="2026-11-05T01:13:00+07:00">
+<meta property="article:modified_time" content="2026-11-05T20:32:00+07:00">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Titik impas: server on-premise atau cloud untuk sistem tiket bioskop">
+<meta name="twitter:description" content="Kapan server sendiri lebih murah daripada cloud untuk sistem tiket bioskop, siapa yang membayar, dan berapa per tiket.">
+<meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#131518" media="(prefers-color-scheme: dark)">
+<style>
+  :root{
+    color-scheme: light dark;
+    --bg:#f7f6f2; --panel:#ffffff; --ink:#1a1c20; --ink-soft:#50566a; --line:#e2dfd7;
+    --accent:#9b3a12; --accent-soft:#f6ebe4; --ok:#276b43; --ok-soft:#e5f2ea;
+    --warn:#8a5b0c; --warn-soft:#f8f0dd;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,"Liberation Mono",monospace;
+    --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --measure:72ch;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#131518; --panel:#1a1d22; --ink:#e8e6e1; --ink-soft:#a8aebb; --line:#2d323b;
+      --accent:#ef9a66; --accent-soft:#2a221d; --ok:#7fcf9d; --ok-soft:#1b2a21;
+      --warn:#e6b561; --warn-soft:#2a2418;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.7 var(--sans);
+       padding:0 max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left))}
+  main{max-width:860px;margin:0 auto;padding:40px 0 64px}
+  p,li{max-width:var(--measure)}
+  a{color:var(--accent);text-underline-offset:2px}
+  h1{font-size:clamp(28px,4.6vw,40px);line-height:1.15;letter-spacing:-.012em;margin:8px 0 18px}
+  h2{font-size:24px;line-height:1.3;margin:56px 0 12px;padding-top:10px;border-top:1px solid var(--line)}
+  h3{font-size:18.5px;line-height:1.35;margin:34px 0 8px}
+  .kicker{margin:0;color:var(--ink-soft);font-size:13.5px;letter-spacing:.06em;text-transform:uppercase}
+  .lead{font-size:19px}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px 22px 12px;margin:26px 0}
+  .box h2{border:0;margin:14px 0 4px;padding:0;font-size:20px}
+  .toc ol{padding-left:22px;margin:8px 0}
+  .toc li{margin:3px 0}
+  code{font-family:var(--mono);font-size:.86em;background:var(--accent-soft);padding:.08em .32em;border-radius:4px;
+       overflow-wrap:anywhere}
+  pre{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 16px;overflow-x:auto;
+      font-size:14px;line-height:1.5}
+  pre code{background:none;padding:0;font-size:inherit;overflow-wrap:normal}
+  .table-wrap{overflow-x:auto;margin:16px 0 22px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+  table{border-collapse:collapse;width:100%;font-size:15px;line-height:1.5}
+  caption{caption-side:top;text-align:left;padding:10px 14px 8px;color:var(--ink-soft);font-size:14px}
+  th,td{padding:9px 12px;border-top:1px solid var(--line);text-align:left;vertical-align:top}
+  thead th{background:var(--accent-soft);font-weight:600}
+  tbody th{font-weight:600;min-width:9em}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  td.best{background:var(--ok-soft);font-weight:600}
+  td.gap{background:var(--warn-soft)}
+  .note{background:var(--warn-soft);border:1px solid var(--line);border-radius:12px;padding:10px 18px;font-size:15.5px}
+  .rule{background:var(--ok-soft);border:1px solid var(--line);border-radius:12px;padding:10px 18px}
+  .small{font-size:14.5px;color:var(--ink-soft)}
+  .sources li{margin:7px 0;overflow-wrap:anywhere}
+  .calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px 18px;padding:16px 22px 18px}
+  .calc[hidden]{display:none}
+  .calc label{display:flex;flex-direction:column;gap:4px;font-size:15px}
+  .calc input,.calc select{font:inherit;font-size:16px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;
+       background:var(--bg);color:var(--ink);width:100%}
+  .calc output{grid-column:1/-1;display:block}
+  footer{max-width:860px;margin:0 auto;padding:22px 0 44px;border-top:1px solid var(--line);color:var(--ink-soft);font-size:14.5px}
+  @media (max-width:600px){
+    body{font-size:16px}
+    .lead{font-size:17.5px}
+    h2{font-size:21px;margin-top:46px}
+    .box{padding:4px 16px 10px}
+    .calc{padding:12px 16px 14px}
+    th,td{padding:8px 10px}
+  }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://dawud-tan.github.io/on-premise-vs-cloud.html#webpage",
+      "url": "https://dawud-tan.github.io/on-premise-vs-cloud.html",
+      "name": "Titik impas: server on-premise atau cloud untuk sistem tiket bioskop",
+      "inLanguage": "id-ID",
+      "isPartOf": {"@id": "https://dawud-tan.github.io/#website"},
+      "mainEntity": {"@id": "https://dawud-tan.github.io/on-premise-vs-cloud.html#article"},
+      "datePublished": "2026-11-05T01:13:00+07:00",
+      "dateModified": "2026-11-05T20:32:00+07:00"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://dawud-tan.github.io/on-premise-vs-cloud.html#article",
+      "headline": "Titik impas: server on-premise atau cloud untuk sistem tiket bioskop",
+      "description": "Biaya bulanan dan biaya total 3 dan 5 tahun untuk server di bioskop, server operator, dan lima cloud; siapa yang membayar; titik impas per volume dan per jumlah bioskop; biaya per tiket yang menutupnya. Perkiraan, bukan penawaran harga.",
+      "inLanguage": "id-ID",
+      "author": {"@type": "Organization", "name": "Claude Opus 5.5"},
+      "publisher": {"@id": "https://dawud-tan.github.io/#publisher"},
+      "datePublished": "2026-11-05T01:13:00+07:00",
+      "dateModified": "2026-11-05T20:32:00+07:00"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<main>
+
+<header>
+  <p class="kicker">Untuk pemilik bioskop dan operator · <time datetime="2026-11-05">5 November 2026</time></p>
+  <h1>Titik impas: server on-premise atau cloud untuk sistem tiket bioskop</h1>
+  <p class="lead">Halaman ini untuk pemilik bioskop dan untuk operator yang menjalankan movie-ticket bagi
+  bioskop. Isinya biaya tiap tempat menjalankan sistem tiket, siapa yang membayar tiap barisnya, dan dari
+  volume berapa server sendiri lebih murah daripada cloud.</p>
+</header>
+
+<p class="note" id="perkiraan"><strong>Perkiraan, bukan penawaran harga.</strong> Harga dibaca
+<time datetime="2026-11-04">4 November 2026</time> dan dihitung <time datetime="2026-11-05">5 November
+2026</time>, dengan satu kurs: JISDOR 3 November 2026, Rp18.148 per dolar AS. [A] berarti asumsi, [E] berarti
+perkiraan dari masukan yang disebut. Harga cloud, suku cadang, dan memori berubah, jadi periksa sumbernya
+sebelum menganggarkan.</p>
+
+<p><a href="https://github.com/dawud-tan/movie-ticket">movie-ticket</a> adalah kode sumber terbuka (lisensi
+Apache-2.0) untuk pemesanan kursi bioskop. <strong>Operator</strong> di halaman ini adalah orang atau
+perusahaan yang menjalankannya untuk bioskop. <strong>Penyewa</strong> adalah usaha bioskop yang memakainya, dan
+satu penyewa bisa punya banyak bioskop. Klaim tentang kode menunjuk baris pada commit <code>39351cc</code>.</p>
+<p>Kapasitas dihitung dari pengukuran proyek ini. CPU per render peta kursi diukur dengan uji beban pada 5 November
+2026 (bagian 2); versi pertama halaman ini menyimpulkannya dari uji yang tidak mencatat CPU. Harga dibaca dari halaman penjual serta API harga penyedia cloud. Setiap angka bisa ditelusuri ke
+masukan di bagian 2 dan ke sumber di bagian 17, dan rumusnya ditulis di samping tabelnya.</p>
+
+<section id="ringkasan" class="box" aria-labelledby="ringkasan-judul">
+<h2 id="ringkasan-judul">Ringkasan</h2>
+<div class="table-wrap">
+<table>
+  <caption>Putusan per pola: biaya sebulan, rata-rata 5 tahun, dengan jam admin [A]</caption>
+  <thead><tr><th scope="col">Pola</th><th scope="col">Tiket sebulan</th><th scope="col">Termurah</th><th scope="col">Putusan</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">P1 · bioskop kecil, lalu lintas rata</th><td class="num">9.800</td><td>Cloudflare Rp1,24 juta, Container Apps Rp1,27 juta</td><td>Container Apps atau Cloudflare, pada volume berapa pun yang bisa dicapai satu bioskop. Server sendiri (A, Rp1,75 juta) baru lebih murah daripada Cloud Run, ECS, dan SAE, dan hanya bila dipakai 5 tahun.</td></tr>
+    <tr><th scope="row">P2 · satu bioskop 4 layar, ramai akhir pekan</th><td class="num">19.600</td><td>Cloudflare Rp1,25 juta, Container Apps Rp1,26 juta</td><td>Sama dengan P1. Ramainya akhir pekan tidak mengubah tagihan, karena instans terkecil (0,5 vCPU) memikul ±1,1 juta tiket sebulan dengan bentuk ini, sedangkan bioskop ini menjual 19.600.</td></tr>
+    <tr><th scope="row">P3 · minggu film laris, prapenjualan</th><td class="num">29.400</td><td>Container Apps Rp1,20 juta, Cloudflare Rp1,25 juta</td><td>Container Apps paling murah justru karena paling lama menganggur, 73 jam seminggu. Puncak prapenjualan, 8,4% tiket seminggu dalam satu jam, tidak menambah satu instans pun untuk satu bioskop.</td></tr>
+    <tr><th scope="row">P4 · 20 bioskop, tiga zona waktu</th><td class="num">400.000</td><td>satu penyewa: Cloudflare Rp1,66 juta, Container Apps Rp1,67 juta<br>penyewa terpisah: B1 Rp2,21 juta</td><td>Bila ke-20 bioskop cabang satu penyewa, Cloudflare atau Container Apps tetap termurah; server on-premise operator baru menyusul dari ±0,73–0,84 juta tiket sebulan. Bila penyewanya terpisah, server operator (Rp2,21 juta) sudah lebih murah paling lambat sejak penyewa ketiga, karena di cloud tiap penyewa butuh deployment sendiri, Rp25–47 juta untuk 20.</td></tr>
+  </tbody>
+</table>
+</div>
+<ul>
+  <li><strong>Kapasitas tidak menentukan.</strong> Server termurah yang dihitung (EPYC 4124P) memikul puncak ±2.020 bioskop 4 layar pada perkiraan dasar, dan ±110 pada perkiraan terburuk. Instans cloud terkecil (0,5 vCPU) memikul ±1,1 juta tiket sebulan. Yang menentukan adalah biaya tetap bulanan, jam admin, dan berapa bioskop yang berbagi satu sistem.</li>
+  <li><strong>Satu bioskop sendirian:</strong> Container Apps atau Cloudflare paling murah, Rp1,05–1,06 juta sebulan sebelum jam admin, dengan basis data ukuran terkecil. Server sendiri di bioskop Rp1,15 juta (5 tahun) atau Rp1,64 juta (3 tahun), dan hanya mengalahkan Cloud Run, ECS, dan SAE.</li>
+  <li><strong>Banyak cabang satu penyewa:</strong> server on-premise operator mengalahkan Cloud Run sejak ±142 ribu tiket sebulan, dan cloud termurah sejak ±0,73 juta, setara ±37 bioskop 4 layar (5 tahun, dengan jam admin).</li>
+  <li><strong>Penyewa terpisah:</strong> halaman publik satu deployment hanya menampilkan satu penyewa, jadi di cloud tiap penyewa butuh deployment sendiri. Server on-premise operator, dengan satu proses per penyewa, lebih murah paling lambat sejak penyewa ketiga.</li>
+  <li><strong>Per tiket,</strong> infrastrukturnya Rp0,7–161 di tabel bagian 5, tergantung tempat dan jumlah bioskop. Pembeli kini membayar biaya layanan Rp1.500–4.000 per tiket di aplikasi tiket. Jadi infrastruktur bukan yang menentukan harga layanan.</li>
+</ul>
+</section>
+
+<nav class="box toc" aria-labelledby="toc-judul">
+  <h2 id="toc-judul">Daftar isi</h2>
+  <ol>
+    <li><a href="#tempat">Delapan tempat menjalankan sistem yang sama</a></li>
+    <li><a href="#masukan">Masukan</a></li>
+    <li><a href="#bulanan">Biaya bulanan dan siapa yang membayar</a></li>
+    <li><a href="#tco">Biaya total 3 dan 5 tahun</a></li>
+    <li><a href="#impas">Titik impas</a></li>
+    <li><a href="#penyewa">Sisi penyewa</a></li>
+    <li><a href="#kalkulator">Kalkulator</a></li>
+    <li><a href="#kepekaan">Kepekaan</a></li>
+    <li><a href="#turun-ke-nol">Mengapa cloud tidak turun ke nol untuk sistem ini</a></li>
+    <li><a href="#native-vs-jvm">Native image atau JVM</a></li>
+    <li><a href="#bentuk-tagihan">Tagihan ikut berubah bentuk</a></li>
+    <li><a href="#jvm-panas">On-premise: JVM yang selalu panas, harganya di operasional</a></li>
+    <li><a href="#memilih">Memilih, dan daftar periksa</a></li>
+    <li><a href="#berubah">Yang berubah sejak artikel utama</a></li>
+    <li><a href="#belum-diketahui">Yang belum diketahui</a></li>
+    <li><a href="#faq">Pertanyaan yang sering diajukan</a></li>
+    <li><a href="#sumber">Sumber</a></li>
+  </ol>
+</nav>
+
+<section id="tempat">
+<h2>1. Delapan tempat menjalankan sistem yang sama</h2>
+<p>Semua tempat menjalankan aplikasi dan PostgreSQL yang sama. Bedanya ada pada siapa pemilik perangkatnya, di
+mana letaknya, dan berapa bioskop yang berbagi satu sistem.</p>
+<div class="table-wrap">
+<table>
+  <caption>Tempat, pemilik, dan ukuran yang dihargai</caption>
+  <thead><tr><th scope="col">Kode</th><th scope="col">Tempat</th><th scope="col">Pemilik perangkat atau akun</th>
+             <th scope="col">Yang dihargai</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">A</th><td>Server milik bioskop, di bioskop; satu penyewa</td><td>Penyewa</td>
+        <td>Menara dan UPS: EPYC 4124P, 2 × 16 GB ECC, 2 × SSD 960 GB dengan pelindung putus daya (PLP), Rp43,6
+        juta. Dijangkau dari luar lewat Cloudflare Tunnel di jalur internet bioskop [A].</td></tr>
+    <tr><th scope="row">B1</th><td>Server on-premise milik operator, di kantor operator; banyak bioskop</td><td>Operator</td>
+        <td>Perangkat yang sama, ditambah internet rumah 350 Mbps (Rp400 ribu + PPN 11%) dan tunnel.</td></tr>
+    <tr><th scope="row">B2</th><td>Server milik operator di colocation Jakarta; banyak bioskop</td><td>Operator</td>
+        <td>Isi yang sama dalam casing 1U, tanpa UPS: Rp37,4 juta. Colocation 1U Rp1,10 juta sebulan (450 W, 1
+        IPv4).</td></tr>
+    <tr><th scope="row">C1</th><td>Google Cloud Run, Jakarta</td><td rowspan="5">Operator bila satu deployment
+        dipakai bersama; penyewa atau operator bila satu deployment per bioskop</td>
+        <td>1 vCPU dan 1 GiB, penagihan berbasis instans, selalu satu yang menyala; Cloud SQL db-g1-small, 10 GB
+        SSD.</td></tr>
+    <tr><th scope="row">C2</th><td>AWS ECS Express Mode, Jakarta</td>
+        <td>Fargate 1 vCPU dan 2 GB [A]; Application Load Balancer; 3 alamat IPv4; RDS t4g.micro, 20 GB gp3.</td></tr>
+    <tr><th scope="row">C3</th><td>Azure Container Apps, Indonesia Central</td>
+        <td>0,5 vCPU dan 1 GiB; PostgreSQL Flexible Server B1ms, 32 GB; Container Registry Basic. README
+        movie-ticket memilih B2s, yang menambah US$51 sebulan (bagian 8).</td></tr>
+    <tr><th scope="row">C4</th><td>Cloudflare Containers, Asia Pasifik (bukan Jakarta)</td>
+        <td>standard-1 (½ vCPU, 4 GiB) di paket Workers US$5; basis data RDS t4g.micro yang terbuka ke publik di
+        AWS Jakarta, di jaringan lain.</td></tr>
+    <tr><th scope="row">C5</th><td>Alibaba Cloud SAE, Jakarta</td>
+        <td>1 vCPU dan 2 GB, tanpa mode diam; NAT Gateway; Classic Load Balancer; RDS PostgreSQL, yang harganya
+        tidak ditemukan ([E] US$18–35, dipakai US$26,5).</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Setiap cloud dihitung dua kali bila hasilnya berbeda: <strong>bersama</strong>, satu deployment untuk semua
+bioskop, dan <strong>per bioskop</strong>, satu deployment untuk tiap bioskop. Ukurannya yang terkecil yang
+masuk akal untuk satu JVM, dengan basis data terkelola terkecil [A]. README movie-ticket hanya menetapkan dua di
+antaranya: <code>standard-1</code> untuk Cloudflare (<a href="https://github.com/dawud-tan/movie-ticket/blob/main/README.md#L521">README:521</a>) dan B2s untuk
+Azure (<a href="https://github.com/dawud-tan/movie-ticket/blob/main/README.md#L447">README:447</a>).</p>
+
+<h3 id="berbagi">Apa arti "berbagi" di kode hari ini</h3>
+<p>Satu penyewa bisa punya banyak bioskop: tabel <code>site</code> menyimpan tiap bioskop bersama
+<code>tenant_id</code> pemiliknya (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/db/migration/V1__init_schema.sql#L124">V1:124</a>). Cabang-cabang satu penyewa bisa
+berbagi satu deployment tanpa syarat tambahan.</p>
+<p>Penyewa yang berbeda lain soal. Untuk pengguna yang sudah masuk, penyewanya dibaca dari identitasnya. Halaman
+publik, yaitu jadwal dan peta kursi yang dibuka tanpa masuk, hanya menampilkan penyewa yang dikonfigurasi lewat
+<code>booking.tenant.slug</code>. Komentar di kodenya menyebut bahwa melayani halaman publik banyak penyewa dari
+satu layanan bersama masih butuh mekanisme hostname terverifikasi, dan "explicitly not claimed to work here"
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/service/CurrentTenant.kt#L36-L42">CurrentTenant.kt:36–42</a>). Jadi, hari ini:</p>
+<ul>
+  <li>Di cloud, penyewa yang terpisah butuh satu deployment per penyewa. Konfigurasinya menyebut ini tingkat
+  <em>dedicated-compute</em>, satu layanan Cloud Run untuk tepat satu penyewa
+  (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/application.properties#L346-L351">application.properties:313–318</a>).</li>
+  <li>Di server on-premise operator, penyewa yang terpisah bisa dijalankan sebagai satu proses JVM per penyewa,
+  masing-masing dengan slug-nya sendiri, di mesin yang sama. Satu JVM memakai ±1 GiB saat hampir menganggur
+  (bagian 8); berapa proses yang muat di 32 GB di bawah beban belum diukur.</li>
+  <li>Rencana proyek menjual tiga paket dari tiga sumbu, yaitu komputasi, data, dan domain
+  (<a href="https://github.com/dawud-tan/movie-ticket/blob/main/docs/plan.md#L496-L504">docs/plan.md:496–504</a>; kolomnya ada di
+  <a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/db/migration/V1__init_schema.sql#L67-L69">V1:67–69</a>). Paket Starter dan Business memakai komputasi bersama, jadi untuk
+  penyewa yang terpisah keduanya menunggu mekanisme hostname itu. Hanya Enterprise, komputasi khusus, yang bisa
+  dipakai penyewa terpisah hari ini.</li>
+</ul>
+</section>
+
+<section id="masukan">
+<h2>2. Masukan</h2>
+<p>Semua angka di halaman ini dihitung dari masukan berikut. Bagian 8 menggeser masukan yang paling
+menentukan.</p>
+<div class="table-wrap">
+<table>
+  <caption>Masukan dan asalnya</caption>
+  <thead><tr><th scope="col">Masukan</th><th scope="col">Nilai</th><th scope="col">Asal</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">Satu bioskop 4 layar</th><td>19.600 tiket sebulan; ±120 di jam puncaknya</td>
+        <td>2.145 layar di 517 lokasi (BPI, Februari 2024); 115–135 juta tiket setahun, karena total dengan film
+        asing tidak ditemukan dan film Indonesia (80,2 juta pada 2025) dianggap 60–70% darinya [A]</td></tr>
+    <tr><th scope="row">P1, bioskop kecil, lalu lintas rata</th><td>9.800 tiket sebulan</td><td>2 layar [A]</td></tr>
+    <tr><th scope="row">P2, satu bioskop, ramai akhir pekan</th><td>19.600</td><td>bioskop 4 layar di atas</td></tr>
+    <tr><th scope="row">P3, minggu film laris</th><td>29.400</td><td>1,5 × P2; prapenjualan Rabu 12.00 membawa 25% tiket seminggu dalam 2 jam, akhir pekan ganda [A]</td></tr>
+    <tr><th scope="row">P4, 20 bioskop, 1–8 layar</th><td>400.000</td><td>20 × P2 × 4,1 ÷ 4, tersebar di WIB, WITA, dan WIT [A]</td></tr>
+    <tr><th scope="row">Bentuk minggu: puncak ÷ rata-rata, jam puncak, jam di bawah 2% puncak</th>
+        <td>P1 2,85 · 1,7% · 49 jam; P2 4,58 · 2,7% · 53; P3 14,2 · 8,4% · 73; P4 4,39 · 2,6% · 46</td>
+        <td>kurva penjualan per jam [A]: nol pada 00–06, puncak 19–20; Senin–Kamis 10% seminggu tiap hari, Jumat 15%, Sabtu 23%, Minggu 22%</td></tr>
+    <tr><th scope="row">Kerja satu tiket</th>
+        <td>±48 render-setara (FE) = 0,154 vCPU-detik; 40 permintaan; 0,5 MB keluar; 6 KB data</td>
+        <td>[E]: halaman, polling peta kursi tiap 3 detik selama ±60 detik memilih
+        (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/templates/customer/seatmapFragment.html#L201">seatmapFragment.html:201</a>),
+        penahanan, QRIS, dan dua penonton yang tidak jadi membeli per pesanan [A]; 12,5 KB per permintaan [A]</td></tr>
+    <tr><th scope="row">Satu render peta kursi</th><td>3,2 milidetik CPU (rentang 2,8–4,3)</td>
+        <td>diukur dengan wrk2 open-loop (5 November 2026) pada PC pengembang Core i7-9700: 2,75–2,86 ms di JVM dan
+        0,41–0,43 ms di PostgreSQL per permintaan fragmen 200 kursi bergzip, dipakai apa adanya tanpa diskalakan ke
+        4215R. 2,8 ms adalah JVM saja; 4,3 ms adalah 3,2 × 4,7 ÷ 3,5 GHz, inti 4215R yang lebih lambat [E]. Versi pertama
+        halaman ini memakai 1,6 ms (rentang 0,8–2,9), batas dari uji 30 Agustus 2026 yang tidak mencatat CPU</td></tr>
+    <tr><th scope="row">Kapasitas server EPYC 4124P</th><td>67 tiket per detik (dasar), 3,7 (terburuk); ±2.020 atau ±110 bioskop 4 layar</td>
+        <td>diskalakan dengan SPECrate2017_int_base (58,9 terhadap 3,41 per thread 4215R), pada 60% CPU</td></tr>
+    <tr><th scope="row">Kapasitas satu instans cloud</th><td>1 vCPU: 2,2 juta tiket sebulan (P2); 0,5 vCPU: 1,1 juta</td>
+        <td>[E]: 60% × vCPU ÷ 0,154 vCPU-detik, dibatasi jam puncak</td></tr>
+    <tr><th scope="row">Perangkat</th><td>menara + UPS Rp43,6 juta; 1U Rp37,4 juta</td>
+        <td>harga toko daring Indonesia (bagian 17); Xeon 6353P yang diimpor sampai Rp51,9 dan Rp45,6 juta</td></tr>
+    <tr><th scope="row">Listrik</th><td>Rp0,06 juta sebulan</td><td>45–60 W + 10% rugi UPS, Rp1.444,70 per kWh (B-2/TR, triwulan IV 2026)</td></tr>
+    <tr><th scope="row">Cadangan suku cadang</th><td>10% harga perangkat setahun</td><td>[A]</td></tr>
+    <tr><th scope="row">Cadangan data di luar lokasi</th><td>US$0,015 per GB sebulan, 10 GB gratis</td><td>Cloudflare R2</td></tr>
+    <tr><th scope="row">Jam admin</th><td>6 jam per server sebulan; +1 jam perjalanan untuk colocation; 2 jam per deployment cloud; Rp100.000 per jam</td><td>[A], tidak pernah diukur; bagian 5 menunjukkan berapa jam yang dibayar oleh selisihnya</td></tr>
+    <tr><th scope="row">Biaya keluar</th><td>4 jam (basis data sendiri) atau 8 jam (basis data bersama), ditambah biaya keluar data cloud</td><td>[A]</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section id="bulanan">
+<h2>3. Biaya bulanan dan siapa yang membayar</h2>
+<h3>Server sendiri: A, B1, B2</h3>
+<pre><code>bulanan = perangkat ÷ (12 × Y) + listrik + akses + colocation + cadangan data
+          + 10% × perangkat ÷ 12 + jam admin × tarif</code></pre>
+<p>Y adalah masa pakai, 3 atau 5 tahun, tanpa nilai sisa. Biaya ini tetap berapa pun jumlah tiketnya, sampai
+batas kapasitas server: ±2.020 bioskop 4 layar pada perkiraan dasar, ±110 pada perkiraan terburuk. A dihitung
+per bioskop, B per server.</p>
+<div class="table-wrap">
+<table>
+  <caption>Rp juta sebulan per server; A untuk satu bioskop 4 layar</caption>
+  <thead><tr><th scope="col">Baris</th><th scope="col" class="num">A · di bioskop</th><th scope="col" class="num">B1 · kantor operator</th><th scope="col" class="num">B2 · colocation</th><th scope="col" class="num">Dibayar langsung oleh</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">Perangkat: harga ÷ (12 × Y), 3 · 5 tahun</th><td class="num">1,21 · 0,73</td><td class="num">1,21 · 0,73</td><td class="num">1,04 · 0,62</td><td>A: penyewa · B: operator</td></tr>
+    <tr><th scope="row">Listrik</th><td class="num">0,06</td><td class="num">0,06</td><td class="num">termasuk colocation</td><td>A: penyewa · B1: operator</td></tr>
+    <tr><th scope="row">Akses dari luar</th><td class="num">0 (tunnel)</td><td class="num">0,44</td><td class="num">termasuk colocation</td><td>A: penyewa, jalur yang sudah ada [A] · B1: operator</td></tr>
+    <tr><th scope="row">Colocation</th><td class="num">—</td><td class="num">—</td><td class="num">1,10</td><td>operator</td></tr>
+    <tr><th scope="row">Cadangan suku cadang, 10% setahun [A]</th><td class="num">0,36</td><td class="num">0,36</td><td class="num">0,31</td><td>pemilik server</td></tr>
+    <tr><th scope="row">Cadangan data di luar lokasi (R2)</th><td class="num">0</td><td class="num">≤ 0,02 untuk 20 bioskop</td><td class="num">≤ 0,02 untuk 20 bioskop</td><td>pemilik server</td></tr>
+    <tr><th scope="row">Jumlah infrastruktur, 3 · 5 tahun</th><td class="num">1,64 · 1,15</td><td class="num">2,08 · 1,60</td><td class="num">2,45 · 2,03</td><td></td></tr>
+    <tr><th scope="row">Jam admin [A]</th><td class="num">6 jam = 0,60</td><td class="num">6 jam = 0,60</td><td class="num">7 jam = 0,70</td><td>A: penyewa, lewat stafnya atau operator · B: operator</td></tr>
+    <tr><th scope="row">Jumlah dengan jam admin, 3 · 5 tahun</th><td class="num"><strong>2,24 · 1,75</strong></td><td class="num"><strong>2,68 · 2,20</strong></td><td class="num"><strong>3,15 · 2,73</strong></td><td></td></tr>
+  </tbody>
+</table>
+</div>
+<p class="small">Untuk P4, A dikali 20, satu server per bioskop. Dengan Xeon 6353P yang diimpor, bukan EPYC 4124P, tambahkan Rp0,30 juta (3 tahun) atau Rp0,21 juta (5 tahun) sebulan. B1 dengan internet dedicated (Rp2,0–4,5 juta + PPN sebulan) lebih mahal daripada B2 pada volume berapa pun.</p>
+
+<h3>Cloud: C1–C5</h3>
+<pre><code>bulanan = tagihan satu instans yang selalu menyala + basis data terkecil
+          + instans tambahan di jam puncak + pertumbuhan data 6 KB per tiket
+          + jam admin × tarif</code></pre>
+<p>Kolom "bulan kosong" adalah tagihan tanpa satu tiket pun. Sisanya rata-rata 5 tahun, termasuk penyimpanan
+yang tumbuh di atas ukuran awalnya, tanpa jam admin. Jam admin menambah Rp0,20 juta per deployment.</p>
+<div class="table-wrap">
+<table>
+  <caption>Rp juta sebulan, tanpa jam admin; rata-rata 5 tahun</caption>
+  <thead><tr><th scope="col">Platform</th><th scope="col" class="num">Bulan kosong</th><th scope="col" class="num">P1</th><th scope="col" class="num">P2</th><th scope="col" class="num">P3</th><th scope="col" class="num">P4 bersama</th><th scope="col" class="num">P4, 20 deployment</th><th scope="col" class="num">Rp per tiket tambahan pada 400 rb</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">C1 · Google Cloud Run</th><td class="num">1,69</td><td class="num">1,71</td><td class="num">1,73</td><td class="num">1,74</td><td class="num">2,62</td><td class="num">34,53</td><td class="num">2,4</td></tr>
+    <tr><th scope="row">C2 · AWS ECS Express Mode</th><td class="num">1,78</td><td class="num">1,78</td><td class="num">1,78</td><td class="num">1,78</td><td class="num">2,15</td><td class="num">35,66</td><td class="num">1,6</td></tr>
+    <tr><th scope="row">C3 · Azure Container Apps</th><td class="num">0,72</td><td class="num">1,07</td><td class="num">1,06</td><td class="num">1,00</td><td class="num">1,47</td><td class="num">21,18</td><td class="num">1,7</td></tr>
+    <tr><th scope="row">C4 · Cloudflare Containers</th><td class="num">1,04</td><td class="num">1,04</td><td class="num">1,05</td><td class="num">1,05</td><td class="num">1,46</td><td class="num">20,98</td><td class="num">1,3</td></tr>
+    <tr><th scope="row">C5 · Alibaba Cloud SAE</th><td class="num">2,14</td><td class="num">2,15</td><td class="num">2,16</td><td class="num">2,17</td><td class="num">2,55</td><td class="num">43,21</td><td class="num">1,0</td></tr>
+  </tbody>
+</table>
+</div>
+<ul class="small">
+  <li>Pada perkiraan dasar tidak satu pola pun butuh instans tambahan: puncak P4 hanya ±0,10 vCPU. Yang menaikkan tagihan P4 adalah data keluar, permintaan di atas kuota gratis, dan penyimpanan.</li>
+  <li>Container Apps satu-satunya yang tagihannya mengikuti bentuk lalu lintas: CPU aktif US$0,000028 per vCPU-detik, menganggur US$0,000004. Jam yang tidak menganggur dihitung aktif [A, batas atas], jadi P3 paling murah karena paling lama menganggur.</li>
+  <li>Cloudflare menagih memori dan disk menurut ukuran yang disediakan sepanjang waktu, dan CPU hanya saat aktif. Apakah Indonesia termasuk wilayah tarif keluar data "everywhere else" tidak disebut. Basis datanya di jaringan lain, jadi setiap kueri menyeberang (bagian 12).</li>
+  <li>SAE: harga RDS tidak ditemukan; dipakai US$26,5 [E US$18–35], atau ±Rp0,15 juta. Harga NAT dari cuplikan pencarian dan belum pasti.</li>
+  <li>Cloud Run dengan domain sendiri lewat load balancer, seperti di rencana proyek, belum dihargai.</li>
+</ul>
+
+<h3>Siapa yang membayar</h3>
+<ul>
+  <li><strong>A:</strong> penyewa membeli perangkat dan membayar listrik serta jalur internetnya. Jam admin
+  dibayar penyewa, entah lewat stafnya sendiri atau lewat operator.</li>
+  <li><strong>B1, B2, dan cloud bersama:</strong> operator membayar semuanya, lalu menagihnya kembali lewat biaya
+  layanan. Penyewa hanya membayar biaya itu.</li>
+  <li><strong>Cloud per bioskop:</strong> tagihan cloud bisa atas nama penyewa, di akunnya sendiri, atau atas nama
+  operator lalu diteruskan. Jam admin tetap pekerjaan operator.</li>
+  <li><strong>Biaya keluar</strong> ditanggung pihak yang pindah, biasanya penyewa (bagian 4).</li>
+</ul>
+</section>
+
+<section id="tco">
+<h2>4. Biaya total 3 dan 5 tahun</h2>
+<pre><code>biaya total = 12 × Y × bulanan + biaya keluar</code></pre>
+<p>P1–P3 adalah satu bioskop. P4 adalah 20 bioskop: A berarti 20 server, B satu server, cloud bersama satu
+deployment, dan cloud per bioskop 20 deployment. Angkanya sudah termasuk jam admin [A] dan biaya keluar [A].
+Sel hijau adalah yang termurah di kolomnya.</p>
+<div class="table-wrap">
+<table>
+  <caption>Biaya total 3 tahun, Rp juta, dengan jam admin [A] dan biaya keluar [A]</caption>
+  <thead><tr><th scope="col">Tempat</th><th scope="col" class="num">P1</th><th scope="col" class="num">P2</th><th scope="col" class="num">P3</th><th scope="col" class="num">P4</th><th scope="col" class="num">P4 per bioskop</th><th scope="col" class="num">Dibayar langsung oleh</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">A · server di bioskop</th><td class="num">80,9</td><td class="num">80,9</td><td class="num">80,9</td><td class="num">1.618,2</td><td class="num">80,9</td><td>penyewa (perangkat), penyewa atau operator (jam admin)</td></tr>
+    <tr><th scope="row">B1 · server on-premise operator</th><td class="num">97,3</td><td class="num">97,3</td><td class="num">97,3</td><td class="num">97,6</td><td class="num">4,9</td><td>operator</td></tr>
+    <tr><th scope="row">B2 · server operator di colocation</th><td class="num">114,2</td><td class="num">114,2</td><td class="num">114,2</td><td class="num">114,5</td><td class="num">5,7</td><td>operator</td></tr>
+    <tr><th scope="row">C1 · Google Cloud Run</th><td class="num">69,5</td><td class="num">70,1</td><td class="num">70,7</td><td class="num">98,5</td><td class="num">4,9</td><td>operator</td></tr>
+    <tr><th scope="row">C2 · AWS ECS Express Mode</th><td class="num">72,2</td><td class="num">72,2</td><td class="num">72,2</td><td class="num">83,0</td><td class="num">4,2</td><td>operator</td></tr>
+    <tr><th scope="row">C3 · Azure Container Apps</th><td class="num">46,6</td><td class="num">46,1</td><td class="num best">44,0</td><td class="num">59,0</td><td class="num">3,0</td><td>operator</td></tr>
+    <tr><th scope="row">C4 · Cloudflare Containers</th><td class="num best">45,6</td><td class="num best">45,8</td><td class="num">46,0</td><td class="num best">58,2</td><td class="num best">2,9</td><td>operator</td></tr>
+    <tr><th scope="row">C5 · Alibaba Cloud SAE</th><td class="num">85,4</td><td class="num">85,8</td><td class="num">86,1</td><td class="num">100,2</td><td class="num">5,0</td><td>operator</td></tr>
+    <tr><th scope="row">C1 · Google Cloud Run, per bioskop</th><td class="num">= bersama</td><td class="num">= bersama</td><td class="num">= bersama</td><td class="num">1.395,3</td><td class="num">69,8</td><td>penyewa atau operator (tagihan), operator (jam admin)</td></tr>
+    <tr><th scope="row">C2 · AWS ECS Express Mode, per bioskop</th><td class="num">= bersama</td><td class="num">= bersama</td><td class="num">= bersama</td><td class="num">1.436,1</td><td class="num">71,8</td><td>penyewa atau operator (tagihan), operator (jam admin)</td></tr>
+    <tr><th scope="row">C3 · Azure Container Apps, per bioskop</th><td class="num">= bersama</td><td class="num">= bersama</td><td class="num">= bersama</td><td class="num">914,7</td><td class="num">45,7</td><td>penyewa atau operator (tagihan), operator (jam admin)</td></tr>
+    <tr><th scope="row">C4 · Cloudflare Containers, per bioskop</th><td class="num">= bersama</td><td class="num">= bersama</td><td class="num">= bersama</td><td class="num">907,3</td><td class="num">45,4</td><td>penyewa atau operator (tagihan), operator (jam admin)</td></tr>
+    <tr><th scope="row">C5 · Alibaba Cloud SAE, per bioskop</th><td class="num">= bersama</td><td class="num">= bersama</td><td class="num">= bersama</td><td class="num">1.707,9</td><td class="num">85,4</td><td>penyewa atau operator (tagihan), operator (jam admin)</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="table-wrap">
+<table>
+  <caption>Biaya total 5 tahun, Rp juta, dengan jam admin [A] dan biaya keluar [A]</caption>
+  <thead><tr><th scope="col">Tempat</th><th scope="col" class="num">P1</th><th scope="col" class="num">P2</th><th scope="col" class="num">P3</th><th scope="col" class="num">P4</th><th scope="col" class="num">P4 per bioskop</th><th scope="col" class="num">Dibayar langsung oleh</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">A · server di bioskop</th><td class="num">105,5</td><td class="num">105,5</td><td class="num">105,5</td><td class="num">2.110,0</td><td class="num">105,5</td><td>penyewa (perangkat), penyewa atau operator (jam admin)</td></tr>
+    <tr><th scope="row">B1 · server on-premise operator</th><td class="num">132,5</td><td class="num">132,5</td><td class="num">132,5</td><td class="num">133,6</td><td class="num">6,7</td><td>operator</td></tr>
+    <tr><th scope="row">B2 · server operator di colocation</th><td class="num">164,8</td><td class="num">164,8</td><td class="num">164,8</td><td class="num">165,9</td><td class="num">8,3</td><td>operator</td></tr>
+    <tr><th scope="row">C1 · Google Cloud Run</th><td class="num">115,4</td><td class="num">116,4</td><td class="num">117,4</td><td class="num">170,5</td><td class="num">8,5</td><td>operator</td></tr>
+    <tr><th scope="row">C2 · AWS ECS Express Mode</th><td class="num">119,8</td><td class="num">119,8</td><td class="num">119,8</td><td class="num">142,0</td><td class="num">7,1</td><td>operator</td></tr>
+    <tr><th scope="row">C3 · Azure Container Apps</th><td class="num">77,1</td><td class="num">76,4</td><td class="num best">72,8</td><td class="num">101,4</td><td class="num">5,1</td><td>operator</td></tr>
+    <tr><th scope="row">C4 · Cloudflare Containers</th><td class="num best">75,4</td><td class="num best">75,7</td><td class="num">76,1</td><td class="num best">100,6</td><td class="num best">5,0</td><td>operator</td></tr>
+    <tr><th scope="row">C5 · Alibaba Cloud SAE</th><td class="num">141,8</td><td class="num">142,4</td><td class="num">143,0</td><td class="num">166,4</td><td class="num">8,3</td><td>operator</td></tr>
+    <tr><th scope="row">C1 · Google Cloud Run, per bioskop</th><td class="num">= bersama</td><td class="num">= bersama</td><td class="num">= bersama</td><td class="num">2.320,2</td><td class="num">116,0</td><td>penyewa atau operator (tagihan), operator (jam admin)</td></tr>
+    <tr><th scope="row">C2 · AWS ECS Express Mode, per bioskop</th><td class="num">= bersama</td><td class="num">= bersama</td><td class="num">= bersama</td><td class="num">2.388,2</td><td class="num">119,4</td><td>penyewa atau operator (tagihan), operator (jam admin)</td></tr>
+    <tr><th scope="row">C3 · Azure Container Apps, per bioskop</th><td class="num">= bersama</td><td class="num">= bersama</td><td class="num">= bersama</td><td class="num">1.519,2</td><td class="num">76,0</td><td>penyewa atau operator (tagihan), operator (jam admin)</td></tr>
+    <tr><th scope="row">C4 · Cloudflare Containers, per bioskop</th><td class="num">= bersama</td><td class="num">= bersama</td><td class="num">= bersama</td><td class="num">1.506,8</td><td class="num">75,3</td><td>penyewa atau operator (tagihan), operator (jam admin)</td></tr>
+    <tr><th scope="row">C5 · Alibaba Cloud SAE, per bioskop</th><td class="num">= bersama</td><td class="num">= bersama</td><td class="num">= bersama</td><td class="num">2.841,1</td><td class="num">142,1</td><td>penyewa atau operator (tagihan), operator (jam admin)</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3 id="keluar">Biaya keluar: memindahkan data dan domain</h3>
+<ul>
+  <li><strong>Data.</strong> Satu tiket menyimpan ±6 KB, jadi satu bioskop 4 layar menumpuk ±1,4 GB setahun.
+  Mengeluarkannya dari cloud berbiaya kurang dari Rp0,1 juta; dari server sendiri, nol.</li>
+  <li><strong>Ekspor per penyewa belum ada di kode.</strong> Skemanya punya status <code>offboarding</code>
+  (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/db/migration/V1__init_schema.sql#L76">V1:76</a>), dan penyapu tetap menyapu penyewa itu demi "whatever final reporting or
+  export follows" (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/service/ReservationLifecycleService.kt#L81-L84">ReservationLifecycleService.kt:81–84</a>), tetapi alat
+  ekspornya tidak ada. Dari basis data bersama, ekspornya dikerjakan tangan, 8 jam [A]. Dari basis data atau
+  server sendiri, cukup <code>pg_dump</code> seluruhnya, 4 jam [A]. Cara memeriksanya ada di
+  <a href="pengelola-bioskop.html#keluar">halaman untuk pengelola bioskop, bagian 7</a>.</li>
+  <li><strong>Domain.</strong> Default kolom <code>domain_mode</code> adalah <code>subdomain</code>
+  (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/db/migration/V1__init_schema.sql#L69">V1:69</a>). Penyewa di subdomain milik operator harus berganti alamat saat pindah,
+  termasuk tautan dan QR yang sudah tercetak. Penyewa dengan domain sendiri cukup mengubah DNS. Harga domain
+  tidak dihitung.</li>
+  <li><strong>Perangkat.</strong> Di A server tetap milik penyewa, dan karena kodenya berlisensi Apache-2.0,
+  penyewa bisa terus menjalankannya tanpa operator. Di B server tetap milik operator. Nilai sisanya tidak
+  dihitung.</li>
+</ul>
+<div class="table-wrap">
+<table>
+  <caption>Biaya keluar sekali, setelah 5 tahun, Rp juta; jam × Rp100.000 [A] + data keluar</caption>
+  <thead><tr><th scope="col">Tempat</th><th scope="col" class="num">Jam [A]</th><th scope="col" class="num">Data keluar, satu bioskop</th><th scope="col" class="num">Satu bioskop</th><th scope="col" class="num">P4 (20 bioskop)</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">A · server sendiri</th><td class="num">4 per bioskop</td><td class="num">0</td><td class="num">0,40</td><td class="num">8,00</td></tr>
+    <tr><th scope="row">B1, B2 · basis data bersama</th><td class="num">8</td><td class="num">0</td><td class="num">0,80</td><td class="num">0,80</td></tr>
+    <tr><th scope="row">Cloud bersama</th><td class="num">8</td><td class="num">0,01–0,02</td><td class="num">0,81–0,82</td><td class="num">1,09–1,26</td></tr>
+    <tr><th scope="row">Cloud per bioskop</th><td class="num">4 per bioskop</td><td class="num">0,01–0,02</td><td class="num">0,41–0,42</td><td class="num">8,29–8,46</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section id="impas">
+<h2>5. Titik impas</h2>
+<h3>Volume: dari mana server sendiri lebih murah</h3>
+<pre><code>volume impas = volume bulanan terkecil dengan  bulanan(server sendiri) ≤ bulanan(cloud, volume)</code></pre>
+<p>Server sendiri berbiaya tetap. Tagihan cloud naik pelan bersama volume karena data yang keluar, permintaan di
+atas kuota gratis, penyimpanan yang tumbuh, dan instans tambahan di jam puncak. A dibandingkan per bioskop dengan
+satu deployment untuk bioskop itu. B dibandingkan dengan satu deployment bersama, dan volumenya bertambah per
+bioskop 4 layar. Angka utama memakai jam admin [A]; angka dalam kurung tanpa jam admin.</p>
+<div class="table-wrap">
+<table>
+  <caption>Volume bulanan, semua bioskop, dari mana server sendiri lebih murah; dengan jam admin [A], dan tanpa</caption>
+  <thead><tr><th scope="col">Server sendiri</th><th scope="col">Cloud Run</th><th scope="col">ECS Express</th><th scope="col">Container Apps</th><th scope="col">Cloudflare</th><th scope="col">SAE</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">A, 3 tahun</th><td>tidak tercapai (±180 rb)<br><span class="small">tanpa admin: sejak tiket pertama</span></td><td>tidak tercapai (±378 rb)<br><span class="small">tanpa admin: sejak tiket pertama</span></td><td>tidak tercapai (±846 rb)<br><span class="small">tanpa admin: tidak tercapai (±575 rb)</span></td><td>tidak tercapai (±1,00 juta)<br><span class="small">tanpa admin: tidak tercapai (±638 rb)</span></td><td>sejak tiket pertama<br><span class="small">tanpa admin: sejak tiket pertama</span></td></tr>
+    <tr><th scope="row">A, 5 tahun</th><td>sejak tiket pertama<br><span class="small">tanpa admin: sejak tiket pertama</span></td><td>sejak tiket pertama<br><span class="small">tanpa admin: sejak tiket pertama</span></td><td>tidak tercapai (±473 rb)<br><span class="small">tanpa admin: tidak tercapai (±223 rb)</span></td><td>tidak tercapai (±490 rb)<br><span class="small">tanpa admin: tidak tercapai (±149 rb)</span></td><td>sejak tiket pertama<br><span class="small">tanpa admin: sejak tiket pertama</span></td></tr>
+    <tr><th scope="row">B1, 3 tahun</th><td>392 rb<br><span class="small">tanpa admin: 201 rb</span></td><td>694 rb<br><span class="small">tanpa admin: 410 rb</span></td><td>1,13 juta<br><span class="small">tanpa admin: 863 rb</span></td><td>1,31 juta<br><span class="small">tanpa admin: 1,04 juta</span></td><td>336 rb<br><span class="small">tanpa admin: sejak tiket pertama</span></td></tr>
+    <tr><th scope="row">B1, 5 tahun</th><td>142 rb<br><span class="small">tanpa admin: sejak tiket pertama</span></td><td>314 rb<br><span class="small">tanpa admin: sejak tiket pertama</span></td><td>735 rb<br><span class="small">tanpa admin: 488 rb</span></td><td>844 rb<br><span class="small">tanpa admin: 525 rb</span></td><td>sejak tiket pertama<br><span class="small">tanpa admin: sejak tiket pertama</span></td></tr>
+    <tr><th scope="row">B2, 3 tahun</th><td>617 rb<br><span class="small">tanpa admin: 378 rb</span></td><td>1,03 juta<br><span class="small">tanpa admin: 670 rb</span></td><td>1,43 juta<br><span class="small">tanpa admin: 1,11 juta</span></td><td>1,62 juta<br><span class="small">tanpa admin: 1,29 juta</span></td><td>801 rb<br><span class="small">tanpa admin: 305 rb</span></td></tr>
+    <tr><th scope="row">B2, 5 tahun</th><td>372 rb<br><span class="small">tanpa admin: 159 rb</span></td><td>657 rb<br><span class="small">tanpa admin: 339 rb</span></td><td>1,07 juta<br><span class="small">tanpa admin: 759 rb</span></td><td>1,21 juta<br><span class="small">tanpa admin: 874 rb</span></td><td>397 rb<br><span class="small">tanpa admin: sejak tiket pertama</span></td></tr>
+  </tbody>
+</table>
+</div>
+<p class="small">"Sejak tiket pertama": server sendiri sudah lebih murah pada 1.000 tiket sebulan. "Tidak
+tercapai": impasnya di atas 100.000 tiket sebulan untuk satu bioskop, lima kali bioskop 4 layar; angkanya dalam
+kurung.</p>
+
+<h3>Penyewa terpisah: dari penyewa keberapa</h3>
+<p>Hari ini penyewa yang terpisah butuh deployment cloud sendiri-sendiri (bagian 1). Server on-premise operator,
+dengan satu proses per penyewa, dibandingkan dengan satu deployment per penyewa, masing-masing bioskop 4
+layar.</p>
+<div class="table-wrap">
+<table>
+  <caption>Penyewa ke berapa yang membuat server operator lebih murah daripada satu deployment per penyewa; dengan jam admin (tanpa)</caption>
+  <thead><tr><th scope="col">Server operator</th><th scope="col" class="num">Cloud Run</th><th scope="col" class="num">ECS Express</th><th scope="col" class="num">Container Apps</th><th scope="col" class="num">Cloudflare</th><th scope="col" class="num">SAE</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">B1, 3 tahun</th><td class="num">2 <span class="small">(2)</span></td><td class="num">2 <span class="small">(2)</span></td><td class="num">3 <span class="small">(2)</span></td><td class="num">3 <span class="small">(2)</span></td><td class="num">2 <span class="small">(1)</span></td></tr>
+    <tr><th scope="row">B1, 5 tahun</th><td class="num">2 <span class="small">(1)</span></td><td class="num">2 <span class="small">(1)</span></td><td class="num">2 <span class="small">(2)</span></td><td class="num">2 <span class="small">(2)</span></td><td class="num">1 <span class="small">(1)</span></td></tr>
+    <tr><th scope="row">B2, 3 tahun</th><td class="num">2 <span class="small">(2)</span></td><td class="num">2 <span class="small">(2)</span></td><td class="num">3 <span class="small">(3)</span></td><td class="num">3 <span class="small">(3)</span></td><td class="num">2 <span class="small">(2)</span></td></tr>
+    <tr><th scope="row">B2, 5 tahun</th><td class="num">2 <span class="small">(2)</span></td><td class="num">2 <span class="small">(2)</span></td><td class="num">3 <span class="small">(2)</span></td><td class="num">3 <span class="small">(2)</span></td><td class="num">2 <span class="small">(1)</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Jam admin yang dibayar oleh selisihnya</h3>
+<p>Jam admin tidak pernah diukur, jadi tabel ini membaliknya: berapa jam admin tambahan sebulan yang terbayar
+oleh selisih biaya infrastruktur, pada Rp100.000 per jam. Server sendiri layak selama jam tambahannya, di atas
+jam admin cloud, di bawah angka ini. Angka negatif berarti cloud sudah lebih murah sebelum jam admin
+dihitung.</p>
+<div class="table-wrap">
+<table>
+  <caption>Jam admin tambahan sebulan yang terbayar oleh selisih biaya infrastruktur, 5 tahun, Rp100.000 per jam</caption>
+  <thead><tr><th scope="col">Pembanding</th><th scope="col" class="num">Cloud Run</th><th scope="col" class="num">ECS Express</th><th scope="col" class="num">Container Apps</th><th scope="col" class="num">Cloudflare</th><th scope="col" class="num">SAE</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">A lawan satu deployment, satu bioskop (P2)</th><td class="num">5,7</td><td class="num">6,3</td><td class="num">−0,9</td><td class="num">−1,0</td><td class="num">10,1</td></tr>
+    <tr><th scope="row">B1 lawan satu deployment bersama, 20 bioskop (P4)</th><td class="num">10,1</td><td class="num">5,3</td><td class="num">−1,4</td><td class="num">−1,6</td><td class="num">9,4</td></tr>
+    <tr><th scope="row">B2 lawan satu deployment bersama, 20 bioskop (P4)</th><td class="num">5,7</td><td class="num">1,0</td><td class="num">−5,8</td><td class="num">−5,9</td><td class="num">5,0</td></tr>
+    <tr><th scope="row">B1 lawan 20 deployment, satu per penyewa (P4)</th><td class="num">329</td><td class="num">341</td><td class="num">196</td><td class="num">194</td><td class="num">416</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Biaya per tiket, dan biaya layanan yang menutupnya</h3>
+<pre><code>biaya per tiket = (biaya tetap + jam admin × tarif) ÷ (N × v) + biaya cloud per tiket tambahan
+N = jumlah bioskop, v = tiket sebulan per bioskop</code></pre>
+<p>Biaya layanan yang menutup infrastruktur sama dengan angka ini. Untuk B, satu server cukup sampai ±2.020
+bioskop 4 layar pada perkiraan dasar, atau ±110 pada perkiraan terburuk. Di atas itu, tambahkan satu server.</p>
+<div class="table-wrap">
+<table>
+  <caption>Rp per tiket, 3 tahun, dengan jam admin [A]; tiap bioskop 4 layar (19.600 tiket sebulan). Cloud per bioskop: Rp64–120 berapa pun jumlahnya. Pada 5 tahun A turun ke Rp89.</caption>
+  <thead><tr><th scope="col">Bioskop</th><th scope="col" class="num">A</th><th scope="col" class="num">B1</th><th scope="col" class="num">B2</th><th scope="col" class="num">Cloud Run</th><th scope="col" class="num">ECS</th><th scope="col" class="num">Container Apps</th><th scope="col" class="num">Cloudflare</th><th scope="col" class="num">SAE</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">1</th><td class="num">114</td><td class="num">137</td><td class="num">161</td><td class="num">98</td><td class="num">101</td><td class="num">64</td><td class="num best">64</td><td class="num">120</td></tr>
+    <tr><th scope="row">2</th><td class="num">114</td><td class="num">68</td><td class="num">80</td><td class="num">50</td><td class="num">51</td><td class="num">33</td><td class="num best">32</td><td class="num">61</td></tr>
+    <tr><th scope="row">5</th><td class="num">114</td><td class="num">27</td><td class="num">32</td><td class="num">21</td><td class="num">20</td><td class="num best">13</td><td class="num">13</td><td class="num">25</td></tr>
+    <tr><th scope="row">10</th><td class="num">114</td><td class="num">14</td><td class="num">16</td><td class="num">12</td><td class="num">10</td><td class="num best">6,8</td><td class="num">7,0</td><td class="num">13</td></tr>
+    <tr><th scope="row">20</th><td class="num">114</td><td class="num">6,9</td><td class="num">8,1</td><td class="num">6,9</td><td class="num">5,8</td><td class="num">4,1</td><td class="num best">4,0</td><td class="num">7,0</td></tr>
+    <tr><th scope="row">50</th><td class="num">114</td><td class="num">2,8</td><td class="num">3,2</td><td class="num">4,0</td><td class="num">3,2</td><td class="num">2,5</td><td class="num best">2,3</td><td class="num">3,4</td></tr>
+    <tr><th scope="row">100</th><td class="num">114</td><td class="num best">1,4</td><td class="num">1,6</td><td class="num">3,1</td><td class="num">2,3</td><td class="num">2,1</td><td class="num">1,9</td><td class="num">2,2</td></tr>
+    <tr><th scope="row">200</th><td class="num">114</td><td class="num best">0,7</td><td class="num">0,8</td><td class="num">2,6</td><td class="num">1,9</td><td class="num">1,9</td><td class="num">1,7</td><td class="num">1,6</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Pemilik belum menetapkan biaya. Kodenya menagih penyewa dengan tarif bulanan tetap, bukan per tiket
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/main/docs/plan.md#L832-L834">docs/plan.md:832–834</a>). Angka di konfigurasinya hanya contoh:
+"Tier NAMES are placeholders; the numbers are config precisely because pricing is what a first tenant
+conversation informs" (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/application.properties#L339-L343">application.properties:306–310</a>). Dibagi 19.600 tiket
+sebulan, contoh itu setara Rp26 per tiket (Starter, Rp0,5 juta), Rp102 per tiket (Business, Rp2,0 juta), Rp383 per tiket (Enterprise, Rp7,5 juta).</p>
+</section>
+
+<section id="penyewa">
+<h2>6. Sisi penyewa</h2>
+<p>Berapa yang dibayar satu bioskop 4 layar sebulan pada biaya layanan tertentu. Kolom kedua mengenakan biaya itu
+pada semua tiket, termasuk loket. Kolom ketiga hanya pada tiket daring, 40% [A], seperti biaya layanan aplikasi
+tiket hari ini yang dibayar pembeli.</p>
+<div class="table-wrap">
+<table>
+  <caption>Satu bioskop 4 layar, Rp juta sebulan; server sendiri (A) Rp1,75 juta (5 tahun) atau Rp2,24 juta (3 tahun), dengan jam admin</caption>
+  <thead><tr><th scope="col">Biaya per tiket</th><th scope="col" class="num">Semua tiket (19.600)</th><th scope="col" class="num">Tiket daring saja (7.840)</th><th scope="col" class="num">Semua tiket, dibanding A 5 tahun</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">Rp25</th><td class="num">0,49</td><td class="num">0,20</td><td>lebih murah</td></tr>
+    <tr><th scope="row">Rp50</th><td class="num">0,98</td><td class="num">0,39</td><td>lebih murah</td></tr>
+    <tr><th scope="row">Rp100</th><td class="num">1,96</td><td class="num">0,78</td><td>lebih mahal</td></tr>
+    <tr><th scope="row">Rp250</th><td class="num">4,90</td><td class="num">1,96</td><td>lebih mahal</td></tr>
+    <tr><th scope="row">Rp500</th><td class="num">9,80</td><td class="num">3,92</td><td>lebih mahal</td></tr>
+    <tr><th scope="row">Rp1.000</th><td class="num">19,60</td><td class="num">7,84</td><td>lebih mahal</td></tr>
+    <tr><th scope="row">Rp1.500</th><td class="num">29,40</td><td class="num">11,76</td><td>lebih mahal</td></tr>
+    <tr><th scope="row">Rp4.000</th><td class="num">78,40</td><td class="num">31,36</td><td>lebih mahal</td></tr>
+  </tbody>
+</table>
+</div>
+<ul>
+  <li>Biaya Rp89 per tiket untuk semua tiket, atau Rp223 per tiket daring, sudah sama dengan biaya server sendiri dalam 5 tahun. Dalam 3 tahun angkanya Rp114 dan Rp285.</li>
+  <li>Aplikasi tiket hari ini menarik biaya layanan dari pembeli: Rp1.500 per tiket di aplikasi Jaringan bioskop A (2024), Rp4.000 bila membayar dengan dompet digital atau QRIS (2025), "paling murah Rp1.990" bagi anggota di aplikasi Jaringan bioskop B, dan berbeda per lokasi di sebuah aplikasi tiket independen (sumber 18–21). Bila 40% tiket [A] dibeli dengan biaya itu, pembeli satu bioskop 4 layar membayar Rp11,8–31,4 juta sebulan, 6,7–17,9 kali biaya server sendiri.</li>
+  <li>Infrastruktur bukan yang menentukan harga layanan. Biaya gerbang pembayaran, dukungan, pengembangan, dan margin tidak dihitung di halaman ini.</li>
+  <li>Di B dan di cloud bersama, biaya per bioskop turun seiring jumlah bioskop (tabel bagian 5). Di A dan di cloud per bioskop, biayanya tetap.</li>
+</ul>
+</section>
+
+<section id="kalkulator">
+<h2>7. Kalkulator</h2>
+<p>Masukkan volume, biaya layanan, tempat, dan pola. Rumusnya sama dengan tabel di atas, termasuk instans
+tambahan di jam puncak dan pertumbuhan data. Tabel-tabel di atas tetap berlaku tanpa JavaScript.</p>
+<noscript><p class="note">Kalkulator ini butuh JavaScript. Angka yang sama ada di tabel bagian 3 sampai 6.</p></noscript>
+<form id="calc" class="box calc" hidden>
+  <label>Tiket sebulan, semua bioskop <input id="c-v" type="number" min="1" step="100" value="19600" inputmode="numeric"></label>
+  <label>Jumlah bioskop <input id="c-n" type="number" min="1" step="1" value="1" inputmode="numeric"></label>
+  <label>Biaya layanan per tiket (Rp) <input id="c-f" type="number" min="0" step="50" value="100" inputmode="numeric"></label>
+  <label>Tempat
+    <select id="c-s">
+      <option value="A">A · server di bioskop</option>
+      <option value="B1">B1 · server on-premise operator</option>
+      <option value="B2">B2 · server operator di colocation</option>
+      <option value="C1">C1 · Cloud Run, bersama</option>
+      <option value="C1pc">C1 · Cloud Run, per bioskop</option>
+      <option value="C2">C2 · ECS Express, bersama</option>
+      <option value="C2pc">C2 · ECS Express, per bioskop</option>
+      <option value="C3" selected>C3 · Container Apps, bersama</option>
+      <option value="C3pc">C3 · Container Apps, per bioskop</option>
+      <option value="C4">C4 · Cloudflare, bersama</option>
+      <option value="C4pc">C4 · Cloudflare, per bioskop</option>
+      <option value="C5">C5 · SAE, bersama</option>
+      <option value="C5pc">C5 · SAE, per bioskop</option>
+    </select></label>
+  <label>Pola
+    <select id="c-p">
+      <option value="P1">P1 · bioskop kecil, rata</option>
+      <option value="P2" selected>P2 · ramai akhir pekan</option>
+      <option value="P3">P3 · minggu film laris</option>
+      <option value="P4">P4 · banyak bioskop, tiga zona</option>
+    </select></label>
+  <label>Masa pakai
+    <select id="c-y"><option value="3">3 tahun</option><option value="5" selected>5 tahun</option></select></label>
+  <label>Tarif admin per jam (Rp) <input id="c-r" type="number" min="0" step="10000" value="100000" inputmode="numeric"></label>
+  <label>Jam admin per server atau deployment <input id="c-h" type="number" min="0" step="1" placeholder="6 server · 2 cloud" inputmode="numeric"></label>
+  <output id="c-out" for="c-v c-n c-f c-s c-p c-y c-r c-h" aria-live="polite"></output>
+</form>
+<script>
+var R7 = (function () {
+  'use strict';
+  // Same formulas as the tables: R6's cloud bills, one instance always on, extra instances at the peak hour,
+  // data growing 6 KB a ticket. Rp juta a month. Source of every constant: section 2 and section 17.
+  var FX = 18148, H = 730, S = H * 3600, WPM = H / 168, U = 0.6;
+  var SHAPE = {"P1":[0.0,0.0,0.0,0.0,0.0,0.0,0.0002823263693,0.0007058159232,0.001411631846,0.002823263693,0.004234895539,0.007058159232,0.008469791078,0.008469791078,0.008469791078,0.009881422925,0.009881422925,0.01129305477,0.01411631846,0.01693958216,0.01693958216,0.01270468662,0.007058159232,0.00211744777,0.0,0.0,0.0,0.0,0.0,0.0,0.0002823263693,0.0007058159232,0.001411631846,0.002823263693,0.004234895539,0.007058159232,0.008469791078,0.008469791078,0.008469791078,0.009881422925,0.009881422925,0.01129305477,0.01411631846,0.01693958216,0.01693958216,0.01270468662,0.007058159232,0.00211744777,0.0,0.0,0.0,0.0,0.0,0.0,0.0002823263693,0.0007058159232,0.001411631846,0.002823263693,0.004234895539,0.007058159232,0.008469791078,0.008469791078,0.008469791078,0.009881422925,0.009881422925,0.01129305477,0.01411631846,0.01693958216,0.01693958216,0.01270468662,0.007058159232,0.00211744777,0.0,0.0,0.0,0.0,0.0,0.0,0.0002823263693,0.0007058159232,0.001411631846,0.002823263693,0.004234895539,0.007058159232,0.008469791078,0.008469791078,0.008469791078,0.009881422925,0.009881422925,0.01129305477,0.01411631846,0.01693958216,0.01693958216,0.01270468662,0.007058159232,0.00211744777,0.0,0.0,0.0,0.0,0.0,0.0,0.0002823263693,0.0007058159232,0.001411631846,0.002823263693,0.004234895539,0.007058159232,0.008469791078,0.008469791078,0.008469791078,0.009881422925,0.009881422925,0.01129305477,0.01411631846,0.01693958216,0.01693958216,0.01270468662,0.007058159232,0.00211744777,0.0,0.0,0.0,0.0,0.0,0.0,0.0002823263693,0.0007058159232,0.001411631846,0.002823263693,0.004234895539,0.007058159232,0.008469791078,0.008469791078,0.008469791078,0.009881422925,0.009881422925,0.01129305477,0.01411631846,0.01693958216,0.01693958216,0.01270468662,0.007058159232,0.00211744777,0.0,0.0,0.0,0.0,0.0,0.0,0.0002823263693,0.0007058159232,0.001411631846,0.002823263693,0.004234895539,0.007058159232,0.008469791078,0.008469791078,0.008469791078,0.009881422925,0.009881422925,0.01129305477,0.01411631846,0.01693958216,0.01693958216,0.01270468662,0.007058159232,0.00211744777],"P2":[0.0,0.0,0.0,0.0,0.0,0.0,0.0001976284585,0.0004940711462,0.0009881422925,0.001976284585,0.002964426877,0.004940711462,0.005928853755,0.005928853755,0.005928853755,0.006916996047,0.006916996047,0.00790513834,0.009881422925,0.01185770751,0.01185770751,0.008893280632,0.004940711462,0.001482213439,0.0,0.0,0.0,0.0,0.0,0.0,0.0001976284585,0.0004940711462,0.0009881422925,0.001976284585,0.002964426877,0.004940711462,0.005928853755,0.005928853755,0.005928853755,0.006916996047,0.006916996047,0.00790513834,0.009881422925,0.01185770751,0.01185770751,0.008893280632,0.004940711462,0.001482213439,0.0,0.0,0.0,0.0,0.0,0.0,0.0001976284585,0.0004940711462,0.0009881422925,0.001976284585,0.002964426877,0.004940711462,0.005928853755,0.005928853755,0.005928853755,0.006916996047,0.006916996047,0.00790513834,0.009881422925,0.01185770751,0.01185770751,0.008893280632,0.004940711462,0.001482213439,0.0,0.0,0.0,0.0,0.0,0.0,0.0001976284585,0.0004940711462,0.0009881422925,0.001976284585,0.002964426877,0.004940711462,0.005928853755,0.005928853755,0.005928853755,0.006916996047,0.006916996047,0.00790513834,0.009881422925,0.01185770751,0.01185770751,0.008893280632,0.004940711462,0.001482213439,0.0,0.0,0.0,0.0,0.0,0.0,0.0002964426877,0.0007411067194,0.001482213439,0.002964426877,0.004446640316,0.007411067194,0.008893280632,0.008893280632,0.008893280632,0.01037549407,0.01037549407,0.01185770751,0.01482213439,0.01778656126,0.01778656126,0.01333992095,0.007411067194,0.002223320158,0.0,0.0,0.0,0.0,0.0,0.0,0.0004545454545,0.001136363636,0.002272727273,0.004545454545,0.006818181818,0.01136363636,0.01363636364,0.01363636364,0.01363636364,0.01590909091,0.01590909091,0.01818181818,0.02272727273,0.02727272727,0.02727272727,0.02045454545,0.01136363636,0.003409090909,0.0,0.0,0.0,0.0,0.0,0.0,0.0004347826087,0.001086956522,0.002173913043,0.004347826087,0.00652173913,0.01086956522,0.01304347826,0.01304347826,0.01304347826,0.0152173913,0.0152173913,0.01739130435,0.02173913043,0.02608695652,0.02608695652,0.01956521739,0.01086956522,0.003260869565],"P3":[0.0,0.0,0.0,0.0,0.0,0.0,0.0001068261938,0.0002670654845,0.0005341309689,0.001068261938,0.001602392907,0.002670654845,0.003204785813,0.003204785813,0.003204785813,0.003738916782,0.003738916782,0.004273047751,0.005341309689,0.006409571627,0.006409571627,0.00480717872,0.002670654845,0.0008011964534,0.0,0.0,0.0,0.0,0.0,0.0,0.0001068261938,0.0002670654845,0.0005341309689,0.001068261938,0.001602392907,0.002670654845,0.003204785813,0.003204785813,0.003204785813,0.003738916782,0.003738916782,0.004273047751,0.005341309689,0.006409571627,0.006409571627,0.00480717872,0.002670654845,0.0008011964534,0.0,0.0,0.0,0.0,0.0,0.0,0.0001068261938,0.0002670654845,0.0005341309689,0.001068261938,0.001602392907,0.002670654845,0.08428586689,0.05725883987,0.003204785813,0.003738916782,0.003738916782,0.004273047751,0.005341309689,0.006409571627,0.006409571627,0.00480717872,0.002670654845,0.0008011964534,0.0,0.0,0.0,0.0,0.0,0.0,0.0001068261938,0.0002670654845,0.0005341309689,0.001068261938,0.001602392907,0.002670654845,0.003204785813,0.003204785813,0.003204785813,0.003738916782,0.003738916782,0.004273047751,0.005341309689,0.006409571627,0.006409571627,0.00480717872,0.002670654845,0.0008011964534,0.0,0.0,0.0,0.0,0.0,0.0,0.0003204785813,0.0008011964534,0.001602392907,0.003204785813,0.00480717872,0.008011964534,0.00961435744,0.00961435744,0.00961435744,0.01121675035,0.01121675035,0.01281914325,0.01602392907,0.01922871488,0.01922871488,0.01442153616,0.008011964534,0.00240358936,0.0,0.0,0.0,0.0,0.0,0.0,0.0004914004914,0.001228501229,0.002457002457,0.004914004914,0.007371007371,0.01228501229,0.01474201474,0.01474201474,0.01474201474,0.0171990172,0.0171990172,0.01965601966,0.02457002457,0.02948402948,0.02948402948,0.02211302211,0.01228501229,0.003685503686,0.0,0.0,0.0,0.0,0.0,0.0,0.0004700352526,0.001175088132,0.002350176263,0.004700352526,0.00705052879,0.01175088132,0.01410105758,0.01410105758,0.01410105758,0.01645123384,0.01645123384,0.01880141011,0.02350176263,0.02820211516,0.02820211516,0.02115158637,0.01175088132,0.003525264395],"P4":[0.0,0.0,0.0,0.0,3.248686989e-05,0.0001218257621,0.0003884888191,0.0008392441388,0.001516053928,0.00266663057,0.003857815799,0.005306188749,0.005928853755,0.006091288104,0.006294331041,0.007079430397,0.007607342033,0.008960961611,0.0106123775,0.01137040446,0.01011153825,0.006862851264,0.003417889436,0.0009339975093,0.0,0.0,0.0,0.0,3.248686989e-05,0.0001218257621,0.0003884888191,0.0008392441388,0.001516053928,0.00266663057,0.003857815799,0.005306188749,0.005928853755,0.006091288104,0.006294331041,0.007079430397,0.007607342033,0.008960961611,0.0106123775,0.01137040446,0.01011153825,0.006862851264,0.003417889436,0.0009339975093,0.0,0.0,0.0,0.0,3.248686989e-05,0.0001218257621,0.0003884888191,0.0008392441388,0.001516053928,0.00266663057,0.003857815799,0.005306188749,0.005928853755,0.006091288104,0.006294331041,0.007079430397,0.007607342033,0.008960961611,0.0106123775,0.01137040446,0.01011153825,0.006862851264,0.003417889436,0.0009339975093,0.0,0.0,0.0,0.0,3.248686989e-05,0.0001218257621,0.0003884888191,0.0008392441388,0.001516053928,0.00266663057,0.003857815799,0.005306188749,0.005928853755,0.006091288104,0.006294331041,0.007079430397,0.007607342033,0.008960961611,0.0106123775,0.01137040446,0.01011153825,0.006862851264,0.003417889436,0.0009339975093,0.0,0.0,0.0,0.0,4.873030484e-05,0.0001827386431,0.0005827332287,0.001258866208,0.002274080892,0.003999945855,0.005786723699,0.007959283123,0.008893280632,0.009136932157,0.009441496562,0.0106191456,0.01141101305,0.01344144242,0.01591856625,0.01705560669,0.01516730738,0.0102942769,0.005126834155,0.001400996264,0.0,0.0,0.0,0.0,7.471980075e-05,0.0002801992528,0.0008935242839,0.001930261519,0.003486924035,0.006133250311,0.008872976339,0.01220423412,0.01363636364,0.01400996264,0.01447696139,0.01628268991,0.01749688667,0.02061021171,0.02440846824,0.02615193026,0.02325653798,0.01578455791,0.007861145704,0.002148194271,0.0,0.0,0.0,0.0,7.147111376e-05,0.0002680166766,0.000854675402,0.001846337105,0.003335318642,0.005866587254,0.008487194759,0.01167361525,0.01304347826,0.01340083383,0.01384752829,0.01557474687,0.01673615247,0.01971411554,0.02334723049,0.02501488982,0.02224538416,0.01509827278,0.00751935676,0.002054794521]}, ACT = {"P1": 0.708333333333, "P2": 0.684523809524, "P3": 0.565476190476, "P4": 0.72619047619};
+  var K = {CPU: 0.1536, REQ: 40, MB: 0.5, DBMB: 0.2};
+  function rp(usd) { return usd * FX / 1e6; }
+  function gb(t, mb) { return t * mb / 1024; }
+  function pos(x) { return x > 0 ? x : 0; }
+  var BILL = {
+    C1: function (t) { return S * (0.0000216 + 0.0000024) - (240e3 * 0.000018 + 450e3 * 0.000002) + 33.215 + 10 * 0.221 + gb(t, K.MB) * 0.19; },
+    C2: function (t) { return H * (0.05056 + 2 * 0.00553) + H * 0.0252 + 0.5 * H * 0.008 + 3 * 0.005 * H + 0.025 * H + 20 * 0.138 + pos(gb(t, K.MB) - 100) * 0.132; },
+    C3: function (t, a) {
+      return pos(0.5 * S - 180e3) * (a * 0.000028 + (1 - a) * 0.000004) + pos(S - 360e3) * 0.000004 + pos(K.REQ * t - 2e6) / 1e6 * 0.40
+        + 0.0234 * H + 32 * 0.1242 + 0.1666 * 30.4 + pos(gb(t, K.MB) - 100) * 0.11; },
+    C4: function (t) { var r = K.REQ * t + 43800;
+      return 5 + pos(4 * S - 25 * 3600) * 0.0000025 + pos(8 * S - 200 * 3600) * 0.00000007 + pos(0.01 * S + K.CPU * t - 375 * 60) * 0.00002
+        + pos(r - 10e6) / 1e6 * 0.30 + pos(r - 1e6) / 1e6 * 0.15 + pos(gb(t, K.MB) - 500) * 0.04
+        + 0.025 * H + 20 * 0.138 + 0.005 * H + gb(t, K.DBMB) * 0.132; },
+    C5: function (t) { return S * 1.5 * 0.00001069 + 0.043 * H + 0.021 * H + 0.5 * 0.007 * H + gb(t, K.MB) * 0.117 + 26.5; }
+  };
+  var CL = {C1: {v: 1, ih: 3600 * (0.0000216 + 0.0000024), st: [10, 0.221]}, C2: {v: 1, ih: 0.05056 + 2 * 0.00553, st: [20, 0.138]},
+            C3: {v: 0.5, ih: 0.5 * 3600 * 0.000028 + 3600 * 0.000004, st: [32, 0.1242]},
+            C4: {v: 0.5, ih: 4 * 3600 * 0.0000025 + 8 * 3600 * 0.00000007, st: [20, 0.138]}, C5: {v: 1, ih: 3600 * 1.5 * 0.00001069, st: null}};
+  function extraH(t, p, vc) {
+    var h = 0, w = SHAPE[p];
+    for (var i = 0; i < w.length; i++) h += Math.max(1, Math.ceil((t / WPM) * w[i] / 3600 * K.CPU / (U * vc) - 1e-9)) - 1;
+    return h * WPM;
+  }
+  function grow(t, Y, prov, rate) { var g = t * 6e3 / 1e9, s = 0; for (var m = 1; m <= 12 * Y; m++) s += pos(g * m - prov) * rate; return s / (12 * Y); }
+  function cloudUsd(c, t, p, Y) { var d = CL[c], x = BILL[c](t, ACT[p]) + extraH(t, p, d.v) * d.ih; if (d.st) x += grow(t, Y, d.st[0], d.st[1]); return x; }
+  var HW = {"A": 43.63, "B1": 43.63, "B2": 37.352}, POWER = 0.06090494, LINE = {A: 0, B1: 0.444, B2: 0}, COLO = {A: 0, B1: 0, B2: 1.10}, NMAX = 2020;
+  function backup(t, Y) { var g = t * 6e3 / 1e9, s = 0; for (var m = 1; m <= 12 * Y; m++) s += pos(g * m - 10) * 0.015; return rp(s / (12 * Y)); }
+  // n cinemas selling t tickets a month in all, pattern p, Y years, R rupiah an admin hour, hOn hours per server, hCl per deployment
+  function cost(setup, n, t, p, Y, R, hOn, hCl) {
+    if (setup === 'A') {
+      var per = HW.A / (12 * Y) + POWER + backup(t / n, Y) + 0.1 / 12 * HW.A;
+      return {infra: n * per, hours: n * hOn, admin: n * hOn * R / 1e6, units: n, extra: 0};
+    }
+    if (setup === 'B1' || setup === 'B2') {
+      var s = Math.ceil(n / NMAX - 1e-9), hw = HW[setup], hrs = hOn + (setup === 'B2' ? 1 : 0);
+      var perB = hw / (12 * Y) + (setup === 'B1' ? POWER : 0) + LINE[setup] + COLO[setup] + 0.1 / 12 * hw;
+      return {infra: s * perB + backup(t, Y), hours: s * hrs, admin: s * hrs * R / 1e6, units: s, extra: 0};
+    }
+    var c = setup.slice(0, 2);
+    if (setup.length === 2 || n === 1) return {infra: rp(cloudUsd(c, t, p, Y)), hours: hCl, admin: hCl * R / 1e6, units: 1, extra: extraH(t, p, CL[c].v)};
+    var one = p === 'P4' ? 'P2' : p;   // each cinema's own week
+    return {infra: n * rp(cloudUsd(c, t / n, one, Y)), hours: n * hCl, admin: n * hCl * R / 1e6, units: n, extra: n * extraH(t / n, one, CL[c].v)};
+  }
+  return {cost: cost};
+})();
+if (typeof module !== 'undefined') module.exports = R7;
+(function () {
+  if (typeof document === 'undefined') return;
+  var form = document.getElementById('calc');
+  if (!form) return;
+  form.hidden = false;
+  function $(id) { return document.getElementById(id); }
+  function nf(x, d) { return x.toLocaleString('id-ID', {minimumFractionDigits: d, maximumFractionDigits: d}); }
+  function num(id, dflt) { var v = parseFloat($(id).value); return isFinite(v) && v >= 0 ? v : dflt; }
+  function row(tb, k, v) {
+    var tr = document.createElement('tr'), th = document.createElement('th'), td = document.createElement('td');
+    th.scope = 'row'; th.textContent = k; td.className = 'num'; td.textContent = v;
+    tr.appendChild(th); tr.appendChild(td); tb.appendChild(tr);
+  }
+  function run() {
+    var V = Math.max(1, num('c-v', 19600)), n = Math.max(1, Math.round(num('c-n', 1))), fee = num('c-f', 0);
+    var s = $('c-s').value, p = $('c-p').value, Y = +$('c-y').value, R = num('c-r', 100000);
+    var cl = s.charAt(0) === 'C', h = $('c-h').value.trim() === '' ? (cl ? 2 : 6) : num('c-h', cl ? 2 : 6);
+    var r = R7.cost(s, n, V, p, Y, R, cl ? 6 : h, cl ? h : 2), a = R7.cost('A', 1, V / n, 'P2', Y, R, 6, 2);
+    var tot = r.infra + r.admin, out = $('c-out'), t = document.createElement('table'), tb = document.createElement('tbody');
+    out.textContent = ''; t.appendChild(tb);
+    row(tb, 'Infrastruktur sebulan', 'Rp' + nf(r.infra, 2) + ' juta');
+    row(tb, 'Jam admin sebulan: ' + nf(r.hours, 0) + ' jam × Rp' + nf(R, 0), 'Rp' + nf(r.admin, 2) + ' juta');
+    row(tb, 'Jumlah sebulan', 'Rp' + nf(tot, 2) + ' juta');
+    row(tb, 'Per tiket', 'Rp' + nf(tot * 1e6 / V, 1));
+    row(tb, 'Biaya layanan terkumpul sebulan', 'Rp' + nf(fee * V / 1e6, 2) + ' juta');
+    row(tb, 'Selisih: terkumpul dikurangi jumlah', 'Rp' + nf(fee * V / 1e6 - tot, 2) + ' juta');
+    row(tb, 'Satu bioskop membayar sebulan', 'Rp' + nf(fee * V / n / 1e6, 2) + ' juta');
+    row(tb, 'Pembanding: server sendiri (A) untuk satu bioskop', 'Rp' + nf(a.infra + a.admin, 2) + ' juta');
+    out.appendChild(t);
+    var notes = [];
+    if (r.extra > 0) notes.push('Puncaknya melebihi satu instans: ' + nf(r.extra, 0) + ' jam instans tambahan sebulan sudah dihitung, tetapi basis datanya tetap ukuran terkecil, yang kapasitasnya tidak diukur.');
+    if (s.charAt(0) === 'B' && r.units > 1) notes.push('Lebih dari ±2.020 bioskop 4 layar: ' + r.units + ' server.');
+    if (s === 'A' && n > 1) notes.push('A berarti satu server per bioskop: ' + n + ' server.');
+    if (s.slice(0, 2) === 'C5') notes.push('Harga RDS Alibaba untuk Jakarta tidak ditemukan; dipakai US$26,5 [E, US$18–35].');
+    if (s.charAt(0) === 'B' && n > 1) notes.push('Penyewa yang terpisah butuh satu proses JVM masing-masing di server ini; satu JVM memakai ±1 GiB saat menganggur, dan berapa yang muat di bawah beban belum diukur.');
+    notes.forEach(function (x) { var el = document.createElement('p'); el.className = 'small'; el.textContent = x; out.appendChild(el); });
+  }
+  form.addEventListener('input', run); form.addEventListener('change', run);
+  form.addEventListener('submit', function (e) { e.preventDefault(); });
+  run();
+})();
+</script>
+</section>
+
+<section id="kepekaan">
+<h2>8. Kepekaan</h2>
+<p>Kapasitas bertumpu pada tiga masukan. CPU per FE diukur pada 5 November 2026 (bagian 2); FE per tiket dan
+thread lawan inti belum pernah diukur. Masing-masing digeser naik dan turun di bawah, satu per satu, dengan yang
+lain tetap di nilai dasar.</p>
+<div class="table-wrap">
+<table>
+  <caption>Satu masukan digeser, yang lain tetap; 5 tahun, dengan jam admin</caption>
+  <thead><tr><th scope="col">Masukan</th><th scope="col" class="num">Satu instans, P4: Cloud Run / Container Apps (juta tiket sebulan)</th><th scope="col" class="num">Bioskop per server on-premise</th><th scope="col" class="num">Rp per tiket tambahan: Cloud Run / Container Apps</th><th scope="col" class="num">Impas B1 lawan Container Apps</th><th scope="col" class="num">Impas B2 lawan Cloud Run</th><th scope="col" class="num">P4 sebulan: Cloud Run / Container Apps (Rp juta)</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">9 FE per tiket: sebentar memilih, tanpa penonton</th><td class="num">12,46 / 6,23</td><td class="num">10.800</td><td class="num">1,0 / 0,4</td><td class="num">2,00 juta</td><td class="num">879 rb</td><td class="num">2,07 / 1,19</td></tr>
+    <tr><th scope="row">Dasar: 48 FE, 3,2 ms per FE</th><td class="num">2,34 / 1,17</td><td class="num">2.020</td><td class="num">2,4 / 1,7</td><td class="num">735 rb</td><td class="num">372 rb</td><td class="num">2,62 / 1,47</td></tr>
+    <tr><th scope="row">328 FE per tiket: lama memilih, 9 penonton</th><td class="num">0,34 / 0,17</td><td class="num">296</td><td class="num">13 / 9,7</td><td class="num">131 rb</td><td class="num">72 rb</td><td class="num">6,58 / 4,61</td></tr>
+    <tr><th scope="row">2,8 ms per FE: JVM saja, basis data di mesin lain (cloud)</th><td class="num">2,67 / 1,34</td><td class="num">— (server on-premise juga menjalankan basis data)</td><td class="num">2,4 / 1,7</td><td class="num">735 rb</td><td class="num">372 rb</td><td class="num">2,62 / 1,47</td></tr>
+    <tr><th scope="row">4,3 ms per FE: inti Xeon Silver 4215R [E]</th><td class="num">1,74 / 0,87</td><td class="num">1.510</td><td class="num">2,4 / 1,7</td><td class="num">735 rb</td><td class="num">372 rb</td><td class="num">2,62 / 1,47</td></tr>
+    <tr><th scope="row">vCPU = satu inti, bukan thread</th><td class="num">2,34 / 1,17</td><td class="num">1.010</td><td class="num">2,4 / 1,7</td><td class="num">735 rb</td><td class="num">372 rb</td><td class="num">2,62 / 1,47</td></tr>
+    <tr><th scope="row">Tanpa PLP: flush 2,8 ms, bukan di bawah 0,01 ms</th><td class="num">sama</td><td class="num">sama: satu penyewa dibatasi ±310 tiket/detik, di atas CPU server ini (±67)</td><td class="num">sama</td><td class="num">sama</td><td class="num">sama</td><td class="num">sama</td></tr>
+  </tbody>
+</table>
+</div>
+<ul>
+  <li><strong>Dwell dan penonton menggeser tagihan cloud.</strong> Permintaan dan data keluar sebanding dengan FE per tiket [E], jadi impas B1 lawan Container Apps bergeser dari ±2,00 juta (9 FE) ke ±131 ribu (328 FE) tiket sebulan. Aplikasi Android, yang memakai WebSocket alih-alih polling, mendekati ujung bawah (±12 FE).</li>
+  <li><strong>CPU per FE dan thread lawan inti hanya menggeser kapasitas.</strong> Pada P1–P4 tidak satu pun butuh instans atau server tambahan, jadi biayanya tidak berubah.</li>
+  <li><strong>PLP</strong> tidak mengubah biaya pada volume mana pun yang realistis. Tanpa PLP (flush ±2,8 ms), satu penyewa dibatasi ±310 tiket per detik, karena trigger audit mengambil kunci per penyewa sampai commit; batas itu diukur, lihat di bawah. Penyewa yang berbeda tidak saling menunggu kunci itu, tetapi berbagi flush disk yang sama (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/db/migration/V1__init_schema.sql#L805-L834">V1:767–783</a>). Puncak P4 hanya ±0,7 tiket per detik. PLP ada di harga perangkat (dua SSD PM9A3, Rp8,8 juta dengan adaptornya) karena ia melindungi data saat listrik putus, bukan karena kapasitas.</li>
+</ul>
+
+<h3>Diukur sesudahnya (5 November 2026)</h3>
+<p>Angka di bawah ini diukur setelah versi pertama halaman ini. Sejak 5 November 2026 tabel dan kalkulator di
+halaman ini memakai CPU per FE yang terukur.</p>
+<ul>
+  <li><strong>CPU per FE: ±3,2 ms, dua kali perkiraan pertama (1,6).</strong> Fragmen peta kursi 200 kursi, terkompresi gzip, memakan
+  2,75–2,86 ms CPU di JVM dan 0,41–0,43 ms di PostgreSQL per permintaan (wrk2 open-loop, 200–1.000 permintaan per
+  detik, PC pengembang Core i7-9700, JVM pada 4 CPU). Itu di atas ujung atas rentang 0,8–2,9 ms yang dipakai versi pertama, dan kini menjadi
+  nilai dasar: kapasitas per server dan per instans menjadi separuh. Biaya hampir tidak berubah. Cloudflare, yang
+  menagih CPU aktif, naik Rp0,01 juta sebulan pada P4; enam impas Cloudflare dan satu impas Container Apps turun 1–3%;
+  dan pada 100–200 bioskop dalam satu deployment biaya per tiket Container Apps dan Cloudflare naik Rp0,1.</li>
+  <li><strong>Kunci audit per penyewa: batasnya kira-kira 1 ÷ (waktu fdatasync + 0,4 ms) transaksi teraudit per
+  detik</strong>, berapa pun jumlah kliennya, diukur dengan pgbench pada urutan SQL penahanan kursi yang sebenarnya.
+  Untuk pesanan dua kursi, satu tiket kira-kira satu transaksi teraudit. Di HDD 7.200 rpm (fdatasync 11–25 ms)
+  hasilnya ±94 tiket per detik untuk satu penyewa. Rumus itu memberi ±310 tiket per detik untuk flush 2,8 ms tanpa
+  PLP (perkiraan versi pertama: ±260) dan ±2.000 dengan PLP. Batas ini diterima dan tidak diubah: puncak P4 hanya ±0,7 tiket
+  per detik. Yang bisa menaikkannya, satu rantai audit per pertunjukan alih-alih per penyewa, baru berguna bila satu
+  penyewa menjual banyak pertunjukan sekaligus sampai mendekati batas itu.</li>
+  <li><strong>Server di mesin virtual: tanyakan cache tulisnya.</strong> Pada server proyek ini, sebuah VM VMware,
+  <code>fdatasync</code> terukur 70 µs (pg_test_fsync). Secepat itu berarti hypervisor menjawab dari cache tulis.
+  Apakah cache itu selamat bila host kehilangan listrik ditentukan oleh konfigurasi datastore, yang tidak terlihat dari
+  dalam VM. Bila tidak selamat, pesanan yang sudah dijawab "berhasil" bisa hilang saat host mati. Tanyakan kepada
+  pengelola host, seperti PLP ditanyakan untuk SSD.</li>
+  <li><strong>Memori: ±1 GiB per JVM saat hampir menganggur.</strong> RSS 910 MiB, puncak 995 MiB, heap terpakai
+  91 MiB dari 512 MiB, pada JVM server proyek yang juga menjalankan aplikasi lain. JVM khusus bioskop lebih kecil dan
+  belum diukur, begitu pula memori di bawah beban.</li>
+  <li><strong>Ukuran fragmen peta kursi:</strong> 61,6 KB mentah, 6,9 KB setelah gzip untuk 200 kursi. Pada polling
+  3 detik itu ±2,3 KB per detik per peramban yang membuka peta kursi.</li>
+</ul>
+
+<h3>Bulan teoretis 24/7 lawan bulan bioskop</h3>
+<p>Kapasitas sebulan yang dihitung dari puncak dikali 720 jam tidak pernah terpakai: bioskop menjual malam hari
+dan akhir pekan, dan semua bioskop memuncak bersama. Biaya per tiket ditentukan oleh tiket yang benar-benar
+terjual, bukan oleh kapasitasnya.</p>
+<div class="table-wrap">
+<table>
+  <caption>Server B1 yang sama, Rp2,21 juta sebulan (5 tahun, dengan jam admin); di volume teoretis penyimpanannya sudah tidak cukup</caption>
+  <thead><tr><th scope="col">Volume</th><th scope="col" class="num">Tiket sebulan</th><th scope="col" class="num">Rp per tiket</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">Bulan teoretis 24/7: 67 tiket per detik × 720 jam</th><td class="num">173.664.000</td><td class="num">0,0127</td></tr>
+    <tr><th scope="row">Kapasitas nyata, semua puncak bersamaan: ±2.020 bioskop 4 layar</th><td class="num">39.592.000</td><td class="num">0,0558</td></tr>
+    <tr><th scope="row">P4: 20 bioskop</th><td class="num">400.000</td><td class="num">5,5</td></tr>
+    <tr><th scope="row">Satu bioskop 4 layar</th><td class="num">19.600</td><td class="num">113</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Masukan lain</h3>
+<ul>
+  <li><strong>Container Apps dengan B2s,</strong> pilihan README, alih-alih B1ms: satu bioskop Rp1,99 juta sebulan dan P4 Rp2,40 juta, tanpa jam admin. Dengan itu server sendiri (A, 5 tahun) lebih murah sejak tiket pertama. B1 sama mahalnya pada satu bioskop (Rp2,20 lawan Rp2,19 juta, dengan jam admin) dan lebih murah sejak bioskop kedua.</li>
+  <li><strong>Cloud Run dengan CUD tiga tahun</strong> (−46% pada instans yang selalu menyala, US$26,6 sebulan): satu bioskop Rp1,24 juta, tanpa jam admin. CUD Cloud SQL tidak dihitung, karena berlaku-tidaknya untuk db-g1-small tidak diperiksa.</li>
+  <li><strong>Harga memori.</strong> Dua keping 16 GB ECC dijual Rp7,0–21,0 juta; dipakai Rp11,8 juta. Rentang itu menggeser A sebesar Rp−0,17 sampai +0,33 juta sebulan (3 tahun).</li>
+  <li><strong>Colocation</strong> Rp1,39 juta, bukan Rp1,10 juta, menambah B2 Rp0,29 juta sebulan.</li>
+  <li><strong>Cadangan suku cadang</strong> 5% setahun, bukan 10%, mengurangi A dan B1 Rp0,18 juta sebulan. Di 5 tahun, itu cukup membuat A lebih murah daripada Container Apps dan Cloudflare sebelum jam admin.</li>
+</ul>
+</section>
+
+<section id="turun-ke-nol">
+<h2>9. Mengapa cloud tidak turun ke nol untuk sistem ini</h2>
+<p>Platform kontainer serverless menjalankan image OCI/Docker tanpa server yang Anda kelola: Google Cloud Run,
+AWS ECS Express Mode, Azure Container Apps, Cloudflare Containers (lewat Worker perantara), dan Alibaba
+Serverless App Engine bisa menjalankan image yang sama. Daya tarik utamanya adalah turun ke nol: tidak ada
+permintaan, tidak ada instans, tidak ada tagihan. Pertanyaan yang menentukan untuk sistem pemesanan bukanlah mana
+yang lebih murah per permintaan, melainkan apa saja di aplikasi yang harus tetap berjalan saat tidak ada yang
+mengirim permintaan. Contoh di bawah memakai Cloud Run; perilaku turun ke nol platform lain berbeda.</p>
+<p>Platform bioskop ini awalnya dirancang dalam dua bentuk dari satu basis kode: <em>native image</em> GraalVM
+(Mandrel) di Cloud Run dengan Cloud SQL for PostgreSQL di region Jakarta, dan JVM yang selalu menyala di server
+on-premise. movie-ticket mengambil bentuk lain lagi: hanya JVM, dengan satu <code>Dockerfile.jvm</code>, dan
+README-nya menjelaskan cara menjalankannya di komputer pengembang dan di kelima cloud di atas.</p>
+<h3>Yang tidak ikut turun ke nol</h3>
+<ul>
+  <li><strong>Tenggat yang jatuh tempo saat tidak ada permintaan.</strong> Tahanan kursi berlaku 10 menit
+  (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/application.properties#L190">application.properties:181</a>). Penyapu setiap 30 detik
+  (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/application.properties#L169">:169</a>) mengedaluwarsakannya, menuntaskan pertunjukan yang sudah lewat,
+  membatalkan pertunjukan yang kurang laku, serta membersihkan langganan notifikasi dan draf yang basi, untuk
+  setiap penyewa (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/service/ReservationLifecycleService.kt#L70-L91">ReservationLifecycleService.kt:70–91</a>). Rekonsiliasi
+  pembayaran berjalan setiap 5 menit (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/application.properties#L237">:228</a>), dan tagihan penyewa setiap hari
+  pukul 03.15 (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/application.properties#L337">:304</a>). Setiap kondisi dipicu oleh sebuah kejadian, tetapi jatuh
+  temponya justru saat waktu berlalu tanpa kejadian apa pun, jadi sesuatu harus bangun tepat pada tenggatnya.
+  Layanan yang turun ke nol tidak melepas kursi yang ditahan sampai ada orang yang kebetulan membuka situsnya
+  (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/application.properties#L589-L593">:556–560</a>).</li>
+  <li><strong>Pekerjaan setelah respons.</strong> Notifikasi ketersediaan dikirim setelah commit, tanpa ditunggu,
+  supaya kegagalannya tidak pernah membatalkan pemesanan yang sudah sah. Itu butuh CPU setelah respons terkirim.
+  Tanpa CPU yang selalu dialokasikan, notifikasinya bisa tertunda atau hilang, dan tidak ada log apa pun
+  (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/application.properties#L584-L588">:551–555</a>).</li>
+  <li><strong>Koneksi panjang.</strong> Aplikasi Android platform ini menerima pembaruan peta kursi dan halaman
+  pesanan lewat WebSocket. Cloud Run memperlakukan WebSocket sebagai permintaan panjang, paling lama 60 menit, dan
+  instans yang punya satu saja koneksi WebSocket terbuka dianggap aktif sehingga CPU-nya dialokasikan. Klien juga
+  bisa dilayani instans yang berbeda, jadi dokumentasi Cloud Run sendiri meminta penyimpanan data eksternal atau
+  antrean pesan untuk menyelaraskan antarinstans. Di platform ini daftar pelanggan soket disimpan di memori JVM
+  (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/service/SeatAvailabilityNotifier.kt#L107-L108">SeatAvailabilityNotifier.kt:99–100</a>), sehingga commit hanya sampai ke soket
+  di proses yang sama. Itu cukup di satu server yang selalu menyala, tetapi tidak untuk beberapa instans tanpa
+  saluran bersama seperti <code>LISTEN</code>/<code>NOTIFY</code> PostgreSQL atau pub/sub Redis. Langganan
+  notifikasi push, sebaliknya, disimpan di tabel basis data (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/db/migration/V1__init_schema.sql#L541-L549">V1:541–549</a>),
+  jadi tidak bergantung pada instans mana pun.</li>
+  <li><strong>Basis data.</strong> Cloud SQL ditagih per detik selama instansnya menyala. Cloud Run bisa tidur,
+  basis datanya tidak; menghentikan instans adalah tindakan manual, dan penyimpanannya tetap ditagih. Jumlah
+  instans dikali ukuran pool koneksi adalah plafon koneksi, dan menurut komentar konfigurasinya, itulah cara
+  Cloud Run dengan Cloud SQL benar-benar gagal, bukan kapasitas
+  (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/application.properties#L80-L81">:80–81</a>, <a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/application.properties#L594-L600">:561–567</a>). Batasi jumlah
+  instans maksimum dengan sengaja, lalu pasang peringatan anggaran.</li>
+</ul>
+<p>Proyek ini menimbang dua cara untuk tetap turun ke nol, lalu menolak keduanya (19 Oktober 2026): memindahkan
+pekerjaan terjadwal ke panggilan Cloud Scheduler, atau menyalakan timer setiap kali tahanan atau pertunjukan
+dibuat. Timer di memori mati bersama instansnya, dan instans yang dibangunkan setiap menit berbiaya sama dengan
+instans yang selalu menyala, sementara notifikasi tetap membutuhkan CPU di luar permintaan. Keputusannya:
+<code>--min-instances=1</code> ditambah <code>--no-cpu-throttling</code>, dan jangan merekayasa jalan
+memutarinya. Kelima tagihan cloud di halaman ini mengikuti keputusan itu: satu instans selalu menyala.</p>
+<h3>Lantainya, di Jakarta</h3>
+<p>Satu instans 1 vCPU yang menyala sebulan penuh (730 jam) memakai ±2,63 juta vCPU-detik. Dengan tarif berbasis
+instans di Jakarta (Tier 2), US$0,0000216 per vCPU-detik, CPU-nya saja US$56,8, dan dengan 1 GiB memori
+US$63,1. Kuota gratis mengurangi US$5,22. Cloud SQL db-g1-small menambah US$33,2, dan 10 GB SSD US$2,2. Jadi
+bulan tanpa satu tiket pun berbiaya US$93,3, atau Rp1,69 juta. Untuk sistem pemesanan, "turun ke nol" berarti
+"turun ke satu".</p>
+</section>
+
+<section id="native-vs-jvm">
+<h2>10. Native image atau JVM: hanya penting bila cold start sering</h2>
+<p>Cloud Run memberi tambahan CPU selama instans dinyalakan dan 10 detik sesudahnya, yaitu <em>startup CPU
+boost</em>, dan tambahan itu ikut ditagih. Untuk batas 1 vCPU, CPU-nya digandakan menjadi 2. Jadi startup yang
+lambat tidak hanya ditagih lebih lama, tetapi juga dengan CPU dua kali lipat. Tabel resmi Quarkus (uji 21 April
+2026: Quarkus 3.34.3, JDK 25.0.2, 4 CPU, <code>-Xmx512m</code>; dibaca ulang 5 November 2026) menunjukkan
+selisihnya:</p>
+<div class="table-wrap">
+<table>
+  <caption>Waktu sampai permintaan pertama, throughput puncak, dan memori</caption>
+  <thead><tr><th scope="col">Mode</th><th scope="col" class="num">Sampai permintaan pertama</th>
+             <th scope="col" class="num">Throughput puncak</th><th scope="col" class="num">Memori (RSS)</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">JVM fast-jar</th><td class="num">4.417 ㎳</td><td class="num">13.265 tps</td><td class="num">304 MiB</td></tr>
+    <tr><th scope="row">JVM + cache AOT Leyden</th><td class="num">1.859 ㎳</td><td class="num">12.389 tps (−7%)</td><td class="num">240 MiB</td></tr>
+    <tr><th scope="row">Native (Mandrel)</th><td class="num">581 ㎳</td><td class="num">5.411 tps (−59%)</td><td class="num">95 MiB</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Native kehilangan 59% throughput puncak, karena tidak ada JIT yang belajar dari profil berjalan. Beban sistem
+pemesanan didominasi I/O, yaitu perjalanan bolak-balik ke basis data dan serialisasi, bukan komputasi CPU yang
+panjang, dan pada lalu lintas sepi instans Cloud Run jarang hidup cukup lama sampai JIT sempat panas. Jadi native
+unggul di dua hal yang ditagih: latensi startup dan detik CPU sampai respons pertama. Perkiraan kasar titik
+impasnya bisa dihitung dari tabel di atas:</p>
+<ul>
+  <li>Pada puncak, satu permintaan memakan sekitar 4 CPU ÷ 12.389 ≈ 0,32 ㎳ waktu CPU di JVM + Leyden, dan
+  4 ÷ 5.411 ≈ 0,74 ㎳ di native. Selisihnya sekitar 0,42 ㎳ per permintaan.</li>
+  <li>Setiap cold start native menghemat (1.859 − 581) ㎳ × 2 vCPU ≈ 2,6 detik vCPU.</li>
+  <li>Titik impasnya sekitar 2,6 detik ÷ 0,42 ㎳ ≈ 6.000 permintaan hangat per cold start.</li>
+</ul>
+<p>Sinyal yang bisa dicek adalah total permintaan dibagi jumlah instans yang dinyalakan, per layanan, dalam
+jendela waktu bergulir; keduanya tampak di Cloud Monitoring. Bila tiap instans rata-rata melayani jauh lebih
+sedikit dari ribuan permintaan sebelum dimatikan, native lebih hemat. Bila rasionya bertahan di ribuan, pindahlah
+ke <strong>JVM dengan cache AOT Leyden</strong>, bukan ke JVM biasa: startup dan memorinya mendekati native,
+build dan deploy-nya tetap JAR biasa, dan risiko konfigurasi refleksi khas native hilang.</p>
+<p>Namun hitungan itu hanya berlaku bila instans memang sering dinyalakan. Aplikasi yang wajib menjaga satu
+instans tetap menyala, seperti di atas, hanya mengalami cold start saat lonjakan menambah instans dan saat deploy,
+jadi keunggulan native menyusut ke instans tambahan itu saja. Di pola P1–P4 lonjakan itu tidak pernah terjadi
+pada perkiraan dasar (bagian 2). Harganya tetap dibayar penuh: build yang memakan beberapa menit, dan pustaka
+berbasis refleksi yang bisa gagal hanya di native. Di proyek ini, Firebase Admin SDK perlu konfigurasi refleksi
+eksplisit dan inisialisasi saat runtime, dan implementasi Web Push mentah gagal di bawah Mandrel karena penyedia
+kriptografi yang didaftarkan secara dinamis ditolak. "Native-nya berhasil di-compile" bukan bukti fiturnya
+jalan.</p>
+</section>
+
+<section id="bentuk-tagihan">
+<h2>11. Tagihan ikut berubah bentuk</h2>
+<ol>
+  <li><strong>Titik awal: penagihan berbasis permintaan.</strong> Bayar per permintaan, US$0,40 per sejuta,
+  ditambah waktu aktif, dan benar-benar bisa turun ke nol, asalkan aplikasinya tidak punya tenggat dan pekerjaan
+  latar seperti di bagian 9.</li>
+  <li><strong>Penagihan berbasis instans</strong>, setelah lalu lintas cukup stabil sehingga instans jarang
+  menganggur, atau sejak hari pertama bila aplikasinya butuh CPU di luar permintaan. Untuk sistem pemesanan,
+  langkah ini syarat, bukan pilihan. Biaya per permintaan hilang, dan tarif per detiknya turun. Di Jakarta,
+  berbasis instans US$0,0000216 per vCPU-detik dan US$0,0000024 per GiB-detik, dibanding US$0,0000336 dan
+  US$0,0000035 waktu aktif untuk berbasis permintaan: 36% dan 31% lebih murah. Cloud Run punya Recommender yang
+  meninjau lalu lintas sebulan terakhir dan menyarankan peralihan ini bila hasilnya lebih murah.</li>
+  <li><strong><em>Committed use discount</em> (CUD).</strong> Diskon komitmen fleksibel Cloud Run kini juga
+  berlaku untuk penagihan berbasis permintaan, tetapi jauh lebih kecil: 17%, dibanding 28% untuk komitmen setahun
+  atau 46% untuk tiga tahun pada penagihan berbasis instans. Yang dikomitmenkan adalah belanja minimum per jam,
+  dan setelah dibeli tidak bisa dibatalkan, jadi ukurlah ke sekitar 60–70% dari pemakaian rata-rata yang stabil,
+  bukan puncaknya. Pada instans yang selalu menyala, CUD tiga tahun memotong US$26,6 (Rp0,48 juta) sebulan dari bagian Cloud
+  Run (bagian 8).</li>
+</ol>
+</section>
+
+<section id="jvm-panas">
+<h2>12. On-premise: JVM yang selalu panas, harganya di operasional</h2>
+<p>Di server yang menyala terus, tiga masalah di bagian 9 lenyap dengan sendirinya: tidak ada cold start, penyapu
+berjalan tepat waktu, dan daftar soket di memori sudah cukup. JIT-nya pun sudah panas, padahal permintaan pertama
+sebelum JIT panas jauh lebih lambat daripada permintaan yang sama setelah hangat.</p>
+<p>Uji beban sebaiknya <em>open-loop</em>, misalnya dengan wrk2, supaya generator bebannya tidak ikut melambat saat
+server melambat dan menyembunyikan latensinya. Setiap tab peta kursi yang terbuka memolling setiap 3 detik
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/templates/customer/seatmapFragment.html#L201">seatmapFragment.html:201</a>),
+jadi bagilah permintaan per detik yang sanggup dilayani dengan 0,33 untuk mendapat jumlah tab yang setara. Di
+proyek ini batas pertamanya pool koneksi basis data, bukan CPU: konfigurasi awal dengan 32 thread dan 10 koneksi
+mentok jauh sebelum CPU penuh, dengan p99 sampai hitungan detik, dan menyamakan keduanya di 16 menaikkan plafon
+itu. movie-ticket sendiri dikirim dengan pool 2–10 koneksi
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/application.properties#L90-L91">application.properties:90–91</a>), yang cocok untuk banyak instans kecil di
+cloud; di satu server khusus, 16 adalah angka yang terukur. Aplikasi pemesanan lebih banyak menunggu I/O daripada
+menghitung.</p>
+<p>Pelajaran terbesarnya justru letak basis data. Setiap polling peta kursi membuat sekitar 10 perjalanan
+bolak-balik ke basis data; bila PostgreSQL-nya berada di region lain dengan RTT 10–30 ㎳, itu 100–300 ㎳ per
+permintaan, hampir semuanya menunggu jaringan, sedangkan lewat Unix socket di server yang sama biaya itu nyaris
+hilang. Di cloud mana pun, aplikasi dan basis datanya harus berada di region yang sama; jarak di antara keduanya
+lebih mahal daripada pilihan native atau JVM. Karena itu pula Cloudflare Containers di bagian 3 murah di atas
+kertas: kontainernya di Asia Pasifik, basis datanya di AWS Jakarta. Biaya bulanan on-premise tetap berapa pun
+jumlah permintaannya, dan data pelanggan tinggal di gedung sendiri.</p>
+<p>Tunnel di A dan B1 mengakhiri TLS di jaringan Cloudflare, jadi lalu lintas pembeli dibuka di jaringan pihak
+ketiga sebelum sampai ke server. movie-ticket memercayai <code>X-Forwarded-*</code>
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/application.properties#L143">application.properties:143</a>; alasannya di
+<a href="https://github.com/dawud-tan/movie-ticket/blob/main/README.md#L213">README</a>), jadi server di belakang tunnel tidak boleh juga terjangkau
+langsung dari internet.</p>
+<h3>Harganya ada di operasional</h3>
+<p>Anda memegang semua yang biasanya diurus penyedia cloud, dan masing-masing bisa menggigit tanpa suara:</p>
+<ul>
+  <li><strong>Jam.</strong> Layanan sinkronisasi waktu bisa mati tanpa ada yang tahu. Stempel waktu log audit
+  hanya sebaik jamnya, dan kedaluwarsa tahanan, QR pembayaran, serta token login membaca jam yang sama. Selisih
+  jam bahkan bisa tampak seperti batas minimum masa berlaku QR pembayaran di gerbang pembayaran, padahal batas itu
+  tidak ada.</li>
+  <li><strong>Unit layanan yang bergeser.</strong> Unit systemd yang dipasang dengan tangan bisa berbeda dari versi
+  di repositori, dengan <em>drop-in</em> yang membuat perbedaannya tidak terlihat dari kedua sisi. Menghapus
+  drop-in seperti itu sebagai "berlebih" bisa membuat migrasi basis data berebut start dengan PostgreSQL, dan
+  gagalnya baru terlihat saat boot berikutnya.</li>
+  <li><strong>Firewall yang gagal diam-diam.</strong> Sebuah kebijakan firewall tersimpan bisa merujuk zona yang
+  hanya ada selama Docker berjalan. Firewall yang sedang berjalan tetap memakai aturan lamanya; boot berikutnya
+  membaca ulang berkas itu, jatuh ke konfigurasi bawaan, dan menutup port aplikasi.</li>
+  <li><strong>Sertifikat TLS.</strong> Aplikasi membaca sertifikatnya sekali saat mulai, jadi perpanjangan otomatis
+  butuh hook yang me-restart layanan.</li>
+  <li><strong>Berbagi mesin.</strong> Server yang juga menjalankan aplikasi lain berbagi port, CPU, dan jadwal
+  pemeliharaan dengannya, dan server tanpa GPU tidak bisa menjalankan model bahasa sendiri dengan layak.</li>
+</ul>
+<p>Semuanya tidak terlihat sampai boot berikutnya, atau sampai ada yang mengaudit. On-premise murah di tagihan,
+tetapi mahal di perhatian. Halaman ini memberi perhatian itu harga: 6 jam sebulan per server [A], dan bagian 5
+menunjukkan berapa jam yang masih terbayar oleh selisihnya.</p>
+</section>
+
+<section id="memilih">
+<h2>13. Memilih, dan daftar periksa</h2>
+<div class="table-wrap">
+<table>
+  <caption>Tenggat waktu, bentuk lalu lintas, dan jumlah penyewa menentukan tempat aplikasi berjalan, bukan sebaliknya</caption>
+  <thead><tr><th scope="col">Kondisi</th><th scope="col">Contoh</th>
+             <th scope="col">Pilihan yang masuk akal</th><th scope="col">Yang harus dihitung</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">Tanpa tenggat dan tanpa pekerjaan latar; lalu lintas sepi dan sporadis</th>
+        <td>halaman katalog dan jadwal, API baca, alat internal, webhook yang jarang</td>
+        <td>Serverless yang benar-benar turun ke nol, penagihan berbasis permintaan; native image bila cold start sering</td>
+        <td>permintaan per cold start; biaya lantai basis data</td></tr>
+    <tr><th scope="row">Ada tenggat, pekerjaan setelah respons, atau koneksi panjang; satu penyewa, sampai puluhan bioskop</th>
+        <td>pemesanan kursi, janji temu, sewa lapangan; bioskop independen, jaringan kecil</td>
+        <td>Serverless dengan satu instans minimum dan CPU selalu dialokasikan, berbasis instans lalu CUD. Termurah
+        di sini: Container Apps atau Cloudflare, ±Rp1,0–1,1 juta sebulan untuk satu bioskop sebelum jam admin. Atau satu VPS kecil, yang tidak dihargai di halaman ini.</td>
+        <td>biaya instans minimum sebulan; basis data; plafon koneksi; saluran bersama bila instans lebih dari satu</td></tr>
+    <tr><th scope="row">Banyak bioskop dalam satu sistem, banyak penyewa terpisah, atau data harus tinggal di gedung sendiri</th>
+        <td>jaringan bioskop besar; operator dengan beberapa penyewa</td>
+        <td>JVM panas di server on-premise operator, di colocation atau di kantornya. Lebih murah dari ±0,73 juta tiket sebulan
+        untuk satu penyewa, atau paling lambat sejak penyewa ketiga bila penyewanya terpisah.</td>
+        <td>jam admin; kapasitas tim operasional: jam, TLS, cadangan, firewall, pemutakhiran; biaya keluar</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Sebelum memilih platform serverless mana pun, jawab pertanyaan yang sama untuknya:</p>
+<ol>
+  <li>Apakah CPU tetap berjalan di antara permintaan? Notifikasi setelah respons dan pekerjaan terjadwal
+  membutuhkannya.</li>
+  <li>Bisakah satu instans tetap hangat, dan berapa biayanya sebulan?</li>
+  <li>Bagaimana jumlah instans dikali ukuran pool koneksi bertemu batas koneksi basis datanya?</li>
+  <li>Apakah PostgreSQL terkelolanya mengizinkan <code>btree_gist</code> dan <code>pgcrypto</code>, dan pemilik
+  tabel yang bukan superuser? Peran superuser atau <code>BYPASSRLS</code> tidak pernah mengevaluasi kebijakan
+  <em>row-level security</em>. Di proyek ini, dua bug nyata yang hanya muncul di bawah kebijakan itu lolos dari
+  rangkaian uji yang hijau sampai migrasinya dijalankan pemilik biasa.</li>
+  <li>Di mana status yang hidup lama disimpan, seperti soket, timer, dan sesi, bila instansnya lebih dari
+  satu?</li>
+  <li>Apakah TLS berakhir di proxy yang selalu menimpa <code>X-Forwarded-*</code>? Header itu hanya boleh dipercaya
+  di belakang proxy seperti itu. Server yang langsung terjangkau dari internet, seperti server on-premise tanpa
+  proxy di depannya, harus menganggapnya masukan pemanggil.</li>
+  <li>Adakah region Indonesia untuk platformnya <em>dan</em> basis datanya?</li>
+  <li>Di mana rahasia disimpan, sebagai pengganti berkas environment di server sendiri?</li>
+</ol>
+<p>Tempat aplikasi berjalan juga bukan keputusan teknis semata. Di proyek ini, pertanyaan hosting sengaja ditunda
+sampai akhir masa uji coba dengan calon penyewa pertama, bersama dua pertanyaan lain: rekening siapa yang menerima
+uang tiket, dan siapa yang mendaftar sebagai Penyelenggara Sistem Elektronik. Ketiganya sebenarnya satu
+pertanyaan: pembeli tiket ini pelanggan siapa?</p>
+<h3>Daftar periksa</h3>
+<ol>
+  <li>Ukur bentuk lalu lintas lebih dulu: permintaan per jam, per hari, dan per cold start.</li>
+  <li>Daftar setiap tenggat dan pekerjaan latar. Masing-masing butuh proses yang terjaga.</li>
+  <li>Hitung biaya lantai yang tidak bisa nol: basis data, instans minimum, dan penyimpanan.</li>
+  <li>Hitung titik impasnya untuk jumlah bioskop dan penyewa Anda sendiri, dengan kalkulator di bagian 7.</li>
+  <li>Pastikan basis data Anda sendiri bisa menegakkan aturan "tidak boleh tumpang tindih", dan uji pelindungnya
+  dengan mencabutnya.</li>
+  <li>Pastikan agen elektronik Anda, manusia atau AI, memberi kesempatan mengoreksi kesalahan sebelum transaksi
+  mengikat.</li>
+  <li>Periksa ke mana data pelanggan mengalir, termasuk teks obrolan, dan apakah ia keluar dari Indonesia.</li>
+  <li>Jujurlah soal kapasitas operasional tim: on-premise murah di tagihan, tetapi mahal di perhatian.</li>
+</ol>
+</section>
+
+<section id="berubah">
+<h2>14. Yang berubah sejak artikel utama</h2>
+<p>Halaman ini menggantikan bagian 6 <a href="index.html">artikel utama</a> tentang on-premise dan serverless. Isi
+bagian itu dibawa ke bagian 9–13 di atas. Yang berubah:</p>
+<ul>
+  <li><strong>Lantai Cloud Run.</strong> Bagian 6 menghitung US$47 untuk CPU saja, dengan tarif Tier 1 dan 30
+  hari, dan sudah mengingatkan bahwa Jakarta termasuk Tier 2. Di Jakarta dan 730 jam: US$56,8 untuk CPU, US$63,1
+  dengan 1 GiB, dan US$93,3 (Rp1,69 juta) dengan Cloud SQL terkecil dan 10 GB.</li>
+  <li><strong>Selisih berbasis instans.</strong> Bagian 6 menyebut 25% dan 20% lebih murah daripada berbasis
+  permintaan, dengan harga Tier 1. Di Jakarta selisihnya 36% dan 31%.</li>
+  <li><strong>Yang belum ada di bagian 6:</strong> lantai Cloud SQL sendiri (US$33,2 + penyimpanan), dan biaya
+  keluar data ke Indonesia, US$0,19 per GiB dari Google Cloud Jakarta, dibanding US$0,12 ke negara Asia
+  lain.</li>
+  <li><strong>"Ramai dan stabil sepanjang hari".</strong> Tidak ada pola bioskop yang stabil sepanjang hari: 27–43%
+  jam dalam seminggu berada di bawah 2% puncak. Yang membuat server sendiri lebih murah adalah jumlah bioskop dan
+  penyewa yang berbagi, bukan kestabilan lalu lintas. Baris ketiga tabel pilihan di bagian 13 sudah diubah.</li>
+  <li><strong>"Biaya bulanan on-premise tetap"</strong> masih benar sampai batas kapasitas, dan kini ada
+  angkanya: Rp1,15–2,46 juta sebulan sebelum jam admin.</li>
+  <li><strong>Pool koneksi.</strong> Angka 16 di bagian 6 adalah pengukuran di server khusus; movie-ticket
+  dikirim dengan 10.</li>
+  <li><strong>Tetap berlaku:</strong> US$0,40 per sejuta permintaan, CUD 17/28/46%, tabel Quarkus (dibaca ulang 5
+  November 2026, tidak berubah), dan "turun ke nol berarti turun ke satu".</li>
+</ul>
+</section>
+
+<section id="belum-diketahui">
+<h2>15. Yang belum diketahui</h2>
+<ul>
+  <li>CPU per permintaan hanya batas, 0,8–2,9 milidetik per render peta kursi, karena pemakaian CPU tidak tercatat
+  saat 9.900 permintaan per detik. Satu jam wrk2 dengan pencatat CPU di mesin sasaran akan menggantinya dengan satu
+  angka.</li>
+  <li>Kursi per layar, pertunjukan per hari, pangsa penjualan daring, dan pangsa jam puncak tidak ditemukan; semuanya
+  asumsi.</li>
+  <li>Harga RDS PostgreSQL Alibaba untuk Jakarta tidak ditemukan, dan harga NAT Gateway-nya belum pasti karena
+  halaman dolar dan yuan berbeda.</li>
+  <li>Ukuran tugas bawaan ECS Express Mode belum dibaca; dipakai 1 vCPU dan 2 GB.</li>
+  <li>Ukuran rata-rata respons per permintaan tidak pernah diukur; dipakai 12,5 KB. Fragmen peta kursi 200 kursi,
+  permintaan yang paling sering, terukur 6,9 KB setelah gzip (bagian 8).</li>
+  <li>Kapasitas basis data cloud ukuran terkecil (db-g1-small, t4g.micro, B1ms) tidak pernah diukur.</li>
+  <li>Memori per proses JVM diukur hanya saat hampir menganggur (±1 GiB, bagian 8), jadi jumlah penyewa terpisah
+  per server on-premise di bawah beban belum diketahui.</li>
+  <li>Load balancer untuk domain sendiri di Cloud Run, yang diminta rencana proyek, tidak dihargai.</li>
+  <li>Lama UPS bertahan pada 70 W, dan apakah bioskop biasanya punya genset, tidak ditemukan.</li>
+  <li>Jam admin tidak pernah diukur.</li>
+  <li>Biaya gerbang pembayaran (QRIS dan lainnya) tidak termasuk di halaman ini.</li>
+  <li>Harga memori DDR5 sedang bergerak; baca ulang sebelum mengutip.</li>
+</ul>
+</section>
+
+<section id="faq" class="faq">
+<h2>16. Pertanyaan yang sering diajukan</h2>
+<h3>Bisakah sistem pemesanan benar-benar turun ke nol di serverless?</h3>
+<p>Biasanya tidak. Tahanan kursi punya tenggat yang jatuh tempo justru saat tidak ada permintaan, jadi penyapu
+terjadwal butuh satu instans yang selalu menyala; notifikasi setelah commit butuh CPU yang selalu dialokasikan; dan
+basis data terkelola tetap ditagih selama instansnya menyala. Di Jakarta, satu instans Cloud Run 1 vCPU dan 1 GiB
+yang menyala sebulan sudah US$63,1, dan dengan Cloud SQL terkecil US$93,3 (Rp1,69 juta) sebelum satu tiket pun
+terjual. Hitung biaya lantai itu sebelum memilih.</p>
+<h3>Kapan native image lebih hemat daripada JVM?</h3>
+<p>Saat instans sering dinyalakan ulang. Dari tabel resmi Quarkus, satu cold start native menghemat sekitar 2,6
+detik vCPU dibanding JVM dengan cache AOT Leyden, setara kira-kira 6.000 permintaan hangat. Bila tiap instans
+melayani jauh lebih sedikit dari itu sebelum dimatikan, native lebih hemat. Aplikasi yang wajib menjaga satu
+instans tetap menyala jarang mendapat manfaat itu, karena cold start-nya hanya terjadi saat lonjakan dan saat
+deploy.</p>
+<h3>Kapan sebaiknya memilih JVM panas di server on-premise?</h3>
+<p>Saat banyak bioskop berbagi satu sistem. Untuk cabang-cabang satu penyewa, server on-premise operator mengalahkan Cloud Run sejak ±142 ribu tiket sebulan dan cloud termurah sejak ±0,73 juta (5 tahun, dengan jam admin [A]). Untuk penyewa terpisah, ia sudah lebih murah paling lambat sejak penyewa ketiga. Syaratnya, tim sanggup mengurus jam, sertifikat TLS, cadangan, firewall, dan pemutakhiran. Dalam uji beban proyek ini, batas pertama JVM yang sudah panas adalah pool koneksi basis data, bukan CPU.</p>
+<h3>Berapa biaya infrastruktur per tiket?</h3>
+<p>Rp0,7–161 per tiket di tabel bagian 5, tergantung tempat dan berapa bioskop berbagi. Satu bioskop 4 layar sendirian: Rp64–161. Dua puluh bioskop dalam satu sistem bersama: Rp4,0–8,1. Pembeli kini membayar biaya layanan Rp1.500–4.000 per tiket di aplikasi tiket, jadi infrastruktur hanya sebagian kecil darinya.</p>
+<h3>Apakah satu bioskop sebaiknya membeli server sendiri?</h3>
+<p>Dari sisi biaya, tidak, bila hanya untuk satu bioskop. Cloud termurah dengan basis data terkecil lebih murah pada volume berapa pun yang bisa dicapai satu bioskop. Server sendiri, Rp1,75 juta sebulan dalam 5 tahun dengan jam admin, hanya lebih murah daripada Cloud Run, ECS, dan SAE, atau daripada Container Apps bila basis datanya B2s. Alasan lain tetap sah: data tinggal di gedung sendiri, dan kodenya terbuka sehingga bioskop bisa menjalankannya tanpa operator.</p>
+</section>
+
+<section id="sumber">
+<h2>17. Sumber</h2>
+<p>Dibaca 4 November 2026, kecuali disebut lain.</p>
+<ol class="sources">
+  <li>Pengukuran proyek ini, yang tidak ikut dipublikasikan: uji wrk2 open-loop 29–30 Agustus 2026 (9.823–9.900 permintaan per detik untuk fragmen peta kursi, 8 vCPU untuk aplikasi) dan uji 16 Agustus 2026 (±300 permintaan per detik pada 0,87 inti); uji 5 November 2026: wrk2 open-loop dan pgbench pada PC pengembang (Core i7-9700, HDD 7.200 rpm), serta pg_test_fsync dan memori JVM pada server proyek.</li>
+  <li>SPEC CPU2017, hasil SPECrate2017_int_base: <a rel="nofollow" href="https://www.spec.org/cpu2017/results/res2025q1/cpu2017-20250310-46726.html">Xeon 6315P</a>, <a rel="nofollow" href="https://www.spec.org/cpu2017/results/res2025q1/cpu2017-20250310-46730.html">6325P</a>, <a rel="nofollow" href="https://www.spec.org/cpu2017/results/res2025q1/cpu2017-20250310-46734.html">6333P</a>, <a rel="nofollow" href="https://www.spec.org/cpu2017/results/res2025q1/cpu2017-20250310-46738.html">6337P</a>, <a rel="nofollow" href="https://www.spec.org/cpu2017/results/res2025q1/cpu2017-20250224-46485.html">6353P</a>, <a rel="nofollow" href="https://www.spec.org/cpu2017/results/res2025q1/cpu2017-20250224-46488.html">6357P</a>, <a rel="nofollow" href="https://www.spec.org/cpu2017/results/res2025q1/cpu2017-20250224-46529.html">6349P</a>, <a rel="nofollow" href="https://www.spec.org/cpu2017/results/res2025q1/cpu2017-20250204-46207.html">6369P</a>, <a rel="nofollow" href="https://www.spec.org/cpu2017/results/res2025q1/cpu2017-20241216-45800.html">EPYC 4124P</a>, <a rel="nofollow" href="https://www.spec.org/cpu2017/results/res2025q1/cpu2017-20241216-45809.html">4344P</a>, <a rel="nofollow" href="https://www.spec.org/cpu2017/results/res2024q2/cpu2017-20240422-43122.html">4344P</a>, <a rel="nofollow" href="https://www.spec.org/cpu2017/results/res2025q2/cpu2017-20250407-47427.html">4245P</a>, <a rel="nofollow" href="https://www.spec.org/cpu2017/results/res2025q2/cpu2017-20250407-47434.html">4345P</a>, <a rel="nofollow" href="https://www.spec.org/cpu2017/results/res2020q1/cpu2017-20200203-20787.html">Xeon Silver 4215R</a>, <a rel="nofollow" href="https://www.spec.org/cpu2017/results/res2020q2/cpu2017-20200525-22539.html">4215R</a>, <a rel="nofollow" href="https://www.spec.org/cpu2017/results/res2020q3/cpu2017-20200914-23965.html">4215R</a>, <a rel="nofollow" href="https://www.spec.org/cpu2017/results/res2020q4/cpu2017-20201020-24223.html">4215R</a>.</li>
+  <li>Intel ARK, ark.intel.com, SKU 241603 (Xeon 6315P, harga US$239), 241608 (Xeon 6353P, US$477), 241876, 241068, 241070, 241067 (Core Ultra 200S, status dan ECC).</li>
+  <li>AMD: <a rel="nofollow" href="https://www.amd.com/en/products/processors/server/epyc/4004-series.html">EPYC 4004 Series</a> dan <a rel="nofollow" href="https://www.amd.com/en/products/processors/server/epyc/4005-series.html">EPYC 4005 Series</a>; Thomas-Krenn Wiki, halaman EPYC 4005 dan Xeon E-2400/6300.</li>
+  <li>Small Datum, <a rel="nofollow" href="https://smalldatum.blogspot.com/2026/01/ssds-power-loss-protection-and-fsync.html">SSDs, power loss protection and fsync latency</a>, 7 Januari 2026: latensi fdatasync dengan dan tanpa PLP.</li>
+  <li>CNA Indonesia, <a rel="nofollow" href="https://www.cna.id/lifestyle/euforia-80-juta-penonton-bioskop-ketimpangan-film-indonesia-jumbo-agak-laen-2-pangku-44721">euforia 80 juta penonton bioskop</a>, 24 Februari 2026: data BPI Februari 2024 (517 lokasi, 2.145 layar) dan 80,2 juta penonton film Indonesia pada 2025.</li>
+  <li>Pangsa penjualan daring: artikel 29055 di jom.unri.ac.id (lebih dari 40% di satu jaringan bioskop, kuartal II 2019) dan katadata.co.id (±5% menurut eksekutif sebuah agregator, tanpa tanggal). Keduanya tidak sepakat; dipakai 40% [A].</li>
+  <li>AWS Price List API, ap-southeast-3: <a rel="nofollow" href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECS/current/ap-southeast-3/index.json">AmazonECS</a>, <a rel="nofollow" href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRDS/current/ap-southeast-3/index.json">AmazonRDS</a>, <a rel="nofollow" href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSELB/current/ap-southeast-3/index.json">AWSELB</a>, <a rel="nofollow" href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/current/ap-southeast-3/index.json">AWSDataTransfer</a>, <a rel="nofollow" href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVPC/current/ap-southeast-3/index.json">AmazonVPC</a>.</li>
+  <li>Azure Retail Prices API, indonesiacentral: <a rel="nofollow" href="https://prices.azure.com/api/retail/prices">prices.azure.com/api/retail/prices</a>; Microsoft Learn, <a rel="nofollow" href="https://learn.microsoft.com/en-us/azure/container-apps/billing">Billing in Azure Container Apps</a> (diperbarui 25 Maret 2026).</li>
+  <li>Google Cloud: <a rel="nofollow" href="https://cloud.google.com/run/pricing">Cloud Run pricing</a>, <a rel="nofollow" href="https://cloud.google.com/sql/pricing">Cloud SQL pricing</a>, <a rel="nofollow" href="https://cloud.google.com/vpc/network-pricing">network pricing</a> (tabel Jakarta di halamannya).</li>
+  <li>Cloudflare: <a rel="nofollow" href="https://developers.cloudflare.com/containers/pricing/">Containers pricing</a>, <a rel="nofollow" href="https://developers.cloudflare.com/workers/platform/pricing/">Workers pricing</a>, <a rel="nofollow" href="https://developers.cloudflare.com/r2/pricing/">R2 pricing</a>, <a rel="nofollow" href="https://blog.cloudflare.com/tunnel-for-everyone/">Tunnel for everyone</a>.</li>
+  <li>Alibaba Cloud: <a rel="nofollow" href="https://www.alibabacloud.com/help/en/sae/product-overview/billing-new">SAE billing</a> (diperbarui 27 Mei 2026), <a rel="nofollow" href="https://www.alibabacloud.com/help/en/slb/classic-load-balancer/product-overview/pay-as-you-go">CLB pay-as-you-go</a> (diperbarui 21 Oktober 2026); NAT Gateway billing dari cuplikan pencarian, belum pasti.</li>
+  <li>Kurs JISDOR 3 November 2026, Rp18.148 per dolar AS, dari unggahan Bank Indonesia; bi.go.id tidak terbuka saat dibaca.</li>
+  <li>Harga suku cadang, halaman pencarian Tokopedia: <a rel="nofollow" href="https://www.tokopedia.com/find/epyc-4124p">epyc-4124p</a>, <a rel="nofollow" href="https://www.tokopedia.com/find/asrock-rack-b650d4u">asrock-rack-b650d4u</a>, <a rel="nofollow" href="https://www.tokopedia.com/find/ddr5-ecc-udimm-16gb">ddr5-ecc-udimm-16gb</a>, <a rel="nofollow" href="https://www.tokopedia.com/find/ssd-samsung-pm9a3-u2-960gb">ssd-samsung-pm9a3-u2-960gb</a>, <a rel="nofollow" href="https://www.tokopedia.com/find/adapter-pcie-u2">adapter-pcie-u2</a>, <a rel="nofollow" href="https://www.tokopedia.com/find/seasonic-focus-gx-550">seasonic-focus-gx-550</a>, <a rel="nofollow" href="https://www.tokopedia.com/find/fractal-design-define-7">fractal-design-define-7</a>, <a rel="nofollow" href="https://www.tokopedia.com/find/casing-server-1u">casing-server-1u</a>, <a rel="nofollow" href="https://www.tokopedia.com/find/cooler-am5">cooler-am5</a>, <a rel="nofollow" href="https://www.tokopedia.com/find/apc-smart-ups-1000va">apc-smart-ups-1000va</a>, <a rel="nofollow" href="https://www.tokopedia.com/find/xeon-6353p">xeon-6353p</a>; serta Bhinneka dan biggo.id untuk Xeon E-2400 dan 6300; esaitech.com (Supermicro X13SCL-F-B, US$440); asus.com, spesifikasi Pro WS W880-ACE SE.</li>
+  <li>Impor barang kiriman: PMK 96/2023 sebagaimana diubah PMK 4/2025, <a rel="nofollow" href="https://peraturan.bpk.go.id/Download/374129/2024pmkeuangan004.pdf">peraturan.bpk.go.id</a> dan <a rel="nofollow" href="https://peraturan.bpk.go.id/Details/311485">Details/311485</a>; PMK 131/2024, berkas 2024pmkeuangan131.pdf di jdih.kemenkeu.go.id.</li>
+  <li>Listrik: siaran PLN 3 November 2026 bahwa tarif triwulan IV 2026 tidak berubah (pln.co.id), dan tarif per kWh dari CNBC Indonesia (artikel 20261104072435-4-782094) dan Detik, yang mengutip PLN.</li>
+  <li>Jaringan dan colocation: nex.net.id; <a rel="nofollow" href="https://nusa.id/promo/internet-dedicated">nusa.id/promo/internet-dedicated</a>; <a rel="nofollow" href="https://perwiracloud.com/colocation">perwiracloud.com/colocation</a>; <a rel="nofollow" href="https://idnix.net/colocation-server/">idnix.net/colocation-server/</a>; <a rel="nofollow" href="https://my.1stserver.com/store/colocation-server-indonesia">my.1stserver.com/store/colocation-server-indonesia</a>.</li>
+  <li>Biaya layanan aplikasi tiket, dibaca 5 November 2026. Liputan6, <a rel="nofollow" href="https://www.liputan6.com/feeds/read/5789953/cara-pesan-tiket-bioskop-online-panduan-lengkap-dan-praktis">Cara Pesan Tiket Bioskop Online</a>, 19 November 2024: Rp1.500 per tiket di aplikasi Jaringan bioskop A.</li>
+  <li>ANTARA, 12 Agustus 2025: di aplikasi yang sama, Rp4.000 per tiket bila membayar dengan dompet aplikasinya, dompet digital, atau QRIS, dan Rp1.500 dengan poin. Tautannya tidak dicantumkan karena alamatnya memuat merek.</li>
+  <li>Halaman tanya-jawab sebuah aplikasi tiket independen: sejak 11 November 2024 biaya layanan per tiket berbeda menurut lokasi dan bisa berubah tanpa pemberitahuan. Tautan tidak dicantumkan, dengan alasan yang sama.</li>
+  <li>Halaman App Store aplikasi Jaringan bioskop B: "Biaya admin paling murah hanya Rp1.990 per tiket", sebagai manfaat anggota. Tautan tidak dicantumkan, dengan alasan yang sama.</li>
+  <li>Quarkus, <a rel="nofollow" href="https://quarkus.io/version/3.40/guides/building-native-image/">Building a native executable</a>, tabel JVM, Leyden, dan native; dibaca ulang 5 November 2026.</li>
+  <li>Google Cloud, dibaca untuk artikel utama (Oktober 2026): <a rel="nofollow" href="https://docs.cloud.google.com/run/docs/configuring/cpu">Configure CPU limits</a>, <a rel="nofollow" href="https://docs.cloud.google.com/run/docs/configuring/cpu-allocation">Billing settings for services</a>, <a rel="nofollow" href="https://docs.cloud.google.com/run/docs/triggering/websockets">Using WebSockets</a>, <a rel="nofollow" href="https://docs.cloud.google.com/run/docs/tips/services-cost-optimization">Best practices for cost-optimized Cloud Run services</a>, <a rel="nofollow" href="https://docs.cloud.google.com/run/cud">Compute flexible committed use discounts</a>, dan <a rel="nofollow" href="https://cloud.google.com/sql/docs/postgres/pricing">Cloud SQL for PostgreSQL pricing</a>.</li>
+  <li>movie-ticket, kode sumber pada commit <a href="https://github.com/dawud-tan/movie-ticket/tree/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6">39351cc</a>; rencana proyek: <a href="https://github.com/dawud-tan/movie-ticket/blob/main/docs/plan.md">docs/plan.md</a>; <a href="https://github.com/dawud-tan/movie-ticket/blob/main/README.md">README</a>.</li>
+  <li>Halaman terkait: <a href="index.html">artikel utama</a>, <a href="pengelola-bioskop.html">untuk pengelola bioskop</a>, <a href="pembeli-tiket.html">untuk pembeli tiket</a>.</li>
+</ol>
+<p class="note">Harga, ketersediaan layanan, region, dan angka tolok ukur berubah dari waktu ke waktu. Periksa
+sumber resminya sebelum mengambil keputusan.</p>
+</section>
+
+</main>
+<footer>
+  <p>Ditulis oleh Claude Opus 5.5 · Diterbitkan oleh Dawud Tan ·
+  <time datetime="2026-11-05T01:13:00+07:00">5 November 2026</time> ·
+  <a href="https://dawud-tan.github.io/">Artikel utama</a></p>
+</footer>
+</body>
+</html>

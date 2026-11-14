@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Neon Intrinsics: Getting Started on Android</title>
+    <link as="style" href="/css/bootstrap.min.css"
+          rel="preload" type="text/css">
+    <link href="/css/bootstrap.min.css"
+          rel="stylesheet">
+    <link href="/img/pk.ico" rel="icon" type="image/x-icon"/>
+    <style>
+        @font-face {
+            font-display: swap;
+            font-family: "Charis SIL";
+            font-style: normal;
+            font-weight: normal;
+            src: url(/fonts/CharisSIL-Regular.woff2) format("woff2"),
+            url(/fonts/CharisSIL-Regular.woff) format("woff"),
+            url(/fonts/CharisSIL-Regular.ttf) format("truetype");
+        }
+
+        html {
+            font-size: 2.4vw;
+        }
+
+        @media all and (min-width: 1000px) {
+            html {
+                font-size: 24px;
+            }
+        }
+
+        @media all and (max-width: 520px) {
+            html {
+                font-size: 18px;
+            }
+        }
+
+        body {
+            font-family: "Charis SIL", serif;
+            line-height: 1.5;
+            font-size: 0.9rem;
+            margin-left: auto;
+            margin-right: auto;
+            padding-bottom: 65px;
+            width: 100%;
+            max-width: 1000px;
+            min-height: 100%;
+            position: relative;
+            z-index: -10000;
+            -webkit-font-smoothing: subpixel-antialiased;
+            padding-top: 50px;
+        }
+
+        .footer {
+            display: block;
+            position: fixed;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            bottom: 0;
+            width: 100%;
+            height: 60px;
+            line-height: 60px;
+            background-color: #f5f5f5;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        div#isi {
+            padding: 3rem 0 65px 0;
+            margin-left: 7.25rem;
+            margin-right: 7.25rem;
+        }
+
+        @media all and (max-width: 520px) {
+            div#isi {
+                margin-left: 1.5rem;
+                margin-right: 1.5rem;
+                padding: 0 0 65px 0;
+            }
+        }
+
+        p {
+            margin-bottom: 12pt;
+        }
+
+        @-ms-viewport {
+            width: device-width;
+        }
+
+        @-o-viewport {
+            width: device-width;
+        }
+
+        @viewport {
+            width: device-width;
+        }
+    </style>
+</head>
+<body>
+<div id="isi">
+    <h1>Neon Intrinsics: Getting Started on Android</h1>
+    <p><img alt="be7aa3b5e5202ea64488c36a1c9252c8"
+            src="https://www.gravatar.com/avatar/be7aa3b5e5202ea64488c36a1c9252c8.jpg?d=identicon&amp;s=150&amp;r=pg"></p>
+    <p><a href="/script/Membership/View.aspx?mid=14692692">Dawid Borycki</a></p>
+    <p>5 May 2020<a href="http://www.codeproject.com/info/cpol10.aspx">CPOL</a>9 min read</p>
+    <p>In this article, we see how to set up Android Studio for native C++ development, and to utilize Neon intrinsics
+        for Arm-powered mobile devices.</p>
+    <p>I’m going to show you how to set up your Android development environment to use Neon intrinsics. Then, we’ll
+        implement an Android application that uses the Android Native Development Kit (NDK) to calculate the dot product
+        of two vectors. Finally, we’ll see how to improve the performance of such a function with NEON intrinsics.</p>
+    <p>This article is in the Product Showcase section for our sponsors at CodeProject. These articles are intended to
+        provide you with information on products and services that we consider useful and of value to developers.</p>
+    <p>Do not repeat yourself (DRY) is one of the major principles of software development, and following this principle
+        typically means reusing your code via functions. Unfortunately, invoking a function adds extra overhead. To
+        reduce this overhead, compilers take advantage of built-in functions called intrinsics, where the compiler will
+        replace the intrinsics used in the high level programming languages (C/C++) with mostly 1-1 mapped assembly
+        instructions. To even further improve performance, you're into the realm of assembly code, but with Arm Neon
+        intrinsics. You can often avoid the complication of writing assembly functions. Instead you only need to program
+        in high level languages and call the intrinsics or instruction functions declared in the arm_neon.h header
+        file.</p>
+    <p>As an Android developer, you probably don’t have the time to write assembly language. Instead, your focus is on
+        app usability, portability, design, data access, and tuning the app to various devices. If that's the case, Neon
+        intrinsics is going to be a big performance help.</p>
+    <p><a href="https://developer.arm.com/architectures/instruction-sets/simd-isas/neon/intrinsics">Arm Neon intrinsics
+        technology</a> is an advanced <a href="https://en.wikipedia.org/wiki/SIMD">single instruction multiple data
+        (SIMD)</a> architecture extension for Arm processors. The idea of SIMD is to perform the same operation on a
+        sequence or vector of data during a single CPU cycle.</p>
+    <p>For instance, if you’re summing numbers from two one-dimensional arrays, you need to add them one by one. In a
+        non-SIMD CPU, each array element is loaded from memory to CPU registers, then the register values are added and
+        the result is stored in memory. This procedure is repeated for all elements. To speed up such operations,
+        SIMD-enabled CPUs load several elements at once, perform the operations, then store results to memory.
+        Performance will improve depending on the sequence length, <i>N</i>. Theoretically, the computation time will
+        reduce <i>N</i> times.</p>
+    <p>By utilizing SIMD architecture, Neon intrinsics can accelerate the performance of multimedia and signal
+        processing applications, including video and audio encoding and decoding, 3D graphics, and speech and image
+        processing. Neon intrinsics provide almost as much control as writing assembly code, but they leave the
+        allocation of registers to the compiler so developers can focus on the algorithms. Hence, Neon intrinsics strike
+        a balance between performance improvement and the writing of assembly language.</p>
+    <p>First, I’m going to show you how to set up your Android development environment to use Neon intrinsics. Then,
+        we’ll implement an Android application that uses the Android Native Development Kit (NDK) to calculate the dot
+        product of two vectors. Finally, we’ll see how to improve the performance of such a function with NEON
+        intrinsics.</p>
+    <p>I created the example project with <a href="https://developer.android.com/studio">Android Studio</a>. The sample
+        code is available from the GitHub repository <a href="https://github.com/dawidborycki/NeonIntrinsics-Android">NeonIntrinsics-Android</a>.
+        I tested the code using a Samsung SM-J710F phone.</p>
+    <h2>Native C++ Android Project Template</h2>
+    <p>I started by creating a new project using the Native C++ Project Template.</p>
+    <p><img alt="Image 1" height="384px" src="/KB/showcase/5267160/image001.png" width="507px"></p>
+    <p>Then, I set the application name to Neon Intrinsics, selected Java as the language, and set the minimum SDK to
+        API 19: Android 4.4 (KitKat).</p>
+    <p><img alt="Image 2" height="384px" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+            width="509px"></p>
+    <p>Then, I picked Toolchain Default for the C++ Standard.</p>
+    <p><img alt="Image 3" height="384px" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+            width="509px"></p>
+    <p>The project I created comprises one activity that’s implemented within the <code>MainActivity</code> class,
+        deriving from <code>AppCompatActivity</code> (see app/java/com.example.neonintrinsics/MainActivity.java). The
+        associated view contains only a <code>TextView</code> control that displays a “Hello from C++” string.</p>
+    <p><img alt="Image 4" height="384px" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+            width="216px"></p>
+    <p>To get these results, you can run the project directly from Android Studio using one of the emulators. To build
+        the project successfully, you’ll need to install CMake and the Android NDK. You do so through the settings (File
+        | Settings). Then, you select NDK and CMake on the SDK Tools tab.</p>
+    <p><img alt="Image 5" height="419px" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+            width="591px"></p>
+    <p>If you open the MainActivity.java file, you’ll note that the string displayed in the app comes from <code>native-lib</code>.
+        This library’s code resides within the app/cpp/native-lib.cpp file. That’s the file we’ll use for our
+        implementation.</p>
+    <h2>Enabling Neon Intrinsics Support</h2>
+    <p>To enable support for Neon intrinsics, you need to modify the <a
+            href="https://developer.android.com/ndk/guides/abis">ABI filters</a> so the app can be built for the Arm
+        architecture. Neon has two versions: one for Armv7, Armv8 AArch32, and one for Armv8 AArch64. From an intrinsics
+        point of view there are a few differences, such as the addition of vectors of 2xfloat64 in Armv8-A. They are all
+        available in the arm_neon.h header file that is included in the compiler’s installation path. You also need to
+        import the Neon libraries.</p>
+    <p>Go to the Gradle scripts, and open the <code>build.gradle</code> (Module: app) file. Then, supplement the <code>defaultConfig</code>
+        section by adding the following statements. First, add this line to the general settings:</p>
+    <pre><code>ndk.abiFilters 'x86', 'armeabi-v7a', 'arm64-v8a'</code></pre>
+    <p>Here, I am adding the support for x86, 32-bit and 64-bit ARM architectures. Then add this line under the cmake
+        options:</p>
+    <pre><code>arguments &quot;-DANDROID_ARM_NEON=ON&quot;</code></pre>
+    <p>It should look like this:</p>
+    <pre><code>defaultConfig {
+	applicationId &quot;com.example.myapplication&quot;
+	minSdkVersion 16
+	targetSdkVersion 29
+	versionCode 1
+	versionName &quot;1.0&quot;
+	ndk.abiFilters 'x86', 'armeabi-v7a', 'arm64-v8a'
+	testInstrumentationRunner &quot;androidx.test.runner.AndroidJUnitRunner&quot;
+ 
+	externalNativeBuild {
+    		cmake {
+        		cppFlags &quot;&quot;
+        		arguments &quot;-DANDROID_ARM_NEON=ON&quot;
+    		}
+	}
+}</code></pre>
+    <p>Now you can use Neon intrinsics, which are declared within the arm_neon.h header. Note that the build will only
+        be successful for ARM-v7 and above. To make your code compatible with x86, you can use the <a
+                href="https://github.com/intel/ARM_NEON_2_x86_SSE">Intel porting guide</a>.</p>
+    <h2>Dot Product and Helper Methods</h2>
+    <p>We can now implement the dot product of two vectors using C++. All the code should be placed in the
+        native-lib.cpp file. Note that, starting from armv8.4a, the DotProduct is part of the new instruction set. This
+        corresponds to some cortex A75 designs and all Cortex A76 designs onwards. See <a
+                href="https://community.arm.com/developer/tools-software/tools/b/tools-software-ides-blog/posts/exploring-the-arm-dot-product-instructions">Exploring
+            the Arm dot product instructions</a> for more information. <a
+                href="https://community.arm.com/developer/tools-software/tools/b/tools-software-ides-blog/posts/exploring-the-arm-dot-product-instructions"></a>
+    </p>
+    <p>We start with the helper method that generates the ramp, which is the vector of 16-bit integers incremented from
+        the <code>startValue</code>:</p>
+    <pre><code>short* generateRamp(short startValue, short len) {
+	short* ramp = new short[len];
+	for(short i = 0; i &lt; len; i++) {
+    		ramp[i] = startValue + i;
+	}
+	return ramp;
+}</code></pre>
+    <p>Next, we implement the <code>msElapsedTime</code> and now methods, which will be used later to determine the
+        execution time:</p>
+    <pre><code>double msElapsedTime(chrono::system_clock::time_point start) {
+	auto end = chrono::system_clock::now();
+	return chrono::duration_cast&lt;chrono::milliseconds&gt;(end - start).count();
+}
+
+chrono::system_clock::time_point now() {
+	return chrono::system_clock::now();
+}</code></pre>
+    <p>The <code>msElapsedTime</code> method calculates the duration (expressed in milliseconds) that passed from a
+        given start point.</p>
+    <p>The now method is a handy wrapper for the <code>std::chrono::system_clock::now</code> method, which returns the
+        current time.</p>
+    <p>Now create the actual <code>dotProduct</code> method. As you remember from your programming classes, to calculate
+        a dot product of two equal-length vectors, you multiply vectors element-by-element, then accumulate the
+        resulting products. A straightforward implementation of this algorithm follows:</p>
+    <pre><code>int dotProduct(short* vector1, short* vector2, short len) {
+	int result = 0;
+ 
+	for(short i = 0; i &lt; len; i++) {
+    	    result += vector1[i] * vector2[i];
+	}
+ 
+	return result;
+}</code></pre>
+    <p>The above implementation uses a for loop. So, we sequentially multiply vector elements and then accumulate the
+        resulting products in a local variable called result.</p>
+    <h2>Calculating Dot Product Using Neon Intrinsics</h2>
+    <p>To modify the <code>dotProduct</code> function to benefit from Neon intrinsics, you need to split the for loop
+        such that it will utilize data lanes. To do so, partition or vectorize the loop to operate on sequences of data
+        during a single CPU cycle. These sequences are defined as <i>vectors</i>. However, to distinguish them from the
+        vectors we use as inputs for the dot product, I’ll call these sequences <i>register vectors</i>.</p>
+    <p>With register vectors, you reduce the loop iterations such that, at every iteration, you multiply, then
+        accumulate, multiple vector elements to calculate the dot product. The number of elements you can work with
+        depends on the register layout.</p>
+    <p>The Arm Neon architecture uses a 64-bit or 128-bit register file (<a
+            href="https://developer.arm.com/architectures/instruction-sets/simd-isas/neon/neon-programmers-guide-for-armv8-a/introducing-neon-for-armv8-a/fundamentals-of-armv8-neon-technology">more
+        info here</a>). In a 64-bit case, you can work with either eight 8-bit, four 16-bit, or two 32-bit elements. In
+        a 128-bit case, you can work with either sixteen 8-bit, eight 16-bit, four 32-bit, or two 64-bit elements.</p>
+    <p>To represent various register vectors, Neon intrinsics use the following name convention:</p>
+    <p><code>&lt;type&gt;&lt;size&gt;x&lt;number of lanes&gt;_t</code></p>
+    <ul>
+        <li><code>&lt;type&gt;</code> is the data type (int, uint, float or poly).</li>
+        <li><code>&lt;size&gt;</code> is the number of bits used for the data type (8, 16, 32, 64).</li>
+        <li><code>&lt;number of lanes&gt;</code> defines how many lanes.</li>
+    </ul>
+    <p>For example, int16x4_t will represent a vector register with 4 lanes of 16-bit integer elements, which is
+        equivalent to a four-element int16 one-dimensional array (<code>short[4]</code>).</p>
+    <p>You don’t instantiate Neon intrinsic types directly. Instead, you use dedicated methods to load data from your
+        arrays to CPU registers. The names of these methods start with <code>vld</code>. Note that method naming uses a
+        convention similar to the one for type naming. All methods start with <code>v</code>, which is followed by a
+        method short name (like <code>ld</code> for load), and the combination of a letter and a number of bits (for
+        example, <code>s16</code>) to specify the input data type.</p>
+    <p>Neon intrinsics directly correspond to the assembly instructions.</p>
+    <pre><code>int dotProductNeon(short* vector1, short* vector2, short len) {
+	const short transferSize = 4;
+	short segments = len / transferSize;
+ 
+	// 4-element vector of zeros
+	int32x4_t partialSumsNeon = vdupq_n_s32(0);
+ 
+	// Main loop (note that loop index goes through segments)
+	for(short i = 0; i &lt; segments; i++) {
+    		// Load vector elements to registers
+    	short offset = i * transferSize;
+       	int16x4_t vector1Neon = vld1_s16(vector1 + offset);
+    	int16x4_t vector2Neon = vld1_s16(vector2 + offset);
+ 
+    		// Multiply and accumulate: partialSumsNeon += vector1Neon * vector2Neon
+    	partialSumsNeon = vmlal_s16(partialSumsNeon, vector1Neon, vector2Neon);
+	}
+ 
+	// Store partial sums
+	int partialSums[transferSize];
+	vst1q_s32(partialSums, partialSumsNeon);
+ 
+	// Sum up partial sums
+	int result = 0;
+	for(short i = 0; i &lt; transferSize; i++) {
+    		result += partialSums[i];
+	}
+ 
+	return result;
+}</code></pre>
+    <p>Here, to load data from memory, I use the <code>vld1_s16</code> method. This method loads four elements from the
+        array of shorts (signed 16-bit integers or <code>s16</code> for short) to the CPU registers.</p>
+    <p>Once the elements are in the CPU registers, I add them using the <code>vmlal</code> (multiply and accumulate)
+        method. This method adds elements from two arrays and accumulates the result in a third array.</p>
+    <p>Here, this array is stored within the <code>partialSumsNeon</code> variable. To initialize this variable, I used
+        the <code>vdupq_n_s32</code> (duplicate) method, which sets all CPU registers to the specific value. In this
+        case, the value is 0. It’s the vectorized equivalent of writing <code>int sum = 0</code>.</p>
+    <p>Once all the loop iterations complete, you need to store the resulting sums back to memory. You can either read
+        the results element by element <code>using vget_lane</code> methods, or store the whole vector using vst
+        methods. I use the second option.</p>
+    <p>Once the partial sums are back in memory, I sum them to get the final result.</p>
+    <p>Note that, on AArch64 you could also use:</p>
+    <pre><code>return vaddv_s32 (partialSumsNeon);</code></pre>
+    <p>Then skip the second for loop.</p>
+    <h2>Putting Things Together</h2>
+    <p>We can now put all of the code together. To that end, we’ll modify the <code>MainActivity.stringFromJNI</code>
+        method.</p>
+    <pre><code>extern &quot;C&quot; JNIEXPORT jstring JNICALL
+MainActivity.stringFromJNI (
+    	JNIEnv* env,
+    	jobject /* this */) {
+ 
+	// Ramp length and number of trials
+	const int rampLength = 1024;
+	const int trials = 10000;
+ 
+	// Generate two input vectors
+	// (0, 1, ..., rampLength - 1)
+	// (100, 101, ..., 100 + rampLength-1)
+	auto ramp1 = generateRamp(0, rampLength);
+	auto ramp2 = generateRamp(100, rampLength);
+ 
+	// Without NEON intrinsics
+	// Invoke dotProduct and measure performance
+	int lastResult = 0;
+ 
+	auto start = now();
+	for(int i = 0; i &lt; trials; i++) {
+    		lastResult = dotProduct(ramp1, ramp2, rampLength);
+	}
+	auto elapsedTime = msElapsedTime(start);
+ 
+	// With NEON intrinsics
+	// Invoke dotProductNeon and measure performance
+	int lastResultNeon = 0;
+ 
+	start = now();
+	for(int i = 0; i &lt; trials; i++) {
+    		lastResultNeon = dotProductNeon(ramp1, ramp2, rampLength);
+	}
+	auto elapsedTimeNeon = msElapsedTime(start);
+ 
+	// Clean up
+	delete ramp1, ramp2;
+ 
+	// Display results
+	std::string resultsString =
+        	&quot;----==== NO NEON ====----\nResult: &quot; + to_string(lastResult)
+        	+ &quot;\nElapsed time: &quot; + to_string((int)elapsedTime) + &quot; ms&quot;
+        	+ &quot;\n\n----==== NEON ====----\n&quot;
+        	+ &quot;Result: &quot; + to_string(lastResultNeon)
+        	+ &quot;\nElapsed time: &quot; + to_string((int)elapsedTimeNeon) + &quot; ms&quot;;
+ 
+	return env-&gt;NewStringUTF(resultsString.c_str());
+}</code></pre>
+    <p>The <code>MainActivity.stringFromJNI</code> method proceeds as follows.</p>
+    <p>First, we create two equal-length vectors using <code>generateRamp</code> methods.</p>
+    <p>Next, we calculate the dot product of those vectors using the non-Neon method <code>dotProduct</code>. We repeat
+        this calculation several times (trials constant), and measure the computation time using
+        <code>msElasedTime</code>.</p>
+    <p>Then, we do the same operations but now using the Neon-enabled method <code>dotProductNeon</code>.</p>
+    <p>Finally, we combine the results of those two methods along with the computation times within the <code>resultsString</code>.
+        The latter will be displayed in the <code>TextView</code>. Note that to build and run the above code
+        successfully, you need an Arm-v7-A/Armv8-A device.</p>
+    <p><img alt="Image 6" height="480px" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+            width="270px"></p>
+    <p>That's a 7 percent improvement simply by using built-in intrinsics. A theoretical improvement of 25 percent could
+        be achieved on Arm 64 devices.</p>
+    <h2>Wrapping Up</h2>
+    <p>In this article, we saw how to set up Android Studio for native C++ development, and to utilize Neon intrinsics
+        for Arm-powered mobile devices.</p>
+    <p>After explaining the idea behind Neon intrinsics, we demonstrated a sample implementation of the dot product of
+        two equal-length vectors. We then vectorized the method using dedicated Neon intrinsics. By doing so, we
+        presented the significant steps you take when working with Neon intrinsics, in particular, loading data from
+        memory to CPU registers, completing the operations, and then storing the results back to memory.</p>
+    <p>Vectorizing code is never an easy task. However, you can simplify it with Neon intrinsics to improve performance
+        in scenarios that employ 3D graphics, signal and image processing, audio encoding, and video streaming, to name
+        just a few.</p>
+    <h2>References and Useful Links</h2>
+    <ul>
+        <li>
+            <a href="https://developer.arm.com/architectures/instruction-sets/simd-isas/neon/intrinsics">Neon Intrinsics
+                search engine</a>
+        </li>
+        <li>
+            <a href="https://developer.arm.com/architectures/instruction-sets/simd-isas/neon/neon-programmers-guide-for-armv8-a/optimizing-c-code-with-neon-intrinsics/rgb-deinterleaving">Neon
+                Programmer’s guide</a>
+        </li>
+        <li>
+            <a href="https://developer.android.com/studio">Android Studio</a>
+        </li>
+        <li>
+            <a href="https://developer.android.com/ndk/guides">Android NDK</a>
+        </li>
+        <li>
+            <a href="https://developer.android.com/ndk/guides/cpu-arm-neon">Neon Support in Android NDK</a>
+        </li>
+        <li>
+            <a href="https://github.com/android/ndk-samples/tree/master/hello-neon">Google Example, Hello Neon</a>
+        </li>
+    </ul>
+    <h2>License</h2>
+    <p>This article, along with any associated source code and files, is licensed under <a
+            href="http://www.codeproject.com/info/cpol10.aspx">The Code Project Open License (CPOL)</a></p>
+    <p><img alt="be7aa3b5e5202ea64488c36a1c9252c8"
+            src="https://www.gravatar.com/avatar/be7aa3b5e5202ea64488c36a1c9252c8.jpg?d=identicon&amp;s=150&amp;r=pg"></p>
+    <p>Written By</p>
+    <p><strong><a href="/Members/User-14659742">Dawid Borycki</a></strong></p>
+    <p><img alt="United States" height="11" src="/script/Geo/Images/US.gif" width="16">&nbsp;United States</p>
+    <p>Dawid Borycki is a software engineer and biomedical researcher with extensive experience in Microsoft
+        technologies. He has completed a broad range of challenging projects involving the development of software for
+        device prototypes (mostly medical equipment), embedded device interfacing, and desktop and mobile programming.
+        Borycki is an author of two Microsoft Press books: “Programming for Mixed Reality (2018)” and “Programming for
+        the Internet of Things (2017).”</p>
+</div>
+</body>
+</html>

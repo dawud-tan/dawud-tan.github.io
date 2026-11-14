@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valorant 360 FPS at 1080p + AV1 Streaming Guide (2026)</title>
+<meta name="description" content="Sustain 360 FPS with stable 1% lows in Valorant at 1080p on a 7700X3D + RTX 5050 build while streaming 1080p60 AV1 to YouTube — verified hardware and settings.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0b0f0e">
+
+<!-- Canonical + language -->
+<link rel="canonical" href="https://dawud-tan.github.io/valorant-360fps-build-audit.html">
+<link rel="alternate" hreflang="en" href="https://dawud-tan.github.io/valorant-360fps-build-audit.html">
+<link rel="alternate" hreflang="x-default" href="https://dawud-tan.github.io/valorant-360fps-build-audit.html">
+
+<!-- Open Graph (Facebook + WhatsApp read these) -->
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="PC Optimization Reference">
+<meta property="og:title" content="Valorant 360 FPS at 1080p + AV1 Streaming Guide">
+<meta property="og:description" content="Sustain 360 FPS with stable 1% lows in Valorant at 1080p on a 7700X3D + RTX 5050 build while streaming 1080p60 AV1 to YouTube — verified hardware and settings.">
+<meta property="og:url" content="https://dawud-tan.github.io/valorant-360fps-build-audit.html">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2026-07-26">
+<meta property="article:modified_time" content="2026-07-27">
+<meta property="article:section" content="PC Hardware">
+
+<meta property="og:image" content="https://dawud-tan.github.io/img/valorant-pc-specs.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:alt" content="Valorant 360 FPS at 1080p build audit summary">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Valorant 360 FPS at 1080p + AV1 Streaming Guide">
+<meta name="twitter:description" content="Sustain 360 FPS with stable 1% lows in Valorant at 1080p on a 7700X3D + RTX 5050 build while streaming 1080p60 AV1 to YouTube.">
+<meta name="twitter:image" content="https://dawud-tan.github.io/img/valorant-pc-specs.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0f0e;
+    --panel:#121815;
+    --panel-2:#161d19;
+    --border:#223028;
+    --border-soft:#1a2420;
+    --text:#e8eeea;
+    --text-dim:#9aaba1;
+    --text-dim2:#8b9c93;
+    --brand:#7fd4e8;
+    --brand-dim:#3f5a63;
+    --ok:#6fe3ae;
+    --ok-bg:rgba(111,227,174,0.08);
+    --warn:#f2b84b;
+    --warn-bg:rgba(242,184,75,0.08);
+    --bad:#ff7a6b;
+    --bad-bg:rgba(255,122,107,0.08);
+    --mono:'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans:'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html{background:var(--bg);}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 1px 1px, rgba(255,255,255,0.028) 1px, transparent 0) 0 0/24px 24px,
+      linear-gradient(180deg, #0b0f0e 0%, #0a0d0c 100%);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{color:var(--brand);}
+
+  .wrap{max-width:880px;margin:0 auto;padding:0 20px 80px;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    border-bottom:1px solid var(--border);
+    padding:56px 0 32px;
+    margin-bottom:8px;
+  }
+  .hero-image{
+	display:block;
+	width:100%;
+	height:auto;
+	margin:22px 0 28px;
+	border:1px solid var(--border);
+	border-radius:10px;
+  }
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--brand);
+    margin:0 0 14px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:7px;height:7px;border-radius:50%;
+    background:var(--brand);
+    box-shadow:0 0 8px var(--brand);
+    flex:none;
+  }
+  h1{
+    font-family:var(--sans);
+    font-weight:700;
+    font-size:clamp(28px,5vw,42px);
+    letter-spacing:-0.01em;
+    margin:0 0 10px;
+  }
+  .hero-sub{
+    color:var(--text-dim2);
+    font-size:15px;
+    max-width:64ch;
+    margin:0 0 30px;
+  }
+
+  .stat-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1px;
+    background:var(--border);
+    border:1px solid var(--border);
+    border-radius:10px;
+    overflow:hidden;
+    margin-bottom:26px;
+  }
+  .stat{
+    background:var(--panel);
+    padding:14px 16px;
+  }
+  .stat-label{
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--text-dim2);
+    margin-bottom:6px;
+  }
+  .stat-value{
+    font-family:var(--mono);
+    font-size:14px;
+    color:var(--text);
+    font-weight:500;
+  }
+
+  .verdict-box{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-left:3px solid var(--ok);
+    border-radius:8px;
+    padding:18px 20px;
+    margin-bottom:20px;
+  }
+  .verdict-main{
+    font-family:var(--mono);
+    font-size:clamp(16px,3vw,20px);
+    font-weight:700;
+    color:var(--ok);
+    letter-spacing:0.01em;
+    margin-bottom:6px;
+  }
+  .verdict-sub{
+    font-size:13.5px;
+    color:var(--text-dim2);
+  }
+
+  .meta-line{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--text-dim2);
+    line-height:1.7;
+  }
+  .meta-line b{color:var(--text);font-weight:600;}
+
+  /* ---------- JUMP NAV ---------- */
+  .jump{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    padding:22px 0 6px;
+  }
+  .jump a{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--text-dim2);
+    text-decoration:none;
+    border:1px solid var(--border);
+    padding:6px 12px;
+    border-radius:20px;
+    transition:border-color .15s, color .15s;
+  }
+  .jump a:hover{border-color:var(--brand-dim);color:var(--brand);}
+
+  /* ---------- SECTIONS ---------- */
+  section{padding:38px 0;border-bottom:1px solid var(--border-soft);}
+  section:last-of-type{border-bottom:none;}
+  .section-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:16px;
+    flex-wrap:wrap;
+  }
+  h2{
+    font-size:19px;
+    font-weight:700;
+    margin:0;
+    letter-spacing:-0.005em;
+  }
+  h2 .num{
+    font-family:var(--mono);
+    color:var(--text-dim2);
+    font-weight:500;
+    font-size:14px;
+    margin-right:10px;
+  }
+
+  .pill{
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    font-weight:600;
+    padding:4px 10px;
+    border-radius:20px;
+    white-space:nowrap;
+    border:1px solid transparent;
+  }
+  .pill-ok{color:var(--ok);background:var(--ok-bg);border-color:rgba(111,227,174,0.28);}
+  .pill-fix{color:var(--warn);background:var(--warn-bg);border-color:rgba(242,184,75,0.28);}
+  .pill-flag{color:var(--bad);background:var(--bad-bg);border-color:rgba(255,122,107,0.28);}
+
+  p{margin:0 0 12px;color:var(--text);font-size:14.5px;}
+  p:last-child{margin-bottom:0;}
+  .dim{color:var(--text-dim2);}
+
+  .callout{
+    border-radius:8px;
+    padding:14px 16px;
+    font-size:13.5px;
+    margin-top:14px;
+    border:1px solid;
+  }
+  .callout-flag{background:var(--bad-bg);border-color:rgba(255,122,107,0.28);color:#ffb3a8;}
+  .callout-fix{background:var(--warn-bg);border-color:rgba(242,184,75,0.28);color:#ffd898;}
+  .callout b{color:var(--text);}
+
+  ol.steps{margin:14px 0 0;padding-left:0;list-style:none;counter-reset:step;}
+  ol.steps li{
+    counter-increment:step;
+    padding:8px 0 8px 34px;
+    position:relative;
+    font-size:14px;
+    border-top:1px solid var(--border-soft);
+  }
+  ol.steps li:first-child{border-top:none;}
+  ol.steps li::before{
+    content:counter(step);
+    position:absolute;left:0;top:8px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--brand);
+    width:22px;height:22px;
+    border:1px solid var(--brand-dim);
+    border-radius:5px;
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  ul.notes{margin:14px 0 0;padding-left:0;list-style:none;}
+  ul.notes li{
+    padding:10px 0 10px 20px;
+    position:relative;
+    font-size:14px;
+    border-top:1px solid var(--border-soft);
+    color:var(--text);
+  }
+  ul.notes li:first-child{border-top:none;}
+  ul.notes li::before{
+    content:"—";
+    position:absolute;left:0;top:10px;
+    color:var(--text-dim2);
+  }
+
+  /* ---------- TABLE ---------- */
+  .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:560px;}
+  thead th{
+    text-align:left;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--text-dim2);
+    background:var(--panel-2);
+    padding:12px 14px;
+    border-bottom:1px solid var(--border);
+  }
+  tbody td{
+    padding:13px 14px;
+    border-bottom:1px solid var(--border-soft);
+    vertical-align:top;
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:rgba(255,255,255,0.015);}
+  td.comp{font-weight:600;white-space:nowrap;}
+  td.note{color:var(--text-dim2);}
+  .keep{
+    font-family:var(--mono);font-size:11px;font-weight:700;
+    color:var(--ok);letter-spacing:0.04em;
+  }
+
+  /* ---------- CODE ---------- */
+  pre{
+    background:#0d1310;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:16px 18px;
+    overflow-x:auto;
+    font-family:var(--mono);
+    font-size:12.5px;
+    line-height:1.7;
+    margin:14px 0 0;
+  }
+  code{font-family:var(--mono);}
+  .cmt{color:var(--text-dim2);}
+  pre .flagline{background:rgba(255,122,107,0.10);display:block;margin:0 -18px;padding:0 18px;border-left:2px solid var(--bad);}
+
+  /* ---------- FAQ ---------- */
+  .faq-item{
+    border:1px solid var(--border);
+    border-radius:8px;
+    margin-bottom:10px;
+    background:var(--panel);
+    overflow:hidden;
+  }
+  .faq-item summary{
+    cursor:pointer;
+    padding:14px 18px;
+    font-weight:600;
+    font-size:14.5px;
+    list-style:none;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+  }
+  .faq-item summary::-webkit-details-marker{display:none;}
+  .faq-item summary::after{
+    content:"+";
+    font-family:var(--mono);
+    color:var(--brand);
+    font-size:18px;
+    flex:none;
+  }
+  .faq-item[open] summary::after{content:"–";}
+  .faq-item p{padding:0 18px 16px;color:var(--text-dim);font-size:14px;margin:0;}
+
+  /* ---------- CHECKLIST ---------- */
+  .checklist-box{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:6px 20px;
+  }
+
+  footer{
+    padding:30px 0 10px;
+    font-size:12px;
+    color:var(--text-dim2);
+    line-height:1.9;
+  }
+  footer a{color:var(--text-dim2);text-decoration:underline;text-decoration-color:var(--border);text-underline-offset:3px;}
+  footer a:hover{color:var(--brand);}
+  footer a::after{content:" ↗";font-size:10px;}
+  footer ul{margin:8px 0 0;padding-left:18px;}
+  footer li{margin-bottom:4px;}
+
+  @media (max-width:640px){
+    .stat-grid{grid-template-columns:repeat(2,1fr);}
+    .wrap{padding:0 16px 60px;}
+    .hero{padding:36px 0 24px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">PC Optimization Reference</p>
+    <h1>Valorant 360 FPS at 1080p While Streaming AV1 to YouTube</h1>
+    <p class="hero-sub">Ryzen 7 7700X3D · RTX 5050 · ROG Strix Pulsar XG27AQNGV — every claim below is cross-checked against current spec sheets, patch notes, and vendor documentation, with sources linked at the end.</p>
+
+    <div class="stat-grid">
+      <div class="stat"><div class="stat-label">Resolution target</div><div class="stat-value">1920×1080</div></div>
+      <div class="stat"><div class="stat-label">Frame target</div><div class="stat-value">360 fps · 1% low</div></div>
+      <div class="stat"><div class="stat-label">GPU ceiling</div><div class="stat-value">&lt;95% (3D engine)</div></div>
+      <div class="stat"><div class="stat-label">Stream out</div><div class="stat-value">YT 1080p60 AV1</div></div>
+    </div>
+
+    <div class="verdict-box">
+      <div class="verdict-main">VERDICT: HARDWARE IS SUFFICIENT</div>
+      <div class="verdict-sub">No CPU, GPU, or monitor upgrade is required to hit the target above. Two configuration steps determine whether the numbers actually hold.</div>
+    </div>
+
+    <div class="meta-line">
+      Last verified <b>27 Jul 2026</b> against <b>Patch 13.01</b>, Season 2026: Act 4 ·
+      Sourced from AMD / ASUS / NVIDIA / Intel spec pages, Tom's Hardware, and playvalorant.com
+    </div>
+
+    <nav class="jump">
+      <a href="#hw" rel="nofollow noopener">Hardware</a>
+      <a href="#monitor" rel="nofollow noopener">Monitor</a>
+      <a href="#settings" rel="nofollow noopener">Video settings</a>
+      <a href="#cpu" rel="nofollow noopener">CPU / BIOS</a>
+      <a href="#reflex" rel="nofollow noopener">Reflex</a>
+      <a href="#fpscap" rel="nofollow noopener">FPS cap</a>
+      <a href="#network" rel="nofollow noopener">Network</a>
+      <a href="#router" rel="nofollow noopener">Router</a>
+      <a href="#patch" rel="nofollow noopener">Patch check</a>
+      <a href="#faq" rel="nofollow noopener">FAQ</a>
+      <a href="#checklist" rel="nofollow noopener">Checklist</a>
+    </nav>
+  </header>
+
+  <main>
+
+  <!-- HARDWARE TABLE -->
+  <section id="hw">
+    <div class="section-head"><h2><span class="num">§0</span>Hardware verdict</h2></div>
+	<img
+	  class="hero-image"
+	  src="./img/valorant-pc-specs.png"
+	  width="1672"
+	  height="941"
+	  alt="PC spec list: ASUS ROG Strix Pulsar XG27AQNGV display, AMD Ryzen 7 7700X3D CPU, Inno3D RTX 5050 8GB GPU, Kingston FURY Beast 16GB DDR5-6000 CL30, ASRock B650M PG Lightning, Intel I226-T1 NIC, Thermalright Phantom Spirit 120 SE cooler, Kingston NV1 500GB SSD, Corsair RM550x PSU, Montech AIR 100 ARGB case, Corsair M65/K70 peripherals, GL.iNet Flint 2 router">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Component</th><th>Verdict</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="comp">CPU — Ryzen 7 7700X3D</td>
+            <td><span class="keep">KEEP</span></td>
+            <td class="note">8C/16T, 104MB total cache, 120W TDP / 162W max PPT. Confirm BIOS support before install (§3).</td>
+          </tr>
+          <tr>
+            <td class="comp">GPU — RTX 5050 8GB</td>
+            <td><span class="keep">KEEP</span></td>
+            <td class="note">130W board power, 9th-gen NVENC with a dedicated AV1 encode block, 8GB GDDR6/128-bit. Well ahead of what Valorant needs at 1080p Low.</td>
+          </tr>
+          <tr>
+            <td class="comp">RAM — 16GB 6000 CL30</td>
+            <td><span class="keep">KEEP</span></td>
+            <td class="note">X3D cache absorbs most memory-latency sensitivity; EXPO is the only lever that matters here.</td>
+          </tr>
+		  <tr>
+            <td class="comp">Storage — 500GB Kingston SNVS/500G NV1 PCIe 3.0 NVMe SSD</td>
+            <td><span class="keep">KEEP</span></td>
+            <td class="note">X3D cache absorbs most memory-latency sensitivity; EXPO is the only lever that matters here.</td>
+          </tr>
+          <tr>
+            <td class="comp">Monitor — XG27AQNGV</td>
+            <td><span class="keep">KEEP*</span></td>
+            <td class="note">*Native panel is 1440p, not 1080p. Genuine 1080p only exists behind a monitor-side toggle — see §1 before anything else.</td>
+          </tr>
+          <tr>
+            <td class="comp">PSU — 550W 80+ Gold</td>
+            <td><span class="keep">KEEP</span></td>
+            <td class="note">GPU (130W) + CPU (≤162W) + platform ≈ 320–350W worst case → &gt;35% headroom.</td>
+          </tr>
+          <tr>
+            <td class="comp">Cooler / Case / NIC</td>
+            <td><span class="keep">KEEP</span></td>
+            <td class="note">Nothing in this target requires a change here.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- MONITOR -->
+  <section id="monitor">
+    <div class="section-head">
+      <h2><span class="num">§1</span>Enable Esports Dual Mode correctly</h2>
+      <span class="pill pill-flag">Do this first</span>
+    </div>
+    <p>ASUS's own spec sheet lists the XG27AQNGV natively at <b>2560×1440, 360Hz IPS</b>. There's no 1080p panel here — 1080p only exists behind <b>Esports Dual Mode</b>, a toggle in the monitor's own OSD, independent of anything set in Windows or Valorant.</p>
+    <p>Dual Mode is also not a single switch — it offers <i>two</i> resolutions: a genuine 1920×1080 image shown at a reduced 25″ diagonal, and a separate 2368×1332 "pixel-perfect" mode. Only the first one is what the rest of this guide assumes.</p>
+    <ol class="steps">
+      <li>Monitor OSD → GamePlus / Esports Dual Mode → select <b>1080p</b> specifically (not 2368×1332).</li>
+      <li>Windows → Settings → Display → confirm the desktop now reads 1920×1080.</li>
+      <li>Then apply Valorant's in-game <b>Resolution: 1920×1080 / Fullscreen</b> (§2).</li>
+    </ol>
+    <div class="callout callout-flag"><b>Skip step 1</b> and "1920×1080 Fullscreen" in Valorant just gets scaled across the full 1440p panel — softer image, and every FPS/GPU-load number below stops describing what it claims to.</div>
+  </section>
+
+  <!-- VIDEO SETTINGS -->
+  <section id="settings">
+    <div class="section-head">
+      <h2><span class="num">§2</span>In-game video settings</h2>
+      <span class="pill pill-ok">Standard esports config</span>
+    </div>
+    <p>Every setting below trades visual fidelity for frame time. This is a standard low-overhead esports configuration: Low across the board, minimal post-processing, multithreaded rendering on to spread work across all eight cores.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td class="comp">Resolution</td><td>1920×1080 (16:9)</td></tr>
+          <tr><td class="comp">Display Mode</td><td>Fullscreen</td></tr>
+          <tr><td class="comp">Multithreaded Rendering</td><td>On</td></tr>
+          <tr><td class="comp">Material / Texture / Detail / UI Quality</td><td>Low</td></tr>
+          <tr><td class="comp">Anti-Aliasing</td><td>None or MSAA 2x</td></tr>
+          <tr><td class="comp">Anisotropic Filtering</td><td>2x</td></tr>
+          <tr><td class="comp">Bloom / Distortion / Cast Shadows</td><td>Off</td></tr>
+          <tr><td class="comp">VSync</td><td>Off</td></tr>
+          <tr><td class="comp">NVIDIA Reflex Low Latency</td><td>On + Boost (§4)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- CPU / BIOS -->
+  <section id="cpu">
+    <div class="section-head">
+      <h2><span class="num">§3</span>Ryzen 7 7700X3D: specs and BIOS readiness</h2>
+      <span class="pill pill-ok">Verified</span>
+    </div>
+    <p>Often mistaken for a mistyped 7800X3D — it isn't one. AMD announced it at Computex 2026 and it shipped 16 Jul 2026: 8C/16T, Zen 4, 96MB L3 + 8MB L2 (104MB total) — the same cache pool as the 7800X3D, just clocked lower (4.0GHz base / 4.5GHz boost). $329 MSRP, Newegg-exclusive in North America at launch.</p>
+    <p>Stock power is <b>120W TDP, 162W max PPT</b> — the same ceiling as the 7800X3D. A common approach for quiet, cool operation on an esports-only build is capping TDC/EDC/PPT to roughly 85–90W (about 45% below stock) via PBO limits, since Valorant rarely loads all eight cores at once. Treat any specific number as a starting point to validate with a stress test and a real 1% low benchmark, not a pre-verified optimum for this exact chip.</p>
+    <div class="callout callout-fix"><b>This exact SKU is very new.</b> Before installing it in the ASRock B650M PG Lightning (or any B650/X670 board), check the motherboard vendor's BIOS page for explicit 7700X3D support — budget boards sometimes lag flagship-chip BIOS support by weeks for niche SKUs. If it isn't listed yet, BIOS Flashback (no CPU or RAM required) is the fallback.</div>
+  </section>
+
+  <!-- REFLEX -->
+  <section id="reflex">
+    <div class="section-head">
+      <h2><span class="num">§4</span>NVIDIA Reflex: On + Boost, and where Reflex 2 fits</h2>
+      <span class="pill pill-fix">Explained</span>
+    </div>
+    <p>Enable Reflex Low Latency in <b>On + Boost</b> mode. In this pairing at these settings, Valorant is CPU-bound — the GPU isn't the limiting factor, so there's no GPU-side bottleneck here for Boost to manage. What Boost actually contributes: it keeps GPU clocks from idling down between frames, so the GPU isn't re-ramping — which costs latency — on the next one. That's the real win in a CPU-bound scenario like this.</p>
+    <p><b>Reflex 2 / Frame Warp</b> is real, and it does apply to Valorant on RTX 50-series — NVIDIA quoted sub-3ms latency at 800+ fps on an RTX 5090 back at CES 2025 — but the rollout has been inconsistent: it was still listed as upcoming with no shipped build as of October 2025, and later reporting shows it live in Valorant on RTX 50-series GPUs. Check <i>Settings</i> directly rather than assuming it's active. Either way, it's a <b>latency</b> feature, not an FPS or GPU-load one — it won't move either of the two numbers this guide is built around.</p>
+  </section>
+
+  <!-- FPS CAP -->
+  <section id="fpscap">
+    <div class="section-head">
+      <h2><span class="num">§5</span>Cap FPS a few frames under your refresh rate</h2>
+      <span class="pill pill-flag">Verify in-client</span>
+    </div>
+    <p>Set <b>Limit FPS Always</b> to a few frames under the monitor's max refresh (for example, 355 on a 360Hz panel) rather than at or above it. Capping under the refresh rate keeps the display inside its variable-refresh range, which is corroborated by current guidance as producing more stable frame times and better 1% lows — the metric this target actually prioritizes.</p>
+    <ul class="notes">
+      <li><b>Confirm the limiter takes an exact typed value.</b> It's been a preset dropdown in most documented walkthroughs; if 355 isn't selectable, take the nearest preset under 360, not over.</li>
+      <li><b>Ignore "cap 100+ fps above refresh" advice</b> found in some newer guides. It's real for bare click-to-photon latency, but it reintroduces tearing — defeating the point of a G-Sync Pulsar panel — and raises 3D-engine load right when the other hard constraint here is GPU &lt;95% while the encoder's also running. Different priority than the one this build is optimizing for.</li>
+    </ul>
+  </section>
+
+  <!-- NETWORK -->
+  <section id="network">
+    <div class="section-head">
+      <h2><span class="num">§6</span>NIC tuning: RSS queue assignment for the Intel I226</h2>
+      <span class="pill pill-ok">Verified + caveats</span>
+    </div>
+    <p>The Intel I226 family exposes <b>4 RX/TX queues and up to 5 MSI-X vectors per port</b>, confirmed via Intel's own datasheet — so a 4-processor RSS assignment maps cleanly onto the real hardware limit.</p>
+    <pre><code><span class="cmt"># 1. Confirm the interface name and current adapter properties</span>
+Get-NetAdapter
+Get-NetAdapterAdvancedProperty -Name "Ethernet" | Format-Table -AutoSize
+
+<span class="cmt"># 2. Confirm real logical-processor-to-core mapping before assuming core 0 = LP 0/1</span>
+<span class="cmt">#    Task Manager -> Performance -> CPU -> right-click -> Change graph to -> Logical processors</span>
+
+<span class="cmt"># 3. Assign RSS queues starting above core 0 (adjust BaseProcessorNumber to your confirmed mapping)</span>
+Set-NetAdapterRss -Name "Ethernet" -BaseProcessorNumber 2 -MaxProcessorNumber 8 -MaxProcessors 4 -Profile NUMAStatic
+
+<span class="flagline">Set-NetAdapterAdvancedProperty -Name "Ethernet" -DisplayName "Interrupt Moderation" -DisplayValue "Disabled"
+<span class="cmt"># ^ trades network latency for CPU interrupt overhead — A/B against your 1% low counter, not a free win</span></span>
+
+<span class="cmt"># 4. Disable power-saving features that can cause micro-disconnects</span>
+Set-NetAdapterAdvancedProperty -Name "Ethernet" -DisplayName "Energy Efficient Ethernet" -DisplayValue "Disabled" -ErrorAction SilentlyContinue
+Set-NetAdapterAdvancedProperty -Name "Ethernet" -DisplayName "Ultra Low Power Mode" -DisplayValue "Disabled" -ErrorAction SilentlyContinue
+
+<span class="cmt"># 5. Verify the change actually took</span>
+Get-NetAdapterRss -Name "Ethernet"</code></pre>
+    <ul class="notes">
+      <li><b>Disabling Interrupt Moderation</b> is a trade, not a guaranteed win — see the inline note above.</li>
+      <li><b><code>BaseProcessorNumber 2</code></b> assumes Windows enumerates logical processors as core0 = LP0/1, core1 = LP2/3, etc. That's the common mapping, not a guaranteed one — confirm it before trusting that "start at 2" really skips core 0 on a given board.</li>
+      <li>Several I226-T1 owners on Windows 11 24H2 report the RSS/queue/buffer properties <b>missing entirely</b> from the driver's Advanced tab until Intel's own driver is installed over the Windows-Update-supplied one. If <code>Get-NetAdapterAdvancedProperty</code> comes back short, that's the fix.</li>
+    </ul>
+  </section>
+
+  <!-- ROUTER -->
+  <section id="router">
+    <div class="section-head">
+      <h2><span class="num">§7</span>Prioritize game traffic over the stream upload</h2>
+      <span class="pill pill-ok">CAKE + DSCP</span>
+    </div>
+    <p>A 1080p60 AV1 upload is enough to saturate a lot of residential upstream bandwidth and bufferbloat the connection out from under low-bandwidth, latency-sensitive game traffic. CAKE's diffserv4 tin mapping puts DSCP CS5 in the top ("Voice") tier by default, so marking the game's outbound UDP with CS5 genuinely prioritizes it ahead of the stream's default best-effort TCP during contention.</p>
+    <ol class="steps">
+      <li>Set the ISP modem to <b>Bridge Mode</b> to avoid double NAT.</li>
+      <li>On the router: WAN connection type → <b>PPPoE</b>, enter ISP credentials.</li>
+      <li><b>Network → SQM QoS</b> → enable on the WAN interface. Run a real speed test first, then set Download/Upload to ~85–90% of the measured result.</li>
+      <li>Queue discipline: <b>cake</b>, script <code>piece_of_cake.qos</code>. Link layer: Ethernet, overhead 44 (mpu 84) — a starting point, not a fixed value.</li>
+      <li>Firewall → mark outbound UDP in the game's port range with <b>DSCP CS5</b>.</li>
+    </ol>
+    <div class="callout callout-fix"><b>Scope the firewall rule</b> to the game's actual UDP port range (or its process), not "all outbound UDP" — otherwise every other real-time UDP app on the machine lands in the same top tin, diluting the priority meant for the game specifically.</div>
+  </section>
+
+  <!-- PATCH CHECK -->
+  <section id="patch">
+    <div class="section-head">
+      <h2><span class="num">§8</span>Patch reference: 13.01, Season 2026 Act 4</h2>
+      <span class="pill pill-ok">Current</span>
+    </div>
+    <p>13.01, dated 14 Jul 2026, Season 2026: Act 4, is the current patch as of this guide's last verification. It's an Iso/Yoru/Outlaw balance pass plus new rank-manipulation enforcement — nothing touching rendering, netcode, or anti-cheat behavior that would change any setting above.</p>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="section-head"><h2>FAQ</h2></div>
+
+    <details class="faq-item">
+      <summary>Does the RTX 5050 bottleneck Valorant at 1080p?</summary>
+      <p>No. The RTX 5050 draws about 130W and includes a 9th-generation NVENC encoder, far more GPU than Valorant needs at 1080p on Low settings. At these settings the game is CPU-bound, so the GPU sits well under its ceiling even before a stream is added.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>What is the difference between the Ryzen 7 7700X3D and the 7800X3D?</summary>
+      <p>They share the same core count (8C/16T), the same 104MB total cache, and the same 162W max power ceiling. The 7700X3D simply runs at lower clocks (4.0GHz base, 4.5GHz boost) and launched later, in July 2026, at a lower price. It's a distinct SKU slotted between the 7600X3D and 7800X3D, not a naming error.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>How do I get true 1080p on the ASUS ROG Strix Pulsar XG27AQNGV?</summary>
+      <p>The panel is natively 1440p (2560×1440). Genuine 1920×1080 only exists behind Esports Dual Mode, a toggle in the monitor's own on-screen display rather than a Windows or in-game setting. Dual Mode includes a separate 2368×1332 option too, so select the 1080p variant specifically, then confirm Windows reports 1920×1080 before setting the resolution in-game.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>Should Valorant's FPS cap be set above or below the monitor's refresh rate?</summary>
+      <p>Below it, by a small margin — for example 355 fps on a 360Hz panel. Capping under the refresh rate keeps the display inside its variable-refresh range, producing more stable frame times and better 1% lows, the priority for a competitive target like this. Capping well above the refresh rate can lower raw click-to-photon latency slightly, but it reintroduces screen tearing and raises GPU load, working against a variable-refresh display and a GPU-utilization ceiling at the same time.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>Does streaming with NVENC AV1 lower Valorant's frame rate?</summary>
+      <p>Only marginally. NVENC uses a dedicated encoder block separate from the GPU's 3D rendering engine, so encoding the stream doesn't compete directly with game rendering on the same silicon. The larger practical risk is upload bandwidth contention on the network rather than GPU contention, which is what QoS configuration on the router addresses.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>Is NVIDIA Reflex 2 with Frame Warp available in Valorant?</summary>
+      <p>It's supported on RTX 50-series GPUs, but the rollout has been inconsistent. NVIDIA announced it for Valorant in January 2025, it was still listed as upcoming with no shipped build as of October 2025, and later reporting shows it live. Check the in-game Settings menu directly rather than assuming it's active, and treat it as a latency improvement rather than a frame-rate or GPU-utilization one.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>Do I need to upgrade any hardware to hit 360 FPS at 1080p while streaming?</summary>
+      <p>No. A Ryzen 7 7700X3D, an RTX 5050, 16GB of 6000MT/s DDR5, and a 550W Gold PSU are all well ahead of what this specific target requires. What actually matters is configuration — the monitor's Dual Mode setting, BIOS readiness for a newly launched CPU, and a handful of NVIDIA and network settings.</p>
+    </details>
+  </section>
+
+  <!-- CHECKLIST -->
+  <section id="checklist">
+    <div class="section-head"><h2>Run order</h2></div>
+    <div class="checklist-box">
+      <ol class="steps">
+        <li>Monitor OSD → Esports Dual Mode → <b>1080p</b> (not 2368×1332) → confirm Windows shows 1920×1080. (§1)</li>
+        <li>Apply the video settings above. (§2)</li>
+        <li>Check the motherboard's BIOS page for explicit 7700X3D support; BIOS Flashback if it isn't listed. (§3)</li>
+        <li>Reflex → On + Boost; check Settings for Reflex 2 / Frame Warp availability and enable it if present. (§4)</li>
+        <li>Set Limit FPS Always and confirm it lands on ~355 fps, or the nearest preset under 360. (§5)</li>
+        <li>Run the NIC RSS commands; verify with <code>Get-NetAdapterAdvancedProperty</code> / <code>Get-NetAdapterRss</code> that they took. (§6)</li>
+        <li>Set a PBO power cap and Curve Optimizer offset, stress-test for stability, then benchmark 1% lows with Interrupt Moderation on vs. off. (§3/§6)</li>
+        <li>Bridge mode + PPPoE + CAKE on the router; scope the DSCP mark rule to the game's UDP ports specifically. (§7)</li>
+      </ol>
+    </div>
+  </section>
+
+  </main>
+
+  <footer>
+    Sources:
+    <ul>
+      <li><a href="https://www.asus.com/motherboards-components/graphics-cards/dual/dual-rtx5050-8g/techspec/" target="_blank" rel="nofollow noopener">ASUS RTX 5050 Dual OC spec sheet</a></li>
+      <li><a href="https://rog.asus.com/us/monitors/27-to-31-5-inches/rog-strix-pulsar-xg27aqngv/" target="_blank" rel="nofollow noopener">ASUS ROG Strix Pulsar XG27AQNGV product page</a></li>
+      <li><a href="https://www.nvidia.com/en-us/geforce/news/reflex-2-even-lower-latency-gameplay-with-frame-warp/" target="_blank" rel="nofollow noopener">NVIDIA Reflex 2 announcement</a></li>
+      <li><a href="https://www.tomshardware.com/pc-components/cpus/amd-ryzen-7-7700x3d-is-exclusive-to-newegg-in-north-america-usd329-cpu-wont-be-available-at-other-vendors-until-at-least-q4" target="_blank" rel="nofollow noopener">Tom's Hardware on the Ryzen 7 7700X3D launch</a></li>
+      <li><a href="https://cdrdv2-public.intel.com/765669/Intel%20Ethernet%20Network%20Adapter%20I226-T1.pdf" target="_blank" rel="nofollow noopener">Intel I226-T1 network adapter datasheet</a></li>
+      <li><a href="https://playvalorant.com/en-us/news/game-updates/valorant-patch-notes-13-01/" target="_blank" rel="nofollow noopener">Official VALORANT patch notes, 13.01</a></li>
+    </ul>
+    The 7700X3D and the Reflex 2 rollout are both very recent — worth a quick re-check if you're reading this more than a few weeks out.
+  </footer>
+
+</div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://dawud-tan.github.io/valorant-360fps-build-audit.html#article",
+      "headline": "Valorant 360 FPS at 1080p While Streaming AV1 to YouTube",
+      "description": "Sustain 360 FPS with stable 1% lows in Valorant at 1080p on a 7700X3D + RTX 5050 build while streaming 1080p60 AV1 to YouTube - verified hardware and settings.",
+      "datePublished": "2026-07-26",
+      "dateModified": "2026-07-27",
+      "inLanguage": "en",
+      "mainEntityOfPage": "https://dawud-tan.github.io/valorant-360fps-build-audit.html",
+      "about": [
+        {"@type": "Thing", "name": "VALORANT"},
+        {"@type": "Thing", "name": "NVIDIA Reflex"},
+        {"@type": "Thing", "name": "AMD Ryzen 7 7700X3D"},
+        {"@type": "Thing", "name": "NVIDIA GeForce RTX 5050"}
+      ]
+    },
+    {
+      "@type": "HowTo",
+      "@id": "https://dawud-tan.github.io/valorant-360fps-build-audit.html#howto",
+      "name": "Configure a PC for 360 FPS Valorant at 1080p while streaming AV1 to YouTube",
+      "step": [
+        {"@type": "HowToStep", "name": "Enable Esports Dual Mode", "text": "In the monitor's on-screen display, switch Esports Dual Mode to the 1080p option, then confirm Windows reports a 1920x1080 desktop resolution."},
+        {"@type": "HowToStep", "name": "Apply Valorant video settings", "text": "Set resolution to 1920x1080, display mode to fullscreen, multithreaded rendering on, and material, texture, detail and UI quality to low."},
+        {"@type": "HowToStep", "name": "Confirm CPU BIOS support", "text": "Check the motherboard vendor's BIOS page for explicit support of the installed CPU before first boot, and use BIOS Flashback if it is not yet listed."},
+        {"@type": "HowToStep", "name": "Enable NVIDIA Reflex", "text": "Turn on Reflex Low Latency in Boost mode, and enable Reflex 2 Frame Warp in Settings if it is available."},
+        {"@type": "HowToStep", "name": "Set the in-game FPS limiter", "text": "Cap Limit FPS Always a few frames below the monitor's maximum refresh rate rather than at or above it."},
+        {"@type": "HowToStep", "name": "Tune the network adapter", "text": "Assign RSS queues away from logical processor 0 and verify the change with Get-NetAdapterRss."},
+        {"@type": "HowToStep", "name": "Set a CPU power cap", "text": "Apply a PBO power limit and Curve Optimizer offset, then validate stability with a stress test and a 1% low benchmark."},
+        {"@type": "HowToStep", "name": "Configure router QoS", "text": "Enable bridge mode on the modem, PPPoE on the router, and CAKE SQM on the WAN interface, marking the game's outbound UDP traffic with DSCP CS5."}
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://dawud-tan.github.io/valorant-360fps-build-audit.html#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Does the RTX 5050 bottleneck Valorant at 1080p?",
+          "acceptedAnswer": {"@type": "Answer", "text": "No. The RTX 5050 draws about 130W and includes a 9th-generation NVENC encoder, far more GPU than Valorant needs at 1080p on Low settings. At these settings the game is CPU-bound, so the GPU sits well under its ceiling even before a stream is added."}
+        },
+        {
+          "@type": "Question",
+          "name": "What is the difference between the Ryzen 7 7700X3D and the 7800X3D?",
+          "acceptedAnswer": {"@type": "Answer", "text": "They share the same core count (8C/16T), the same 104MB total cache, and the same 162W max power ceiling. The 7700X3D simply runs at lower clocks (4.0GHz base, 4.5GHz boost) and launched later, in July 2026, at a lower price. It is a distinct SKU slotted between the 7600X3D and 7800X3D, not a naming error."}
+        },
+        {
+          "@type": "Question",
+          "name": "How do I get true 1080p on the ASUS ROG Strix Pulsar XG27AQNGV?",
+          "acceptedAnswer": {"@type": "Answer", "text": "The panel is natively 1440p (2560x1440). Genuine 1920x1080 only exists behind Esports Dual Mode, a toggle in the monitor's own on-screen display rather than a Windows or in-game setting. Dual Mode includes a separate 2368x1332 option too, so select the 1080p variant specifically, then confirm Windows reports 1920x1080 before setting the resolution in-game."}
+        },
+        {
+          "@type": "Question",
+          "name": "Should Valorant's FPS cap be set above or below the monitor's refresh rate?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Below it, by a small margin, for example 355 fps on a 360Hz panel. Capping under the refresh rate keeps the display inside its variable-refresh range, producing more stable frame times and better 1% lows. Capping well above the refresh rate can lower raw click-to-photon latency slightly, but it reintroduces screen tearing and raises GPU load."}
+        },
+        {
+          "@type": "Question",
+          "name": "Does streaming with NVENC AV1 lower Valorant's frame rate?",
+          "acceptedAnswer": {"@type": "Answer", "text": "Only marginally. NVENC uses a dedicated encoder block separate from the GPU's 3D rendering engine, so encoding the stream does not compete directly with game rendering on the same silicon. The larger practical risk is upload bandwidth contention on the network rather than GPU contention."}
+        },
+        {
+          "@type": "Question",
+          "name": "Is NVIDIA Reflex 2 with Frame Warp available in Valorant?",
+          "acceptedAnswer": {"@type": "Answer", "text": "It is supported on RTX 50-series GPUs, but the rollout has been inconsistent. NVIDIA announced it for Valorant in January 2025, it was still listed as upcoming with no shipped build as of October 2025, and later reporting shows it live. It is a latency improvement rather than a frame-rate or GPU-utilization one."}
+        },
+        {
+          "@type": "Question",
+          "name": "Do I need to upgrade any hardware to hit 360 FPS at 1080p while streaming?",
+          "acceptedAnswer": {"@type": "Answer", "text": "No. A Ryzen 7 7700X3D, an RTX 5050, 16GB of 6000MT/s DDR5, and a 550W Gold PSU are all well ahead of what this specific target requires. What actually matters is configuration: the monitor's Dual Mode setting, BIOS readiness for a newly launched CPU, and a handful of NVIDIA and network settings."}
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+</body>
+</html>
