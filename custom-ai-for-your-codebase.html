@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Build a Custom AI Assistant for Your Codebase</title>
+<meta name="description" content="Build a codebase AI assistant with open-weight models, symbol search, and an edit-and-test loop. Follow eight checkpoints and compare local costs with hosted APIs.">
+<link rel="canonical" href="https://dawud-tan.github.io/custom-ai-for-your-codebase.html">
+<link rel="alternate" hreflang="en-US" href="https://dawud-tan.github.io/custom-ai-for-your-codebase.html">
+<link rel="alternate" hreflang="x-default" href="https://dawud-tan.github.io/custom-ai-for-your-codebase.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Dawud Tan">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Build a Custom AI Assistant for Your Codebase">
+<meta property="og:description" content="Learn the model, build the harness, and measure when running it locally saves money. Eight checkpoints from backpropagation to verified edits.">
+<meta property="og:url" content="https://dawud-tan.github.io/custom-ai-for-your-codebase.html">
+<meta property="og:image" content="https://dawud-tan.github.io/img/custom-ai-for-your-codebase.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Build a custom AI assistant for your codebase. Search, read, edit and test.">
+<meta property="article:published_time" content="2026-11-19">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Build a Custom AI Assistant for Your Codebase">
+<meta name="twitter:description" content="Eight checkpoints from backpropagation to verified edits, with a way to compare local and hosted costs.">
+<meta name="twitter:image" content="https://dawud-tan.github.io/img/custom-ai-for-your-codebase.png">
+<meta name="twitter:image:alt" content="Build a custom AI assistant for your codebase. Search, read, edit and test.">
+<meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#131518" media="(prefers-color-scheme: dark)">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f7f6f2; --panel: #fff; --ink: #1a1c20; --muted: #50566a;
+    --line: #ddd9cf; --accent: #9b3a12; --tint: #f6ebe4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #131518; --panel: #1a1d22; --ink: #e8e6e1; --muted: #a8aebb;
+      --line: #39404b; --accent: #ef9a66; --tint: #2a221d;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding-inline: max(1rem, env(safe-area-inset-left)) max(1rem, env(safe-area-inset-right));
+    background: var(--bg);
+    color: var(--ink);
+    font: 1.0625rem/1.65 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main, footer { max-width: 48rem; margin-inline: auto; }
+  main { padding-block: clamp(2rem, 6vw, 4rem) 3rem; }
+  h1, h2, h3 { line-height: 1.2; text-wrap: pretty; }
+  h1 { font-size: clamp(2rem, 5.8vw, 3.125rem); letter-spacing: -.025em; margin: .5rem 0 1rem; }
+  h2 { font-size: 1.5rem; margin: 3rem 0 1rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+  h3 { font-size: 1.175rem; margin: 1.75rem 0 .5rem; }
+  p { margin-block: .625rem 1rem; }
+  ul, ol { padding-inline-start: 1.5rem; }
+  li + li { margin-top: .35rem; }
+  a { color: var(--accent); text-underline-offset: .16em; }
+  a:focus-visible, main:focus-visible, .table-wrap:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  code { padding: .08em .28em; background: var(--tint); border-radius: .25rem; overflow-wrap: anywhere; }
+  .date, .sources, footer { color: var(--muted); font-size: .925rem; }
+  .lead { font-size: 1.175rem; }
+  .toc { background: var(--panel); border: 1px solid var(--line); border-radius: .75rem; padding: .875rem 1.25rem; margin: 1.75rem 0; }
+  .toc h2 { font-size: 1.1rem; margin: 0 0 .5rem; padding: 0; border: 0; }
+  .toc ul { margin: 0; }
+  .checkpoint { border-inline-start: .2rem solid var(--accent); background: var(--tint); padding: .625rem .875rem; margin: 1rem 0; }
+  .table-wrap { overflow-x: auto; margin: 1rem 0; border: 1px solid var(--line); border-radius: .75rem; background: var(--panel); }
+  table { width: 100%; border-collapse: collapse; font-size: .875rem; line-height: 1.45; font-variant-numeric: tabular-nums; }
+  caption { padding: .5rem .75rem; text-align: start; color: var(--muted); }
+  th, td { padding: .5rem clamp(.25rem, 1vw, .75rem); border-top: 1px solid var(--line); text-align: start; vertical-align: top; }
+  thead th { background: var(--tint); }
+  .skip { position: absolute; inset-inline-start: 1rem; inset-block-start: .75rem; background: var(--panel); padding: .5rem .75rem; }
+  .skip:not(:focus) { clip-path: inset(50%); width: 1px; height: 1px; padding: 0; overflow: hidden; }
+  footer { border-top: 1px solid var(--line); padding-block: 1rem 2rem; }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "@id": "https://dawud-tan.github.io/custom-ai-for-your-codebase.html#article",
+      "headline": "Build a Custom AI Assistant for Your Codebase",
+      "description": "Build a codebase AI assistant with open-weight models, symbol search, and an edit-and-test loop. Follow eight checkpoints and compare local costs with hosted APIs.",
+      "inLanguage": "en-US",
+      "datePublished": "2026-11-19",
+      "image": "https://dawud-tan.github.io/img/custom-ai-for-your-codebase.png",
+      "publisher": {
+        "@type": "Person",
+        "name": "Dawud Tan",
+        "url": "https://dawud-tan.github.io/"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://dawud-tan.github.io/custom-ai-for-your-codebase.html"
+      },
+      "citation": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2203.15556",
+        "https://arxiv.org/abs/2405.21015",
+        "https://darioamodei.com/post/on-deepseek-and-export-controls"
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://dawud-tan.github.io/custom-ai-for-your-codebase.html",
+      "url": "https://dawud-tan.github.io/custom-ai-for-your-codebase.html",
+      "name": "Build a Custom AI Assistant for Your Codebase",
+      "inLanguage": "en-US",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Do I need to train an AI model from scratch for my codebase?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Start with pretrained open weights for a practical assistant. Connect the model to repository search and file-reading tools so it can use current code. Train a tiny model from scratch if you want to learn how language modeling works."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Should I use retrieval or fine-tuning?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Use retrieval for facts that change, such as where a function is defined or which modules call it. Use fine-tuning to teach recurring behaviors, such as a review format. Test each with held-out tasks."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Will running the assistant locally save money?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "It depends on hardware, workload, and how many answers or edits you accept. Compare local and hosted costs on the same tasks, including failed attempts, maintenance, and review time where relevant. Divide each total by its accepted task count."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can a small model rename a method across 15 files?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "It can coordinate the task when the language server can resolve the symbol and the harness can verify the resulting patch. Check for references in configuration and reflective calls, then run the build and tests and review the diff."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How much memory does a 4-bit model need?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Eight billion parameters at four bits each take about 4 GB for the raw weights. Leave more room for quantization metadata, tensors kept at higher precision, runtime buffers, and context memory such as a key–value cache or recurrent state. Measure peak memory with the context length and concurrency you plan to use."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<main id="main" tabindex="-1">
+<article>
+  <header>
+    <p class="date"><time datetime="2026-11-19">November 19, 2026</time></p>
+    <h1>Build a Custom AI Assistant for Your Codebase</h1>
+    <p class="lead">Start with an open-weight model and give it tools to search your repository, look up symbols, read files, and verify edits. Train a tiny model along the way to learn how language models work. Use the same repository tasks to find out whether running the finished assistant locally saves you money.</p>
+  </header>
+
+  <nav class="toc" aria-labelledby="contents">
+    <h2 id="contents">On this page</h2>
+    <ul>
+      <li><a href="#learning-path">Eight checkpoints, from gradients to verified edits</a></li>
+      <li><a href="#long-context">What a million-token context costs</a></li>
+      <li><a href="#cost">What frontier training costs and how to compare your options</a></li>
+      <li><a href="#faq">Frequently asked questions</a></li>
+    </ul>
+  </nav>
+
+  <section aria-labelledby="learning-path">
+    <h2 id="learning-path">The slow path, with a checkpoint at every step</h2>
+    <p>Pick one repository and record the commit you’ll use for exercises. The first three steps teach model fundamentals. The remaining five build the assistant you can use on that repository. Treat the time estimates as planning ranges. Move on when you can reproduce the checkpoint and explain the result with the tutorial closed.</p>
+
+    <h3 id="backprop">1. Learn backpropagation in a few weeks</h3>
+    <p>Build a scalar automatic differentiation engine in Python, then use it to train a small multilayer network. Work through <em>micrograd</em> and the first <em>makemore</em> lessons to connect the chain rule to a training loop and next-token prediction. Choose a smooth activation for a finite-difference check and include a test where one variable contributes to the loss along two paths.</p>
+    <p class="checkpoint"><strong>Checkpoint.</strong> Train the network without a framework, reproduce the loss drop, and trace how gradients accumulate at a shared variable. Show that the gradients agree with your finite-difference check.</p>
+    <p class="sources"><a rel="nofollow" href="https://karpathy.ai/zero-to-hero.html">Karpathy’s Neural Networks: Zero to Hero</a> · <a rel="nofollow" href="https://www.3blue1brown.com/lessons/backpropagation-calculus/">3Blue1Brown on backpropagation</a></p>
+
+    <h3 id="transformer">2. Build a tiny Transformer in one to two months</h3>
+    <p>Implement a decoder-only GPT in PyTorch with causal self-attention, residual connections, normalization, and a feed-forward block. Build a byte-pair tokenizer alongside it and check that code with indentation and Unicode round-trips. For a roughly 10M-parameter exercise, try five layers, width 384, six heads, a vocabulary of 2,048, and tied input and output embeddings. Read the original Transformer paper after the exercise and compare its encoder–decoder architecture with your model.</p>
+    <p class="checkpoint"><strong>Checkpoint.</strong> Your GPT trains and samples from a clean checkout. With dropout off, changing a future input token leaves the earlier logits unchanged. Explain each tensor dimension from the token batch to the logits.</p>
+    <p class="sources"><a rel="nofollow" href="https://karpathy.ai/zero-to-hero.html">Karpathy’s GPT and tokenizer lessons</a> · <a rel="nofollow" href="https://github.com/rasbt/LLMs-from-scratch">Raschka’s Build a Large Language Model (From Scratch)</a> · <a rel="nofollow" href="https://arxiv.org/abs/1706.03762">Attention Is All You Need</a></p>
+
+    <h3 id="tiny-code-model">3. Train a tiny code model and inspect its limits</h3>
+    <p>Train the same small model on code you’re allowed to use. A language slice of The Stack Smol is one option if you can meet its terms, including file-level license obligations. Hold out whole repositories where possible and remove duplicate files across splits. Save a checkpoint, continue training on a permitted snapshot of your own code, and compare both checkpoints on untouched files. Keep the code and answers for the later assistant evaluation out of adapter training.</p>
+    <p>Track training and validation loss. A falling training loss alongside a rising validation loss is evidence of overfitting. Compare autocomplete quality with answers to cross-file questions. A tiny model can learn formatting and common continuations while still missing how the project fits together. For scale, BigCode reports more than 3.5 trillion training tokens for StarCoder2-7B. The Chinchilla paper explains how model size and token count trade off under a compute budget.</p>
+    <p class="checkpoint"><strong>Checkpoint.</strong> Show both loss curves and sample completions. Explain what the curves say about overfitting on your split, or what additional experiment would help distinguish it from undertraining.</p>
+    <p class="sources"><a rel="nofollow" href="https://huggingface.co/datasets/bigcode/the-stack-smol">The Stack Smol dataset card</a> · <a rel="nofollow" href="https://huggingface.co/bigcode/starcoder2-7b">StarCoder2-7B model card</a> · <a rel="nofollow" href="https://arxiv.org/abs/2203.15556">Training Compute-Optimal Large Language Models</a></p>
+
+    <h3 id="local-inference">4. Run pretrained weights locally</h3>
+    <p>Load an instruction-tuned open-weight model in llama.cpp or Ollama. Qwen2.5-Coder-7B-Instruct and gpt-oss-20b are concrete starting points with different hardware requirements. Check the exact model’s license and runtime support. At four bits per weight, 8 billion parameters take about 4 GB of raw weight storage. Quantization metadata, higher-precision tensors, runtime buffers, and the key–value (KV) cache increase the memory you need. Longer prompts and concurrent requests can make the cache a substantial part of that budget.</p>
+    <p>Use dated coding benchmarks to shortlist other models, then compare them on your own tasks. Keep the model version, quantization, context limit, and sampling settings in your run log. Try short and repository-sized prompts at the same settings. Record peak memory, time to first token, and generation speed. The <a href="#long-context">million-token comparison</a> shows how the model’s architecture changes those costs.</p>
+    <p class="checkpoint"><strong>Checkpoint.</strong> A local model answers a few coding questions with source excerpts you supply, within memory and latency limits you’re willing to use every day.</p>
+    <p class="sources"><a rel="nofollow" href="https://github.com/ggml-org/llama.cpp">llama.cpp</a> · <a rel="nofollow" href="https://docs.ollama.com/context-length">Ollama context length</a> · <a rel="nofollow" href="https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF">Qwen2.5-Coder GGUF weights</a> · <a rel="nofollow" href="https://huggingface.co/openai/gpt-oss-20b">gpt-oss-20b model card</a></p>
+
+    <h3 id="fine-tuning">5. Run one small LoRA or QLoRA experiment</h3>
+    <p>Train an adapter on a narrow behavior, such as responding in your team’s code-review format. Give the base model and the adapter the same held-out prompts and source excerpts, then score format compliance and correctness independently. Before you build retrieval, set aside 30 private repository questions with known evidence at the pinned commit. Use different questions for day-to-day tuning. Include a few unanswerable prompts in the broader evaluation to test when the assistant asks for evidence.</p>
+    <p class="checkpoint"><strong>Checkpoint.</strong> Reload the adapter and reproduce the comparison. Explain which conventions it learned, where it regressed, and whether it earned a place in your harness.</p>
+    <p class="sources"><a rel="nofollow" href="https://huggingface.co/docs/peft/en/developer_guides/quantization">Hugging Face PEFT quantization and QLoRA guide</a></p>
+
+    <h3 id="retrieval">6. Retrieve code by symbol, text, and dependency</h3>
+    <p>Start with ripgrep for exact identifiers and paths. Use Tree-sitter to split Java, Kotlin, or Python files into classes or functions, storing the path, range, qualified name, and commit with each entry. Add SQLite FTS5 with BM25 for text search. Try embeddings and reranking only when measured failures justify them, such as a question phrased differently from the source.</p>
+    <p>Use a language server through the Language Server Protocol (LSP) for definitions and resolved references when the server and project support them. IDE rename can return an edit based on those same relationships. A Tree-sitter syntax tree gives you structure and candidates. Graphify (distributed as <code>graphifyy</code>) and Aider’s repo map show how a compact map can help prioritize files. Treat edges inferred from syntax as leads and verify them against source or compiler evidence.</p>
+    <p class="checkpoint"><strong>Checkpoint.</strong> Compare against ripgrep on the 30 private, answerable questions. For a first target, find a required source range in the top five results on at least 24 of 30 questions. Record whether all required evidence was retrieved for multi-file questions, since finding one file can still leave the answer incomplete.</p>
+    <p class="sources"><a rel="nofollow" href="https://github.com/BurntSushi/ripgrep">ripgrep</a> · <a rel="nofollow" href="https://tree-sitter.github.io/tree-sitter/">Tree-sitter</a> · <a rel="nofollow" href="https://www.sqlite.org/fts5.html">SQLite FTS5</a> · <a rel="nofollow" href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/">LSP specification</a> · <a rel="nofollow" href="https://github.com/Graphify-Labs/graphify">Graphify</a> · <a rel="nofollow" href="https://aider.chat/docs/repomap.html">Aider’s repo map</a></p>
+
+    <h3 id="agent-loop">7. Write a read-only agent loop</h3>
+    <p>Give the model a small tool list with operations such as <code>list_dir</code>, <code>search</code>, <code>read_file</code> with line ranges, and <code>find_references</code>. Validate the tool name and arguments in the harness, run the operation, return the result, and repeat until the model answers or hits a limit. Bound tool calls, wall time, and overall context. When a result is too long, return a bounded excerpt and its path and line range so the model can request the rest. Keep the original task and pinned commit in context.</p>
+    <p>Give tools access only to approved files inside the workspace, enforce file boundaries after resolving paths and symlinks, and treat repository content as data. Grammar-constrained JSON can help produce parseable calls. The harness still decides which calls are authorized. Keep a local trace of tool calls and paths and avoid collecting secrets in it.</p>
+    <p class="checkpoint"><strong>Checkpoint.</strong> The assistant answers a multi-file question by finding a definition, tracing a caller, and citing source lines. The trace lets you replay its evidence. An unavailable file or exhausted budget produces a clear incomplete result.</p>
+    <p class="sources"><a rel="nofollow" href="https://github.com/ggml-org/llama.cpp/blob/master/grammars/README.md">llama.cpp grammars</a> · <a rel="nofollow" href="https://arxiv.org/abs/2405.15793">SWE-agent’s agent–computer interface paper</a></p>
+
+    <h3 id="verified-edits">8. Add a controlled edit-and-test loop</h3>
+    <p>Start with one patch tool and named test commands. Run them in a disposable checkout inside a sandbox with no credentials or unnecessary network access. Limit writes to the checkout and cap test time and retries. Show the diff and test output for review before applying changes to the working branch.</p>
+    <p>Try a rename such as changing <code>reserveSeat</code> to <code>holdSeat</code> across 15 files. Ask the language server to resolve the symbol and propose a rename edit when available. Review that diff, then search the old name in configuration, reflective calls, templates, and generated sources. Verify the supported build targets and tests. A frontier model may do better at coordinating these checks. The language server, compiler, tests, and diff still supply the evidence that the edit is ready.</p>
+    <p class="checkpoint"><strong>Checkpoint.</strong> In a known multi-file rename, the assistant updates the required callers, accounts for intentional old-name matches, and leaves unrelated symbols alone. The build and targeted tests pass, and you can explain the diff from the trace.</p>
+    <p>Rerun your private evaluation after each change to the model, prompt, or index. For answers, record correctness and whether the cited lines support the claim. For edits, record the diff review and test outcomes. When a task fails, check whether the right source reached the model. If it did and the model still struggled, try a stronger model through the same harness. You can rent GPUs for a larger open-weight model or use a hosted API where your repository’s data rules permit it.</p>
+  </section>
+
+  <section aria-labelledby="long-context">
+    <h2 id="long-context">What does a million-token context cost?</h2>
+    <p>At one million tokens, full attention can use <strong>131 GB</strong> just to store the context for one request. Linear attention and a selective state-space model (SSM) can carry the same input length in about <strong>68 MB</strong> and <strong>136 MB</strong> of recurrent state, respectively. The example models each have <strong>16 GB</strong> of weights. Those weights are shared across requests, while each independent request needs its own context memory.</p>
+    <p>The estimates use three illustrative dense 8B models with 32 mixing layers, a single 1,000,000-token prompt, BF16 weights and KV cache, and FP32 recurrent state. The hardware is an NVIDIA H100 SXM with 80 GB of VRAM, 3.35 TB/s of memory bandwidth, and about 989 TFLOP/s of dense BF16 tensor compute. GB and MB are decimal.</p>
+    <p class="sources"><a rel="nofollow" href="https://www.nvidia.com/en-us/data-center/h100/">NVIDIA H100 specifications</a></p>
+
+    <div class="table-wrap" role="region" aria-labelledby="context-table-caption" tabindex="0">
+      <table>
+        <caption id="context-table-caption">Persistent VRAM and sequence-mixing work at one million tokens</caption>
+        <thead>
+          <tr><th scope="col">Metric</th><th scope="col">Full attention</th><th scope="col">Linear attention</th><th scope="col">Selective SSM</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Context memory</th><td>131.1 GB</td><td>67.6 MB</td><td>136.4 MB</td></tr>
+          <tr><th scope="row">With weights</th><td>147.1 GB</td><td>16.07 GB</td><td>16.14 GB</td></tr>
+          <tr><th scope="row">Prompt prefill</th><td>262 PFLOP</td><td>~0.067 PFLOP</td><td>~0.17 PFLOP</td></tr>
+          <tr><th scope="row">Decode per token</th><td>524 GFLOP</td><td>~0.067 GFLOP</td><td>~0.17 GFLOP</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>How memory and work scale</h3>
+    <p><strong>Full attention</strong> stores a key and a value per historical position, per layer. With 32 query heads sharing 8 KV heads and 128 dimensions per head, the cache uses 1,000,000 tokens × 32 layers × 8 KV heads × 128 dimensions × 2 tensors × 2 bytes. Giving all 32 heads their own keys and values would raise the cache to 524 GB. Doubling the prompt length doubles the KV cache and decode work per token, and roughly quadruples the prefill attention work. FlashAttention tiles the exact calculation so the quadratic score matrix stays out of GPU memory.</p>
+    <p class="sources"><a rel="nofollow" href="https://aclanthology.org/2023.emnlp-main.298/">Grouped-query attention</a> · <a rel="nofollow" href="https://arxiv.org/abs/2205.14135">FlashAttention</a></p>
+    <p><strong>Linear attention</strong> accumulates key–value associations in a shared state for each head. This example uses 32 heads with a 128 × 128 accumulator and a 128-element normalizer per head in each layer. The <strong>Mamba-2-style SSM</strong> keeps 128 state values for each of 8,192 internal channels per layer, plus a small BF16 convolution buffer. With those dimensions fixed, doubling the prompt roughly doubles prefill work and keeps state size and decode work per token steady.</p>
+    <p class="sources"><a rel="nofollow" href="https://proceedings.mlr.press/v119/katharopoulos20a.html">Linear attention recurrence</a> · <a rel="nofollow" href="https://arxiv.org/html/2405.21060">Mamba-2 and structured state-space duality</a></p>
+
+    <h3>What that means for latency</h3>
+    <p>The dense projections and feed-forward layers add roughly 16 PFLOP per prompt and 16 GFLOP per generated token in each model. That brings a cold prefill to about 278 PFLOP for full attention and 16.1–16.2 PFLOP for either recurrent model. Chunking the prompt can bound temporary activation memory while carrying the cache or recurrent state across chunks.</p>
+    <ul>
+      <li><strong>Full attention on four H100s.</strong> Evenly sharded weights and cache take about 37 GB per GPU before temporary buffers. At 30–50% of aggregate peak compute, prefill takes an estimated 2.3–3.9 minutes. Decode streams about 147 GB of weights and cache across the GPUs per step. At 50–75% of aggregate memory bandwidth, that is about 15–22 ms per token before communication and other overhead.</li>
+      <li><strong>Linear attention or an SSM on one H100.</strong> At the same compute utilization, prefill takes an estimated 33–55 seconds. The 16 GB of weights dominate decode traffic for one request, giving about 6–10 ms per token under the same bandwidth assumption, before other overhead.</li>
+    </ul>
+    <p>These are analytical estimates. Peak VRAM and latency depend on the runtime, prefill chunk size, and GPU communication.</p>
+
+    <h3>Why precise recall still matters for code</h3>
+    <p>Full attention lets the current query score each earlier position individually, even when a detail only becomes relevant much later. In linear attention, similar keys can interfere as their values accumulate. A selective SSM learns what to keep or decay, so a rare identifier or exact quotation can fade as more tokens arrive. Larger recurrent states can improve recall. Across architectures, retrieval quality depends on training, context length, and the task.</p>
+    <p class="sources"><a rel="nofollow" href="https://arxiv.org/abs/2402.18668">Linear attention recall experiments</a> · <a rel="nofollow" href="https://proceedings.mlr.press/v235/jelassi24a.html">SSM copying experiments</a> · <a rel="nofollow" href="https://arxiv.org/abs/2404.06654">RULER long-context evaluation</a></p>
+    <p>For a repository assistant, test whether the model can find exact paths, definitions, and all relevant call sites at the prompt length you plan to use. The <a href="#retrieval">symbol and text search in step 6</a> can bring those source lines into the prompt when the model needs them.</p>
+  </section>
+
+  <section aria-labelledby="cost">
+    <h2 id="cost">When does a local assistant save money?</h2>
+    <p>Frontier-model training puts the project in perspective. Cottier and colleagues estimated about <strong>US$40 million</strong> in amortized hardware and energy for the final training run of OpenAI’s original GPT‑4, released in 2023. In January 2025, Anthropic’s Dario Amodei said Claude 3.5 Sonnet cost <strong>several tens of millions of US dollars</strong> to train. These are historical figures with different accounting methods. Full development can also include staff, experiments, post-training, and evaluation. Your assistant’s budget starts from pretrained weights and pays for using them on real tasks.</p>
+    <p class="sources"><a rel="nofollow" href="https://arxiv.org/html/2405.21015#S3.SS2">Cottier et al. on frontier training costs</a> · <a rel="nofollow" href="https://darioamodei.com/post/on-deepseek-and-export-controls">Amodei’s statement on Claude 3.5 Sonnet</a></p>
+    <p>Run the same workload and apply the same acceptance rubric to both setups. Include hardware depreciation or GPU rental, electricity, indexing, and maintenance for local inference. Include input and output tokens, cache or tool charges where applicable, and retries for hosted inference. Count human review time on both sides if it differs. Compare latency and acceptance rate alongside cost.</p>
+    <p class="checkpoint"><strong>Cost per accepted task</strong> = total cost of all attempts ÷ number of accepted tasks. For example, if 100 tasks cost $12 locally and 60 pass, that’s $0.20 each. If the same tasks cost $15 with a hosted API and 90 pass, that’s about $0.17 each. These are illustrative figures. Use your own measured workload to decide whether to run locally, use an API, or route some tasks to each.</p>
+    <p class="sources"><a rel="nofollow" href="https://developers.openai.com/api/docs/pricing">OpenAI API pricing</a> · <a rel="nofollow" href="https://platform.claude.com/docs/en/about-claude/pricing">Claude API pricing</a></p>
+  </section>
+
+  <section id="faq" aria-labelledby="faq-heading">
+    <h2 id="faq-heading">Frequently asked questions</h2>
+    <h3>Do I need to train an AI model from scratch for my codebase?</h3>
+    <p>Start with pretrained open weights for a practical assistant. Connect the model to repository search and file-reading tools so it can use current code. Train a tiny model from scratch if you want to learn how language modeling works.</p>
+    <h3>Should I use retrieval or fine-tuning?</h3>
+    <p>Use retrieval for facts that change, such as where a function is defined or which modules call it. Use fine-tuning to teach recurring behaviors, such as a review format. Test each with held-out tasks.</p>
+    <h3>Will running the assistant locally save money?</h3>
+    <p>It depends on hardware, workload, and how many answers or edits you accept. Compare local and hosted costs on the same tasks, including failed attempts, maintenance, and review time where relevant. Divide each total by its accepted task count.</p>
+    <h3>Can a small model rename a method across 15 files?</h3>
+    <p>It can coordinate the task when the language server can resolve the symbol and the harness can verify the resulting patch. Check for references in configuration and reflective calls, then run the build and tests and review the diff.</p>
+    <h3>How much memory does a 4-bit model need?</h3>
+    <p>Eight billion parameters at four bits each take about 4 GB for the raw weights. Leave more room for quantization metadata, tensors kept at higher precision, runtime buffers, and context memory such as a key–value cache or recurrent state. Measure peak memory with the context length and concurrency you plan to use.</p>
+  </section>
+</article>
+</main>
+<footer><a href="/">Dawud Tan home</a></footer>
+</body>
+</html>

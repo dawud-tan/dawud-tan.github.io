@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sebelum menandatangani: memeriksa operator sistem tiket bioskop Anda</title>
+<meta name="description" content="Untuk pemilik bioskop yang akan menyerahkan penjualan tiketnya kepada operator movie-ticket: sembilan hal yang perlu diperiksa sebelum menandatangani perjanjian, cara memeriksanya sendiri tanpa harus percaya kepada operator, dan seperti apa jawaban yang wajar.">
+<meta name="keywords" content="pengelola bioskop, operator sistem tiket, movie-ticket, penjualan ganda, row level security, Midtrans, UU PDP pengendali prosesor, PSE lingkup privat, BANI, Pengadilan Negeri, UU 24/2009 bahasa perjanjian, PBJT tontonan film, UU 1/2022, PP 35/2023">
+<meta name="author" content="Claude Opus 5.5">
+<link rel="canonical" href="https://dawud-tan.github.io/pengelola-bioskop.html">
+<link rel="alternate" hreflang="id-ID" href="https://dawud-tan.github.io/pengelola-bioskop.html">
+<link rel="alternate" hreflang="x-default" href="https://dawud-tan.github.io/pengelola-bioskop.html">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Dawud Tan">
+<meta property="og:title" content="Sebelum menandatangani: memeriksa operator sistem tiket bioskop Anda">
+<meta property="og:description" content="Sembilan pemeriksaan untuk pemilik bioskop: penjualan ganda, pemisahan data antarbioskop, uang, data pribadi, pendaftaran, letak server, cara keluar, isi perjanjian, dan pajak.">
+<meta property="og:url" content="https://dawud-tan.github.io/pengelola-bioskop.html">
+<meta property="og:locale" content="id_ID">
+<meta property="article:published_time" content="2026-11-04T20:00:00+07:00">
+<meta property="article:modified_time" content="2026-11-05T20:32:00+07:00">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Sebelum menandatangani: memeriksa operator sistem tiket bioskop Anda">
+<meta name="twitter:description" content="Sembilan pemeriksaan untuk pemilik bioskop sebelum menyerahkan penjualan tiket kepada operator.">
+<meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#131518" media="(prefers-color-scheme: dark)">
+<style>
+  :root{
+    color-scheme: light dark;
+    --bg:#f7f6f2; --panel:#ffffff; --ink:#1a1c20; --ink-soft:#50566a; --line:#e2dfd7;
+    --accent:#9b3a12; --accent-soft:#f6ebe4; --ok:#276b43; --ok-soft:#e5f2ea;
+    --warn:#8a5b0c; --warn-soft:#f8f0dd;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,"Liberation Mono",monospace;
+    --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --measure:72ch;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#131518; --panel:#1a1d22; --ink:#e8e6e1; --ink-soft:#a8aebb; --line:#2d323b;
+      --accent:#ef9a66; --accent-soft:#2a221d; --ok:#7fcf9d; --ok-soft:#1b2a21;
+      --warn:#e6b561; --warn-soft:#2a2418;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.7 var(--sans);
+       padding:0 max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left))}
+  main{max-width:860px;margin:0 auto;padding:40px 0 64px}
+  p,li{max-width:var(--measure)}
+  a{color:var(--accent);text-underline-offset:2px}
+  h1{font-size:clamp(28px,4.6vw,40px);line-height:1.15;letter-spacing:-.012em;margin:8px 0 18px}
+  h2{font-size:24px;line-height:1.3;margin:56px 0 12px;padding-top:10px;border-top:1px solid var(--line)}
+  h3{font-size:18.5px;line-height:1.35;margin:34px 0 8px}
+  .kicker{margin:0;color:var(--ink-soft);font-size:13.5px;letter-spacing:.06em;text-transform:uppercase}
+  .lead{font-size:19px}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px 22px 12px;margin:26px 0}
+  .box h2{border:0;margin:14px 0 4px;padding:0;font-size:20px}
+  .toc ol{padding-left:22px;margin:8px 0}
+  .toc li{margin:3px 0}
+  code{font-family:var(--mono);font-size:.86em;background:var(--accent-soft);padding:.08em .32em;border-radius:4px;
+       overflow-wrap:anywhere}
+  pre{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 16px;overflow-x:auto;
+      font-size:14px;line-height:1.5}
+  pre code{background:none;padding:0;font-size:inherit;overflow-wrap:normal}
+  .table-wrap{overflow-x:auto;margin:16px 0 22px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+  table{border-collapse:collapse;width:100%;font-size:15px;line-height:1.5}
+  caption{caption-side:top;text-align:left;padding:10px 14px 8px;color:var(--ink-soft);font-size:14px}
+  th,td{padding:9px 12px;border-top:1px solid var(--line);text-align:left;vertical-align:top}
+  thead th{background:var(--accent-soft);font-weight:600}
+  tbody th{font-weight:600;min-width:9em}
+  td.gap{background:var(--warn-soft)}
+  .note{background:var(--warn-soft);border:1px solid var(--line);border-radius:12px;padding:10px 18px;font-size:15.5px}
+  .rule{background:var(--ok-soft);border:1px solid var(--line);border-radius:12px;padding:10px 18px}
+  .sources li{margin:7px 0;overflow-wrap:anywhere}
+  footer{max-width:860px;margin:0 auto;padding:22px 0 44px;border-top:1px solid var(--line);color:var(--ink-soft);font-size:14.5px}
+  @media (max-width:600px){
+    body{font-size:16px}
+    .lead{font-size:17.5px}
+    h2{font-size:21px;margin-top:46px}
+    .box{padding:4px 16px 10px}
+    th,td{padding:8px 10px}
+  }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://dawud-tan.github.io/pengelola-bioskop.html#webpage",
+      "url": "https://dawud-tan.github.io/pengelola-bioskop.html",
+      "name": "Sebelum menandatangani: memeriksa operator sistem tiket bioskop Anda",
+      "inLanguage": "id-ID",
+      "isPartOf": {"@id": "https://dawud-tan.github.io/#website"},
+      "mainEntity": {"@id": "https://dawud-tan.github.io/pengelola-bioskop.html#article"},
+      "datePublished": "2026-11-04T20:00:00+07:00",
+      "dateModified": "2026-11-05T20:32:00+07:00"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://dawud-tan.github.io/pengelola-bioskop.html#article",
+      "headline": "Sebelum menandatangani: memeriksa operator sistem tiket bioskop Anda",
+      "description": "Sembilan pemeriksaan untuk pemilik bioskop sebelum menyerahkan penjualan tiket kepada operator movie-ticket, masing-masing dengan cara memeriksa sendiri dan jawaban yang wajar.",
+      "inLanguage": "id-ID",
+      "author": {"@type": "Organization", "name": "Claude Opus 5.5"},
+      "publisher": {"@id": "https://dawud-tan.github.io/#publisher"},
+      "datePublished": "2026-11-04T20:00:00+07:00",
+      "dateModified": "2026-11-05T20:32:00+07:00"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<main>
+
+<header>
+  <p class="kicker">Untuk pemilik dan pengelola bioskop · <time datetime="2026-11-04">4 November 2026</time></p>
+  <h1>Sebelum menandatangani: memeriksa operator sistem tiket bioskop Anda</h1>
+  <p class="lead">Halaman ini untuk pemilik bioskop yang sedang menimbang apakah akan menyerahkan penjualan
+  tiketnya kepada seseorang yang menjalankan movie-ticket. Isinya sembilan pertanyaan. Untuk setiap
+  pertanyaan ada cara memeriksa jawabannya sendiri, tanpa harus percaya kepada operator, dan gambaran
+  jawaban yang wajar.</p>
+</header>
+
+<p class="note" id="nasihat"><strong>Bukan nasihat hukum.</strong> Riset per <time datetime="2026-11-04">4 November
+2026</time>; setiap pasal di sini dibaca dari naskah resminya. Peraturan bisa berubah. Sebelum menandatangani
+perjanjian, mintalah advokat membaca drafnya.</p>
+
+<p><a href="https://github.com/dawud-tan/movie-ticket">movie-ticket</a> adalah kode sumber terbuka
+(lisensi Apache-2.0) untuk pemesanan kursi bioskop. <strong>Operator</strong> di halaman ini adalah orang
+atau perusahaan yang menjalankannya untuk Anda dan menagih Anda untuk itu. Setiap klaim tentang kode
+menunjuk baris pada commit <code>39351cc</code>. Klaim tentang kode
+hanya membuktikan isi kode. Klaim
+tentang server yang benar-benar berjalan hanya terbukti bila diperiksa di server itu, jadi beberapa
+pemeriksaan di bawah meminta operator menjalankan perintah sementara Anda atau pengembang Anda
+menyaksikan.</p>
+
+<p>Pengembang Anda bisa memulai dari bagian <a href="https://github.com/dawud-tan/movie-ticket/blob/main/README.md#questions-an-operator-should-answer-from-the-code">"Questions
+an operator should answer from the code"</a> di README. Di sana ada daftar pertanyaan yang harus bisa
+dijawab operator sambil menunjuk baris kodenya. Halaman ini tidak menyalinnya. Halaman ini membahas apa
+yang perlu Anda minta di dalam perjanjian.</p>
+
+<nav class="box toc" aria-labelledby="toc-judul">
+  <h2 id="toc-judul">Daftar isi</h2>
+  <ol>
+    <li><a href="#ganda">Satu kursi tidak terjual dua kali</a></li>
+    <li><a href="#pemisahan">Data bioskop Anda terpisah dari bioskop lain</a></li>
+    <li><a href="#uang">Uang pembeli</a></li>
+    <li><a href="#data">Data pribadi penonton</a></li>
+    <li><a href="#daftar">Pendaftaran PSE dan OSS</a></li>
+    <li><a href="#server">Letak server, cadangan data, dan saat server mati</a></li>
+    <li><a href="#keluar">Pindah operator atau menjalankan sendiri</a></li>
+    <li><a href="#perjanjian">Isi perjanjian</a></li>
+    <li><a href="#pajak">Pajak tontonan (PBJT)</a></li>
+    <li><a href="#belum">Ringkasan: yang belum ada di kode</a></li>
+    <li><a href="#sumber">Sumber</a></li>
+  </ol>
+</nav>
+
+<section id="ganda">
+<h2>1. Satu kursi tidak terjual dua kali</h2>
+
+<p><strong>Tanyakan:</strong> bagaimana sistem mencegah dua pembeli, atau loket dan situs web, mendapat kursi
+yang sama pada pertunjukan yang sama?</p>
+
+<p><strong>Periksa sendiri.</strong> Di kode, pencegahnya adalah satu aturan di basis data:
+<code>reservation_no_overlap</code>, sebuah <code>EXCLUDE</code> PostgreSQL yang menolak dua pemesanan aktif
+untuk kursi yang sama pada waktu yang tumpang tindih
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/db/migration/V1__init_schema.sql#L485-L487">V1__init_schema.sql:485–487</a>).
+Ada tiga pasang uji. Uji "differential" sengaja mencabut satu perlindungan dan menuntut anomalinya
+<em>benar-benar terjadi</em>. Uji pasangannya memakai perlindungan yang asli dan menuntut anomali itu
+<em>tidak</em> terjadi.</p>
+
+<div class="table-wrap">
+<table>
+<caption>Tiga pasang uji di <code>src/test/java/com/protek/booking/concurrency/</code></caption>
+<thead><tr><th scope="col">Yang diuji</th><th scope="col">Perlindungan dicabut (harus memperlihatkan anomali)</th><th scope="col">Perlindungan asli (harus bertahan)</th></tr></thead>
+<tbody>
+<tr><th scope="row">Kursi yang sama</th>
+<td><a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/test/java/com/protek/booking/concurrency/SeatBookingConcurrencyDifferentialTest.kt#L17-L31">SeatBookingConcurrencyDifferentialTest</a>: skema dibangun dari migrasi asli tanpa <code>EXCLUDE</code>; delapan pemesanan serentak untuk satu kursi semuanya berhasil</td>
+<td><code>SeatBookingConcurrencyTest</code></td></tr>
+<tr><th scope="row">Pertunjukan dibatalkan saat kursi dipesan</th>
+<td><a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/test/java/com/protek/booking/concurrency/SessionCancellationRaceDifferentialTest.kt#L20-L55">SessionCancellationRaceDifferentialTest</a>: pembacaan status tanpa <code>FOR UPDATE</code>; pembatalan menyelip dan pesanan tertinggal pada pertunjukan yang batal</td>
+<td><code>SessionCancellationRaceTest</code></td></tr>
+<tr><th scope="row">Batas pembelian per hari</th>
+<td><a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/test/java/com/protek/booking/concurrency/DailyPurchaseCapConcurrencyDifferentialTest.kt#L123-L165">DailyPurchaseCapConcurrencyDifferentialTest</a>: tanpa kunci pelanggan, empat pemesanan serentak lolos hitungan dan hari itu melewati batas; satu per satu tetap berhenti di batas</td>
+<td><code>DailyPurchaseCapConcurrencyTest</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Jalankan keenamnya (perlu Docker atau podman, lihat bagian
+<a href="https://github.com/dawud-tan/movie-ticket/blob/main/README.md#tests">"Tests"</a> di README):</p>
+<pre><code>./mvnw test -DskipJsTests -Dtest='SeatBookingConcurrencyDifferentialTest,SeatBookingConcurrencyTest,SessionCancellationRaceDifferentialTest,SessionCancellationRaceTest,DailyPurchaseCapConcurrencyDifferentialTest,DailyPurchaseCapConcurrencyTest'</code></pre>
+
+<p>Keenamnya harus lulus. Uji differential yang lulus berarti anomalinya memang muncul ketika
+perlindungan dicabut. Itu yang membuat kelulusan uji pasangannya menjadi bukti, bukan kebetulan. Lalu
+pastikan aturan itu juga ada di basis data yang berjalan. Minta operator menjalankan perintah berikut
+di depan Anda:</p>
+<pre><code>SELECT conname FROM pg_constraint WHERE conname = 'reservation_no_overlap';</code></pre>
+
+<p class="rule"><strong>Jawaban yang wajar:</strong> operator menunjuk baris <code>EXCLUDE</code>, menjalankan
+keenam uji di depan Anda, dan memperlihatkan aturan itu di basis data produksi. Loket juga memesan
+melalui jalur yang sama
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/web/admin/CounterSaleResource.kt#L95">CounterSaleResource.kt:95</a>),
+jadi tidak ada "kursi loket" di luar aturan ini, <em>asal</em> semua penjualan, termasuk di loket, memang
+dilakukan melalui sistem. Kursi yang dijual di loket dengan buku kertas tidak diketahui sistem.</p>
+</section>
+
+<section id="pemisahan">
+<h2>2. Data bioskop Anda terpisah dari bioskop lain</h2>
+
+<p><strong>Tanyakan:</strong> bila operator menjalankan beberapa bioskop di satu basis data, apa yang
+mencegah satu bioskop membaca pesanan bioskop lain? Aplikasinya terhubung ke basis data sebagai peran
+(<em>role</em>) apa?</p>
+
+<p><strong>Periksa sendiri.</strong> Pemisahannya memakai <em>row level security</em> (RLS) PostgreSQL.
+Dua puluh tabel milik bioskop memakai <code>ENABLE</code> dan <code>FORCE ROW LEVEL SECURITY</code>, dengan
+kebijakan yang hanya meloloskan baris milik bioskop yang sedang dilayani
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/db/migration/V1__init_schema.sql#L949-L1049">V1:886–981</a>).
+Bioskop itu ditetapkan per transaksi dengan <code>set_config(…, true)</code>
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/db/Db.kt#L107-L117">Db.kt:107–117</a>).
+Migrasi membuat peran <code>app_runtime</code> tanpa hak superuser dan tanpa <code>BYPASSRLS</code>
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/db/migration/V1__init_schema.sql#L1074-L1079">V1:1001–1006</a>),
+dan peran itu tidak bisa mengubah atau menghapus jejak audit
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/db/migration/V1__init_schema.sql#L1102">V1:1029</a>).</p>
+
+<p>Ada satu jebakan. Bila operator tidak mengisi apa pun, aplikasi terhubung sebagai <code>booking</code>,
+pemilik tabel, bukan sebagai <code>app_runtime</code>
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/application.properties#L67">application.properties:67</a>,
+<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/application.properties#L112">:112</a>).
+RLS tetap berlaku bagi pemilik karena <code>FORCE</code>, tetapi pemilik bisa mengubah kebijakannya dan
+jejak audit tidak lagi hanya bisa ditambah
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/main/README.md#against-your-own-postgresql-18">README, "Against
+your own PostgreSQL 18"</a>). Aplikasi menulis di log saat mulai dengan peran
+apa ia terhubung, dan memberi peringatan bila peran itu bisa mengubah atau menghapus <code>audit_log</code>
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/db/RuntimeRoleStartupLog.kt#L30-L47">RuntimeRoleStartupLog.kt:30–47</a>).
+Minta operator memperlihatkan baris log itu, lalu menjalankan di basis data produksi:</p>
+<pre><code>SELECT usename, count(*) FROM pg_stat_activity WHERE datname = current_database() GROUP BY usename;
+SELECT rolname, rolsuper, rolbypassrls FROM pg_roles WHERE rolname IN ('app_runtime', 'booking');
+SELECT relname FROM pg_class
+ WHERE relnamespace = 'public'::regnamespace AND relkind = 'r' AND relrowsecurity AND relforcerowsecurity;</code></pre>
+
+<p>Baris pertama harus memperlihatkan koneksi aplikasi atas nama <code>app_runtime</code>. Baris kedua harus
+<code>false</code> di kedua kolom untuk kedua peran. Baris ketiga harus mendaftar kedua puluh tabel itu.
+Tiga tabel sengaja tidak memakai RLS: <code>tenant</code>, <code>platform_agreement_version</code>, dan
+<code>app_user</code>, yang menyimpan alamat email akun
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/db/migration/V1__init_schema.sql#L284-L294">V1:284–294</a>).</p>
+
+<p class="note"><strong>Yang tidak dilindungi RLS: operator sendiri.</strong> RLS melindungi satu bioskop dari
+bioskop lain dan dari kesalahan di kode aplikasi. RLS tidak melindungi Anda dari orang yang memegang
+kredensial pemilik basis data. Operator yang memegangnya bisa membaca semua baris semua bioskop,
+termasuk email dan tanggal lahir penonton
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/db/migration/V1__init_schema.sql#L251-L266">V1:251–266</a>).
+Itu bukan cacat. Begitulah basis data bekerja. Perlindungannya ada di perjanjian (bagian 4) dan pada
+pilihan siapa yang memegang server (bagian 6).</p>
+
+<p class="rule"><strong>Jawaban yang wajar:</strong> aplikasi berjalan sebagai <code>app_runtime</code>,
+diperlihatkan dengan tiga perintah di atas. Operator menyebut siapa saja yang memegang kredensial pemilik
+basis data dan berjanji tertulis untuk tidak membuka data Anda kecuali atas perintah Anda.</p>
+</section>
+
+<section id="uang">
+<h2>3. Uang pembeli</h2>
+
+<p><strong>Tanyakan:</strong> uang dari pembeli masuk ke akun pedagang (<em>merchant</em>) Midtrans milik siapa?
+Kapan uang itu sampai ke rekening Anda? Siapa yang mengembalikan uang pembeli? Apa yang dicocokkan sistem?</p>
+
+<h3>Akun pedagang</h3>
+<p>Kode memakai <strong>satu</strong> akun pedagang Midtrans untuk satu instalasi. Nomornya diambil dari
+konfigurasi (<code>MIDTRANS_MERCHANT_ID</code>,
+<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/application.properties#L222-L224">application.properties:213–215</a>),
+dan komentar di skemanya berbunyi "Our Midtrans merchant id, from configuration — an aggregator integration
+has no per-tenant acquirer merchant id"
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/db/migration/V1__init_schema.sql#L657-L659">V1:633–635</a>).
+Artinya, bila satu instalasi melayani beberapa bioskop, uang pembeli semua bioskop itu masuk ke satu
+akun, dan akun itu milik siapa pun yang mengisi konfigurasinya. Biasanya operator.</p>
+
+<p class="rule"><strong>Jawaban yang wajar:</strong> uang pembeli masuk ke akun Midtrans atas nama bioskop Anda
+dan diselesaikan (<em>settlement</em>) ke rekening bank Anda. Operator tidak pernah memegang uang pembeli.
+Dengan kode hari ini, itu berarti <strong>satu instalasi untuk bioskop Anda sendiri</strong>, dengan
+kredensial akun Anda. Periksa sendiri: Anda masuk ke dasbor Midtrans dengan akun Anda, dan nomor pedagang
+yang tampil di sana sama dengan yang tercatat di setiap baris pembayaran (kolom
+<code>payment.qris_merchant_id</code>).</p>
+<p class="note"><strong>Belum ada:</strong> akun pedagang per bioskop di dalam satu instalasi bersama.</p>
+
+<h3>Kapan uang sampai</h3>
+<p>Jadwal <em>settlement</em> diatur perjanjian Anda dengan Midtrans, bukan oleh kode ini. Halaman ini tidak
+memeriksanya. Tanyakan kepada Midtrans, bukan kepada operator.</p>
+
+<h3>Pengembalian uang</h3>
+<p>Untuk pembayaran QRIS, sistem mengembalikan uang sendiri. Setiap utang pengembalian yang dicatat dikirim lewat BI-SNAP (<em>QR MPM refund</em>) ke aplikasi pembayaran pembeli setelah pembatalannya tersimpan (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/payment/RefundService.kt#L75-86">RefundService.kt:75–86</a>); kiriman yang tidak dijawab Midtrans diulang oleh penyapu 5 menit, paling banyak 12 kali. Bila Midtrans menolak, utangnya tetap ada dan masalahnya tampil di <code>/admin/payments</code> dengan kalimat yang menyebut langkah berikutnya, yaitu pengembalian dari dasbor Midtrans atau tunai di loket (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/payment/RefundService.kt#L193-218">RefundService.kt:188–213</a>). Uang tunai tidak pernah dikirim ke Midtrans. Pembeli menerima email, dan push bila ia menyalakannya, ketika pertunjukan dibatalkan dan ketika uang dikirim atau ditolak (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/service/BuyerMail.kt#L97-140">BuyerMail.kt:97–140</a>); email hanya terkirim bila SMTP sudah diisi. <strong>Baru terbukti di <em>sandbox</em> Midtrans dengan GoPay.</strong> Aplikasi pembayaran lain, batas waktu pengembalian tiap penyedia, dan ShopeePay (hanya pengembalian penuh, hanya pukul 06.00–23.55 WIB) baru bisa diuji di produksi. Utang dicatat dan ditampilkan kepada staf di <code>/admin/payments</code> dan kepada pembeli di halaman pesanannya:</p>
+<ul>
+  <li>ketika staf membatalkan kursi yang sudah dibayar
+  (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/service/BookingService.kt#L783-802">BookingService.kt:783–802</a>);</li>
+  <li>ketika pembayaran QRIS masuk <em>setelah</em> kodenya kedaluwarsa. Kursinya tidak diterbitkan, karena
+  masa tahannya sudah habis
+  (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/payment/PaymentService.kt#L463-490">PaymentService.kt:463–490</a>);</li>
+  <li>ketika staf menekan "Cancel showing": setiap kursi pada pertunjukan itu dibatalkan dan setiap kursi
+  yang sudah dibayar dicatat sebagai utang, dalam satu transaksi
+  (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/service/BookingService.kt#L680-729">BookingService.kt:680–729</a>).
+  QR yang masih terbuka ditarik dan dibatalkan di Midtrans; bila pembeli tetap sempat membayarnya, jumlah itu juga
+  dicatat sebagai utang;</li>
+  <li>ketika Midtrans melaporkan pengembalian (<code>04</code>), yang dihitung adalah tiap pengembalian dalam riwayatnya, bukan jumlah pesanan, dan setiap pengembalian dihitung sekali. Pengembalian yang tidak menutup utang apa pun ditandai untuk staf
+  (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/payment/PaymentService.kt#L424-461">PaymentService.kt:424–461</a>).</li>
+</ul>
+<p>Karena uang masuk ke akun Anda, kewajiban mengembalikannya kepada pembeli juga ada pada Anda. Hak
+pembeli dijelaskan di <a href="pembeli-tiket.html">halaman untuk pembeli tiket</a>.</p>
+
+<h3>Pencocokan</h3>
+<p>Setiap 5 menit, sistem menanyakan kepada Midtrans status pembayaran yang notifikasinya tidak sampai
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/payment/PaymentReconciliationService.kt#L16-L30">PaymentReconciliationService.kt:16–30</a>,
+<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/application.properties#L237">application.properties:228</a>),
+dan berhenti menanyakan setelah satu jam
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/application.properties#L242">:233</a>).
+Itu pencocokan status per transaksi. Sistem tidak mencocokkan laporan <em>settlement</em> Midtrans atau
+mutasi rekening Anda dengan penjualan.</p>
+
+<p class="rule"><strong>Jawaban yang wajar:</strong> operator menjelaskan prosedur tertulis untuk tiga kasus
+di atas (QRIS terlambat, pertunjukan dibatalkan, pembayaran ganda): siapa yang melihat, dalam berapa hari
+pembeli mendapat uangnya kembali, dan siapa yang menekan tombol di dasbor Midtrans untuk pengembalian yang ditolak.</p>
+<p class="note"><strong>Belum ada:</strong> pengembalian uang yang teruji di produksi dan untuk aplikasi pembayaran selain GoPay;
+pencocokan dengan laporan <em>settlement</em>.</p>
+
+<h3>Biaya operator dan penghentian layanan</h3>
+<p>Kode menagih bioskop dengan tarif bulanan tetap per paket, bukan per tiket
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/service/BillingService.kt#L20-L30">BillingService.kt:20–30</a>).
+Angka bawaan di
+<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/application.properties#L341-L343">application.properties:308–310</a>
+hanya contoh konfigurasi, bukan harga siapa pun. Empat belas hari setelah tagihan lewat jatuh tempo, staf
+operator dapat menandai bioskop sebagai <code>suspended</code> dengan satu tombol
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/service/BillingService.kt#L174-L184">BillingService.kt:174–184</a>).
+Status itu menolak setiap penahanan kursi baru di semua saluran: web, API
+aplikasi, dan loket
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/service/BookingService.kt#L351-L359">BookingService.kt:343–351</a>).
+Kursi yang sudah ditahan sebelumnya tetap bisa dibayar dan tiket yang sudah lunas tetap bisa dipakai masuk,
+karena pembelinya tidak berbuat salah. Jadi satu tombol operator menghentikan penjualan Anda. Pastikan
+perjanjian menentukan kapan tombol itu boleh ditekan, termasuk pemberitahuan tertulis sebelum layanan
+dihentikan.</p>
+</section>
+
+<section id="data">
+<h2>4. Data pribadi penonton</h2>
+
+<p><strong>Tanyakan:</strong> siapa pengendali dan siapa prosesor data pribadi? Pihak lain siapa saja yang ikut
+menerima data? Bagaimana bentuk data Anda ketika Anda pergi? Bagaimana penghapusan dilakukan? Seberapa cepat
+Anda diberi tahu bila terjadi kebocoran?</p>
+
+<h3>Peran</h3>
+<p>UU 27/2022 tentang Pelindungan Data Pribadi membedakan Pengendali Data Pribadi, yang menentukan tujuan
+dan mengendalikan pemrosesan (Pasal 1 angka 4), dari Prosesor, yang memproses "atas nama" Pengendali
+(Pasal 1 angka 5). Pembagian yang lazim: bioskop Anda Pengendali, operator Prosesor. Pembagian itu ditentukan
+oleh perjanjian, bukan oleh kode. Akibatnya:</p>
+<ul>
+  <li>Prosesor wajib memproses "berdasarkan perintah Pengendali" (Pasal 51 ayat 1), dan pemrosesan itu
+  "termasuk dalam tanggung jawab Pengendali" (ayat 3). Pemrosesan "di luar perintah dan tujuan" menjadi
+  tanggung jawab Prosesor (ayat 6).</li>
+  <li>Prosesor "wajib mendapatkan persetujuan tertulis dari Pengendali" sebelum melibatkan prosesor lain
+  (Pasal 51 ayat 5). Kode ini dapat mengirim data ke penyedia server, Midtrans, Google (masuk dengan akun
+  Google, <a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/application.properties#L358-L361">application.properties:325–328</a>;
+  Google Wallet, <a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/application.properties#L469">:436</a>),
+  Firebase untuk notifikasi, dan penyedia model bahasa untuk asisten <code>/chat</code> bila diaktifkan.
+  Mintalah daftar tertulis yang menyebut mana yang aktif.</li>
+</ul>
+
+<h3>Kebocoran</h3>
+<p>Bila terjadi kegagalan pelindungan, <strong>Pengendali</strong>, yaitu Anda, wajib memberi tahu secara
+tertulis "paling lambat 3 x 24 (tiga kali dua puluh empat) jam" kepada Subjek Data Pribadi dan lembaga
+(Pasal 46 ayat 1). Pemberitahuan itu memuat data yang terungkap, kapan dan bagaimana terungkapnya, serta upaya
+penanganannya (ayat 2). Anda hanya bisa memenuhinya bila operator memberi tahu Anda jauh lebih awal.</p>
+<p class="rule"><strong>Jawaban yang wajar:</strong> operator memberi tahu Anda paling lambat 24 jam sejak
+mengetahui kebocoran, dengan isi seperti Pasal 46 ayat 2.</p>
+
+<h3>Salinan data dan penghapusan</h3>
+<p>Penonton berhak memperoleh salinan datanya (Pasal 7) dan berhak menghapusnya (Pasal 8). Di kode belum ada
+fitur ekspor, baik untuk satu penonton maupun untuk seluruh data satu bioskop. Belum ada pula fitur
+penghapusan. Tabel <code>customer_pii</code> punya kolom <code>deleted_at</code>
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/db/migration/V1__init_schema.sql#L739-L745">V1:715–721</a>),
+tetapi tidak ada kode yang mengisinya.</p>
+<p>Cara sementara yang bisa diperiksa: karena RLS, perintah <code>\copy</code> di <code>psql</code> yang dijalankan
+sebagai <code>app_runtime</code>, setelah <code>set_config('app.current_tenant_id', '&lt;id bioskop Anda&gt;', false)</code>,
+hanya mengeluarkan baris milik bioskop Anda. Untuk instalasi milik Anda sendiri, cadangan
+<code>pg_dump</code> utuh adalah salinan yang paling lengkap.</p>
+<p class="rule"><strong>Jawaban yang wajar:</strong> perjanjian menyebut format (dump PostgreSQL atau CSV per
+tabel), batas waktu penyerahan setelah berakhir, batas waktu penghapusan salinan operator dengan konfirmasi
+tertulis, dan siapa yang menangani permintaan salinan atau penghapusan dari penonton selama perjanjian
+berjalan.</p>
+<p class="note"><strong>Belum ada:</strong> ekspor data satu bioskop; salinan data satu penonton; penghapusan
+data penonton.</p>
+</section>
+
+<section id="daftar">
+<h2>5. Pendaftaran PSE dan OSS</h2>
+
+<p><strong>Tanyakan:</strong> siapa Penyelenggara Sistem Elektronik (PSE) Lingkup Privat untuk layanan ini,
+operator atau bioskop Anda? Apakah pihak itu sudah terdaftar, dan apa nomor tanda daftarnya?</p>
+<p>Pertanyaan ini masih terbuka. Panduan di repositori menyebut dua kemungkinan bacaan dan tidak menutupnya
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/main/docs/pse-oss-registration.md#2-who-registers--still-open-and-this-file-does-not-close-it">docs/pse-oss-registration.md,
+bagian 2</a>). Di sana juga dijelaskan bahwa pendaftaran di OSS bergantung pada NIB. Kode menyiapkan satu
+kolom per bioskop, <code>tenant.pse_registration_no</code>
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/db/migration/V1__init_schema.sql#L75">V1:75</a>).
+Kolom itu boleh kosong. Kode juga mewajibkan nomor telepon
+pengaduan saat bioskop didaftarkan
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/service/TenantProvisioningService.kt#L251-L255">TenantProvisioningService.kt:251–255</a>),
+dan nomor itu tampil di bagian bawah setiap halaman pembeli, bersama nomor tanda daftar PSE bila sudah
+dicatat
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/resources/templates/base.html#L155">base.html:155</a>).</p>
+<p class="rule"><strong>Jawaban yang wajar:</strong> perjanjian menyebut pihak yang mendaftar, dan sebelum
+penjualan pertama pihak itu menyerahkan NIB serta nomor tanda daftar PSE-nya. Bila belum jelas, operator
+mengatakan belum jelas dan menyebut siapa yang akan memutuskannya, bukan menyatakan "sudah beres".</p>
+</section>
+
+<section id="server">
+<h2>6. Letak server, cadangan data, dan saat server mati</h2>
+
+<p><strong>Tanyakan:</strong> di mana server berada, siapa yang memegang kredensial pemilik basis data, siapa yang
+membuat cadangan, dan apa yang terjadi saat server mati pada jam ramai?</p>
+
+<div class="table-wrap">
+<table>
+<caption>Tiga letak server dan siapa yang bisa membaca semua data</caption>
+<thead><tr><th scope="col">Letak</th><th scope="col">Pemegang kredensial pemilik basis data</th><th scope="col">Yang perlu ditanyakan</th></tr></thead>
+<tbody>
+<tr><th scope="row">Di bioskop Anda (server on-premise milik bioskop)</th><td>Anda, atau orang yang Anda beri</td><td>Siapa yang merawat perangkat keras, listrik, dan internetnya; bagaimana operator masuk dari jauh dan bagaimana aksesnya dicabut</td></tr>
+<tr><th scope="row">Di tempat operator (server on-premise operator atau colocation)</th><td>Operator</td><td>Alamat dan pengamanan fisiknya; siapa saja yang punya akses; apakah server itu juga melayani bioskop lain</td></tr>
+<tr><th scope="row">Di cloud</th><td>Pemilik akun cloud</td><td>Akun cloud atas nama siapa; region-nya; siapa yang membayar tagihannya</td></tr>
+</tbody>
+</table>
+</div>
+<p>Biaya ketiganya dibandingkan di <a href="on-premise-vs-cloud.html">halaman on-premise atau cloud</a> (sedang
+disusun).</p>
+
+<h3>Cadangan dan uji pemulihan</h3>
+<p>README dan <code>docs/</code> tidak memuat prosedur cadangan atau pemulihan. Itu urusan operator.</p>
+<p class="rule"><strong>Jawaban yang wajar:</strong> ada cadangan terjadwal yang disimpan di tempat lain, dan
+perjanjian menyebut berapa lama data terakhir boleh hilang serta berapa lama pemulihan boleh berlangsung.
+Yang terpenting, ada <strong>uji pemulihan yang Anda saksikan</strong>: cadangan dipulihkan ke PostgreSQL
+yang kosong, aplikasi dijalankan di atasnya, dan pesanan terakhir yang Anda kenal muncul. Cadangan yang
+belum pernah dipulihkan belum terbukti bisa dipakai.</p>
+<p class="note"><strong>Belum ada:</strong> prosedur cadangan dan pemulihan yang tertulis di repositori.</p>
+
+<h3>Saat server mati</h3>
+<p>movie-ticket tidak punya aplikasi loket atau kios yang bisa bekerja tanpa server. Halaman loket
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/web/admin/CounterSaleResource.kt#L95">CounterSaleResource.kt</a>)
+dan pemindai di pintu masuk dilayani oleh server yang sama dengan situs pembeli. Bila server mati, penjualan
+daring, penjualan loket lewat sistem, dan pemeriksaan tiket di pintu berhenti bersamaan.</p>
+<p class="rule"><strong>Jawaban yang wajar:</strong> ada rencana tertulis untuk menjual dan memeriksa tiket
+secara manual. Rencana itu menyebut siapa yang memutuskan kursi mana yang boleh dijual manual, karena
+kursi yang dijual di luar sistem tidak diketahui sistem (bagian 1). Ada pula cara mencatat penjualan
+manual itu ke sistem setelah server hidup lagi, waktu tanggap operator untuk gangguan "tidak bisa menjual
+sama sekali", dan nomor yang bisa dihubungi pada jam tayang, termasuk malam dan akhir pekan.</p>
+</section>
+
+<section id="keluar">
+<h2>7. Pindah operator atau menjalankan sendiri</h2>
+
+<p>Kodenya berlisensi Apache-2.0
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/LICENSE">LICENSE</a>). Bioskop Anda boleh
+menjalankannya sendiri atau memindahkannya ke operator lain. Lisensi ini tidak mewajibkan operator membuka
+perubahan yang ia buat pada kodenya. Bila operator menjalankan versi yang diubah, perubahan itu hanya Anda
+dapatkan bila perjanjian memintanya.</p>
+
+<div class="table-wrap">
+<table>
+<caption>Yang harus Anda bawa ketika pindah</caption>
+<thead><tr><th scope="col">Barang</th><th scope="col">Mengapa</th></tr></thead>
+<tbody>
+<tr><th scope="row">Data</th><td>Dump basis data atau CSV per tabel (bagian 4), termasuk pesanan yang belum ditonton dan jejak audit</td></tr>
+<tr><th scope="row">Kode yang berjalan</th><td>Hash commit yang dipakai, ditambah setiap perubahan operator. Tanpa itu, data Anda mungkin tidak cocok dengan versi publik</td></tr>
+<tr><th scope="row">Nama domain</th><td>Tautan pemesanan dan kode tiket yang sudah tercetak menunjuk ke domain itu. Domain atas nama operator berarti tautan Anda ikut pergi</td></tr>
+<tr><th scope="row">Akun Midtrans dan kuncinya</th><td>Bila akun atas nama Anda (bagian 3), Anda cukup memasang kuncinya di server baru. Bila atas nama operator, pembeli harus pindah ke akun baru</td></tr>
+<tr><th scope="row">Akun Google (masuk, Wallet) dan Firebase</th><td>Proyek atas nama siapa. Pembeli masuk dengan akun Google mereka melalui klien OAuth milik proyek itu</td></tr>
+<tr><th scope="row">Daftar konfigurasi</th><td>Isi berkas lingkungan seperti di <a href="https://github.com/dawud-tan/movie-ticket/blob/main/README.md#etcmovie-ticketenv">README, "/etc/movie-ticket.env"</a>, tanpa rahasia milik operator</td></tr>
+</tbody>
+</table>
+</div>
+<p class="rule"><strong>Jawaban yang wajar:</strong> semua akun di tabel ini atas nama bioskop Anda sejak awal,
+atau perjanjian mewajibkan pemindahannya ketika Anda pergi, dengan batas waktu dan bantuan teknis yang
+disebut.</p>
+</section>
+
+<section id="perjanjian">
+<h2>8. Isi perjanjian</h2>
+
+<h3>Bahasa</h3>
+<p>UU 24/2009 Pasal 31 ayat (1): "Bahasa Indonesia wajib digunakan dalam nota kesepahaman atau perjanjian
+yang melibatkan lembaga negara, instansi pemerintah Republik Indonesia, lembaga swasta Indonesia atau
+perseorangan warga negara Indonesia." Perpres 63/2019 Pasal 26 ayat (4): bila padanan atau terjemahannya
+ditafsirkan berbeda, "bahasa yang digunakan ialah bahasa yang disepakati dalam nota kesepahaman atau
+perjanjian".</p>
+<p>Dalam putusan 1572 K/Pdt/2015 (23 Oktober 2015), Mahkamah Agung menolak kasasi atas putusan yang
+menyatakan sebuah <em>loan agreement</em> batal demi hukum karena "tidak dibuat dalam bahasa Indonesia",
+bertentangan dengan Pasal 31 ayat (1), sehingga dibuat "berdasarkan sebab yang terlarang" (KUHPerdata Pasal
+1335 jo. 1337). SEMA 3/2023, Rumusan Kamar Perdata, Perdata Umum angka 1, kemudian menyatakan: perjanjian
+"dengan pihak asing dalam bahasa asing yang tidak disertai dengan terjemahan bahasa Indonesia tidak dapat
+dijadikan alasan pembatalan perjanjian, kecuali dapat dibuktikan bahwa ketiadaan terjemahan Bahasa Indonesia
+karena adanya iktikad tidak baik oleh salah satu pihak". Bila bioskop Anda dan operator sama-sama pihak
+Indonesia, yang paling aman adalah perjanjian dalam Bahasa Indonesia. Bila ada salinan bahasa lain,
+sebutkan bahasa mana yang berlaku.</p>
+
+<h3>Tempat menyelesaikan sengketa</h3>
+<div class="table-wrap">
+<table>
+<caption>Arbitrase atau Pengadilan Negeri</caption>
+<thead><tr><th scope="col"></th><th scope="col">Arbitrase (misalnya BANI)</th><th scope="col">Pengadilan Negeri</th></tr></thead>
+<tbody>
+<tr><th scope="row">Akibat klausulnya</th><td>Perjanjian arbitrase tertulis "meniadakan hak para pihak" untuk ke Pengadilan Negeri (UU 30/1999 Pasal 11 ayat 1)</td><td>Jalur bawaan</td></tr>
+<tr><th scope="row">Terbuka atau tertutup</th><td>Pemeriksaan "dilakukan secara tertutup" (Pasal 27)</td><td>Tidak diteliti di halaman ini</td></tr>
+<tr><th scope="row">Upaya hukum</th><td>Putusan "final dan mempunyai kekuatan hukum tetap" (Pasal 60)</td><td>Tidak diteliti di halaman ini</td></tr>
+<tr><th scope="row">Lama</th><td>BANI: pemeriksaan paling lambat 180 hari kalender sejak majelis terbentuk, bisa diperpanjang untuk perkara yang sangat kompleks (Peraturan dan Prosedur BANI 2025, Pasal 4 angka 6)</td><td>Gugatan sederhana, untuk nilai gugatan materiil paling banyak Rp500.000.000 (PERMA 4/2019 Pasal 1 angka 1)</td></tr>
+<tr><th scope="row">Biaya</th><td>BANI, untuk perkara yang didaftarkan sejak 2 Januari 2026: pendaftaran Rp5.000.000, biaya arbitrase minimum Rp20.000.000, 10% untuk tuntutan di bawah Rp1 miliar, ditambah PPN; saksi dan ahli tidak termasuk</td><td>Biaya perkara pengadilan; tidak diteliti di halaman ini</td></tr>
+</tbody>
+</table>
+</div>
+<p>Untuk sengketa tentang biaya layanan bulanan, biaya minimum BANI bisa melebihi nilai yang disengketakan.
+Pilih tempat sengketa dengan sadar, bukan karena sudah tertulis di draf.</p>
+
+<h3>Biaya, layanan, dan tanggal berakhir</h3>
+<ul>
+  <li><strong>Biaya:</strong> jumlahnya, apa saja yang termasuk (server, cadangan, dukungan, pembaruan
+  keamanan), dan bagaimana biaya boleh berubah: pemberitahuan tertulis sebelumnya dan hak Anda untuk
+  keluar tanpa denda bila tidak setuju. Apa yang wajar dicakup sebuah biaya dibahas di
+  <a href="on-premise-vs-cloud.html">halaman on-premise atau cloud</a>.</li>
+  <li><strong>Tingkat layanan:</strong> ketersediaan yang dijanjikan, diukur pada jam tayang Anda; waktu
+  tanggap untuk "tidak bisa menjual sama sekali" dan untuk gangguan lain; pemberitahuan sebelum pemeliharaan
+  terjadwal; dan apa yang Anda dapat bila janji itu tidak tercapai.</li>
+  <li><strong>Batas tanggung jawab:</strong> bila tanggung jawab operator dibatasi, periksa apakah kebocoran
+  data pribadi dan pemrosesan di luar perintah Anda ikut dibatasi. Ingat UU PDP Pasal 51 ayat (6).</li>
+  <li><strong>Tanggal berakhir:</strong> tanggal yang pasti, cara memperpanjang, cara mengakhiri lebih awal,
+  dan apa yang tetap berlaku setelah berakhir (data, kerahasiaan, bantuan pindah).</li>
+</ul>
+</section>
+
+<section id="pajak">
+<h2>9. Pajak tontonan (PBJT)</h2>
+
+<p>Tiket bioskop termasuk objek Pajak Barang dan Jasa Tertentu atas jasa kesenian dan hiburan. UU 1/2022
+Pasal 56 ayat (2): "Wajib Pajak PBJT adalah orang pribadi atau Badan yang melakukan penjualan, penyerahan,
+dan/atau konsumsi barang dan jasa tertentu", yaitu bioskop yang menjual tiket. Operator menjual layanan
+perangkat lunak kepada bioskop, bukan pertunjukan. Dasar pengenaannya adalah "jumlah yang dibayarkan oleh
+konsumen" (Pasal 57 ayat 1). Tarifnya "paling tinggi sebesar 10%" (Pasal 58 ayat 1) dan ditetapkan oleh Perda
+masing-masing daerah.</p>
+<p>PP 35/2023 menyatakan PBJT atas jasa kesenian dan hiburan "dipungut berdasarkan penghitungan sendiri oleh
+Wajib Pajak" (Pasal 3 ayat 4 huruf b angka 5), dengan masa pajak satu bulan kalender atau paling lama tiga bulan
+(Pasal 4 ayat 3), dan dasar pengenaan "jumlah pembayaran yang diterima oleh penyelenggara Jasa Kesenian dan
+Hiburan" (Pasal 19 ayat 1 huruf e). Halaman ini tidak menemukan pasal dalam PP 35/2023 yang menunjuk
+penyedia pembayaran atau operator perangkat lunak sebagai pemungut. Apakah Perda daerah Anda menunjuk
+pihak ketiga tidak diteliti. Tanyakan kepada Bapenda setempat.</p>
+<p>Angka yang Anda perlukan untuk melapor: jumlah yang dibayar pembeli per bulan, dipisah tunai dan QRIS,
+dikurangi pengembalian. Harga tersimpan per kursi saat dipesan
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/service/BookingService.kt#L947-L959">BookingService.kt:922–934</a>),
+dan pembayaran tersimpan di tabel <code>payment</code>. Kode tidak punya baris pajak, tetapi ada
+laporan penjualan: <code>/admin/payments/sales.csv</code>, dari formulir di halaman
+<code>/admin</code> (<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/web/admin/PaymentAttentionResource.kt#L97-L99">PaymentAttentionResource.kt:97</a>).
+Isinya satu baris per tanggal, cabang, kota, dan saluran (tunai atau QRIS): jumlah pembayaran, nilai kotor, dan
+pengembalian yang masih terutang
+(<a href="https://github.com/dawud-tan/movie-ticket/blob/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6/src/main/java/com/protek/booking/repository/PaymentRepository.kt#L325">PaymentRepository.kt:291</a>).
+Kota dicantumkan karena PBJT adalah pajak kabupaten/kota. Nilai kotor dan pengembalian tidak dikurangkan: sistem
+tidak memindahkan uang kembali, jadi angka bersih hanya tebakan tentang pengembalian yang dilakukan staf secara
+manual. Laporan itu tidak memuat jumlah tiket maupun tarif PBJT.</p>
+<p class="rule"><strong>Jawaban yang wajar:</strong> operator menyerahkan laporan bulanan tertulis (penjualan per
+hari, tunai dan QRIS, pengembalian), dan perjanjian menyebut apakah harga tiket di sistem sudah termasuk
+PBJT.</p>
+<p class="note"><strong>Belum ada:</strong> laporan pajak (tarif PBJT ditetapkan per daerah) dan jumlah tiket
+terjual di laporan penjualan.</p>
+</section>
+
+<section id="belum">
+<h2>10. Ringkasan: yang belum ada di kode</h2>
+<p>Untuk setiap baris di bawah, jawaban yang wajar tidak bisa diberikan oleh kode hari ini. Jawabannya harus
+datang dari prosedur operator yang tertulis di perjanjian.</p>
+<div class="table-wrap">
+<table>
+<caption>Per commit <code>39351cc</code></caption>
+<thead><tr><th scope="col">Yang belum ada</th><th scope="col">Bagian</th><th scope="col">Pengganti sementara yang wajar diminta</th></tr></thead>
+<tbody>
+<tr><td class="gap">Akun pedagang Midtrans per bioskop dalam satu instalasi</td><td>3</td><td>Satu instalasi untuk bioskop Anda, dengan akun Midtrans Anda</td></tr>
+<tr><td class="gap">Pengembalian uang dari sistem</td><td>3</td><td>Prosedur tertulis dan tenggatnya</td></tr>
+<tr><td class="gap">Pencocokan dengan laporan <em>settlement</em> Midtrans</td><td>3</td><td>Pencocokan bulanan manual oleh operator</td></tr>
+<tr><td class="gap">Ekspor data bioskop dan salinan data penonton</td><td>4</td><td><code>pg_dump</code> atau <code>\copy</code> sebagai <code>app_runtime</code></td></tr>
+<tr><td class="gap">Penghapusan data penonton</td><td>4</td><td>Prosedur manual dengan bukti tertulis</td></tr>
+<tr><td class="gap">Prosedur cadangan dan pemulihan</td><td>6</td><td>Prosedur operator dan uji pemulihan yang disaksikan</td></tr>
+<tr><td class="gap">Penjualan dan pemeriksaan tiket tanpa server</td><td>6</td><td>Rencana manual tertulis</td></tr>
+<tr><td class="gap">Laporan pajak, dan jumlah tiket di laporan penjualan</td><td>9</td><td>Hitungan bulanan operator dari <code>sales.csv</code> dengan tarif Perda daerah Anda</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section id="sumber">
+<h2>11. Sumber</h2>
+<ol class="sources">
+  <li>UU 27/2022 tentang Pelindungan Data Pribadi, Pasal 1 angka 4–5, 7, 8, 46, 51: <a href="https://peraturan.bpk.go.id/Details/229798">peraturan.bpk.go.id</a>.</li>
+  <li>UU 30/1999 tentang Arbitrase dan Alternatif Penyelesaian Sengketa, Pasal 11, 27, 60: <a href="https://peraturan.bpk.go.id/Details/45348">peraturan.bpk.go.id</a>.</li>
+  <li>Peraturan dan Prosedur Arbitrase BANI 2025, dan daftar biaya BANI (berlaku untuk perkara yang didaftarkan sejak 2 Januari 2026): <a href="https://baniarbitration.org/fees">baniarbitration.org/fees</a>, dibaca 4 November 2026.</li>
+  <li>PERMA 4/2019 tentang perubahan PERMA 2/2015 tentang Tata Cara Penyelesaian Gugatan Sederhana, Pasal 1 angka 1: <a href="https://peraturan.bpk.go.id/Download/258497/PERMA_04_2019.pdf">peraturan.bpk.go.id</a>.</li>
+  <li>UU 24/2009 tentang Bendera, Bahasa, dan Lambang Negara, serta Lagu Kebangsaan, Pasal 31: <a href="https://peraturan.bpk.go.id/Details/38661">peraturan.bpk.go.id</a>.</li>
+  <li>Perpres 63/2019 tentang Penggunaan Bahasa Indonesia, Pasal 26: <a href="https://peraturan.bpk.go.id/Details/121661">peraturan.bpk.go.id</a>.</li>
+  <li>Putusan Mahkamah Agung Nomor 1572 K/Pdt/2015, diputus 23 Oktober 2015: Direktori Putusan Mahkamah Agung, <a href="https://putusan3.mahkamahagung.go.id/">putusan3.mahkamahagung.go.id</a>.</li>
+  <li>SEMA 3/2023 tentang Pemberlakuan Rumusan Hasil Rapat Pleno Kamar Mahkamah Agung Tahun 2023, B.1: <a href="https://jdih.mahkamahagung.go.id/">jdih.mahkamahagung.go.id</a>.</li>
+  <li>UU 1/2022 tentang Hubungan Keuangan antara Pemerintah Pusat dan Pemerintahan Daerah, Pasal 55–58: <a href="https://peraturan.bpk.go.id/Details/195696">peraturan.bpk.go.id</a>.</li>
+  <li>PP 35/2023 tentang Ketentuan Umum Pajak Daerah dan Retribusi Daerah, Pasal 1 angka 14, 3, 4, 19: <a href="https://peraturan.bpk.go.id/Details/252130/pp-no-35-tahun-2023">peraturan.bpk.go.id</a>.</li>
+  <li>movie-ticket, kode sumber pada commit <a href="https://github.com/dawud-tan/movie-ticket/tree/39351ccd32f64fc6fa32eceb1c82a7b4d5d84dd6">39351cc</a>; pertanyaan untuk operator: <a href="https://github.com/dawud-tan/movie-ticket/blob/main/README.md#questions-an-operator-should-answer-from-the-code">README</a>; pendaftaran PSE: <a href="https://github.com/dawud-tan/movie-ticket/blob/main/docs/pse-oss-registration.md">docs/pse-oss-registration.md</a>.</li>
+  <li>Untuk pembeli tiket: <a href="pembeli-tiket.html">Kursi Anda, uang Anda</a>.</li>
+</ol>
+</section>
+
+</main>
+<footer>
+  <p>Ditulis oleh Claude Opus 5.5 · Diterbitkan oleh Dawud Tan ·
+  <time datetime="2026-11-04T20:00:00+07:00">4 November 2026</time>, diperbarui
+  <time datetime="2026-11-05T20:32:00+07:00">5 November 2026</time> ·
+  <a href="https://dawud-tan.github.io/">Artikel utama</a></p>
+</footer>
+</body>
+</html>
