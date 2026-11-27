@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Kebijakan Privasi – Jadwal Sholat, Kiblat &amp; Quran</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body{font-family: system-ui,-apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; line-height:1.6; padding:24px; max-width:900px; margin:auto; color:#111}
+    h1{font-size:1.6rem; margin-bottom:0.25rem}
+    h2{font-size:1.1rem; margin-top:1.1rem}
+    section{margin-bottom:14px}
+    footer{font-size:0.9rem; color:#444; margin-top:18px}
+    a{color:#0a66c2}
+    hr{border:0; border-top:1px solid #ccc; margin:28px 0}
+  </style>
+</head>
+<body>
+  <h1>Kebijakan Privasi – Jadwal Sholat, Kiblat &amp; Quran</h1>
+
+  <p><strong>Aplikasi:</strong> <a href="https://play.google.com/store/apps/details?id=com.quran.kiblat.salat">Jadwal Sholat, Kiblat &amp; Quran</a><br>
+     <strong>Nama paket:</strong> com.quran.kiblat.salat<br>
+     <strong>Pengembang:</strong> <a href="https://play.google.com/store/apps/dev?id=4728659111611968018">Loods 4.C.a.7.5</a></p>
+
+  <p>Halaman ini adalah kebijakan privasi resmi aplikasi Jadwal Sholat, Kiblat &amp; Quran. Aplikasi ini dibuat oleh pengembang perorangan, <strong>bukan aplikasi pemerintah</strong>, dan tidak berafiliasi dengan Kementerian Agama RI atau lembaga mana pun. Jadwal salat yang diterbitkan Kementerian Agama: <a href="https://bimasislam.kemenag.go.id/jadwalshalat">https://bimasislam.kemenag.go.id/jadwalshalat</a>.</p>
+
+  <section>
+    <h2>1. Ringkasan</h2>
+    <ul>
+      <li>Aplikasi tidak menampilkan iklan, tidak memuat SDK iklan atau analitik, dan tidak memakai ID iklan.</li>
+      <li>Aplikasi tidak memiliki akun, login, atau server milik pengembang. Pengembang tidak menerima dan tidak menyimpan data apa pun tentang Anda.</li>
+      <li>Satu-satunya data yang keluar dari ponsel Anda adalah koordinat lokasi, yang dikirim ke layanan Nominatim milik OpenStreetMap untuk mencari nama tempat (lihat bagian 3).</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>2. Lokasi: untuk apa dipakai</h2>
+    <p>Bila Anda mengizinkan, aplikasi membaca lokasi ponsel (lintang, bujur, dan ketinggian) untuk menghitung jadwal salat, waktu dan arah terbit serta terbenam matahari, arah kiblat, dan saat bayangan kiblat. Semua hitungan itu dikerjakan di ponsel. Koordinat terakhir disimpan di penyimpanan aplikasi pada ponsel Anda supaya jadwal tetap bisa dihitung ketika lokasi tidak tersedia.</p>
+    <p>Lokasi presisi diminta karena ketinggian tempat hanya ada pada lokasi presisi, dan ketinggian menggeser waktu terbit dan Maghrib (di Bandung sekitar 4 menit). Bila izin lokasi ditolak, aplikasi tetap berjalan dengan lokasi tersimpan terakhir atau titik tengah Indonesia, dengan jadwal yang kurang tepat.</p>
+    <p>Lokasi tidak dipakai untuk iklan atau analitik, dan tidak pernah dijual.</p>
+  </section>
+
+  <section>
+    <h2>3. Lokasi yang dikirim ke OpenStreetMap (Nominatim)</h2>
+    <p>Notifikasi adzan menampilkan nama tempat Anda (misalnya nama kelurahan dan kabupaten). Untuk mendapatkan nama itu, aplikasi mengirim koordinat lokasi tersimpan ke <a href="https://nominatim.openstreetmap.org/">Nominatim</a>, layanan pencarian alamat yang dijalankan OpenStreetMap Foundation, melalui sambungan terenkripsi (HTTPS). Permintaan itu berisi lintang, bujur, nama dan versi aplikasi, serta alamat surel pengembang sebagai kontak yang diminta layanan tersebut. Permintaan tidak berisi nama, akun, atau pengenal perangkat Anda; seperti semua sambungan internet, alamat IP Anda terlihat oleh server tujuan.</p>
+    <p>Permintaan dikirim sekali untuk suatu tempat, lalu lagi hanya sesudah Anda berpindah lebih dari sekitar 2 km. Pengembang tidak menerima salinan data itu. Cara OpenStreetMap Foundation menangani data dijelaskan di <a href="https://osmfoundation.org/wiki/Privacy_Policy">kebijakan privasi OSMF</a>. Data nama tempat © kontributor OpenStreetMap.</p>
+  </section>
+
+  <section>
+    <h2>4. Lokasi di latar belakang (pilihan, mati sejak awal)</h2>
+    <p>Bila Anda menyalakan sakelar "Perbarui lokasi sebelum adzan" di menu Izin Aplikasi dan memilih "Izinkan sepanjang waktu", aplikasi mengumpulkan data lokasi untuk menyesuaikan jadwal adzan dengan tempat Anda berada, <strong>bahkan saat aplikasi ditutup atau tidak digunakan</strong>. Caranya: 10 menit sebelum setiap adzan, aplikasi membaca lokasi terakhir yang sudah diketahui ponsel, tanpa menyalakan GPS. Koordinat itu diperlakukan sama seperti di bagian 2 dan 3: disimpan di ponsel, dan dikirim ke Nominatim hanya untuk nama tempat.</p>
+    <p>Sebelum izin ini diminta, aplikasi menampilkan penjelasan dan meminta persetujuan Anda. Fitur ini bisa dimatikan kapan saja dari sakelar yang sama, atau dengan mengubah izin lokasi aplikasi di Setelan Android. Tanpa fitur ini, jadwal adzan memakai lokasi saat aplikasi terakhir dibuka.</p>
+  </section>
+
+  <section>
+    <h2>5. Data yang tersimpan di perangkat Anda</h2>
+    <p>Koordinat dan nama tempat terakhir, setelan adzan (waktu yang dibunyikan, ihtiyati, cara hitung Ashar), dan posisi baca Al-Qur'an terakhir disimpan hanya di penyimpanan aplikasi pada ponsel Anda. Bila fitur cadangan Android aktif, setelan itu dapat ikut dicadangkan ke akun Google Anda oleh sistem Android; cadangan itu dikelola oleh Google dan akun Anda sendiri, bukan oleh pengembang.</p>
+    <p>Anda dapat menghapus semuanya dengan menghapus data aplikasi (Setelan &gt; Aplikasi &gt; aplikasi ini &gt; Penyimpanan &gt; Hapus data) atau dengan mencopot aplikasi. Karena pengembang tidak menyimpan data Anda, tidak ada data di pihak pengembang yang perlu dihapus.</p>
+  </section>
+
+  <section>
+    <h2>6. Izin aplikasi</h2>
+    <ul>
+      <li><strong>Lokasi</strong> (presisi dan perkiraan; latar belakang hanya bila Anda nyalakan): bagian 2 sampai 4.</li>
+      <li><strong>Alarm &amp; pengingat</strong>: menjadwalkan adzan tepat pada waktunya.</li>
+      <li><strong>Pengecualian optimasi baterai</strong> bersifat opsional. Jika adzan sering terlewat, Anda dapat memintanya dari menu Izin Aplikasi. Android menyimpan pilihan ini di ponsel. Anda dapat menolak atau mencabutnya lewat setelan baterai tanpa membatalkan jadwal. Pengecualian dapat menambah pemakaian baterai dan tidak mengumpulkan atau mengirim data tambahan.</li>
+      <li><strong>Notifikasi</strong> dan <strong>tampilan layar penuh</strong>: menampilkan adzan beserta tombol Matikan, termasuk di atas layar kunci.</li>
+      <li><strong>Layanan latar depan (pemutaran media)</strong>, <strong>getar</strong>, dan <strong>mencegah ponsel tidur</strong>: membunyikan adzan dan nada pengingat.</li>
+      <li><strong>Berjalan saat ponsel dinyalakan</strong>: memasang kembali alarm adzan sesudah ponsel dihidupkan ulang.</li>
+      <li><strong>Internet</strong> dan <strong>status jaringan</strong>: hanya untuk permintaan nama tempat di bagian 3.</li>
+    </ul>
+    <p>Aplikasi tidak meminta izin kamera, mikrofon, kontak, atau penyimpanan. Setiap izin dijelaskan di menu Izin Aplikasi, termasuk apa yang terjadi bila ditolak.</p>
+  </section>
+
+  <section>
+    <h2>7. Anak-anak</h2>
+    <p>Aplikasi ditujukan bagi pengguna umum berusia 13 tahun ke atas dan tidak dirancang khusus untuk anak-anak.</p>
+  </section>
+
+  <section>
+    <h2>8. Kontak</h2>
+    <p>Pertanyaan tentang kebijakan privasi ini atau praktik data aplikasi dapat dikirim kepada pengembang: <a href="mailto:muhammad.dawud91@gmail.com">muhammad.dawud91@gmail.com</a></p>
+  </section>
+
+  <hr>
+
+  <h1>Privacy Policy – Jadwal Sholat, Kiblat &amp; Quran</h1>
+
+  <p>This is the official privacy policy of the Jadwal Sholat, Kiblat &amp; Quran application (package <code>com.quran.kiblat.salat</code>) by Loods 4.C.a.7.5. The app is made by an individual developer. It is not a government app and is not affiliated with the Ministry of Religious Affairs of the Republic of Indonesia or any other institution.</p>
+
+  <section>
+    <h2>1. Summary</h2>
+    <p>The app shows no ads, contains no advertising or analytics SDK and does not use the advertising ID. It has no accounts, no login and no developer-operated server; the developer does not receive or store any data about you. The only data that leaves your device is your location coordinates, sent to OpenStreetMap's Nominatim service to look up a place name (section 3).</p>
+  </section>
+
+  <section>
+    <h2>2. Location: what it is used for</h2>
+    <p>If you allow it, the app reads the device location (latitude, longitude and altitude) to calculate prayer times, sunrise and sunset times and bearings, the qibla direction and the qibla-shadow moments. All calculations run on the device. The last coordinates are kept in the app's storage on your device. Precise location is requested because altitude is only available with a precise fix, and altitude shifts sunrise and Maghrib (by about 4 minutes in a highland city). If you deny location access the app still works with the last saved location or a default point in Indonesia, with a less accurate schedule. Location is never used for advertising or analytics and is never sold.</p>
+  </section>
+
+  <section>
+    <h2>3. Location sent to OpenStreetMap (Nominatim)</h2>
+    <p>The adhan notification shows the name of your area. To obtain it, the app sends the saved coordinates over HTTPS to <a href="https://nominatim.openstreetmap.org/">Nominatim</a>, the geocoding service run by the OpenStreetMap Foundation. The request contains latitude, longitude, the app's name and version, and the developer's contact email as that service requires. It contains no name, account or device identifier; as with any internet connection, the server sees your IP address. A request is made once for a place and again only after you have moved more than about 2 km. The developer receives no copy of this data. See the <a href="https://osmfoundation.org/wiki/Privacy_Policy">OSMF privacy policy</a>. Place names © OpenStreetMap contributors.</p>
+  </section>
+
+  <section>
+    <h2>4. Background location (optional, off by default)</h2>
+    <p>If you turn on the switch "Perbarui lokasi sebelum adzan" under Izin Aplikasi (App permissions) and choose "Allow all the time", the app collects location data to adjust the adhan schedule to where you are, <strong>even when the app is closed or not in use</strong>. Ten minutes before each adhan it reads the device's last known location without switching on GPS. Those coordinates are handled exactly as in sections 2 and 3. The app shows a disclosure and asks for your agreement before requesting this permission, and you can turn the feature off at any time with the same switch or in Android's location settings for the app.</p>
+  </section>
+
+  <section>
+    <h2>5. Data kept on your device, permissions, children and contact</h2>
+    <p>The last coordinates and place name, adhan settings and the last reading position are stored only in the app's storage on your device. If Android backup is enabled they may be included in the backup to your own Google account, which is handled by Android and Google, not by the developer. You can delete everything by clearing the app's data or uninstalling the app; the developer holds no data to delete.</p>
+    <p>Permissions: location (sections 2 to 4); alarms and reminders, notifications, full-screen display, foreground media-playback service, vibration and wake lock to sound and show the adhan; run at startup to re-arm the alarm after a reboot; internet and network state only for the request in section 3. The app is intended for general users aged 13 and over and is not designed for children. Contact: <a href="mailto:muhammad.dawud91@gmail.com">muhammad.dawud91@gmail.com</a></p>
+    <p>If you often miss the adhan, you can request an optional battery optimization exemption under Izin Aplikasi (App permissions). Android stores the choice on your device. You can decline or revoke it in Android battery settings and keep the alarm schedule. This option may increase battery use and does not collect or send additional data.</p>
+  </section>
+
+  <footer>
+    <p><strong>Clear labeling:</strong> This page is the official <em>Privacy Policy</em> for Jadwal Sholat, Kiblat &amp; Quran (package <code>com.quran.kiblat.salat</code>).<br>
+    <strong>Terakhir diperbarui / Last updated:</strong> 27 November 2026.</p>
+  </footer>
+</body>
+</html>

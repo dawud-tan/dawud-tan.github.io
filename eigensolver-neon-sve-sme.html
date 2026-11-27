@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dense Generalized Symmetric-Definite Eigensolver on AArch64: NEON, SVE and SME</title>
+<meta name="description" content="A phase-by-phase map of a dense generalized symmetric-definite eigensolver (K phi = lambda M phi) and exactly where ARMv8-A AArch64 NEON intrinsics, SVE predicated FMLA and the SME ZA tile pay off across its four hot kernels.">
+<meta name="keywords" content="generalized symmetric-definite eigenproblem, AArch64, ARMv8-A, NEON intrinsics, float64x2_t, vfmaq_f64, SVE, SME, FMOPA, ZA tile, Householder tridiagonalization, blocked Cholesky, SYRK, SYR2K, LATRD, back-transformation, LAPACK dsygv, DSTERF">
+<meta name="author" content="Dawud Tan">
+<link rel="canonical" href="https://dawud-tan.github.io/eigensolver-neon-sve-sme.html">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<meta property="og:url" content="https://dawud-tan.github.io/eigensolver-neon-sve-sme.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Dense Generalized Symmetric-Definite Eigensolver on AArch64: NEON, SVE and SME">
+<meta property="og:description" content="Which phases of a dense generalized symmetric-definite eigensolver actually vectorize on AArch64, and why only one of its four hot kernels is a genuine target for SME's matrix engine.">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Dense Generalized Symmetric-Definite Eigensolver on AArch64: NEON, SVE and SME">
+<meta name="twitter:description" content="Four hot kernels mapped onto seven phases of a panel-blocked dense generalized symmetric-definite eigensolver, in NEON, SVE and SME.">
+<style>
+
+  :root{
+    --bg:#fbfaf8; --panel:#ffffff; --ink:#16181d; --ink-soft:#4b5162;
+    --line:#e3e0da; --accent:#8a3f14; --accent-soft:#f4ece5;
+    --code-bg:#1d2027; --code-ink:#e7e4de; --code-key:#e0a87a;
+    --code-com:#8f9aa8; --code-num:#9fd0a8; --ok:#2f6b46; --warn:#8a5a10;
+    --measure:74ch;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#14161a; --panel:#1a1d23; --ink:#e9e7e2; --ink-soft:#a7adbb;
+      --line:#2c313a; --accent:#e39a63; --accent-soft:#242830;
+      --code-bg:#0f1114; --ok:#7fc79b; --warn:#e0b25f;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.65 ui-sans-serif,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:0 20px 96px}
+  header.hero{
+    border-bottom:1px solid var(--line); margin-bottom:36px;
+    padding:56px 0 32px; background:
+      radial-gradient(1200px 320px at 12% -40%, var(--accent-soft), transparent 70%);
+  }
+  h1{font-size:clamp(1.7rem,4.2vw,2.5rem);line-height:1.15;margin:0 0 .5rem;letter-spacing:-.02em}
+  .sub{font-size:1.08rem;color:var(--ink-soft);max-width:var(--measure);margin:0 0 1.2rem}
+  .meta{font-size:.83rem;color:var(--ink-soft);display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;margin:0}
+  .meta b{font-weight:600;color:var(--ink)}
+  h2{font-size:1.45rem;margin:2.6rem 0 .7rem;letter-spacing:-.01em;scroll-margin-top:1rem}
+  h3{font-size:1.08rem;margin:1.7rem 0 .45rem;scroll-margin-top:1rem}
+  h2 .num{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:.45rem;font-weight:700}
+  p,li{max-width:var(--measure)}
+  a{color:var(--accent)}
+  code{
+    font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+    font-size:.9em;background:var(--accent-soft);padding:.1em .34em;border-radius:4px;
+  }
+  pre{
+    background:var(--code-bg);color:var(--code-ink);padding:16px 18px;border-radius:10px;
+    overflow-x:auto;font-size:.83rem;line-height:1.55;border:1px solid #000;
+    font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  }
+  pre code{background:none;padding:0;font-size:1em;color:inherit}
+  .c{color:var(--code-com);font-style:italic}
+  .k{color:var(--code-key)}
+  .n{color:var(--code-num)}
+  .panel{
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:18px 20px;margin:1.4rem 0;
+  }
+  .panel h3:first-child,.panel h2:first-child{margin-top:0}
+  .keyfacts{border-left:4px solid var(--accent)}
+  .keyfacts ul{margin:.4rem 0 0;padding-left:1.15rem}
+  .keyfacts li{margin:.3rem 0}
+  .callout{border-left:4px solid var(--warn);background:var(--panel)}
+  .short{border-left:4px solid var(--line);padding-left:16px;color:var(--ink-soft);margin:1rem 0}
+  .short p{margin:.4rem 0}
+  table{border-collapse:collapse;width:100%;font-size:.9rem;margin:1rem 0;display:block;overflow-x:auto}
+  th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+  th{background:var(--accent-soft);font-weight:650}
+  td b{font-weight:650}
+  .tag{display:inline-block;font-size:.72rem;font-weight:650;padding:.12em .5em;border-radius:999px;
+       border:1px solid var(--line);white-space:nowrap}
+  .tag.hot{background:#2f6b4622;color:var(--ok);border-color:#2f6b4655}
+  .tag.cold{background:#8a5a1022;color:var(--warn);border-color:#8a5a1055}
+  .tag.mid{background:var(--accent-soft);color:var(--accent);border-color:var(--line)}
+  nav.toc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:1.6rem 0 2rem}
+  nav.toc h2{margin:0 0 .5rem;font-size:1rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft)}
+  nav.toc ol{margin:0;padding-left:1.3rem;columns:2;column-gap:2rem}
+  nav.toc li{margin:.2rem 0;break-inside:avoid}
+  nav.toc a{text-decoration:none}
+  nav.toc a:hover{text-decoration:underline}
+  .eq{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 16px;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92rem;overflow-x:auto;margin:1rem 0}
+  details{border:1px solid var(--line);border-radius:10px;padding:0 16px;margin:.6rem 0;background:var(--panel)}
+  details[open]{padding-bottom:6px}
+  summary{cursor:pointer;padding:14px 0;font-weight:600;list-style-position:outside}
+  summary::marker{color:var(--accent)}
+  details p:first-of-type{margin-top:.2rem}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+  .grid2 .panel{margin:0}
+  footer{border-top:1px solid var(--line);margin-top:56px;padding-top:20px;font-size:.85rem;color:var(--ink-soft)}
+  .refs li{margin:.5rem 0}
+  .skip{position:absolute;left:-9999px}
+  .skip:focus{left:12px;top:12px;background:var(--panel);padding:8px 12px;border:1px solid var(--accent);border-radius:6px;z-index:9}
+  @media (max-width:640px){nav.toc ol{columns:1}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>Dense Generalized Symmetric-Definite Eigensolver on AArch64: where NEON, SVE and SME actually pay off</h1>
+    <p class="sub">Solving <b>K&nbsp;&phi;&nbsp;=&nbsp;&lambda;&nbsp;M&nbsp;&phi;</b> for dense symmetric K and symmetric positive-definite M &mdash; and exactly which of the seven phases the four hot kernels can accelerate with ARMv8-A NEON intrinsics, scalable SVE predication, or the SME ZA tile.</p>
+    <p class="meta">
+      <span><b>ISAs</b> ARMv8-A NEON &middot; SVE &middot; SME (FMOPA, FP64)</span>
+      <span><b>Precision</b> IEEE-754 binary64 throughout</span>
+      <span><b>Language</b> C++23</span>
+      <span><b>Reading time</b> ~20 min</span>
+    </p>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+
+<div class="panel keyfacts">
+  <h3>The short answer</h3>
+  <ul>
+    <li><b>Four hot kernels, three ISA tiers each</b>, resolved once at <code>dlopen</code> from <code>getauxval</code> into a function-pointer table. Nothing is re-tested in an inner loop.</li>
+    <li><b>Only one of the four is a genuine matrix-engine shape.</b> <code>panelOuterProduct</code> computes a real M&times;N block of A&middot;B<sup>T</sup>. The other three are BLAS-1/2, and feeding one of those to FMOPA &mdash; as the SME dot product does &mdash; issues VL&sup2; multiplies to keep VL of them.</li>
+    <li><b>Blocking is what creates the BLAS-3 shape.</b> Phases 1, 3 and 6 defer their trailing updates into one batched call per panel; those three, and only those three, drive the panel kernel.</li>
+    <li><b>Phases 4 and 5 get nothing, and phase 4 must not be reordered at all</b> &mdash; it is a bit-identical port of reference LAPACK <code>DSTERF</code>, and reassociating it would destroy the property that makes it verifiable.</li>
+    <li><b>No hardware timing exists for the SVE and SME paths.</b> The motivating device has neither feature, and no shipping silicon is confirmed to implement <code>FEAT_SME_F64F64</code>. Emulator wall-clock measures the emulator.</li>
+    <li><b>Correctness is established bit-exactly, not within a tolerance:</b> the NEON and SVE paths produce byte-identical eigenvalues to each other, and the tridiagonal phase matches reference LAPACK compiled with gfortran across 185 cases.</li>
+  </ul>
+</div>
+
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#s1">The problem being solved</a></li>
+    <li><a href="#s2">The pipeline at a glance</a></li>
+    <li><a href="#s3">The four hot kernels, three ways</a></li>
+    <li><a href="#s4">Runtime ISA dispatch</a></li>
+    <li><a href="#s5">Phase 1 &mdash; Cholesky factorization</a></li>
+    <li><a href="#s6">Phase 2 &mdash; Congruence reduction</a></li>
+    <li><a href="#s7">Phase 3 &mdash; Householder tridiagonalization</a></li>
+    <li><a href="#s8">Phase 4 &mdash; Tridiagonal eigenvalues</a></li>
+    <li><a href="#s9">Phase 5 &mdash; Inverse iteration</a></li>
+    <li><a href="#s10">Phase 6 &mdash; Back-transformation</a></li>
+    <li><a href="#s11">Phase 7 &mdash; M-orthonormalization</a></li>
+    <li><a href="#s12">Why SME loses at small n</a></li>
+    <li><a href="#s13">Verification and reproducibility</a></li>
+    <li><a href="#s14">Frequently asked questions</a></li>
+    <li><a href="#s15">Further reading</a></li>
+  </ol>
+</nav>
+
+<h2 id="s1"><span class="num">1</span>The problem being solved</h2>
+
+<p>A dense generalized symmetric-definite eigenproblem asks for the pairs (&lambda;,&nbsp;&phi;) satisfying</p>
+
+<div class="eq">K &phi; = &lambda; M &phi;,&nbsp;&nbsp;&nbsp; K = K<sup>T</sup>,&nbsp;&nbsp; M = M<sup>T</sup> &#8827; 0 (positive definite)</div>
+
+<p>In structural dynamics K is the stiffness matrix and M the mass matrix, &lambda;&nbsp;=&nbsp;&omega;&sup2; gives the natural frequencies, and &phi; gives the mode shapes. This is LAPACK&rsquo;s <code>dsygv</code> problem type 1. The same formulation appears in electronic structure as the overlap-matrix generalized eigenproblem, in chemometrics, and anywhere a quadratic form has to be diagonalized against a non-identity metric.</p>
+
+<p>The classical dense algorithm does <em>not</em> attack the generalized problem directly. It factors M, uses that factor to turn the generalized problem into a standard one, solves the standard problem, and maps the answer back. Every one of those steps has a different memory access pattern &mdash; and that, not the FLOP count, is what decides whether a SIMD unit can help.</p>
+
+<div class="panel callout">
+  <p><b>The through-line of this page.</b> A vector unit accelerates a phase when the phase re-reads the same operand many times (arithmetic intensity) and touches memory in contiguous runs. A matrix engine additionally needs the work to be shaped like a matrix product. Three of the seven phases satisfy all of that; two satisfy the first two conditions but not the third; and two satisfy none of it and are simply sequential.</p>
+</div>
+
+<h2 id="s2"><span class="num">2</span>The pipeline at a glance</h2>
+
+<p>Seven phases. The <em>vector benefit</em> column is the whole point of this page.</p>
+
+<table>
+<thead><tr><th>#</th><th>Phase</th><th>What it computes</th><th>Cost</th><th>Hot kernel</th><th>Vector benefit</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><b>Cholesky</b></td><td>M = L L<sup>T</sup></td><td>n&sup3;/3</td><td><code>dotProduct</code> (panel), <code>panelOuterProduct</code> (SYRK)</td><td><span class="tag hot">High</span> blocked trailing update</td></tr>
+<tr><td>2</td><td><b>Congruence reduction</b></td><td>&Atilde; = L<sup>&minus;1</sup> K L<sup>&minus;T</sup></td><td>n&sup3;</td><td><code>axpyRow</code> (blocked TRSM)</td><td><span class="tag hot">High</span> row-only, no gather</td></tr>
+<tr><td>3</td><td><b>Householder tridiagonalization</b></td><td>T = Q<sub>1</sub><sup>T</sup> &Atilde; Q<sub>1</sub></td><td>4n&sup3;/3</td><td><code>dotProduct</code>, <code>axpyRow</code>, <code>panelOuterProduct</code> (SYR2K)</td><td><span class="tag hot">High</span> the dominant term</td></tr>
+<tr><td>4</td><td><b>Tridiagonal eigenvalues</b></td><td>eigenvalues of T</td><td>~O(n&sup2;)</td><td>&mdash; scalar</td><td><span class="tag cold">None</span> sequential, and reordering is forbidden</td></tr>
+<tr><td>5</td><td><b>Inverse iteration</b></td><td>eigenvectors of T</td><td>O(n) per mode</td><td>norms only</td><td><span class="tag cold">None</span> Thomas recurrence is serial</td></tr>
+<tr><td>6</td><td><b>Back-transformation</b></td><td>W = Q<sub>1</sub>Y, then &Phi; = L<sup>&minus;T</sup>W</td><td>n&sup3;</td><td><code>panelOuterProduct</code> (GEMM), <code>axpyRow</code> (solve)</td><td><span class="tag hot">High</span> batched across all modes</td></tr>
+<tr><td>7</td><td><b>M-orthonormalization</b></td><td>&phi;<sup>T</sup>M&phi; = 1</td><td>O(n&sup2;) per mode</td><td><code>matVec</code></td><td><span class="tag hot">High</span> dense square GEMV</td></tr>
+</tbody>
+</table>
+
+<p>Phases 1, 2, 3 and 6 are panel-blocked (right-looking: factor or solve a narrow panel, then apply that panel&rsquo;s whole effect to the trailing region in one batched update) through a single block-size parameter, <code>MPMR_DEFAULT_NB = 32</code>. The block size is a parameter of every blocked routine rather than a constant baked into one, because this is shared code that outlives any one caller&rsquo;s problem size.</p>
+
+<h2 id="s3"><span class="num">3</span>The four hot kernels, three ways</h2>
+
+<p>Four kernels are hot enough to justify per-ISA implementations. Everything else in the pipeline is either sequential by construction or O(n) bookkeeping.</p>
+
+<table>
+<thead><tr><th>Kernel</th><th>BLAS level</th><th>Called from</th><th>NEON</th><th>SVE</th><th>SME</th></tr></thead>
+<tbody>
+<tr><td><code>dotProduct</code></td><td>1</td><td>Cholesky, both triangular solves, every Householder reflection</td><td><code>vfmaq_f64</code></td><td><code>svmla_f64_m</code> + <code>whilelt</code></td><td>FMOPA diagonal &mdash; <span class="tag cold">poor fit</span></td></tr>
+<tr><td><code>matVec</code></td><td>2</td><td>back-transform, re-orthogonalization, residuals</td><td>row-wise dot</td><td>row-wise dot</td><td>row-wise, one streaming region</td></tr>
+<tr><td><code>axpyRow</code></td><td>1</td><td>blocked TRSM, batched triangular solve, rank-2 update</td><td><code>vfmaq_f64</code> + store</td><td><code>svmla_f64_m</code> + <code>whilelt</code></td><td><span class="tag cold">none</span> &mdash; no outer-product structure</td></tr>
+<tr><td><code>panelOuterProduct</code></td><td><b>3</b></td><td>Cholesky SYRK, Householder SYR2K, batched GEMM</td><td>nested dot</td><td>j-unrolled &times;2</td><td><b>full ZA tile</b> &mdash; <span class="tag hot">the real target</span></td></tr>
+</tbody>
+</table>
+
+<p>All three paths sum the same terms in a different order, so they are not bit-identical <em>to each other</em>. They agree far inside any residual bound that matters, but no assertion anywhere expects exact equality across tiers.</p>
+
+<h3>3.1 NEON: <code>float64x2_t</code> and <code>vfmaq_f64</code></h3>
+
+<p>Two FP64 lanes, a fused multiply-add, a horizontal add at the end, and a scalar cleanup iteration for odd lengths. NEON is mandatory on AArch64, so this tier is always available and is the universal fallback.</p>
+
+<pre><code>[[nodiscard]] static double dotNeon(CSpan av_, CSpan bv_) {
+    const int n = isize(av_);
+    const double *a = av_.data();
+    const double *b = bv_.data();
+    float64x2_t acc = vdupq_n_f64(0.0);
+    int j = 0;
+    for (; j + 1 &lt; n; j += 2) {
+        float64x2_t av = vld1q_f64(a + j);
+        float64x2_t bv = vld1q_f64(b + j);
+        acc = vfmaq_f64(acc, av, bv);          <span class="c">// two lanes per iteration</span>
+    }
+    double sum = vgetq_lane_f64(acc, 0) + vgetq_lane_f64(acc, 1);
+    for (; j &lt; n; j++) sum += a[j] * b[j];     <span class="c">// scalar cleanup for odd n</span>
+    return sum;
+}</code></pre>
+
+<h3>3.2 SVE: the same loop, minus the tail</h3>
+
+<p>The vector length is a runtime property, so the loop cannot be written around a compile-time width. <code>svwhilelt_b64</code> builds the active-lane mask directly from the loop counter against the length, which means the final partial vector is handled by predication and there is <em>no scalar cleanup loop at all</em>.</p>
+
+<p>One detail is load-bearing: <code>svmla_f64_m</code> is the <em>merging</em> form. The zeroing form would leave inactive accumulator lanes undefined, and those lanes carry partial sums that the final reduction still has to read.</p>
+
+<pre><code>MPMR_SVE_TARGET
+static double dotSve(CSpan av_, CSpan bv_) {
+    const double *a = av_.data();
+    const double *b = bv_.data();
+    const uint64_t N = av_.size();
+    const uint64_t vl = svcntd();              <span class="c">// lanes, not bytes; runtime value</span>
+    svfloat64_t acc = svdup_f64(0.0);
+    for (uint64_t i = 0; i &lt; N; i += vl) {
+        svbool_t pg = svwhilelt_b64(i, N);     <span class="c">// the tail IS the predicate</span>
+        acc = svmla_f64_m(pg, acc, svld1_f64(pg, a + i), svld1_f64(pg, b + i));
+    }
+    return svaddv_f64(svptrue_b64(), acc);
+}</code></pre>
+
+<h3>3.3 SME: two very different uses of one instruction</h3>
+
+<p>FMOPA computes an outer product into a ZA tile: <code>ZA[p][q] += zn[p] * zm[q]</code>, over a full SVL&times;SVL block in one instruction. How well that serves you depends entirely on whether you want the whole block.</p>
+
+<p><b>The dot product is the bad case.</b> Feed the same slice to both operands and the diagonal <code>ZA[p][p]</code> accumulates <code>a[i+p]*b[i+p]</code>, so the dot product falls out of <code>trace(ZA)</code>. It is correct, and it is genuinely what the instruction can be made to do &mdash; but every off-diagonal entry is computed and thrown away.</p>
+
+<pre><code>MPMR_SME_TARGET
+static double dotSmeStreaming(const double *a, const double *b, int n)
+__arm_streaming __arm_inout(&quot;za&quot;) {
+    const uint64_t N = (n &lt;= 0) ? 0 : (uint64_t) n;
+    const uint64_t vl = svcntd();              <span class="c">// STREAMING vector length (SVL/64)</span>
+    const svbool_t all = svptrue_b64();
+
+    svzero_za();
+    for (uint64_t i = 0; i &lt; N; i += vl) {
+        svbool_t pg = svwhilelt_b64(i, N);
+        <span class="c">// Same slice on both operands, so ZA[p][p] accumulates a[i+p]*b[i+p].</span>
+        svmopa_za64_m(0, pg, pg, svld1_f64(pg, a + i), svld1_f64(pg, b + i));
+    }
+
+    <span class="c">// The dot product is trace(ZA). Every off-diagonal entry is discarded:</span>
+    <span class="c">// VL*VL multiplies were issued to keep VL of them.</span>
+    const uint64_t pmax = (N &lt; vl) ? N : vl;
+    double sum = 0.0;
+    for (uint64_t p = 0; p &lt; pmax; p++) {
+        svfloat64_t slice = svread_hor_za64_m(svdup_f64(0.0), all, 0, (uint32_t) p);
+        svbool_t lane = svbic_b_z(all, svwhilelt_b64((uint64_t) 0, p + 1),
+                                  svwhilelt_b64((uint64_t) 0, p));
+        sum += svaddv_f64(lane, slice);
+    }
+    return sum;
+}</code></pre>
+
+<p><b>The panel product is the good case.</b> Here <code>zn</code> is a <em>column</em> of the A panel (fixed k, varying i) and <code>zm</code> a column of B, so one FMOPA per k accumulates a genuine VL&times;VL block of A&middot;B<sup>T</sup>, and every lane of the readout is a value the caller asked for.</p>
+
+<div class="panel callout">
+  <p><b>The structural inversion.</b> In the dot product, k &mdash; the reduction index &mdash; maps onto vector <em>lanes</em>. In the panel product it is the <em>loop</em> index, and the lanes carry i and j instead. That is why there is no <code>whilelt</code> partial-chunk handling over K in the panel kernel: &ldquo;K not a multiple of the vector length&rdquo; is not a case this kernel can have. The ragged edges live on M and N, and are predicated there.</p>
+</div>
+
+<p>Reading a column of a row-major panel is a gather, so both operands are <em>packed</em> into k-major staging buffers first, in ordinary non-streaming code. That is the standard GEMM packing step &mdash; O(K(M+N)) to enable O(MNK) of compute &mdash; and it keeps every container access outside the streaming region, which matters because calling a non-streaming function from streaming context forces the compiler to bracket it in <code>smstop</code>/<code>smstart</code>.</p>
+
+<pre><code>MPMR_SME_TARGET
+static void panelOuterSmeStreaming(const double *Apack, int M,
+                                   const double *Bpack, int N,
+                                   int K, double *const *Cout, bool accumulate)
+__arm_streaming __arm_inout(&quot;za&quot;) {
+    const int vl = (int) svcntd();
+    for (int i0 = 0; i0 &lt; M; i0 += vl) {
+        const int mb = (M - i0 &lt; vl) ? (M - i0) : vl;
+        const svbool_t pi = svwhilelt_b64((uint64_t) 0, (uint64_t) mb);
+        for (int j0 = 0; j0 &lt; N; j0 += vl) {
+            const int nb = (N - j0 &lt; vl) ? (N - j0) : vl;
+            const svbool_t pj = svwhilelt_b64((uint64_t) 0, (uint64_t) nb);
+
+            svzero_za();
+            for (int k = 0; k &lt; K; k++) {
+                <span class="c">// zn is a COLUMN of A (fixed k, varying i), zm a column of B.</span>
+                <span class="c">// One FMOPA per k accumulates a whole VL x VL block of A*B^T.</span>
+                svfloat64_t zn = svld1_f64(pi, Apack + (size_t) k * (size_t) M + i0);
+                svfloat64_t zm = svld1_f64(pj, Bpack + (size_t) k * (size_t) N + j0);
+                svmopa_za64_m(0, pi, pj, zn, zm);
+            }
+
+            <span class="c">// Horizontal slice p IS output row i0+p. Nothing is discarded.</span>
+            for (int p = 0; p &lt; mb; p++) {
+                svfloat64_t slice = svread_hor_za64_m(svdup_f64(0.0), pj, 0, (uint32_t) p);
+                double *__restrict crow = Cout[i0 + p] + j0;
+                if (accumulate) slice = svadd_f64_x(pj, slice, svld1_f64(pj, crow));
+                svst1_f64(pj, crow, slice);
+            }
+        }
+    }
+}</code></pre>
+
+<p><code>FEAT_SME_F64F64</code> provides eight FP64 ZA tiles, each SVL<sub>d</sub>&times;SVL<sub>d</sub> where SVL<sub>d</sub> is <code>svcntd()</code> <em>evaluated inside streaming mode</em> &mdash; the streaming vector length, which need not equal the non-streaming one. This kernel uses one tile and loops over as many blocks as it takes, rather than using all eight: an M or N that outruns a single tile is already handled by that loop, and multi-tile blocking would buy throughput at the cost of a second, independently-wrong-able index scheme.</p>
+
+<h2 id="s4"><span class="num">4</span>Runtime ISA dispatch</h2>
+
+<p>Selection happens once, at library load, into a <code>const</code> table of function pointers. This is dynamic initialization of a namespace-scope object, so it runs on <code>dlopen</code> before any entry point can be reached &mdash; there is no per-call guard variable in the O(n&sup3;) inner loop.</p>
+
+<pre><code>enum class IsaPath : unsigned char { Neon = 0, Sve = 1, Sme = 2 };
+
+struct HotKernels {
+    IsaPath  path;
+    DotFn    dot;      <span class="c">// double(*)(CSpan, CSpan)</span>
+    MatVecFn matVec;   <span class="c">// void(*)(const Mat&amp;, const Vec&amp;, Vec&amp;)</span>
+    AxpyFn   axpy;     <span class="c">// void(*)(DSpan, double, CSpan)</span>
+    PanelFn  panel;    <span class="c">// void(*)(RowsIn, RowsIn, int, RowsOut, bool)</span>
+};
+
+static HotKernels selectHotKernels() {
+    const unsigned long hw  = getauxval(AT_HWCAP);
+    const unsigned long hw2 = getauxval(AT_HWCAP2);
+
+    <span class="c">// HWCAP2_SME alongside HWCAP2_SME_F64F64: the F64F64 bit only says the</span>
+    <span class="c">// FP64 outer product exists, the base bit says ZA/streaming mode may be</span>
+    <span class="c">// entered at all.</span>
+    if ((hw2 &amp; HWCAP2_SME) &amp;&amp; (hw2 &amp; HWCAP2_SME_F64F64)) {
+        <span class="c">// axpyRow has no SME variant, so it is chosen independently --</span>
+        <span class="c">// SME does not imply base SVE on the same core.</span>
+        AxpyFn axpyChoice = (hw &amp; HWCAP_SVE) ? &amp;axpyRowSve : &amp;axpyRowNeon;
+        return HotKernels{.path = IsaPath::Sme, .dot = &amp;dotSme, .matVec = &amp;matVecSme,
+                          .axpy = axpyChoice, .panel = &amp;panelOuterSme};
+    }
+    if (hw &amp; HWCAP_SVE) {
+        return HotKernels{.path = IsaPath::Sve, .dot = &amp;dotSve, .matVec = &amp;matVecSve,
+                          .axpy = &amp;axpyRowSve, .panel = &amp;panelOuterSve};
+    }
+    return HotKernels{.path = IsaPath::Neon, .dot = &amp;dotNeon, .matVec = &amp;matVecNeon,
+                      .axpy = &amp;axpyRowNeon, .panel = &amp;panelOuterNeon};
+}
+
+<span class="c">// Namespace-scope dynamic initialization: runs on dlopen, before any entry</span>
+<span class="c">// point can be reached, so the O(n^3) inner loop tests no guard variable.</span>
+static const HotKernels g_hotKernels = selectHotKernels();</code></pre>
+
+<div class="panel callout">
+  <p><b>The <code>getauxval</code> guard is load-bearing in the strongest sense.</b> Executing an SVE or SME instruction on a core that lacks the feature traps with <code>SIGILL</code>. There is no graceful degradation and no way to probe by trying. The HWCAP bit positions are architectural ABI, but older NDK kernel headers predate <code>HWCAP2_SME_F64F64</code> and <code>HWCAP2_SME2</code> &mdash; so they are pinned locally with <code>#ifndef</code> fallbacks and then <code>static_assert</code>ed against the platform header wherever one does define them, which turns a hand-pinned bit that disagrees with the ABI into a build error rather than a trap on somebody&rsquo;s phone.</p>
+</div>
+
+<p>Note also that the SME branch picks <code>axpyRow</code> independently, by testing <code>HWCAP_SVE</code> directly. SME does not imply base SVE on the same core; the architecture makes no such guarantee.</p>
+
+<h2 id="s5"><span class="num">5</span>Phase 1 &mdash; Cholesky factorization</h2>
+
+<p>M&nbsp;=&nbsp;L&nbsp;L<sup>T</sup>, right-looking and panel-blocked. Each outer step does three things: factor the nb&times;nb diagonal panel with the unblocked algorithm, solve the panel below it (a row-oriented TRSM, since each row below the panel is independent given L<sub>11</sub>), and then apply the panel&rsquo;s entire effect to the trailing submatrix as one symmetric rank-nb update.</p>
+
+<p>That third step is the BLAS-3-shaped part, and it is what the panel kernel exists for. Two details of the call are worth spelling out.</p>
+
+<pre><code><span class="c">// Phase 1, step 3 -- the trailing SYRK: A22 -= L21 * L21^T, lower triangle.</span>
+const int mt = n - p - nb;
+if (mt &gt; 0) {
+    const int base = p + nb;
+    for (int i0 = 0; i0 &lt; mt; i0 += kPanelStripRows) {
+        const int rb   = std::min(kPanelStripRows, mt - i0);
+        const int cols = i0 + rb;              <span class="c">// only j &lt;= i is ever wanted</span>
+        scratch.a.resize((size_t) rb);
+        scratch.b.resize((size_t) cols);
+        for (int r = 0; r &lt; rb;   r++) scratch.a[r] = L[base + i0 + r].data() + p;
+        for (int c = 0; c &lt; cols; c++) scratch.b[c] = L[base + c].data() + p;
+        RowsOut C = scratch.stage(rb, cols);
+        panelOuterProduct(RowsIn(scratch.a), RowsIn(scratch.b), nb, C, false);
+        for (int r = 0; r &lt; rb; r++) {
+            double *Lrow = L[base + i0 + r].data() + base;
+            const double *Crow = C[r];
+            for (int c = 0; c &lt;= i0 + r; c++) Lrow[c] -= Crow[c];
+        }
+    }
+}</code></pre>
+
+<p><b>Why strips rather than one big block.</b> The trailing region is (n&minus;p&minus;nb)&sup2;, and staging all of it would be O(n&sup2;) of scratch. Striping bounds the staging buffer at O(strip&times;n) &mdash; and because only j&nbsp;&le;&nbsp;i is ever wanted, stopping each strip&rsquo;s column range at <code>i0 + rb</code> computes very nearly the lower triangle instead of the full square. The memory bound and the halved flop count come from the same decision.</p>
+
+<p><b>Why the strips cannot race.</b> The kernel reads columns p&hellip;p+nb&minus;1 of the panel and writes only columns &ge; p+nb. No strip can observe a value another strip in the same sweep has already updated.</p>
+
+<div class="panel callout">
+  <p><b>An aliasing subtlety that constrains the kernel&rsquo;s signature.</b> In this call site <code>scratch.a[r]</code> and <code>scratch.b[c]</code> are <em>the same pointer</em> whenever <code>c == i0 + r</code> &mdash; a SYRK reads the same panel on both sides. So the panel kernel may mark its <em>output</em> row <code>__restrict</code>, but never its two input panels against each other. The same reasoning excludes <code>__restrict</code> from the dot product entirely: <code>dotProduct(v, v)</code> is a real call site.</p>
+</div>
+
+<h2 id="s6"><span class="num">6</span>Phase 2 &mdash; Congruence reduction</h2>
+
+<p>&Atilde;&nbsp;=&nbsp;L<sup>&minus;1</sup>&nbsp;K&nbsp;L<sup>&minus;T</sup>, done as two triangular solves. Both are of the shape L&nbsp;X&nbsp;=&nbsp;B for a full n&times;n right-hand side &mdash; a matrix TRSM, not a single-vector one &mdash; and both are panel-blocked: once a row-panel of X is solved, its effect on all remaining unsolved rows is applied as one row-oriented linear combination before moving on.</p>
+
+<p>The thing to notice is what is <em>absent</em>. Every array access stays row-wise: the update for row p+i is a weighted sum of already-computed <em>rows</em> of X, never a column of anything. That is why this phase reduces to <code>axpyRow</code> and not to a dot product &mdash; and why it gets no SME variant, since AXPY is BLAS-1 and has no outer-product structure for a matrix engine to exploit.</p>
+
+<p>K is symmetric, which is what lets the first solve use K&rsquo;s rows directly as right-hand sides: column j of K <em>is</em> row j of K, so no gather is needed to form it.</p>
+
+<h2 id="s7"><span class="num">7</span>Phase 3 &mdash; Householder tridiagonalization</h2>
+
+<p>T&nbsp;=&nbsp;Q<sub>1</sub><sup>T</sup>&nbsp;&Atilde;&nbsp;Q<sub>1</sub>, accumulating Q<sub>1</sub>. At 4n&sup3;/3 this is the dominant phase of the whole pipeline, so it is where blocking matters most.</p>
+
+<h3>7.1 Building the reflector</h3>
+
+<p>Per column: form x from the subdiagonal, take its norm, pick the sign that avoids cancellation (&alpha; = &minus;sign(x<sub>0</sub>)&middot;&#8214;x&#8214;), build v, normalize. Three O(n) dot products, all dispatched.</p>
+
+<p>One step here is easy to get wrong in a blocked formulation. The reflector&rsquo;s defining property already determines what column k becomes &mdash; <code>A[k+1][k] = alpha</code>, everything below it zero &mdash; so that is written directly rather than derived from a matrix update. A rank-2 update on the trailing submatrix alone never touches column k at all; omitting the explicit write produces eigenvalues that look superficially close &mdash; a small perturbation &mdash; while residuals go from 1e&minus;11 to the hundreds. It was caught by running the cross-check against the unblocked version, not by re-reading the algebra, which still looked correct on paper.</p>
+
+<h3>7.2 The panel: LATRD-style deferred correction</h3>
+
+<p>Within a panel, each new reflector must see a trailing region that has been updated by the earlier reflectors of the <em>same</em> panel &mdash; but those updates have deliberately not been applied to A yet. So column k, the diagonal entry A[k][k], and the w vector each carry an explicit correction computed from the V and W factors accumulated so far.</p>
+
+<h3>7.3 Between panels: the SYR2K</h3>
+
+<p>At the end of each panel, all nb reflectors&rsquo; cumulative effect lands on the region beyond the panel in one batched symmetric rank-2k update. This is two panel-kernel calls, and it is precisely why the primitive carries an <code>accumulate</code> flag instead of always assigning:</p>
+
+<pre><code><span class="c">// Phase 3 -- the deferred SYR2K, applying all nb reflectors at once:</span>
+<span class="c">//     A[i][j] -= 2 * ( (V W^T)[i][j] + (W V^T)[i][j] )</span>
+<span class="c">// Two calls: the first ASSIGNS V*W^T into the staging block, the second</span>
+<span class="c">// ACCUMULATES W*V^T on top. That is why panelOuterProduct carries an</span>
+<span class="c">// `accumulate` flag rather than always assigning.</span>
+RowsOut C = scratch.stage(rb, cols);
+for (int r = 0; r &lt; rb;   r++) scratch.a[r] = V[base + i0 + r - p].data();
+for (int c = 0; c &lt; cols; c++) scratch.b[c] = W[base + c - p].data();
+panelOuterProduct(RowsIn(scratch.a), RowsIn(scratch.b), nb, C, false);
+
+for (int r = 0; r &lt; rb;   r++) scratch.a[r] = W[base + i0 + r - p].data();
+for (int c = 0; c &lt; cols; c++) scratch.b[c] = V[base + c - p].data();
+panelOuterProduct(RowsIn(scratch.a), RowsIn(scratch.b), nb, C, true);</code></pre>
+
+<p>Per (i,&nbsp;j) the two length-nb reductions are summed in exactly the order the unblocked pair of dot products would have used, which is what makes the blocked and unblocked paths comparable to the last bit on the NEON and SVE tiers.</p>
+
+<p>Q&rsquo;s own accumulation stays one reflector at a time. It is O(n) per reflector either way, and it is not the part blocking targets.</p>
+
+<div class="panel callout">
+  <p><b>Both versions are kept.</b> Every blocked phase sits in the file next to its unblocked counterpart, and a self-test cross-validates them element-by-element on the intermediate results &mdash; the L factor, the reduced &Atilde;, the tridiagonal and Q &mdash; not merely on downstream eigenvalues. The unblocked routines are not dead code, and the build enforces that: <code>-Werror=unused-function</code> turns &ldquo;the last caller of a reference implementation disappeared&rdquo; into a compile error rather than a cross-check that quietly ceased to exist.</p>
+</div>
+
+<h2 id="s8"><span class="num">8</span>Phase 4 &mdash; Tridiagonal eigenvalues</h2>
+
+<p>Eigenvalues of the symmetric tridiagonal T, via the Pal&ndash;Walker&ndash;Kahan variant of the QL/QR algorithm. This phase gets <b>no vector benefit at all</b>, for two independent reasons.</p>
+
+<p><b>It is a first-order dependency chain.</b> The bulge-chase is a three-element stencil sweeping a tridiagonal: each step&rsquo;s rotation depends on the previous step&rsquo;s output through the GAMMA/OLDGAM/OLDC recurrence. There is nothing to put in lane 1 while lane 0 is being computed. This is not a blocking problem &mdash; it is not a candidate for panel blocking at all.</p>
+
+<p><b>And reordering is forbidden anyway.</b> This is a port of reference LAPACK <code>DSTERF</code> together with its exact dependency closure (DLAE2, DLANST&rsquo;s &lsquo;M&rsquo; branch, DLAPY2, DLAMCH&rsquo;s &lsquo;E&rsquo;/&lsquo;S&rsquo;/&lsquo;O&rsquo; codes, DLASCL, DLASRT), and it is verified <em>bit-for-bit</em> &mdash; not within a tolerance &mdash; against Reference-LAPACK compiled and run with gfortran. Any &ldquo;mathematically equivalent but differently ordered&rdquo; rewrite, vectorized or not, destroys the property that makes the phase verifiable at all.</p>
+
+<div class="panel callout">
+  <p><b>A build requirement that only surfaced on the target ISA.</b> <code>-fno-fast-math</code> does <em>not</em> disable floating-point contraction. This toolchain reports <code>-ffp-contract=fast</code> as the active default on both x86_64 and aarch64 even under <code>-fno-fast-math</code> &mdash; and aarch64 has cheap native FMA while baseline x86_64 does not. So identical source under identical flags silently contracted some expressions on the device and never on the host, breaking bit-identity between them. <code>-ffp-contract=off</code> is therefore <b>required</b>, at the build-system level, and must not be assumed to follow from <code>-fno-fast-math</code>.</p>
+</div>
+
+<p>The port itself is structured C++ &mdash; structured loops rather than the reference&rsquo;s GOTO graph, 0-based arrays, <code>std::span</code> at the leaf routines, <code>constexpr</code> machine constants. What is <em>not</em> modernized is the arithmetic: same operations, same operands, same order. That distinction is the whole discipline. Each structural change was landed separately with the full bit-comparison re-run in between, and every one came back byte-identical.</p>
+
+<h2 id="s9"><span class="num">9</span>Phase 5 &mdash; Inverse iteration</h2>
+
+<p>Given an eigenvalue, the corresponding eigenvector of T comes from a few steps of inverse iteration: solve (T&nbsp;&minus;&nbsp;&lambda;I)y&nbsp;=&nbsp;y<sub>prev</sub>, renormalize, repeat. The solve is a Thomas recurrence on a tridiagonal &mdash; forward elimination then back substitution, each element depending on the last. <b>Serial by construction.</b> The only dispatched work is the norm, which is O(n) against an O(n) solve, so it is not where the time goes.</p>
+
+<p>The shift makes T&nbsp;&minus;&nbsp;&lambda;I deliberately near-singular, which is the point &mdash; that is what amplifies the wanted eigendirection &mdash; but it means pivots can land arbitrarily close to zero, so the solve is regularized with a floor scaled to the matrix norm.</p>
+
+<p>Degenerate eigenvalues need care that is easy to miss. Inverse iteration is deterministic, so members of a numerically degenerate cluster come back as <em>exact duplicates</em> of the first rather than as a basis for the shared eigenspace. Left alone that is a silent-wrong-answer bug: &phi;<sub>a</sub><sup>T</sup>M&phi;<sub>b</sub> comes out 1 instead of 0, and any modal-mass sum double-counts one direction and drops another. Clusters are detected by relative separation, each member is started from a different seed vector, and members are orthogonalized against the already-accepted modes of the same cluster in the M inner product.</p>
+
+<h2 id="s10"><span class="num">10</span>Phase 6 &mdash; Back-transformation</h2>
+
+<p>The eigenvectors of T are not the eigenvectors of the original problem. They have to come back through both transformations: &Phi;&nbsp;=&nbsp;L<sup>&minus;T</sup>&nbsp;Q<sub>1</sub>&nbsp;Y. Done per mode that is a matVec plus a triangular solve, once each, n times. Done as written here it is two matrix operations for <em>all</em> modes at once.</p>
+
+<pre><code><span class="c">// Phase 6 -- W = Q * Yt^T for every mode at once. Yt holds one ROW per mode,</span>
+<span class="c">// which is both how inverse iteration produces it and the layout the panel</span>
+<span class="c">// kernel&#x27;s B operand wants: no transpose exists anywhere on this path.</span>
+[[nodiscard]] static Mat matMulBatchedT(const Mat &amp;Q, const Mat &amp;Yt) {
+    const int n  = isize(Q);
+    const int nm = isize(Yt);
+    Mat W(n, nm, 0.0);
+    if (n == 0 || nm == 0) return W;
+    std::vector&lt;const double *&gt; ap((size_t) n), bp((size_t) nm);
+    std::vector&lt;double *&gt; cp((size_t) n);
+    for (int i = 0; i &lt; n;  i++) { ap[i] = Q[i].data(); cp[i] = W[i].data(); }
+    for (int j = 0; j &lt; nm; j++)   bp[j] = Yt[j].data();
+    panelOuterProduct(RowsIn(ap), RowsIn(bp), n, RowsOut(cp), false);
+    return W;
+}</code></pre>
+
+<p>Two design choices make this work without ever reading a column.</p>
+
+<p><b>Y is stored transposed</b> &mdash; one row per mode. That is both how inverse iteration naturally produces it (a contiguous length-n vector per mode, so storing it is a whole-row move rather than n strided single-element writes) and exactly the operand layout the panel kernel wants. No transpose is introduced anywhere on this path; the orientation removes one.</p>
+
+<p><b>The triangular solve is flipped.</b> Solving L<sup>T</sup>X&nbsp;=&nbsp;B the usual way reads a column of L: &ldquo;for each row i, sum L[k][i] over k&nbsp;&gt;&nbsp;i&rdquo;. Instead, rows are processed top-down from n&minus;1, and the moment row i is finalized its contribution is immediately propagated into every not-yet-finalized row j&nbsp;&lt;&nbsp;i by sweeping <em>along</em> row i of L, which is contiguous. Same result, same arithmetic, and the access pattern reduces to <code>axpyRow</code>.</p>
+
+<h2 id="s11"><span class="num">11</span>Phase 7 &mdash; M-orthonormalization</h2>
+
+<p>Each returned mode satisfies &phi;<sup>T</sup>M&phi;&nbsp;=&nbsp;1. Computing that norm is a dense square GEMV against M followed by a dot product &mdash; O(n&sup2;) per mode, contiguous, and the cleanest <code>matVec</code> target in the pipeline.</p>
+
+<p>Mass normalization is a deliberate choice over the alternative of scaling each mode so that one chosen coordinate equals 1. That alternative divides by a coordinate with no guaranteed magnitude: a mode with little amplitude at that specific degree of freedom produces a tiny divisor, and whatever rounding error already exists is amplified by however much that division blows up. Measured on this pipeline, divisors as small as 1e&minus;7 turned underlying eigenvectors accurate to ~1e&minus;14 into residuals of 1e&minus;2. &phi;<sup>T</sup>M&phi; is bounded away from zero for any valid mode because M is positive definite, so the mass norm has no such failure mode.</p>
+
+<h2 id="s12"><span class="num">12</span>Why SME loses at small n</h2>
+
+<p>Blocking makes phases 1, 3 and 6 BLAS-3-shaped, which is the <em>precondition</em> for a matrix engine to help at all. It is not sufficient.</p>
+
+<p>FMOPA performs VL&sup2; multiply-accumulates per instruction. That is a bargain when you want all VL&sup2; results and the operands are reused across many such instructions. It is a poor trade when the useful output is VL values (a dot product) or when the problem is smaller than a single tile.</p>
+
+<div class="panel callout">
+  <p><b>The blunt consequence for the motivating problem.</b> At n&nbsp;=&nbsp;24 with NB&nbsp;=&nbsp;32, there is no panel narrower than the matrix &mdash; blocking degenerates to the unblocked algorithm entirely, and <em>none</em> of the panel-kernel code executes. The SME path on a 24-DOF problem is not slow; it is unreachable. Blocking was worth doing because this is shared code that will see larger callers, not because it unlocks anything at this size.</p>
+</div>
+
+<p>And on the device that motivated the work &mdash; an Exynos 990, ARMv8.2 &mdash; there is no SVE and no SME at all, so the dispatcher resolves to NEON and the other two tiers are dead code that never runs. They exist for architectural coverage and for a future part, and the load-time log line reports which tier was actually selected precisely so that no measurement is ever attributed to the wrong kernel.</p>
+
+<p>There is a further open question worth stating plainly rather than assuming away: <code>FEAT_SME_F64F64</code> is an <em>optional</em> feature, separate from base SME. Every public account of SME and SME2 reaching mobile silicon frames it around AI inference in BF16, FP16 and INT8 &mdash; never FP64. Whether any shipping part implements the double-precision outer product is, as far as this work can establish, unconfirmed.</p>
+
+<h2 id="s13"><span class="num">13</span>Verification and reproducibility</h2>
+
+<p>Three properties are checked, and they are different in kind.</p>
+
+<h3>Agreement between the tiers</h3>
+
+<p>The panel kernel is cross-validated across a sweep of 1727 panel shapes &mdash; empty and singleton dimensions, K below, at and above a plausible vector length, K prime, M and N that do and do not fill a ZA tile, strongly rectangular panels in both directions, and both the assigning and accumulating modes against a pre-seeded output. Each tier is compared against a portable scalar reference <em>and</em> against the per-element dot-product loop it replaced. Worst observed relative deviation is ~3e&minus;15; the SME tier is the closest of the three to the scalar reference, because FMOPA accumulates fused and in strict k order.</p>
+
+<h3>Agreement with the unblocked algorithm</h3>
+
+<p>Blocked Cholesky, congruence, and tridiagonalization are each compared element-by-element against their unblocked counterparts across a sweep of sizes and block widths, on the intermediate results rather than on downstream eigenvalues.</p>
+
+<h3>Agreement with reference LAPACK</h3>
+
+<p>The tridiagonal phase is compared <em>byte-for-byte</em> against Reference-LAPACK <code>DSTERF</code> built with gfortran, over 185 cases: randomized tridiagonals from n&nbsp;=&nbsp;2 to 500, adversarial large- and small-magnitude scaling chosen to exercise both branches of the internal rescaling, deliberately multi-block matrices, both QL and QR direction selection, and the edge cases (n&nbsp;=&nbsp;0, n&nbsp;=&nbsp;1, all-zero, clustered eigenvalues). The comparison is on raw binary output, never a decimal round trip. It is run on aarch64, not merely on the development host &mdash; which is the only reason the <code>-ffp-contract</code> divergence described in &sect;8 was ever found.</p>
+
+<div class="panel keyfacts">
+  <h3>What &ldquo;reproducible&rdquo; does and does not mean here</h3>
+  <ul>
+    <li>The <b>NEON and SVE tiers are bit-identical</b> to the per-element formulation they replaced &mdash; every eigenvalue, byte for byte, at n&nbsp;=&nbsp;64 and n&nbsp;=&nbsp;257.</li>
+    <li>The <b>SME tier is not</b>, and should not be expected to be: it genuinely accumulates differently. It differs by ~5e&minus;15 relative, and its residuals are marginally <em>better</em>.</li>
+    <li>The <b>tridiagonal phase is bit-identical to Fortran LAPACK</b>, which is a much stronger claim than the other two and is the only one stated as byte equality against an external reference.</li>
+    <li><b>No timing claim is made.</b> The only execution vehicle available for the SVE and SME tiers is emulation, and emulator wall-clock measures the emulator &mdash; it says nothing about hardware.</li>
+  </ul>
+</div>
+
+<h2 id="s14"><span class="num">14</span>Frequently asked questions</h2>
+
+<details><summary>Why not just call LAPACK <code>dsygv</code>?</summary>
+<p>For production, on a platform with a tuned BLAS, you should. This exists to answer a narrower question &mdash; which phases of the algorithm can use which AArch64 vector features, and by what mechanism &mdash; which a library call hides by design. The tridiagonal phase here <em>is</em> reference LAPACK, ported line-for-line and checked byte-for-byte, precisely because there was no reason to invent an alternative to a routine that already has a definitive implementation.</p></details>
+
+<details><summary>Why is there no SME variant of <code>axpyRow</code>?</summary>
+<p>AXPY is y&nbsp;+=&nbsp;a&middot;x: one scalar, two vectors, no outer-product structure whatsoever. FMOPA has nothing to exploit, for the same reason it does not help a plain dot product. On an SME-capable core, <code>axpyRow</code> resolves to the SVE implementation &mdash; and that choice is made by testing <code>HWCAP_SVE</code> directly rather than inferring it from the SME bit, because the architecture does not guarantee that one implies the other.</p></details>
+
+<details><summary>Does the panel kernel need K to be a multiple of the vector length?</summary>
+<p>No, and more than that: the case cannot arise. K is the loop index in that kernel, not the lane index &mdash; lanes carry the output block&rsquo;s i and j. Partial predication applies to M and N, which is where the ragged edges actually are. This is the single most important structural difference between the panel kernel and the SME dot product, and it is why the two look so different despite issuing the same instruction.</p></details>
+
+<details><summary>Why pack the operands instead of using gather loads?</summary>
+<p>FMOPA wants, for each k, a contiguous vector of A over i &mdash; which is a column of a row-major panel. Packing into k-major staging buffers costs O(K(M+N)) to enable O(MNK) of compute, so it amortizes as soon as M and N approach a tile. It also keeps every <code>std::vector</code> access outside the streaming region: those accessors are ordinary non-streaming functions, and calling one from streaming context makes the compiler bracket it in <code>smstop</code>/<code>smstart</code> &mdash; exactly the per-row transition cost the single-region design exists to avoid.</p></details>
+
+<details><summary>Is <code>-ffast-math</code> ever worth trying here?</summary>
+<p>No. The convergence tests in the tridiagonal iteration and the residual assertions in the harness both depend on IEEE semantics, and fast-math reassociation perturbs them. Separately &mdash; and this is the part that catches people &mdash; <code>-fno-fast-math</code> alone is <em>not enough</em> to guarantee reproducibility across ISAs, because it leaves FP contraction enabled. See &sect;8.</p></details>
+
+<details><summary>Why <code>std::span</code> in kernels this hot?</summary>
+<p>A span is a pointer and a length, which is what the old <code>(const double*, ..., int)</code> signature already passed &mdash; same two registers, no indirection. What changes is that the length can no longer be passed inconsistently with the pointer. It is worth being precise about the limit, though: <code>span::operator[]</code> is unchecked, so the benefit is entirely at the call boundary. That happens to be where the mistakes actually were.</p></details>
+
+<details><summary>Why is <code>Mat</code> a contiguous buffer rather than a vector of vectors?</summary>
+<p>A vector of vectors is one heap allocation per row, with no guarantee that row i+1 lands anywhere near row i, and a pointer chase on every row access. A single buffer removes all three. Rows remain the primary access path &mdash; <code>operator[](i)</code> returns a span over one row &mdash; because &ldquo;never read a column&rdquo; is the invariant the blocked phases are built on; the 2D <code>mdspan</code> view is there for the places where the matrix shape, rather than the row, is what the code is about.</p></details>
+
+<details><summary>How would this change if SVE2 or SME2 were targeted?</summary>
+<p>SVE2 adds integer and fixed-point work that this FP64 pipeline does not use. SME2&rsquo;s multi-vector forms would let the panel kernel drive several ZA tiles per instruction group, which is a real throughput argument for the one kernel that has the right shape &mdash; but it would not change the classification of any phase in the table in &sect;2. Phases 4 and 5 stay sequential regardless of how wide the machine gets.</p></details>
+
+<h2 id="s15"><span class="num">15</span>Further reading</h2>
+
+<ul class="refs">
+<li><b>Arm C Language Extensions (ACLE)</b> &mdash; the normative definition of the SVE and SME intrinsics used here, including the <code>__arm_streaming</code> and <code>__arm_new("za")</code> keywords and the ZA state rules. <a href="https://github.com/ARM-software/acle">github.com/ARM-software/acle</a></li>
+<li><b>Arm Architecture Reference Manual, SME supplement</b> &mdash; ZA tile geometry, streaming vector length, and the <code>FEAT_SME_F64F64</code> feature definition. <a href="https://developer.arm.com/documentation/ddi0487/latest/">developer.arm.com/documentation/ddi0487</a></li>
+<li><b>Arm Neon Intrinsics Reference</b> &mdash; <code>float64x2_t</code>, <code>vfmaq_f64</code> and the rest of the baseline tier. <a href="https://developer.arm.com/architectures/instruction-sets/intrinsics/">developer.arm.com/architectures/instruction-sets/intrinsics</a></li>
+<li><b>Reference LAPACK</b> &mdash; <code>dsygv</code>, <code>dsytrd</code>/<code>dlatrd</code> for the blocked tridiagonalization pattern, and <code>dsterf</code>, which this pipeline ports verbatim. <a href="https://netlib.org/lapack/explore-html/">netlib.org/lapack/explore-html</a></li>
+<li><b>LAPACK Users&rsquo; Guide</b> (Anderson et al.) &mdash; the standard account of why the generalized problem is reduced rather than attacked directly. <a href="https://netlib.org/lapack/lug/">netlib.org/lapack/lug</a></li>
+<li><b>Golub &amp; Van Loan, <i>Matrix Computations</i></b> &mdash; Householder tridiagonalization, the implicit QL/QR iteration, and inverse iteration, including the degenerate-cluster problem described in &sect;9.</li>
+<li><b>Parlett, <i>The Symmetric Eigenvalue Problem</i></b> &mdash; the definitive treatment of the symmetric case, and the source for why shifted inverse iteration behaves as it does near a converged eigenvalue.</li>
+</ul>
+
+<footer>
+  <p>All measurements described on this page are correctness measurements. No performance claim is made for the SVE or SME tiers, because no hardware implementing <code>FEAT_SME_F64F64</code> was available to make one on.</p>
+</footer>
+
+</main>
+</body>
+</html>

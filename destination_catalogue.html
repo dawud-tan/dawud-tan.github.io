@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Destination Catalogue</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17352f;
+      --muted: #4e625a;
+      --paper: #f5f2e9;
+      --surface: #fffef9;
+      --line: #d4dcd1;
+      --accent: #1b5145;
+      --selected: #e5efdf;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font: 1rem/1.45 system-ui, sans-serif;
+    }
+    .wrap { width: min(100% - 2rem, 96rem); margin-inline: auto; }
+    .site-header { padding-block: 1.25rem 1rem; }
+    h1, h2, p { margin: 0; }
+    h1 { font: 400 clamp(1.75rem, 3vw, 2.5rem)/1.1 Georgia, serif; }
+    h2 { font-size: 1rem; }
+    a { color: var(--accent); text-underline-offset: 0.2em; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(16rem, 1fr) minmax(0, 2.2fr);
+      grid-template-areas: "catalogue preview";
+      height: max(30rem, calc(100dvh - 6rem));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .panel {
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--line);
+      border-radius: 0.75rem;
+      background: var(--surface);
+    }
+    .preview { grid-area: preview; }
+    .catalogue { grid-area: catalogue; }
+    .panel-header {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 0.25rem 1rem;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .status, .count { color: var(--muted); font-size: 0.875rem; }
+    .status { padding-top: 0.25rem; }
+    .maps-link { font-size: 0.875rem; font-weight: 650; }
+    .travel-controls, .maps-settings { flex-basis: 100%; }
+    .maps-settings { font-size: 0.875rem; }
+    .maps-settings summary { color: var(--accent); cursor: pointer; }
+    .maps-settings form { margin-top: 0.5rem; }
+    .maps-key-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.375rem;
+      margin-block: 0.25rem;
+    }
+    #maps-key {
+      width: min(100%, 26rem);
+      min-width: 0;
+      padding: 0.25rem 0.5rem;
+      border: 1px solid var(--line);
+      border-radius: 0.375rem;
+      background: var(--surface);
+      color: var(--ink);
+      font: inherit;
+    }
+    .location-button {
+      padding: 0.25rem 0.625rem;
+      border: 1px solid var(--accent);
+      border-radius: 0.375rem;
+      background: var(--surface);
+      color: var(--accent);
+      font: inherit;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .location-button[aria-disabled="true"] { cursor: wait; opacity: 0.75; }
+    .google-maps { color: #5e5e5e; white-space: nowrap; }
+    .map {
+      display: flex;
+      flex: 1;
+      min-height: 200px;
+      overflow: hidden;
+      border-radius: 0 0 0.7rem 0.7rem;
+      background: #e6eae1;
+    }
+    iframe { flex: 1; width: 100%; border: 0; }
+    .destinations { overflow-y: auto; list-style: none; padding: 0; margin: 0; }
+    .destinations li + li { border-top: 1px solid var(--line); }
+    .destination {
+      width: 100%;
+      display: grid;
+      gap: 0.125rem;
+      border: 0;
+      border-inline-start: 4px solid transparent;
+      background: transparent;
+      color: inherit;
+      padding: 0.6rem 0.75rem;
+      text-align: start;
+      font: inherit;
+      cursor: pointer;
+    }
+    .destination:focus-visible { outline-offset: -3px; }
+    .destination[aria-pressed="true"] {
+      border-inline-start-color: var(--accent);
+      background: var(--selected);
+    }
+    @media (hover: hover) {
+      .destination:hover { background: var(--selected); }
+    }
+    .destination-name { font-weight: 650; overflow-wrap: anywhere; }
+    .reviews, .travel { color: var(--muted); font-size: 0.875rem; }
+    .star { color: #805719; }
+    @media (max-width: 47.99rem), (pointer: coarse) {
+      .wrap { width: calc(100% - 1rem); }
+      .site-header { padding-block: 0.75rem; }
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas: "preview" "catalogue";
+        height: auto;
+        gap: 0.75rem;
+      }
+      .map { flex: none; height: clamp(200px, 40dvh, 28rem); }
+      .destinations { max-height: clamp(15rem, 42dvh, 29rem); }
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap site-header">
+    <h1>Destination Catalogue</h1>
+  </header>
+  <main class="wrap layout">
+    <section class="panel preview" aria-labelledby="preview-heading">
+      <div class="panel-header">
+        <div>
+          <h2 id="preview-heading">Destination preview</h2>
+          <p id="status" class="status" role="status">Choose a destination to see it on the map.</p>
+        </div>
+        <a id="maps-link" class="maps-link" target="_blank" rel="noopener noreferrer" hidden>Open in Google Maps</a>
+        <details class="maps-settings">
+          <summary>Google Maps settings</summary>
+          <form id="maps-key-form">
+            <label for="maps-key">Google Maps API key</label>
+            <div class="maps-key-controls">
+              <input id="maps-key" type="text" spellcheck="false" autocapitalize="off" autocomplete="off"
+                aria-describedby="maps-key-help">
+              <button type="submit" class="location-button">Apply key</button>
+            </div>
+            <p id="maps-key-help" class="status">
+              Use a Google Cloud project linked to a billing account with the Maps JavaScript API and Routes API enabled.
+              Enable the Maps Embed API for previews. Clear the field and apply to restore the default key.
+              <a href="https://developers.google.com/maps/documentation/javascript/routes/start">Google Cloud setup</a>
+            </p>
+            <p id="maps-key-status" class="status" role="status"></p>
+          </form>
+        </details>
+      </div>
+      <div class="map">
+        <iframe id="map" title="Google Maps overview of Tanjungrejo, Wirosari" allowfullscreen
+          referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      </div>
+    </section>
+    <section class="panel catalogue" aria-labelledby="catalogue-heading">
+      <div class="panel-header">
+        <h2 id="catalogue-heading">Destinations</h2>
+        <span id="count" class="count"></span>
+        <div class="travel-controls">
+          <button type="button" id="use-location" class="location-button">Use my location</button>
+          <p class="status" role="status">
+            <span id="travel-status"></span><span id="travel-source" hidden>
+              · Driving estimates from <span class="google-maps" translate="no">Google Maps</span>
+            </span>
+          </p>
+        </div>
+      </div>
+      <ul id="destinations" class="destinations" role="list"></ul>
+      <noscript>Enable JavaScript to view destinations and driving estimates.</noscript>
+    </section>
+  </main>
+  <template id="row">
+    <li>
+      <button type="button" class="destination" aria-pressed="false">
+        <span><span class="destination-name"></span><span class="travel"></span></span>
+        <span class="reviews"><span class="star" aria-hidden="true">★</span> <span class="review-text"></span></span>
+      </button>
+    </li>
+  </template>
+  <script>
+    const defaultMapsKey = "AIzaSyC4wdZXtiUvoSWh4wYxc4mVi8fLNreuIas";
+    const mapsKeyStorage = "destinationCatalogue.mapsKey";
+    let mapsKey = defaultMapsKey;
+    try {
+      mapsKey = sessionStorage.getItem(mapsKeyStorage) || defaultMapsKey;
+    } catch {
+      // The default is still usable when the browser blocks storage.
+    }
+    // Catalogue order, ratings and review counts come from wirosari_group_travel.ods.
+    // Each row has a name, rating, review count, latitude, longitude and optional Google Place ID.
+    const destinations = [
+      ["Bledug Kuwu (Kabupaten Grobogan)", 4.2, 2775, -7.1158285, 111.1212843],
+      ["Goa Terawang Eco Park (Kabupaten Blora)", 4.3, 2573, -6.9616991, 111.1947993],
+      ["Oasis Djarum Park (Kabupaten Kudus)", 4.6, 2956, -6.7841933, 110.8593084, "ChIJVW_QnNDacC4RzVAVVH13s3g"],
+      ["NDayu Park (Kabupaten Sragen)", 4.1, 2858, -7.4636654, 110.9916024],
+      ["Koetatoea (Kota Semarang)", 4.4, 4981, -7.010443, 110.4734377, "ChIJ3Udi7HqNcC4RXfk-wZz8yx0"],
+      ["Brown Canyon (Kota Semarang)", 4.2, 3750, -7.0565164, 110.4862531, "ChIJx-YWHX6OcC4RxNu9jx5FzTg"],
+      ["Wisata Bahari Dampo Awang Beach (Kabupaten Rembang)", 4.0, 3137, -6.703524, 111.34111, "ChIJCVBlqjEkdy4RVzOaK2yu88M"],
+      ["The Hills Vaganza (Kabupaten Kudus)", 3.9, 2565, -6.7066097, 110.8854604, "ChIJt7GZafzZcC4RW7jUWIUUmKc"],
+      ["Kampung Pelangi (Kota Semarang)", 4.3, 4455, -6.9888812, 110.4083781, "ChIJpaAV61SMcC4R20Eu4uQfBSE"],
+      ["Kanal Banjir Barat (Kota Semarang)", 4.5, 3174, -6.9917066, 110.4020435, "ChIJ9_cwqTiLcC4R9jlDMchkC5o"],
+      ["Taman Budaya Raden Saleh (TBRS) (Kota Semarang)", 4.4, 3978, -7.0031373, 110.4244266, "ChIJVVVVFaOMcC4RaVEM5BxHj_o"],
+      ["Grand Maerakaca (Kota Semarang)", 4.4, 5560, -6.9604467, 110.3879084, "ChIJ56au0dH0cC4RokcyVYnaNvk"],
+      ["Wisata Pijar Park (Kabupaten Kudus)", 4.4, 2463, -6.6787573, 110.8926256, "ChIJf7M33dHZcC4RDtLCL8HZfgM"],
+      ["Sampangan Park (Kota Semarang)", 4.4, 7229, -7.0084463, 110.3959754, "ChIJtVrbdg6LcC4RsyogYzQkpv0"],
+      ["Marina Beach (Kota Semarang)", 4.2, 16754, -6.948877, 110.3893285, "ChIJoY5PbuX0cC4R0G1g0HLuK88"],
+      ["Ngarsopuro Night Market (Kota Surakarta)", 4.5, 6312, -7.56875, 110.8223017, "ChIJV8vMh2IWei4RzI2gv2W0pLs"],
+      ["Pantai Pasir Putih Wates Rembang (Kabupaten Rembang)", 4.5, 3017, -6.689504, 111.2825842, "ChIJRWE55Iwpdy4RF1jHxwAz13k"],
+      ["Kampung Wisata Taman Lele Semarang (Kota Semarang)", 4.2, 3388, -6.9860867, 110.3457493, "ChIJ-wljD7SKcC4RHBhCt6f1jJE"],
+      ["Solo Safari (Kota Surakarta)", 4.1, 21430, -7.5643553, 110.8586618, "ChIJf-tH9wAXei4R7311DhU7CXw"],
+      ["Karang Jahe Beach (Kabupaten Rembang)", 4.4, 16425, -6.6873643, 111.4119539, "ChIJHWAdO-4jdy4R2YTupAK2Gcs"],
+      ["Sondokoro Agrotourism (Kabupaten Karanganyar)", 4.1, 5336, -7.5756447, 110.9303723, "ChIJAYa_2IYWei4RJ5SzfxnzHVY"],
+      ["Lembah Gunung Madu (Kabupaten Boyolali)", 4.0, 3052, -7.4103475, 110.6897207, "ChIJox91rSFzei4RICW15lg6W5I"],
+      ["Wana Wisata Sreni Indah (Kabupaten Jepara)", 4.2, 2341, -6.6713933, 110.8277087, "ChIJNy184t7YcC4RtNb5p95o8vE"],
+      ["Thematic Attraction Kampung Jawi (Kota Semarang)", 4.6, 2905, -7.0288381, 110.3774602, "ChIJW3-WUq2LcC4R7sRRqki2lrc"],
+      ["Semarang Zoo (Kota Semarang)", 4.0, 4548, -6.969492, 110.286592],
+      ["Kemuning Sky Hills (Kabupaten Karanganyar)", 4.7, 3578, -7.5952734, 111.1329213, "ChIJlaDmg0yLeS4RNaGB0mBGlc0"],
+      ["Waduk Cengklik Park (Kabupaten Boyolali)", 4.4, 7954, -7.5177626, 110.7258357, "ChIJoag4CwwTei4RKIR8vUY_VR8"],
+      ["Resto Kalibatur Salatiga (Kota Salatiga)", 4.3, 2701, -7.3052017, 110.5173533, "ChIJ572SPXZ5ei4RgfPnMzeySx8"],
+      ["Goa Kreo (Kota Semarang)", 4.3, 8177, -7.0388163, 110.3510113, "ChIJ2431LD-KcC4RacYnynZhOS4"],
+      ["Pantai Kartini (Kabupaten Jepara)", 4.3, 15554, -6.5891849, 110.6461048],
+      ["Wisata Agro Jollong (Kabupaten Pati)", 4.2, 3843, -6.6526204, 110.9351298, "ChIJC_LDDbnXcC4R3dl9xDBbfPU"],
+      ["Watu Gajah Park (Kabupaten Semarang)", 4.1, 4256, -7.1633102, 110.4462307, "ChIJqVbMxcaFcC4RhVEzxYSp3bs"],
+      ["Saloka Theme Park (Kabupaten Semarang)", 4.5, 21892, -7.2803263, 110.4584492, "ChIJ95oOl2WCcC4R5pgg3z1ycqU"],
+      ["Ngrembel Asri (Kota Semarang)", 4.5, 10012, -7.0754637, 110.3605141, "ChIJ8at1GZSJcC4RhSyh5NIvcqg"],
+      ["Dusun Semilir (Kabupaten Semarang)", 4.4, 41136, -7.2382983, 110.4332243],
+      ["Eling Bening (Kabupaten Semarang)", 4.3, 25403, -7.2528968, 110.4265016],
+      ["Umbul Sewu Pengging (Kabupaten Boyolali)", 4.3, 4478, -7.550181, 110.677462, "ChIJ-7MyT2Rrei4R3bWbOzLSOGY"],
+      ["Pantai Tirta Samudera (Kabupaten Jepara)", 4.3, 6208, -6.5537961, 110.6471087, "ChIJuTUAs0UZcS4RmmMjg2PyO2M"],
+      ["Jepara Ourland Park (Kabupaten Jepara)", 4.3, 5803, -6.5470222, 110.66276, "ChIJHUkbDCcZcS4RQqAK7iVTS2M"],
+      ["Jamus Tea Plantation (Kabupaten Ngawi)", 4.5, 4145, -7.5617675, 111.1840596],
+      ["Kampung Karet (Kabupaten Karanganyar)", 4.4, 2242, -7.622692, 111.1038005, "ChIJARgqdJmKeS4RGofrtoOcVvg"],
+      ["Goa Rong View (Kabupaten Semarang)", 4.4, 4629, -7.2720725, 110.4698095, "ChIJ3QJyFlmCcC4Ru13i4xRH4Ms"],
+      ["Kampoeng Rawa (Kabupaten Semarang)", 4.3, 3813, -7.2707898, 110.4216723, "ChIJAxk6oIiBcC4RDVdXoyy_mO0"],
+      ["Umbul Pengging (Kabupaten Boyolali)", 4.5, 5393, -7.5531454, 110.6752755, "ChIJtaGN_m1rei4RpHflvNLANBs"],
+      ["Paralayang Kemuning (Kabupaten Karanganyar)", 4.6, 5010, -7.6039118, 111.1438097, "ChIJG15pCteKeS4RPbUHSUB4f7E"],
+      ["Jumog Waterfall (Kabupaten Karanganyar)", 4.6, 12088, -7.6308722, 111.1251748],
+      ["Senjoyo Spring (Kabupaten Semarang)", 4.4, 7475, -7.3736717, 110.5261108, "ChIJf5l0F1R3ei4RDTjSEYv3adI"],
+      ["Muncul Public Swimmingpool (Kabupaten Semarang)", 4.4, 5058, -7.3285715, 110.4402315, "ChIJJY8qqMV4ei4RLyYyV6o80sE"],
+      ["Srambang Park Waterfall Ngawi (Kabupaten Ngawi)", 4.5, 6001, -7.5662607, 111.2307539, "ChIJbVU9zRjzeS4RlxdDFxOoSKI"],
+      ["Umbul Pelem (Kabupaten Klaten)", 4.5, 6573, -7.592262, 110.6493485],
+      ["Tlatar Water Park (Kabupaten Boyolali)", 4.2, 3012, -7.4940686, 110.6212609, "ChIJoUsmhlNuei4RmVU5HUC1vHw"],
+      ["GoFun Bojonegoro (Kabupaten Bojonegoro)", 4.3, 3744, -7.1691239, 111.8953819, "ChIJWyllnZiBdy4R6bSDmoaMtK0"],
+      ["Umbul Kemanten (Kabupaten Klaten)", 4.5, 13334, -7.5910307, 110.6506748, "ChIJgXLyb0Nqei4RpkY4h4Hk6vI"],
+      ["Janti Park (Kabupaten Klaten)", 4.5, 3843, -7.5942951, 110.6443868, "ChIJ46knzU9tei4RprJQU9KlHZU"],
+      ["New Bukit Cinta Rawa Pening (Kabupaten Semarang)", 4.4, 3851, -7.30766, 110.422204, "ChIJcWyDR-x_ei4Rq3nxtGMwD9s"],
+      ["New Rivermoon Adventure Resto & Fun (Kabupaten Klaten)", 4.6, 10272, -7.6069338, 110.6489932, "ChIJOybDNjxrei4RbVXh-C74-Yo"],
+      ["Kolam Renang Umbul Cokro (OMAC-Obyek Mata Air Cokro) (Kabupaten Klaten)", 4.2, 3614, -7.6028076, 110.6441968, "ChIJZTXP1TJrei4RLbA2XRFARCA"],
+      ["Air Terjun Grojogan Sewu (Kabupaten Karanganyar)", 4.5, 13832, -7.6615335, 111.1286395],
+      ["Taman Wisata New Balekambang Tawangmangu (Kabupaten Karanganyar)", 4.3, 6968, -7.6623622, 111.1324432, "ChIJt96YojGKeS4RG5Wp8HQ3UhA"],
+      ["Nglirip Waterfall (Kabupaten Tuban)", 4.5, 3914, -6.9683485, 111.7939863, "ChIJ4ZjL80Z0dy4RaHnwdVlJGL8"],
+      ["Umbul Nilo (Kabupaten Klaten)", 4.4, 3155, -7.5933083, 110.6418769, "ChIJ5YzJuUBqei4RoBOK2YVG6aY"],
+      ["Umbul Sigedang-Kapilaler (Kabupaten Klaten)", 4.6, 5574, -7.6063753, 110.6449899],
+      ["Wahana Soko Alas (Kabupaten Klaten)", 4.5, 2669, -7.6105916, 110.6428104, "ChIJeV48xdxrei4Rb4UDmRz2oAM"],
+      ["Celosia Flower Garden (Kabupaten Semarang)", 4.4, 29170, -7.2252901, 110.3460851, "ChIJ14g0FrOAcC4RFJhOaMP2Dxk"],
+      ["Umbul Ponggok (Kabupaten Klaten)", 4.5, 23353, -7.6137557, 110.6357521, "ChIJuRjnoLBGei4Rzzse5SV68q4"],
+      ["Empu Rancak Beach (Kabupaten Jepara)", 4.3, 2278, -6.4859835, 110.6944613, "ChIJvdbUgIkicS4Rnl-Wn_k72gc"],
+      ["Wisata Bukit Sekipan Tawangmangu (Kabupaten Karanganyar)", 4.4, 13435, -7.6679918, 111.1438577],
+      ["Umbul Sidomukti (Kabupaten Semarang)", 4.6, 9068, -7.1945903, 110.3733583],
+      ["Umbul Besuki (Kabupaten Klaten)", 4.5, 3025, -7.6100448, 110.6377704],
+      ["The Kopeng Park (Kabupaten Semarang)", 4.2, 9375, -7.398416, 110.419317, "ChIJNZZbAwx8ei4RK0mibKWFK2g"],
+      ["ARENAN KALIKESEK (Kabupaten Kendal)", 4.6, 2835, -7.1529636, 110.3068371, "ChIJw7PHmFV9cC4RPJ0DW6Kr30Q"],
+      ["The Lawu Park (Kabupaten Karanganyar)", 4.5, 19011, -7.6637382, 111.1763731, "ChIJd5v_0u-LeS4R0thx5v7QkZI"],
+      ["Agrowisata Kopeng Gunungsari (Kabupaten Semarang)", 4.4, 2309, -7.4080261, 110.4201667, "ChIJeV3dfnN8ei4RotV9115v3fY"],
+      ["Cemara Kandang (Kabupaten Karanganyar)", 4.7, 16801, -7.6635043, 111.1870256, "ChIJn0IASPiLeS4RSjjawEiw9Kw"],
+      ["Kebun Teh Medini (Kabupaten Kendal)", 4.5, 2362, -7.1647289, 110.3344518],
+      ["Gulun Sport Park (Kota Madiun)", 4.5, 6459, -7.634629, 111.5266789, "ChIJOUm3Oou-eS4Rh8xyQfnkyWc"],
+      ["Rowo Jombor Klaten (Kabupaten Klaten)", 4.4, 7548, -7.7517486, 110.6236009, "ChIJL5trE21Gei4RJX-FmmLLjII"],
+      ["Pantai Semilir (Kabupaten Tuban)", 4.5, 4047, -6.7876341, 111.9042455, "ChIJnZ1kt4Cndy4Rw4DqSz-TenY"],
+      ["Kayangan Api (Kabupaten Bojonegoro)", 4.4, 2728, -7.2595333, 111.7905274],
+      ["Mojosemi Forest Park (Kabupaten Magetan)", 4.4, 6778, -7.6647397, 111.2170016],
+      ["Bukit Cinta Watu Prahu Bayat (Kabupaten Klaten)", 4.1, 2355, -7.7640773, 110.6694724, "ChIJnUtzw8tHei4RTV8J1N5b8UU"],
+      ["Gua Ngerong (Kabupaten Tuban)", 4.2, 2963, -7.0603763, 112.0074415, "ChIJqVWBU9Oady4RhJyqmz-N1Es"],
+      ["Gajah Mungkur Wonogiri (Kabupaten Wonogiri)", 4.2, 10295, -7.8555104, 110.9103159, "ChIJR3mnrvstei4RZIWoSTxC2co"],
+      ["Pantai Cahaya (Kabupaten Kendal)", 4.2, 4275, -6.9024213, 110.0659932],
+      ["Madiun Umbul Square (Kabupaten Madiun)", 4.0, 3136, -7.7857255, 111.52173, "ChIJKzevK62jeS4RAY2xzaViwS0"],
+      ["Pikatan Water Park (Kabupaten Temanggung)", 4.3, 3979, -7.3383305, 110.1846515],
+      ["Tebing Breksi (Kabupaten Sleman)", 4.5, 66891, -7.7815714, 110.5045827, "ChIJW2a0WKRaei4Rxziu0Gr8sKQ"],
+      ["Gua Manik (Kabupaten Jepara)", 4.2, 2809, -6.4068625, 110.9084844, "ChIJvVU4hKEwcS4RbX3BqVLyrLg"],
+      ["Pantai Indah Kemangi (Kabupaten Kendal)", 4.5, 2862, -6.8903691, 110.1058841, "ChIJy38bYJJEcC4R3YsM3ixXu5w"],
+      ["Taman Kyai Langgeng - Tempat Wisata Magelang (Kota Magelang)", 4.3, 14152, -7.4843948, 110.2105462],
+      ["Blue Lagoon Jogja (Kabupaten Sleman)", 4.3, 4943, -7.7028328, 110.4491103, "ChIJFdqp63Vcei4RYjQWOzsG1tQ"],
+      ["Kids Fun (Kota Yogyakarta)", 4.6, 2925, -7.7823764, 110.3791402, "ChIJKUDqszNYei4RWwYICV9KX1s"],
+      ["Gembira Loka Zoo (Kota Yogyakarta)", 4.5, 50958, -7.803957, 110.3981136],
+      ["Ketep Pass Magelang (Kabupaten Magelang)", 4.5, 21147, -7.4944699, 110.3815682],
+      ["Obelix Hills (Kabupaten Sleman)", 4.6, 9045, -7.8068969, 110.5214454],
+      ["Bukit Bintang (Kabupaten Gunungkidul)", 4.5, 32004, -7.84593, 110.4798285, "ChIJ09esGKRRei4RCi-ZBGZbBfs"],
+      ["HeHa Sky View (Kabupaten Gunungkidul)", 4.5, 36589, -7.8496297, 110.4779383],
+      ["Embung Potorono (Kabupaten Bantul)", 4.5, 5552, -7.8315103, 110.4205358, "ChIJCax6VwBXei4RVuOsdzaI9n8"],
+      ["XT Square (Kota Yogyakarta)", 4.4, 17296, -7.8167718, 110.3862774, "ChIJQ9a7xAxXei4Rqo39gmCEIU4"],
+      ["Pantai Remen Tuban (Kabupaten Tuban)", 4.4, 6036, -6.7657627, 111.9680784, "ChIJFTbzr8Oldy4RD0zw3fhBMss"],
+      ["Ancient Volcano Nglanggeran (Kabupaten Gunungkidul)", 4.6, 3603, -7.8429562, 110.537942],
+      ["Negeri Kahyangan (Kabupaten Magelang)", 4.6, 5647, -7.4820445, 110.3994085, "ChIJBT7pgUFjei4RG6Hfb0_Ge9I"],
+      ["Watu Amben Stone Park (Kabupaten Bantul)", 4.5, 3636, -7.8586679, 110.4726761, "ChIJ98uyq6FRei4RP_-nGSmS2SY"],
+      ["SKE CITY PARK (Kabupaten Sleman)", 4.2, 17602, -7.766867, 110.3553757, "ChIJiw8ggUJYei4RqHIiS0-I0O4"],
+      ["Wisata Kali Gajah Wong Mrican Giwangan (Kota Yogyakarta)", 4.6, 3094, -7.8311337, 110.3941846, "ChIJrUf7bhxXei4RrqsZKA-ziJ8"],
+      ["Rafting Magelang Kampung Ulu Resort (Kabupaten Magelang)", 4.5, 2558, -7.5796923, 110.2465471],
+      ["Pantai Kelapa Tuban (Kabupaten Tuban)", 4.3, 6613, -6.8963097, 112.0892074, "ChIJzfMgucS9dy4RmWWyGeK_ewk"],
+      ["Taman Pelangi Jogja (Kabupaten Sleman)", 4.2, 6121, -7.7503027, 110.3694988, "ChIJl2DGdflYei4RLYblLjQdM5k"],
+      ["Cave Akbar (Kabupaten Tuban)", 4.2, 3899, -6.9053442, 112.0604005],
+      ["Genilangit Park (Kabupaten Magetan)", 4.5, 3774, -7.7097668, 111.216761, "ChIJAQAAANyOeS4RvHxx7LHYjbk"],
+      ["Hutan Pinus Pengger (Kabupaten Bantul)", 4.5, 27210, -7.8712041, 110.4595144],
+      ["Citra Elo Rafting (Kabupaten Magelang)", 4.6, 2237, -7.6103963, 110.2287755],
+      ["Lava Merapi and Alien Stone (Kabupaten Sleman)", 4.6, 11304, -7.6023375, 110.4552585, "ChIJIRYoEBRnei4RbnigouyekOY"],
+      ["Stonehenge Yogyakarta (Kabupaten Sleman)", 4.4, 3893, -7.6024184, 110.4474119, "ChIJB4-scT5nei4ROjuolpZRWhs"],
+      ["The Lost World Castle (Kabupaten Sleman)", 4.3, 22397, -7.6041648, 110.4510042, "ChIJCVFD7Ztdei4RyYO2suhfTyg"],
+      ["Wisata jeep merapi (Kabupaten Sleman)", 4.4, 4127, -7.6473403, 110.4263662, "ChIJN3wIRyxnei4RN1z0axYs_zg"],
+      ["Agro Tourism Bhumi Merapi (Kabupaten Sleman)", 4.5, 14650, -7.6400635, 110.426389, "ChIJ33HWr6xgei4R2S9jnxzk09I"],
+      ["Svargabumi Borobudur (Kabupaten Magelang)", 4.8, 10045, -7.6133916, 110.2055066],
+      ["Kledung Park Sindoro Coffee House (Kabupaten Temanggung)", 4.5, 3141, -7.3338281, 110.0374012, "ChIJn2p8UNqfei4R_l0497TRdXE"],
+      ["Ledok Sambi Ecopark (Kabupaten Sleman)", 4.7, 17175, -7.64745, 110.4281736, "ChIJu5ZWHOJdei4RRhnQ1vhGyQE"],
+      ["The Sinsu Park ( Taman Wisata - Resort - Resto ) (Kabupaten Wonosobo)", 4.4, 2468, -7.345568, 110.0278648, "ChIJK2PldVKfei4R76dhaQjBWvQ"],
+      ["Pine Forest Nongko IJO (Kabupaten Madiun)", 4.4, 2307, -7.735137, 111.684776, "ChIJm1trkOaveS4R_-ErBQ3Cb1k"],
+      ["Embung Kledung (Kabupaten Temanggung)", 4.5, 5930, -7.3342637, 110.032034],
+      ["Becici Peak (Kabupaten Bantul)", 4.6, 17782, -7.9019918, 110.4373813, "ChIJq6qqqhpTei4R9FnqkZsUKGw"],
+      ["Ekowisata Kali Talang (Kabupaten Klaten)", 4.7, 4524, -7.5831047, 110.4619551, "ChIJn1Uko-Rmei4Rpte4Etu2Vk4"],
+      ["Merapi Park Yogyakarta (Kabupaten Sleman)", 4.3, 18521, -7.6209386, 110.4219092],
+      ["Silancur Highland (Kabupaten Magelang)", 4.6, 9830, -7.4146928, 110.1081727, "ChIJYb2eT2ybei4RkqWpKu1562Q"],
+      ["Tegaldowo Puspa Gading Park (Kabupaten Bantul)", 4.4, 2594, -7.8658973, 110.3224493, "ChIJcd37dqn5ei4RwEyVzTojEG0"],
+      ["Safari Beach Jateng (Kabupaten Batang)", 4.4, 6260, -6.8833981, 109.7567241],
+      ["Teras Merapi (Kabupaten Sleman)", 4.7, 2788, -7.5875018, 110.4559827, "ChIJB_OVAolnei4RKYbVFBx6OVc"],
+      ["Wisata Watu Rumpuk (Kabupaten Madiun)", 4.3, 2428, -7.7705775, 111.6447676, "ChIJg2o6ugqleS4RThEuyRfa5p0"],
+      ["Umbul Jumprit (Kabupaten Temanggung)", 4.5, 2248, -7.2541963, 110.0166628, "ChIJYUZeRwV0cC4R1pzWI69pXCs"],
+      ["Wisata Pagilaran (Kabupaten Batang)", 4.4, 4565, -7.1110111, 109.8553483, "ChIJV4NYbtgTcC4RL_f2KosHLZQ"],
+      ["Taman Gardu Pandang Kaliurang (Kabupaten Sleman)", 4.4, 3828, -7.5930139, 110.4249938, "ChIJudvCFdNgei4R2fU-nXAlpU8"],
+      ["Mangunan Pines Forests (Kabupaten Bantul)", 4.6, 27406, -7.9259164, 110.43034],
+      ["Gamplong Studio Alam (Kabupaten Sleman)", 4.5, 15174, -7.806759, 110.236537, "ChIJRR3Qbf_5ei4RXQujN8Yu20M"],
+      ["Jurang Tembelan Kanigoro (Kabupaten Bantul)", 4.5, 4137, -7.9399945, 110.4298378, "ChIJYWmf-l5Tei4Rny4GNmuqTNk"],
+      ["Bukit Klangon (Kabupaten Sleman)", 4.7, 10245, -7.5768666, 110.4548311, "ChIJXwy6auZmei4RJZqUXZEi4wM"],
+      ["Kebun Buah Mangunan (Kabupaten Bantul)", 4.7, 5166, -7.9408714, 110.4245352, "ChIJq6qqqmZTei4ROBMgh81edhE"],
+      ["Grojogan Watu Purbo (Kabupaten Sleman)", 4.5, 3346, -7.6307204, 110.3407695, "ChIJjWn6EaJhei4RbxwuZS1VghU"],
+      ["WEGO (Kabupaten Lamongan)", 4.0, 3413, -7.2049516, 112.2811119, "ChIJC1BxUXn1dy4RNO0c-ZpQp8Y"],
+      ["Desa Wisata Pulesari (Kabupaten Sleman)", 4.5, 3207, -7.6258806, 110.371698, "ChIJKf3i43tgei4RLXFPz4588xs"],
+      ["Wisata Alam Kebun Teh Sikatok (Kabupaten Wonosobo)", 4.7, 3685, -7.2687408, 109.9875245, "ChIJbVDfcEp1cC4RiMo83mmVPc4"],
+      ["Pantai Pasir Kencana (Kota Pekalongan)", 3.9, 2457, -6.8592635, 109.6910395, "ChIJp8GNXuwlcC4RhTFO7ECL1Lc"],
+      ["Pindul Cave (Kabupaten Gunungkidul)", 4.5, 8282, -7.9332936, 110.6469829],
+      ["Telaga Jonge (Kabupaten Gunungkidul)", 4.4, 3151, -8.0116925, 110.6247014, "ChIJM0mY5gy0ey4RqXFjGCBpTVQ"],
+      ["D'Qiano Waterpark (Kabupaten Banjarnegara)", 4.1, 2390, -7.1940697, 109.8807116],
+      ["Embung Bansari (Kabupaten Temanggung)", 4.7, 2676, -7.2891771, 110.034561, "ChIJzbjv47R1cC4RF6hSZmfCjpA"],
+      ["Wisata Tambi Villa & Perkebunan Teh PT. Tambi (Kabupaten Wonosobo)", 4.5, 2552, -7.2670563, 109.9591761],
+      ["Wisata Negeri Sayur Sukomakmur (Kabupaten Magelang)", 4.8, 2776, -7.41926, 110.0644186, "ChIJr70rpuObei4R-hoptOBrJDo"],
+      ["Gumuk Pasir Parangkusumo (Kabupaten Bantul)", 4.5, 10373, -8.018355, 110.3195234, "ChIJL11FE5AAey4RQN3C7ht34SI"],
+      ["Posong Natural Park (Kabupaten Temanggung)", 4.6, 6186, -7.3182254, 110.0248724],
+      ["Wisata Bahari Lamongan (WBL) (Kabupaten Lamongan)", 4.6, 6344, -6.8667656, 112.3608982],
+      ["Maharani Zoo & Cave (Kabupaten Lamongan)", 4.5, 3187, -6.8677899, 112.3623122],
+      ["Taman Rekreasi Kalianget Wonosobo (Kabupaten Wonosobo)", 4.2, 3584, -7.3329064, 109.9106733, "ChIJnWKmAXugei4Ratff_jWAbqQ"],
+      ["Telaga Warna Dieng (Kabupaten Wonosobo)", 4.5, 13484, -7.215639, 109.9135766, "ChIJ7S8hK_AMcC4RbDnFTLUMBuQ"],
+      ["Pintu Langit Sky View (Kabupaten Wonosobo)", 4.6, 4039, -7.2326894, 109.9384614],
+      ["Malindo Swimming Pool (Kabupaten Gresik)", 4.4, 4038, -6.9658442, 112.4238772, "ChIJzZDsrlbvdy4Rq_jvSpCsD0s"],
+      ["Menjer Lake (Kabupaten Wonosobo)", 4.7, 3772, -7.2733486, 109.926498, "ChIJ5UPODNoLcC4Rrl0q3wdzh3I"],
+      ["Batu Pandang Ratapan Angin (Kabupaten Wonosobo)", 4.7, 10008, -7.217694, 109.9166435, "ChIJD5Ug2e0McC4R09AGGgb1ULM"],
+      ["Obelix Sea View (Kabupaten Gunungkidul)", 4.5, 10921, -8.025245, 110.3469037],
+      ["Maha Sky Batu Angkruk (Kabupaten Wonosobo)", 4.5, 5053, -7.2260742, 109.9319245, "ChIJ72ziyTUNcC4R36NIo-KH3Ng"],
+      ["Waduk Sermo (Kabupaten Kulon Progo)", 4.6, 2654, -7.8232883, 110.1242918],
+      ["Bukit Wisata Pulepayung (Kabupaten Kulon Progo)", 4.5, 4952, -7.7999428, 110.1237712, "ChIJ6SxE5wzvei4RfhahcHbhMpg"],
+      ["Wisata Kalibiru (Kabupaten Kulon Progo)", 4.4, 7537, -7.8074219, 110.1292682, "ChIJkQsehvfvei4RfiL0087kBFY"],
+      ["Glagah Indah Beach (Kabupaten Kulon Progo)", 4.4, 5537, -7.9168137, 110.076823, "ChIJ618obYdXei4RvmleqabRIsg"],
+      ["Dieng Plateau (Kabupaten Banjarnegara)", 4.7, 12523, -7.2149012, 109.8994385],
+      ["Kahyangan Skyline (Kabupaten Wonosobo)", 4.5, 3036, -7.2634475, 109.9279108, "ChIJ9f_vAe0LcC4RyKgPsU4EfWM"],
+      ["SEDUDO WATERFALL (Kabupaten Nganjuk)", 4.5, 4806, -7.7813045, 111.7575514],
+      ["Ekowisata Sungai Mudal (Kabupaten Kulon Progo)", 4.7, 9891, -7.7628166, 110.1161247, "ChIJt3Tpb0ruei4RMSWO_IPh8cg"],
+      ["Kedung Pedut Waterfall (Kabupaten Kulon Progo)", 4.5, 4010, -7.7699875, 110.1210707],
+      ["Bendungan Waru Turi Kediri (Kabupaten Kediri)", 4.2, 4077, -7.764047, 112.0243003, "ChIJicw6zOxQeC4RE3c770FOcFw"],
+      ["Mangrove Jembatan Api-Api (MJAA) (Kabupaten Kulon Progo)", 4.3, 4845, -7.8937273, 110.0259395, "ChIJwQ2txbTmei4Rf-39umjdhiA"],
+      ["Dynasty Water World Gresik (Kabupaten Gresik)", 4.3, 3136, -7.1409986, 112.6149747],
+      ["Kawah Sikidang (Kabupaten Banjarnegara)", 4.4, 31917, -7.2202382, 109.9039748],
+      ["Dalegan Beach (Kabupaten Gresik)", 4.5, 2306, -6.8923065, 112.4664768, "ChIJqSG5GRrndy4R4Mbns0ogmdA"],
+      ["Taman Wisata Tirtoyoso (Kabupaten Kediri)", 4.3, 3596, -7.8164375, 112.0297484, "ChIJkY_r4mtXeC4RcEi3IuoEv8M"],
+      ["Sikarim Waterfall (Kabupaten Wonosobo)", 4.7, 3454, -7.2425307, 109.9070629, "ChIJu8wL74EMcC4RB5XCYaDDW88"],
+      ["The Pikas Artventure (Wisata Arung Jeram Sungai Serayu) (Kabupaten Banjarnegara)", 4.6, 3207, -7.389211, 109.744874],
+      ["Sikunir Hill Dieng (Kabupaten Wonosobo)", 4.7, 19465, -7.2393929, 109.9242165, "ChIJz-0-Z58McC4R4y-evdWWHbE"],
+      ["Gronjong Wariti (Kabupaten Kediri)", 4.4, 3413, -7.7269152, 112.1408988],
+      ["Objek Wisata Linggoasri (Kabupaten Pekalongan)", 4.3, 2842, -7.1060148, 109.5870037, "ChIJN5hbzugdcC4R7p9XU9zQ5VE"],
+      ["Pantai Drini (Kabupaten Gunungkidul)", 4.6, 5591, -8.1379365, 110.5774823],
+      ["Taman Bambu Air Waduk Sermo (Kabupaten Kulon Progo)", 4.5, 2504, -7.8212286, 110.1150847, "ChIJbRi-NWjlei4RuMs62I6_eo8"],
+      ["Pantai Dewaruci Jatimalang (Kabupaten Purworejo)", 4.4, 8984, -7.879616, 109.9830355, "ChIJB0A7xTznei4RvuAZ-e4gxgw"],
+      ["Gumul Paradise Island (Kabupaten Kediri)", 4.4, 4879, -7.811681, 112.0611694, "ChIJN0nFcLP5eC4RAw5IW6VPl7U"],
+      ["Wisata Alam SETIGI (SELO TIRTO GIRI) (Kabupaten Gresik)", 4.4, 3951, -6.9496118, 112.5064943],
+      ["HeHa Ocean View (Kabupaten Gunungkidul)", 4.0, 13670, -8.1060664, 110.4615101],
+      ["Surya Yudha Park (Kabupaten Banjarnegara)", 4.4, 10156, -7.3892402, 109.690731, "ChIJ7eBiBxOpei4RCw3xVhOrWl4"],
+      ["Pantai Nampu (Kabupaten Wonogiri)", 4.5, 4395, -8.2101472, 110.9027687],
+      ["Pantai Purwahamba Indah Tegal (Kabupaten Tegal)", 4.2, 4061, -6.8730986, 109.2566853, "ChIJBfsK0SLGby4RBE47_RrY85c"],
+      ["Surabaya North Quay (Kota Surabaya)", 4.4, 23695, -7.1969273, 112.7322829, "ChIJqU_9mSCPdy4RECfM9M_QwcE"],
+      ["Taman Lansia (Kota Surabaya)", 4.6, 3437, -7.271015, 112.7500365, "ChIJX9h29tn71y0R134VY1aM_JQ"],
+      ["Surabaya Zoo (Kota Surabaya)", 4.4, 56711, -7.2961959, 112.7366553, "ChIJrS98kZf71y0RzHThXy0SsSE"],
+      ["Goa Gong (Kabupaten Pacitan)", 4.4, 5726, -8.1644714, 110.9798594],
+      ["Pantai Jetis (Kabupaten Purworejo)", 4.3, 6002, -7.8493058, 109.8953196, "ChIJUUWp_gLdei4R7SeOLOjsW6s"],
+      ["Wisata Bukit Kayoe putih (Kabupaten Mojokerto)", 4.1, 4240, -7.389593, 112.431493, "ChIJqUJlM4QPeC4RWe5qygVgVho"],
+      ["Ketawang Beach Purworejo (Kabupaten Purworejo)", 4.3, 2499, -7.845741, 109.885281, "ChIJl2Gq4-Tcei4RaHN8r9eRZNo"],
+      ["Unesa Lake (Kota Surabaya)", 4.5, 7418, -7.3014893, 112.6749246, "ChIJ26tkv1H81y0RX300Hu4mVEU"],
+      ["Waterland Park (Kabupaten Mojokerto)", 4.2, 2744, -7.5153087, 112.4233886, "ChIJO_NXH4kNeC4RtEtRBsrp_dg"],
+      ["Kenjeran Park (Kota Surabaya)", 4.2, 6286, -7.2525912, 112.7969305],
+      ["Ria Beach Kenjeran (Kota Surabaya)", 4.2, 4135, -7.2509164, 112.8009332, "ChIJkTH0IC--eS4RKB_srdovXK0"],
+      ["Suramadu View Point (Kota Surabaya)", 4.5, 3676, -7.2087704, 112.7801815, "ChIJWcFR0FD51y0R9Hvm3_B1Owo"],
+      ["Taman Air Mancur Menari Kenjeran (Kota Surabaya)", 4.5, 5392, -7.2356933, 112.7955234, "ChIJ06Zz-8T51y0RKergXlSdhD8"],
+      ["Pantai Kenjeran Lama (Kota Surabaya)", 4.4, 4794, -7.2381863, 112.7955159, "ChIJo6mhkMX51y0RRTy25VVoLMY"],
+      ["Waterpark Kenjeran (Kota Surabaya)", 4.1, 3293, -7.2477963, 112.7998235, "ChIJHSkgGub51y0RGct5k6FNorw"],
+      ["Maron River Pacitan (Kabupaten Pacitan)", 4.7, 4727, -8.2045083, 110.9552183, "ChIJgQjeQFncey4RmuU0JUioWjg"],
+      ["Citra Harmoni Water Park (Kabupaten Sidoarjo)", 4.4, 3335, -7.3758835, 112.64363, "ChIJ-15w05Ti1y0Rs_eOKwGsBIo"],
+      ["Hutan Mangrove Pantai Alam Indah Tegal (Kota Tegal)", 4.3, 2418, -6.8483353, 109.147404, "ChIJh5vgxpi3by4RWznJa2vmk-k"],
+      ["Pantai Alam Indah (Kota Tegal)", 4.1, 5566, -6.8475532, 109.1403735, "ChIJKbx0VnW3by4ResaWrp-US_g"],
+      ["Frog Island Beach (Kota Tegal)", 4.3, 3071, -6.8446761, 109.1587684, "ChIJmdZD7Zi3by4ReTPMPv0cbjU"],
+      ["Bahari Waterpark Tegal (Kota Tegal)", 4.2, 3403, -6.8720241, 109.1110969, "ChIJixq3XOG5by4R-BScXw690ow"],
+      ["Pantai Teleng Ria Beach Resort (Kabupaten Pacitan)", 4.2, 3777, -8.2198447, 111.0796272],
+      ["Wisata Desa BMJ - Majapahit (Kabupaten Mojokerto)", 4.4, 3474, -7.555496, 112.4590993, "ChIJlVf79fFyeC4RABYN-rBMBGs"],
+      ["Suncity Waterpark Sidoarjo (Kabupaten Sidoarjo)", 4.3, 3280, -7.4496282, 112.7127712],
+      ["Surabaya Mangrove Botanical Garden (Kota Surabaya)", 4.6, 3924, -7.33113, 112.8172238, "ChIJ5dU8f6f61y0Ryfz1SZ28eyo"],
+      ["Wisata Waduk Siman (Kabupaten Kediri)", 4.4, 2398, -7.8184375, 112.3034375, "ChIJw1hbNqdheC4R53wIKOVp1fQ"],
+      ["Wana Wisata Sumber Biru (Kabupaten Jombang)", 4.3, 2486, -7.733028, 112.357439, "ChIJaeCSVtRleC4RPFcHDK2zYIY"],
+      ["Mangrove Wonorejo Ecotourism (Kota Surabaya)", 4.3, 8100, -7.3073636, 112.8232904, "ChIJvQmQ1mTw1y0REK5dCN2ff7Q"],
+      ["Kali Cokel Pacitan (Kabupaten Pacitan)", 4.7, 2357, -8.2380166, 110.983932, "ChIJYTXDKejdey4RSWoyQQPZpF8"],
+      ["Wisata Bukit Gandrung, Tanggulasi (Kabupaten Kediri)", 4.4, 2338, -7.7612062, 112.3487422, "ChIJk5vQrBFkeC4R7u2tnMSAZr8"],
+      ["Wisata Rodjo Tater (Kabupaten Tegal)", 4.4, 3566, -6.9954251, 109.1648721, "ChIJrzAzW5-_by4RkxDkDEw0P3s"],
+      ["Bendungan Wonorejo (Kabupaten Tulungagung)", 4.4, 3378, -8.0178527, 111.8066484, "ChIJee3bLB0DeS4Rro415eQSG1c"],
+      ["Pacet Mini Park (Kabupaten Mojokerto)", 4.3, 4796, -7.6238564, 112.532685],
+      ["Konang Beach (Kabupaten Trenggalek)", 4.4, 3412, -8.2748273, 111.4529199, "ChIJ35MllYpAeS4R5lCbbMrcr8A"],
+      ["Kampoeng Anggrek Kediri (Kabupaten Kediri)", 4.2, 4141, -7.9431804, 112.2232822, "ChIJKVm-d6f0eC4Rjzct0cb-eYI"],
+      ["Mbalong Kawuk (Kabupaten Tulungagung)", 4.4, 2299, -8.1178282, 111.9883416, "ChIJGQqmgyjkeC4Rn8Wos9UGO4I"],
+      ["Ranu Manduro (Kabupaten Mojokerto)", 4.3, 2402, -7.572163, 112.6485746, "ChIJm9nLC0nf1y0RU65rQjPxsyE"],
+      ["Pantai Gemah Tulungagung (Kabupaten Tulungagung)", 4.3, 4973, -8.2648235, 111.7693767],
+      ["Pantai Bayeman (Kabupaten Tulungagung)", 4.4, 2809, -8.2600128, 111.7749798, "ChIJe3kDA3cheS4RSCDUCgdMXao"],
+      ["Pantai Midodaren Tulungagung (Kabupaten Tulungagung)", 4.3, 2478, -8.2575916, 111.7782826, "ChIJ9XeL5fcheS4RudPkHn0aOrg"],
+      ["Ranu Gumbolo Tulungagung (Kabupaten Tulungagung)", 4.3, 2245, -8.0053963, 111.8092061],
+      ["Bernah De Vallei (Kabupaten Mojokerto)", 4.6, 4850, -7.6525692, 112.5589893, "ChIJaQQgKAx3eC4RY1OOHMikPE0"],
+      ["Pantai Cemoro Sewu (Kabupaten Tulungagung)", 4.4, 2634, -8.2805124, 111.9409582, "ChIJ1ys17rHeeC4RZ1edkIU3Vj8"],
+      ["Sendi Adventure (Kabupaten Mojokerto)", 4.5, 3382, -7.6998018, 112.5325288, "ChIJ3_59pPN5eC4RYsIpoyUaIsY"],
+      ["Waduk Sempor Gombong (Kabupaten Kebumen)", 4.5, 6150, -7.5660516, 109.4918955, "ChIJ_____5tLZS4RCx6YLmaCKIQ"],
+      ["Klurak Eco Park (Kabupaten Mojokerto)", 4.5, 2795, -7.6643529, 112.5645531, "ChIJqYKAxap3eC4Rh-Zbmnb-XAg"],
+      ["Sagara View Of Karangbolong (Kabupaten Kebumen)", 4.7, 2959, -7.7585507, 109.4649863, "ChIJtcmEf-83ZS4RjIOfrecw3aE"],
+      ["Owabong Water Park Purbalingga (Kabupaten Purbalingga)", 4.5, 17259, -7.3494707, 109.3496942],
+      ["Taman Wisata Selorejo (Kabupaten Malang)", 4.2, 4618, -7.8773978, 112.3610311, "ChIJV1UWAr-JeC4RKXXpIGAzP4E"],
+      ["Wisata Sawah Sumber Gempong (Kabupaten Mojokerto)", 4.6, 7012, -7.6668399, 112.611505, "ChIJe9xVgdPh1y0R-9KMLmmKQz0"],
+      ["Bukit Tangkeban (Kabupaten Pemalang)", 4.4, 5072, -7.1610293, 109.2328216, "ChIJAQAAAKTtby4RHILHuTMEmDA"],
+      ["Dermaga Taman Mangrove Pandansari (Kabupaten Brebes)", 4.4, 2348, -6.7959621, 109.0313532, "ChIJZ3zVPY-xby4RM4glPB0WHwU"],
+      ["Dlundung Waterfall (Kabupaten Mojokerto)", 4.6, 9288, -7.6818015, 112.5938161],
+      ["Pantai Kedung Tumpang (Kabupaten Tulungagung)", 4.5, 2240, -8.3033462, 112.0102501, "ChIJ37CTqZ3beC4RARKYjTO4_iM"],
+      ["Pantai Pacar (Kabupaten Tulungagung)", 4.5, 3244, -8.3070417, 112.0240484, "ChIJMyntCD7beC4R1Oj9zQ9yuEQ"],
+      ["Obyek Wisata Alam Goa Lawa Purbalingga (Kabupaten Purbalingga)", 4.6, 5077, -7.2294203, 109.3186365],
+      ["Menara Pandang Teratai (Kabupaten Banyumas)", 4.6, 8810, -7.4315255, 109.2325481, "ChIJ_w1UMhFfZS4RnoT1NjZUw0s"],
+      ["Pantai Logending (Kabupaten Kebumen)", 4.2, 2975, -7.7254188, 109.3943902, "ChIJIZksz3Y3ZS4Rffc2wI6Uolo"],
+      ["Situ Tirta Marta Desa Karangcegak (Kabupaten Purbalingga)", 4.4, 2621, -7.3341, 109.3135412, "ChIJzwnD2Tj2by4R2fqMWJzRqzo"],
+      ["Wana Prabanlintang Danasari (Kabupaten Tegal)", 4.4, 3737, -7.115594, 109.1865482, "ChIJ3UK6wFGTby4R4rS4akoB-zk"],
+      ["The Forest Island Purwokerto (Kabupaten Banyumas)", 4.2, 2305, -7.3760625, 109.240366, "ChIJoQ4PAxpfZS4R2QvZEKGZA7Y"],
+      ["Pantai Menganti Kebumen (Kabupaten Kebumen)", 4.7, 5208, -7.7725534, 109.4126815, "ChIJZQ8SkaMxZS4RYEbjjAl7N1o"],
+      ["Desa Wisata Pujonkidul (Kabupaten Malang)", 4.5, 6586, -7.8557059, 112.4558603, "ChIJq6qqqo-HeC4R_k3K1zyP5Us"],
+      ["Florawisata Santerra De Laponte (Kabupaten Malang)", 4.6, 27443, -7.8542907, 112.4857585],
+      ["The Village Purwokerto (Kabupaten Banyumas)", 4.3, 10373, -7.3743823, 109.2410304],
+      ["Kebun Raya Purwodadi (Kabupaten Pasuruan)", 4.4, 13055, -7.7976547, 112.7372707],
+      ["Untung Suropati Sports Complex (Kota Pasuruan)", 4.3, 2846, -7.6612255, 112.9048238, "ChIJx7-IblXP1y0RLF6gvxl_0Uw"],
+      ["Wisata Buken (Kabupaten Banyumas)", 4.4, 2257, -7.3585529, 109.242496, "ChIJ_____3xfZS4RvLrKab7uM4w"],
+      ["D'Las Lembah Asri Serang Purbalingga (Kabupaten Purbalingga)", 4.5, 8905, -7.2423866, 109.2911912, "ChIJ_____9Pzby4RZmparHnc2IM"],
+      ["Telaga Sunyi Purwokerto (Kabupaten Banyumas)", 4.6, 2569, -7.3072399, 109.2431964, "ChIJQ-xhHFH0by4Rk1FHqLBgZJw"],
+      ["Hot Water Boom, GUCI-KU (Kabupaten Tegal)", 4.5, 8870, -7.1948531, 109.1621562],
+      ["Objek Wisata Guci (Kabupaten Tegal)", 4.3, 14547, -7.196974, 109.1638758, "ChIJ6x0i3GqNby4RwGRcQrcy9FA"],
+      ["Taman Langit (Kabupaten Banyumas)", 4.2, 4330, -7.3555203, 109.226908, "ChIJU0iam4dfZS4RZ0w-lUK6SxA"],
+      ["Tlocor Marine Tourism (Kabupaten Sidoarjo)", 4.1, 2643, -7.5526757, 112.8451825, "ChIJtTVNvxrD1y0Rb7RA_w1twd8"],
+      ["New Small World (Taman Miniatur Dunia) (Kabupaten Banyumas)", 4.2, 8982, -7.332444, 109.2243801, "ChIJtUl1lw31by4RzGxDFaVSYxE"],
+      ["Hutan Pinus Limpakuwus (Kabupaten Banyumas)", 4.6, 7538, -7.3022129, 109.2447195, "ChIJ_4EZrq71by4RRTnKQQHZdWc"],
+      ["Baturraden (Kabupaten Banyumas)", 4.5, 30320, -7.3139818, 109.229844],
+      ["Goa Jatijajar (Kabupaten Kebumen)", 4.4, 10208, -7.6692515, 109.425448],
+      ["Pari Bendo (Kabupaten Malang)", 4.3, 2612, -7.8354365, 112.6838566, "ChIJPeKW8RTV1y0RbOOpFfYyhjE"],
+      ["Baturraden Botanical Garden (Kabupaten Banyumas)", 4.4, 2724, -7.3063544, 109.2324285],
+      ["Coban Rondo Waterfall Pujon (Kabupaten Malang)", 4.5, 12664, -7.8846458, 112.4768237],
+      ["Indonesia Safari Park II Prigen (Kabupaten Pasuruan)", 4.6, 31322, -7.7583372, 112.6639427],
+      ["Kendedes Park (Kota Malang)", 4.5, 2995, -7.9261358, 112.6508536, "ChIJ82XBv44p1i0RoqC1F8ccKvw"],
+      ["Hawai Waterpark (Kabupaten Malang)", 4.8, 11027, -7.9234101, 112.657862],
+      ["Malang Night Paradise (Kota Malang)", 4.6, 22225, -7.9235099, 112.6580123, "ChIJ569mZIYp1i0RABy8uVtD5EE"],
+      ["Penjalin Reservoir (Kabupaten Brebes)", 4.3, 3685, -7.3278617, 109.0556051, "ChIJs9FmqaiJby4RnS4UdFkNAqw"],
+      ["Malang Skyland (Kabupaten Malang)", 4.2, 3410, -7.867401, 112.5760073, "ChIJx_R-WaGBeC4R3mUQAVrssDM"],
+      ["Sengkaling Recreation Park (Kabupaten Malang)", 4.4, 9863, -7.9153841, 112.5889089, "ChIJVxN4YY6BeC4R1d1EueGiN7o"],
+      ["Taman Krida Budaya Jawa Timur (Kota Malang)", 4.5, 7618, -7.9426232, 112.6225314, "ChIJx6Buzt8p1i0RR5V5o4crP1s"],
+      ["Wendit Recreational Park (Kabupaten Malang)", 4.1, 8193, -7.9524529, 112.6749379],
+      ["Trunojoyo Park (Kota Malang)", 4.4, 2556, -7.9764328, 112.6365191, "ChIJBVGM9Tso1i0R8U_5lMF8I7w"],
+      ["Kampung Tridi Malang (Kota Malang)", 4.4, 3360, -7.9822081, 112.638085, "ChIJPaDBAT4o1i0R2_8JhxMSY5g"],
+      ["Kajoetangan Heritage Village (Kota Malang)", 4.6, 7572, -7.978964, 112.6292965, "ChIJvWqpXyop1i0RECn5leQUQUw"],
+      ["Ijen Park (Kota Malang)", 4.7, 3430, -7.9677826, 112.6238808, "ChIJEwohbyko1i0R3apowbfPXTk"],
+      ["Pancuran 7 Hotspring (Kabupaten Banyumas)", 4.5, 2669, -7.3100237, 109.2179186, "ChIJE6lQWen0by4RrLTDUj2kE7I"],
+      ["Taman Kunang Kunang (Kota Malang)", 4.3, 2386, -7.9631613, 112.6236354, "ChIJG5Ig5ioo1i0R-QoNW6XhL4g"],
+      ["Wonosari Agro Tourism (Kabupaten Malang)", 4.5, 8541, -7.8204902, 112.6431502, "ChIJvzRbqrbU1y0RdoCqmcqERhs"],
+      ["Sirah Kencong Tea Plantation (Kabupaten Blitar)", 4.5, 5191, -7.9761368, 112.4301459, "ChIJRUObR36FeC4RTpwpKNXB4T8"],
+      ["Kemit Forest Education (Kabupaten Cilacap)", 4.2, 4477, -7.4670624, 108.8404785, "ChIJfe3PC8V4ZS4RksjwQyCbhpk"],
+      ["Boonpring (Kabupaten Malang)", 4.3, 4929, -8.1555365, 112.7612942, "ChIJv04k0n8i1i0RVO-pqRzFXRs"],
+      ["Pantai Ngliyep Malang (Kabupaten Malang)", 4.5, 5232, -8.3835873, 112.4242054],
+      ["Bukit Love (Kabupaten Jepara)", 4.6, 3308, -5.8622906, 110.4354169, "ChIJsSEH_d_Rcy4R9OX6E5MmsgU"],
+      ["Karimunjawa National Park (Kabupaten Jepara)", 4.7, 4480, -5.8489123, 110.4396206]
+    ];
+
+    const list = document.querySelector("#destinations");
+    const row = document.querySelector("#row");
+    const preview = document.querySelector(".preview");
+    const status = document.querySelector("#status");
+    const map = document.querySelector("#map");
+    const mapsLink = document.querySelector("#maps-link");
+    const locationButton = document.querySelector("#use-location");
+    const travelStatus = document.querySelector("#travel-status");
+    const travelSource = document.querySelector("#travel-source");
+    const reviewCount = new Intl.NumberFormat("en");
+    const kilometers = new Intl.NumberFormat("en", { maximumFractionDigits: 1 });
+    let selectedButton;
+    let mapsReady;
+
+    function showMap(mode, parameters) {
+      const query = new URLSearchParams({ key: mapsKey, language: "en", ...parameters });
+      map.src = "https://www.google.com/maps/embed/v1/" + mode + "?" + query;
+    }
+
+    function selectDestination(button, name, { lat, lng }, placeId) {
+      selectedButton?.setAttribute("aria-pressed", "false");
+      button.setAttribute("aria-pressed", "true");
+      selectedButton = button;
+
+      map.title = "Satellite map of " + name;
+      showMap("place", {
+        q: placeId ? "place_id:" + placeId : name,
+        center: lat + "," + lng,
+        zoom: 21,
+        maptype: "satellite",
+        language: "id"
+      });
+      const search = new URLSearchParams({ api: "1", query: name });
+      if (placeId) search.set("query_place_id", placeId);
+      mapsLink.href = "https://www.google.com/maps/search/?" + search;
+      mapsLink.hidden = false;
+      status.textContent = name;
+      preview.scrollIntoView({ block: "nearest" });
+    }
+
+    async function loadRoutes() {
+      mapsReady ??= new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        const params = new URLSearchParams({
+          key: mapsKey, v: "weekly", loading: "async", callback: "destinationMapsReady"
+        });
+        window.destinationMapsReady = () => {
+          delete window.destinationMapsReady;
+          resolve();
+        };
+        script.src = "https://maps.googleapis.com/maps/api/js?" + params;
+        script.async = true;
+        script.onerror = () => {
+          delete window.destinationMapsReady;
+          script.remove();
+          mapsReady = undefined;
+          reject(new Error("Google Maps could not load."));
+        };
+        document.head.append(script);
+      });
+      await mapsReady;
+      return google.maps.importLibrary("routes");
+    }
+
+    function rankDestinations(items) {
+      const ranked = entries.map(({ element, travel, rating, reviews }, index) => {
+        const route = items[index];
+        const found = route?.condition === "ROUTE_EXISTS";
+        const distanceMeters = found && Number.isFinite(route.distanceMeters) ? route.distanceMeters : Infinity;
+        const hasTraffic = found && route.fallbackInfo?.routingMode !== "TRAFFIC_UNAWARE";
+        const durationMillis = hasTraffic && Number.isFinite(route.durationMillis) ? route.durationMillis : Infinity;
+        const distance = Number.isFinite(distanceMeters)
+          ? kilometers.format(distanceMeters / 1000) + " km"
+          : "Distance unavailable";
+        const time = Number.isFinite(durationMillis)
+          ? reviewCount.format(Math.ceil(durationMillis / 60000)) + " min in traffic"
+          : "Traffic estimate unavailable";
+        travel.textContent = found ? " · " + distance + " · " + time : " · Driving estimate unavailable";
+        return { element, distanceMeters, durationMillis, rating, reviews };
+      });
+      ranked.sort((a, b) => a.durationMillis - b.durationMillis || a.distanceMeters - b.distanceMeters ||
+        b.rating - a.rating || b.reviews - a.reviews);
+      const focused = document.activeElement;
+      list.replaceChildren(...ranked.map(({ element }) => element));
+      if (list.contains(focused)) focused.focus();
+      return Number.isFinite(ranked[0]?.durationMillis);
+    }
+
+    async function updateTravelEstimates() {
+      if (locationButton.getAttribute("aria-disabled") === "true") return;
+      if (!window.isSecureContext || !navigator.geolocation) {
+        travelStatus.textContent = "Location access requires a browser that supports it over HTTPS.";
+        return;
+      }
+
+      locationButton.setAttribute("aria-disabled", "true");
+      travelStatus.textContent = "Getting your current location…";
+      try {
+        const { coords } = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 12000, maximumAge: 60000 });
+        });
+        travelStatus.textContent = "Calculating driving estimates…";
+        const { RouteMatrix } = await loadRoutes();
+        // shortcut: one matrix supports 625 coordinate destinations, batch if the catalogue grows beyond that.
+        const { matrix } = await RouteMatrix.computeRouteMatrix({
+          origins: [{ lat: coords.latitude, lng: coords.longitude }],
+          destinations: entries.map(({ position }) => position),
+          travelMode: "DRIVING",
+          routingPreference: "TRAFFIC_AWARE",
+          fields: ["durationMillis", "distanceMeters", "condition", "fallbackInfo", "error"]
+        });
+        const items = matrix.rows[0]?.items;
+        if (items?.length !== entries.length) throw new Error("Google Maps returned an incomplete route matrix.");
+        const hasTraffic = rankDestinations(items);
+        travelStatus.textContent = hasTraffic
+          ? "Sorted by driving time in traffic."
+          : "Traffic estimates are unavailable from your location.";
+        travelSource.hidden = false;
+        locationButton.textContent = "Update estimates";
+      } catch (error) {
+        let message = "Google Maps could not calculate driving estimates. Try again.";
+        if (error?.code === 1) message = "Location access was blocked. Allow it in your browser and try again.";
+        if (error?.code === 2 || error?.code === 3) message = "Your location is unavailable. Try again.";
+        if (error?.code === "PERMISSION_DENIED") message = "Google Maps denied access to driving estimates for this site.";
+        travelStatus.textContent = message + (travelSource.hidden ? "" : " Previous estimates are still shown.");
+      } finally {
+        locationButton.removeAttribute("aria-disabled");
+      }
+    }
+
+    const entries = destinations.map(([name, rating, reviews, lat, lng, placeId]) => {
+      const element = row.content.firstElementChild.cloneNode(true);
+      const button = element.querySelector("button");
+      const travel = element.querySelector(".travel");
+      const position = { lat, lng };
+      element.querySelector(".destination-name").textContent = name;
+      element.querySelector(".review-text").textContent =
+        rating.toFixed(1) + "/5 · " + reviewCount.format(reviews) + " reviews";
+      button.addEventListener("click", () => selectDestination(button, name, position, placeId));
+      list.append(element);
+      return { element, travel, position, rating, reviews };
+    });
+    const mapsKeyInput = document.querySelector("#maps-key");
+    const mapsKeyStatus = document.querySelector("#maps-key-status");
+    mapsKeyInput.value = mapsKey;
+    document.querySelector("#maps-key-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const nextKey = mapsKeyInput.value.trim() || defaultMapsKey;
+      mapsKeyInput.value = nextKey;
+      if (nextKey === mapsKey) {
+        mapsKeyStatus.textContent = "This key is already active.";
+        return;
+      }
+      try {
+        if (nextKey === defaultMapsKey) sessionStorage.removeItem(mapsKeyStorage);
+        else sessionStorage.setItem(mapsKeyStorage, nextKey);
+      } catch {
+        mapsKeyStatus.textContent = "Allow browser storage for this site to apply a different key.";
+        return;
+      }
+      window.location.reload();
+    });
+    locationButton.addEventListener("click", updateTravelEstimates);
+    document.querySelector("#count").textContent = reviewCount.format(destinations.length);
+    showMap("view", { center: "-7.0872923,111.0564524", zoom: 9 });
+  </script>
+</body>
+</html>

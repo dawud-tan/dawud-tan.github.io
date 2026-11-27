@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rem Truk Sulawesi Air Horn: Six Tuned Trumpets with a Slide-Whistle Scoop</title>
+<meta name="description" content="A buildable musical air horn for the rem truk Sulawesi tune: six tuned trumpets, sliding tubes for the scoop, valves, air supply and controller timing.">
+<meta name="keywords" content="rem truk Sulawesi, klakson rem truk Sulawesi, musical air horn, klakson telolet, air horn design, diaphragm air horn, telescoping trumpet, slide whistle, pitch scoop, glissando, lip reed, 3/2 solenoid valve, 5/2 solenoid valve, pneumatic cylinder hard stop, pressure protection valve, air brake accessory, air horn tuning, trumpet length for a note, Mezmar El Asfour, physical modelling synthesis, digital waveguide, PP 55/2012 klakson 83-118 dB">
+<meta name="author" content="Claude Opus 5.5">
+<link rel="canonical" href="https://dawud-tan.github.io/rem-truk-sulawesi-air-horn.html">
+<link rel="alternate" hreflang="en-US" href="https://dawud-tan.github.io/rem-truk-sulawesi-air-horn.html">
+<link rel="alternate" hreflang="x-default" href="https://dawud-tan.github.io/rem-truk-sulawesi-air-horn.html">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Rem Truk Sulawesi Air Horn: Six Tuned Trumpets with a Slide-Whistle Scoop">
+<meta property="og:description" content="The rem truk Sulawesi tune on real air: one horn per pitch, telescoping trumpets that slide each note in, the valves, the air supply and the timing, with numbers from a physical simulation.">
+<meta property="og:url" content="https://dawud-tan.github.io/rem-truk-sulawesi-air-horn.html">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2026-11-07T21:01:00+07:00">
+<meta property="article:modified_time" content="2026-11-09T10:35:12+07:00">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Rem truk Sulawesi on real air: a six-trumpet horn whose notes slide in">
+<meta name="twitter:description" content="Six tuned trumpets, telescoping slides for the scoop, 12 valves and a 166.7 ms grid: a mechanical horn for the rem truk Sulawesi tune.">
+<meta name="theme-color" content="#fbfaf8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14161a" media="(prefers-color-scheme: dark)">
+<style>
+  :root{
+    --bg:#fbfaf8; --panel:#ffffff; --ink:#16181d; --ink-soft:#4b5162;
+    --line:#e3e0da; --accent:#7a4a12; --accent-soft:#f5ece0;
+    --warn:#a3321f;
+    --measure:74ch;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#14161a; --panel:#1a1d23; --ink:#e9e7e2; --ink-soft:#a7adbb;
+      --line:#2c313a; --accent:#e2b26a; --accent-soft:#2a241b;
+      --warn:#f08a73;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:16px/1.65 ui-sans-serif,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+       -webkit-text-size-adjust:100%}
+  .wrap{max-width:980px;margin:0 auto;padding:0 16px 96px}
+  header.hero{border-bottom:1px solid var(--line);margin-bottom:32px;padding:52px 0 28px;
+              background:radial-gradient(1200px 320px at 12% -40%, var(--accent-soft), transparent 70%)}
+  header.hero .wrap{padding-bottom:0}
+  h1{font-size:clamp(1.65rem,4.2vw,2.45rem);line-height:1.15;margin:0 0 .6rem;letter-spacing:-.02em}
+  .sub{font-size:1.06rem;color:var(--ink-soft);max-width:var(--measure);margin:0 0 1.1rem}
+  .meta{font-size:.84rem;color:var(--ink-soft);display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;margin:0}
+  .meta b{font-weight:600;color:var(--ink)}
+  h2{font-size:1.42rem;margin:2.6rem 0 .7rem;letter-spacing:-.01em;scroll-margin-top:1rem}
+  h2 .num{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:.45rem;font-weight:700}
+  h3{font-size:1.08rem;margin:1.6rem 0 .45rem;scroll-margin-top:1rem}
+  p,li{max-width:var(--measure)}
+  a{color:var(--accent)}
+  code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9em}
+  code{background:var(--accent-soft);padding:.1em .34em;border-radius:4px;overflow-wrap:anywhere}
+  pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;line-height:1.55}
+  pre code{background:none;padding:0}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:1.4rem 0}
+  .panel h3:first-child{margin-top:0}
+  .panel p:last-child{margin-bottom:0}
+  .keyfacts{border-left:4px solid var(--accent)}
+  .keyfacts ul{margin:.4rem 0 0;padding-left:1.15rem}
+  .keyfacts li{margin:.35rem 0}
+  .callout{border-left:4px solid var(--warn)}
+  table{border-collapse:collapse;width:100%;font-size:.9rem;margin:1rem 0;display:block;overflow-x:auto}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--accent-soft);font-weight:650}
+  td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+  nav.toc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:1.6rem 0 2rem}
+  nav.toc h2{margin:0 0 .5rem;font-size:.95rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft)}
+  nav.toc ol{margin:0;padding-left:1.3rem;columns:2;column-gap:2rem}
+  nav.toc li{margin:.2rem 0;break-inside:avoid}
+  nav.toc a{text-decoration:none}
+  details{border:1px solid var(--line);border-radius:10px;padding:0 16px;margin:.6rem 0;background:var(--panel)}
+  details[open]{padding-bottom:8px}
+  summary{cursor:pointer;padding:13px 0;font-weight:600}
+  summary::marker{color:var(--accent)}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px}
+  .grid2 .panel{margin:0}
+  figure{margin:1.6rem 0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
+  figure .svgbox{overflow-x:auto}
+  figure svg{display:block;margin:0 auto;width:100%;min-width:600px;height:auto}
+  figcaption{font-size:.85rem;color:var(--ink-soft);margin:.6rem 4px 2px;max-width:var(--measure)}
+  svg text{font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;fill:var(--ink)}
+  svg .t-soft{fill:var(--ink-soft)}
+  svg .t-acc{fill:var(--accent)}
+  svg .t-warn{fill:var(--warn)}
+  svg .t-b{font-weight:650}
+  .s-ink{stroke:var(--ink);fill:none}
+  .s-soft{stroke:var(--ink-soft);fill:none}
+  .s-line{stroke:var(--line);fill:none}
+  .s-acc{stroke:var(--accent);fill:none}
+  .s-warn{stroke:var(--warn);fill:none}
+  .f-ink{fill:var(--ink)}
+  .f-soft{fill:var(--ink-soft)}
+  .f-acc{fill:var(--accent)}
+  .f-accsoft{fill:var(--accent-soft)}
+  .f-panel{fill:var(--panel)}
+  .f-bg{fill:var(--bg)}
+  .f-warn{fill:var(--warn)}
+  .box{fill:var(--panel);stroke:var(--ink-soft);stroke-width:1.2}
+  .box-acc{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.4}
+  ol.steps li{margin:.45rem 0}
+  footer{border-top:1px solid var(--line);margin-top:56px;padding-top:20px;font-size:.85rem;color:var(--ink-soft)}
+  .refs li{margin:.45rem 0;overflow-wrap:anywhere}
+  .skip{position:absolute;left:-9999px}
+  .skip:focus{left:12px;top:12px;background:var(--panel);padding:8px 12px;border:1px solid var(--accent);border-radius:6px;z-index:9}
+  figure.reel{background:none;border:0;padding:0}
+  .reel figcaption{max-width:532px;margin:.6rem auto 2px}
+  .reel blockquote{display:block;width:100%;max-width:540px;min-width:0;margin:0 auto;padding:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:none}
+  .reel iframe{width:100%!important;max-width:540px!important;min-width:0!important;margin:0 auto!important;background-color:var(--panel)!important;border:1px solid var(--line)!important;border-radius:12px!important}
+  .ig-card{padding:16px}
+  .ig-card>a{line-height:0;text-align:center;text-decoration:none}
+  .ig-head,.ig-actions{display:flex;align-items:center}
+  .ig-actions{margin-bottom:14px}
+  .ig-col{display:flex;flex-direction:column;flex-grow:1;justify-content:center}
+  .ig-foot{margin-bottom:24px}
+  .ig-avatar{background:var(--line);border-radius:50%;width:40px;height:40px;margin-right:14px}
+  .ig-bar{background:var(--line);border-radius:4px;height:14px}
+  .ig-bar+.ig-bar{margin-top:6px}
+  .ig-w60{width:60px} .ig-w100{width:100px} .ig-w144{width:144px} .ig-w224{width:224px}
+  .ig-gap{padding:19% 0}
+  .ig-gap-sm{padding:12.5% 0}
+  .ig-logo{width:50px;height:50px;margin:0 auto 12px}
+  .ig-logo svg{width:50px;min-width:0;height:50px}
+  .ig-cta{padding-top:8px;color:var(--accent);font-size:14px;font-weight:550;line-height:18px}
+  .ig-heart-l,.ig-heart-c,.ig-heart-r{background:var(--line);width:12.5px;height:12.5px}
+  .ig-heart-l{border-radius:50%;transform:translateY(7px)}
+  .ig-heart-c{margin:0 14px 0 2px;transform:rotate(-45deg) translateX(3px) translateY(1px)}
+  .ig-heart-r{border-radius:50%;transform:translateX(9px) translateY(-18px)}
+  .ig-comment{margin-left:8px}
+  .ig-bubble{background:var(--line);border-radius:50%;width:20px;height:20px}
+  .ig-tail{width:0;height:0;border-top:2px solid transparent;border-left:6px solid var(--line);border-bottom:2px solid transparent;transform:translateX(16px) translateY(-4px) rotate(30deg)}
+  .ig-save{margin-left:auto}
+  .ig-save-top{width:0;border-top:8px solid var(--line);border-right:8px solid transparent;transform:translateY(16px)}
+  .ig-save-mid{background:var(--line);width:16px;height:12px;transform:translateY(-4px)}
+  .ig-save-tip{width:0;height:0;border-top:8px solid var(--line);border-left:8px solid transparent;transform:translateY(-4px) translateX(8px)}
+  .ig-by{margin:8px 0 0;padding:8px 0 7px;overflow:hidden;text-align:center;text-overflow:ellipsis;white-space:nowrap;font-size:14px;line-height:17px}
+  .ig-by a{color:var(--ink-soft);text-decoration:none}
+  @media (max-width:640px){nav.toc ol{columns:1}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>Rem truk Sulawesi on real air: a six-trumpet air horn whose notes slide in</h1>
+    <p class="sub">The "rem truk Sulawesi" clip is a horn melody in which every note starts low and slides up into pitch. This page designs a machine that plays it with compressed air, not a speaker: <b>one tuned horn per pitch</b>, a <b>telescoping trumpet</b> on each that shortens as the note starts, <b>12 solenoid valves</b> and a small controller. Every dimension and timing comes from the physical simulation that renders the same tune as a WAV.</p>
+    <p class="meta">
+      <span><b>Status</b> 7 November 2026: designed from a physical simulation; not yet built</span>
+      <span><b>Tune</b> 33 notes, G5 to D#6, 90 BPM, 13.3 s</span>
+      <span><b>Model</b> lip-reed horn with waveguide trumpet, 96 kHz</span>
+      <span><b>Reading time</b> ~14 min</span>
+    </p>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+
+<div class="panel keyfacts">
+  <h3>The short answer</h3>
+  <ul>
+    <li><b>Six diaphragm horns, one per pitch:</b> G5, G#5, A#5, C6, D6 and D#6. The tune is a single line, so only one horn sounds at a time.</li>
+    <li><b>The scoop is mechanical:</b> each trumpet is a telescoping tube. A pneumatic cylinder pulls it from long to short between two adjustable hard stops. The short stop sets the note; the long stop sets how low the note starts.</li>
+    <li><b>The slide alone is not enough with a stiff diaphragm.</b> In the simulation a longer tube bends it only about 2 semitones before the horn chokes. Either link the diaphragm's tension to the slide (a −8.6 semitone scoop from a 1.9× tube), or fit a softer diaphragm (about 6 semitones, and simpler to build).</li>
+    <li><b>Air:</b> the horns run at 0.10 bar through a precision regulator and the slides at 4–6 bar. On a truck, take the air from the brake system only through a pressure-protection valve.</li>
+    <li><b>Timing:</b> a microcontroller switches the 12 valves on a 166.7 ms grid. The horn valve stays open N × 166.7 − 30 ms; the slide valve opens 20 ms after it.</li>
+    <li><b>Expect:</b> about 10 L of free air per play, and tuning to a few cents. Pitch moves about 3 cents per °C and about 7 cents per kPa of horn pressure.</li>
+    <li><b>On Indonesian roads:</b> a horn must stay within 83–118 dB (PP 55/2012), and since March 2024 buses with telolet horns fail inspection.</li>
+  </ul>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#tune">What the horn plays</a></li>
+    <li><a href="#machine">The machine at a glance</a></li>
+    <li><a href="#horn">One horn, up close</a></li>
+    <li><a href="#six">The six horns</a></li>
+    <li><a href="#scoop">The scoop: what it takes</a></li>
+    <li><a href="#air">Air supply</a></li>
+    <li><a href="#controller">Controller and timing</a></li>
+    <li><a href="#tuning">Tuning and commissioning</a></li>
+    <li><a href="#safety">Road rules and safety</a></li>
+    <li><a href="#model">Where the numbers come from</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#refs">References</a></li>
+  </ol>
+</nav>
+
+<section id="tune">
+<h2><span class="num">1</span>What the horn plays</h2>
+<p>The clip shared as "rem truk Sulawesi" sounds at C6 to G#6. Its phrase comes from the song "Mezmar El Asfour" by <a href="https://www.youtube.com/@mostafabaset" rel="external nofollow">Mostafa Baset</a>, which plays it five semitones lower, from G5 to D#6. This horn plays in the song's key. The melody is someone else's composition; below is only the 13-second excerpt the machine plays.</p>
+<p>The excerpt is 33 notes at 90 BPM, so a sixteenth note lasts 166.7 ms. Lengths are counted in sixteenths, and <code>-</code> is a rest:</p>
+<pre><code>G5:2 D#6:2 D6:2 C6:4 -:4
+G5:2 G#5:2 A#5:2 G#5:2 G5:4 G5:4 -:1
+C6:2 C6:2 D6:2 D#6:2 D6:2 C6:2 D6:2 C6:1 A#5:2 A#5:2 C6:2 D6:2
+C6:2 A#5:2 C6:2 A#5:1 G#5:3 G#5:2 A#5:2 C6:2 A#5:2 G#5:2 G5:4</code></pre>
+<p>Only six pitches occur, so the machine needs six horns. C6 is the busiest, with 9 of the 33 notes.</p>
+<figure>
+  <div class="svgbox">
+<svg viewBox="0 0 720 220" width="720" height="220" role="img" aria-labelledby="f1t f1d">
+<title id="f1t">The 33-note tune as valve openings on six horns</title>
+<desc id="f1d">Six rows, D#6 at the top and G5 at the bottom, with one bar per note over 13.3 seconds. Sequence: G5 2/16 D#6 2/16 D6 2/16 C6 4/16 rest 4/16 G5 2/16 G#5 2/16 A#5 2/16 G#5 2/16 G5 4/16 G5 4/16 rest 1/16 C6 2/16 C6 2/16 D6 2/16 D#6 2/16 D6 2/16 C6 2/16 D6 2/16 C6 1/16 A#5 2/16 A#5 2/16 C6 2/16 D6 2/16 C6 2/16 A#5 2/16 C6 2/16 A#5 1/16 G#5 3/16 G#5 2/16 A#5 2/16 C6 2/16 A#5 2/16 G#5 2/16 G5 4/16.</desc>
+<line x1="74.0" y1="27.0" x2="708.0" y2="27.0" class="s-line" stroke-width="1"/>
+<text x="64.0" y="31.0" font-size="12" text-anchor="end" class="t-b">D#6</text>
+<line x1="74.0" y1="53.0" x2="708.0" y2="53.0" class="s-line" stroke-width="1"/>
+<text x="64.0" y="57.0" font-size="12" text-anchor="end" class="t-b">D6</text>
+<line x1="74.0" y1="79.0" x2="708.0" y2="79.0" class="s-line" stroke-width="1"/>
+<text x="64.0" y="83.0" font-size="12" text-anchor="end" class="t-b">C6</text>
+<line x1="74.0" y1="105.0" x2="708.0" y2="105.0" class="s-line" stroke-width="1"/>
+<text x="64.0" y="109.0" font-size="12" text-anchor="end" class="t-b">A#5</text>
+<line x1="74.0" y1="131.0" x2="708.0" y2="131.0" class="s-line" stroke-width="1"/>
+<text x="64.0" y="135.0" font-size="12" text-anchor="end" class="t-b">G#5</text>
+<line x1="74.0" y1="157.0" x2="708.0" y2="157.0" class="s-line" stroke-width="1"/>
+<text x="64.0" y="161.0" font-size="12" text-anchor="end" class="t-b">G5</text>
+<line x1="74.0" y1="10" x2="74.0" y2="174" class="s-soft" stroke-width="1" stroke-dasharray="2 3"/>
+<line x1="200.8" y1="10" x2="200.8" y2="174" class="s-soft" stroke-width="1" stroke-dasharray="2 3"/>
+<line x1="327.6" y1="10" x2="327.6" y2="174" class="s-soft" stroke-width="1" stroke-dasharray="2 3"/>
+<line x1="454.4" y1="10" x2="454.4" y2="174" class="s-soft" stroke-width="1" stroke-dasharray="2 3"/>
+<line x1="581.2" y1="10" x2="581.2" y2="174" class="s-soft" stroke-width="1" stroke-dasharray="2 3"/>
+<line x1="708.0" y1="10" x2="708.0" y2="174" class="s-soft" stroke-width="1" stroke-dasharray="2 3"/>
+<g><title>Note 1: G5, 2/16, starts 0.000 s, valve open 303.3 ms</title><rect x="74.00" y="145" width="14.42" height="24" fill="transparent"/><rect x="74.00" y="149" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 2: D#6, 2/16, starts 0.333 s, valve open 303.3 ms</title><rect x="89.85" y="15" width="14.42" height="24" fill="transparent"/><rect x="89.85" y="19" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 3: D6, 2/16, starts 0.667 s, valve open 303.3 ms</title><rect x="105.70" y="41" width="14.42" height="24" fill="transparent"/><rect x="105.70" y="45" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 4: C6, 4/16, starts 1.000 s, valve open 636.7 ms</title><rect x="121.55" y="67" width="30.27" height="24" fill="transparent"/><rect x="121.55" y="71" width="30.27" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 5: G5, 2/16, starts 2.333 s, valve open 303.3 ms</title><rect x="184.95" y="145" width="14.42" height="24" fill="transparent"/><rect x="184.95" y="149" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 6: G#5, 2/16, starts 2.667 s, valve open 303.3 ms</title><rect x="200.80" y="119" width="14.42" height="24" fill="transparent"/><rect x="200.80" y="123" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 7: A#5, 2/16, starts 3.000 s, valve open 303.3 ms</title><rect x="216.65" y="93" width="14.42" height="24" fill="transparent"/><rect x="216.65" y="97" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 8: G#5, 2/16, starts 3.333 s, valve open 303.3 ms</title><rect x="232.50" y="119" width="14.42" height="24" fill="transparent"/><rect x="232.50" y="123" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 9: G5, 4/16, starts 3.667 s, valve open 636.7 ms</title><rect x="248.35" y="145" width="30.27" height="24" fill="transparent"/><rect x="248.35" y="149" width="30.27" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 10: G5, 4/16, starts 4.333 s, valve open 636.7 ms</title><rect x="280.05" y="145" width="30.27" height="24" fill="transparent"/><rect x="280.05" y="149" width="30.27" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 11: C6, 2/16, starts 5.167 s, valve open 303.3 ms</title><rect x="319.67" y="67" width="14.42" height="24" fill="transparent"/><rect x="319.67" y="71" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 12: C6, 2/16, starts 5.500 s, valve open 303.3 ms</title><rect x="335.52" y="67" width="14.42" height="24" fill="transparent"/><rect x="335.52" y="71" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 13: D6, 2/16, starts 5.833 s, valve open 303.3 ms</title><rect x="351.38" y="41" width="14.42" height="24" fill="transparent"/><rect x="351.38" y="45" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 14: D#6, 2/16, starts 6.167 s, valve open 303.3 ms</title><rect x="367.22" y="15" width="14.42" height="24" fill="transparent"/><rect x="367.22" y="19" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 15: D6, 2/16, starts 6.500 s, valve open 303.3 ms</title><rect x="383.07" y="41" width="14.42" height="24" fill="transparent"/><rect x="383.07" y="45" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 16: C6, 2/16, starts 6.833 s, valve open 303.3 ms</title><rect x="398.93" y="67" width="14.42" height="24" fill="transparent"/><rect x="398.93" y="71" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 17: D6, 2/16, starts 7.167 s, valve open 303.3 ms</title><rect x="414.77" y="41" width="14.42" height="24" fill="transparent"/><rect x="414.77" y="45" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 18: C6, 1/16, starts 7.500 s, valve open 136.7 ms</title><rect x="430.62" y="67" width="6.50" height="24" fill="transparent"/><rect x="430.62" y="71" width="6.50" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 19: A#5, 2/16, starts 7.667 s, valve open 303.3 ms</title><rect x="438.55" y="93" width="14.42" height="24" fill="transparent"/><rect x="438.55" y="97" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 20: A#5, 2/16, starts 8.000 s, valve open 303.3 ms</title><rect x="454.40" y="93" width="14.42" height="24" fill="transparent"/><rect x="454.40" y="97" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 21: C6, 2/16, starts 8.333 s, valve open 303.3 ms</title><rect x="470.25" y="67" width="14.42" height="24" fill="transparent"/><rect x="470.25" y="71" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 22: D6, 2/16, starts 8.667 s, valve open 303.3 ms</title><rect x="486.10" y="41" width="14.42" height="24" fill="transparent"/><rect x="486.10" y="45" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 23: C6, 2/16, starts 9.000 s, valve open 303.3 ms</title><rect x="501.95" y="67" width="14.42" height="24" fill="transparent"/><rect x="501.95" y="71" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 24: A#5, 2/16, starts 9.333 s, valve open 303.3 ms</title><rect x="517.80" y="93" width="14.42" height="24" fill="transparent"/><rect x="517.80" y="97" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 25: C6, 2/16, starts 9.667 s, valve open 303.3 ms</title><rect x="533.65" y="67" width="14.42" height="24" fill="transparent"/><rect x="533.65" y="71" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 26: A#5, 1/16, starts 10.000 s, valve open 136.7 ms</title><rect x="549.50" y="93" width="6.50" height="24" fill="transparent"/><rect x="549.50" y="97" width="6.50" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 27: G#5, 3/16, starts 10.167 s, valve open 470.0 ms</title><rect x="557.42" y="119" width="22.35" height="24" fill="transparent"/><rect x="557.42" y="123" width="22.35" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 28: G#5, 2/16, starts 10.667 s, valve open 303.3 ms</title><rect x="581.20" y="119" width="14.42" height="24" fill="transparent"/><rect x="581.20" y="123" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 29: A#5, 2/16, starts 11.000 s, valve open 303.3 ms</title><rect x="597.05" y="93" width="14.42" height="24" fill="transparent"/><rect x="597.05" y="97" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 30: C6, 2/16, starts 11.333 s, valve open 303.3 ms</title><rect x="612.90" y="67" width="14.42" height="24" fill="transparent"/><rect x="612.90" y="71" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 31: A#5, 2/16, starts 11.667 s, valve open 303.3 ms</title><rect x="628.75" y="93" width="14.42" height="24" fill="transparent"/><rect x="628.75" y="97" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 32: G#5, 2/16, starts 12.000 s, valve open 303.3 ms</title><rect x="644.60" y="119" width="14.42" height="24" fill="transparent"/><rect x="644.60" y="123" width="14.42" height="16" rx="2" class="f-acc"/></g>
+<g><title>Note 33: G5, 4/16, starts 12.333 s, valve open 636.7 ms</title><rect x="660.45" y="145" width="30.27" height="24" fill="transparent"/><rect x="660.45" y="149" width="30.27" height="16" rx="2" class="f-acc"/></g>
+<text x="74.0" y="190" font-size="11" text-anchor="middle" class="t-soft">0 s</text>
+<text x="169.1" y="190" font-size="11" text-anchor="middle" class="t-soft">2 s</text>
+<text x="264.2" y="190" font-size="11" text-anchor="middle" class="t-soft">4 s</text>
+<text x="359.3" y="190" font-size="11" text-anchor="middle" class="t-soft">6 s</text>
+<text x="454.4" y="190" font-size="11" text-anchor="middle" class="t-soft">8 s</text>
+<text x="549.5" y="190" font-size="11" text-anchor="middle" class="t-soft">10 s</text>
+<text x="644.6" y="190" font-size="11" text-anchor="middle" class="t-soft">12 s</text>
+<text x="391.0" y="210" font-size="11" text-anchor="middle" class="t-soft">time · dotted lines every 16 sixteenths (2.67 s)</text>
+</svg>
+  </div>
+  <figcaption>Figure 1. The tune as valve openings: one row per horn, one bar per note. Each bar ends 30 ms before the next grid line, which leaves the gap between notes. Hover over a bar for its note, length and start time.</figcaption>
+</figure>
+<p>The reel below plays the excerpt four times with the sound of the simulation in section 10, which is what this machine should sound like. It shows one horn up close as in Figure 3, the six trumpets to scale as in Figure 4, and each horn's notes over an oscilloscope trace.</p>
+<figure class="reel">
+  <blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="https://www.instagram.com/reel/DfgX3RtpnER/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14">
+    <div class="ig-card">
+      <a href="https://www.instagram.com/reel/DfgX3RtpnER/?utm_source=ig_embed&amp;utm_campaign=loading" target="_blank">
+        <div class="ig-head">
+          <div class="ig-avatar"></div>
+          <div class="ig-col"><div class="ig-bar ig-w100"></div><div class="ig-bar ig-w60"></div></div>
+        </div>
+        <div class="ig-gap"></div>
+        <div class="ig-logo"><svg width="50px" height="50px" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g transform="translate(-511.000000, -20.000000)" class="f-ink"><g><path d="M556.869,30.41 C554.814,30.41 553.148,32.076 553.148,34.131 C553.148,36.186 554.814,37.852 556.869,37.852 C558.924,37.852 560.59,36.186 560.59,34.131 C560.59,32.076 558.924,30.41 556.869,30.41 M541,60.657 C535.114,60.657 530.342,55.887 530.342,50 C530.342,44.114 535.114,39.342 541,39.342 C546.887,39.342 551.658,44.114 551.658,50 C551.658,55.887 546.887,60.657 541,60.657 M541,33.886 C532.1,33.886 524.886,41.1 524.886,50 C524.886,58.899 532.1,66.113 541,66.113 C549.9,66.113 557.115,58.899 557.115,50 C557.115,41.1 549.9,33.886 541,33.886 M565.378,62.101 C565.244,65.022 564.756,66.606 564.346,67.663 C563.803,69.06 563.154,70.057 562.106,71.106 C561.058,72.155 560.06,72.803 558.662,73.347 C557.607,73.757 556.021,74.244 553.102,74.378 C549.944,74.521 548.997,74.552 541,74.552 C533.003,74.552 532.056,74.521 528.898,74.378 C525.979,74.244 524.393,73.757 523.338,73.347 C521.94,72.803 520.942,72.155 519.894,71.106 C518.846,70.057 518.197,69.06 517.654,67.663 C517.244,66.606 516.755,65.022 516.623,62.101 C516.479,58.943 516.448,57.996 516.448,50 C516.448,42.003 516.479,41.056 516.623,37.899 C516.755,34.978 517.244,33.391 517.654,32.338 C518.197,30.938 518.846,29.942 519.894,28.894 C520.942,27.846 521.94,27.196 523.338,26.654 C524.393,26.244 525.979,25.756 528.898,25.623 C532.057,25.479 533.004,25.448 541,25.448 C548.997,25.448 549.943,25.479 553.102,25.623 C556.021,25.756 557.607,26.244 558.662,26.654 C560.06,27.196 561.058,27.846 562.106,28.894 C563.154,29.942 563.803,30.938 564.346,32.338 C564.756,33.391 565.244,34.978 565.378,37.899 C565.522,41.056 565.552,42.003 565.552,50 C565.552,57.996 565.522,58.943 565.378,62.101 M570.82,37.631 C570.674,34.438 570.167,32.258 569.425,30.349 C568.659,28.377 567.633,26.702 565.965,25.035 C564.297,23.368 562.623,22.342 560.652,21.575 C558.743,20.834 556.562,20.326 553.369,20.18 C550.169,20.033 549.148,20 541,20 C532.853,20 531.831,20.033 528.631,20.18 C525.438,20.326 523.257,20.834 521.349,21.575 C519.376,22.342 517.703,23.368 516.035,25.035 C514.368,26.702 513.342,28.377 512.574,30.349 C511.834,32.258 511.326,34.438 511.181,37.631 C511.035,40.831 511,41.851 511,50 C511,58.147 511.035,59.17 511.181,62.369 C511.326,65.562 511.834,67.743 512.574,69.651 C513.342,71.625 514.368,73.296 516.035,74.965 C517.703,76.634 519.376,77.658 521.349,78.425 C523.257,79.167 525.438,79.673 528.631,79.82 C531.831,79.965 532.853,80.001 541,80.001 C549.148,80.001 550.169,79.965 553.369,79.82 C556.562,79.673 558.743,79.167 560.652,78.425 C562.623,77.658 564.297,76.634 565.965,74.965 C567.633,73.296 568.659,71.625 569.425,69.651 C570.167,67.743 570.674,65.562 570.82,62.369 C570.966,59.17 571,58.147 571,50 C571,41.851 570.966,40.831 570.82,37.631"></path></g></g></g></svg></div>
+        <div class="ig-cta">View this post on Instagram</div>
+        <div class="ig-gap-sm"></div>
+        <div class="ig-actions">
+          <div><div class="ig-heart-l"></div><div class="ig-heart-c"></div><div class="ig-heart-r"></div></div>
+          <div class="ig-comment"><div class="ig-bubble"></div><div class="ig-tail"></div></div>
+          <div class="ig-save"><div class="ig-save-top"></div><div class="ig-save-mid"></div><div class="ig-save-tip"></div></div>
+        </div>
+        <div class="ig-col ig-foot"><div class="ig-bar ig-w224"></div><div class="ig-bar ig-w144"></div></div>
+      </a>
+      <p class="ig-by"><a href="https://www.instagram.com/reel/DfgX3RtpnER/?utm_source=ig_embed&amp;utm_campaign=loading" target="_blank">A post shared by No Discrepancy (@no_discrepancy)</a></p>
+    </div>
+  </blockquote>
+  <figcaption>Reel. The simulated air horn playing the excerpt four times, 53 s, posted on Instagram.</figcaption>
+</figure>
+</section>
+
+<section id="machine">
+<h2><span class="num">2</span>The machine at a glance</h2>
+<p>Air flows from the source through a protection valve and a filter, then splits. A low-pressure branch feeds the horns and a high-pressure branch feeds the slide cylinders. Each horn has its own horn valve and its own slide valve, so the controller switches 12 valves in all.</p>
+<figure>
+  <div class="svgbox">
+  <svg viewBox="0 0 720 300" width="720" height="300" role="img" aria-labelledby="f2t f2d">
+    <title id="f2t">Block diagram of the six-trumpet sliding air horn</title>
+    <desc id="f2d">Air source, pressure-protection valve and filter feed two branches: a 0.10 bar precision regulator to six 3/2 horn valves and six horns, and a 4 to 6 bar regulator to six 5/2 slide valves and six slide cylinders. The cylinder rods move the horns' outer tubes. A controller between the valve banks drives all twelve valves.</desc>
+    <defs>
+      <marker id="f2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" class="f-ink"/></marker>
+      <marker id="f2m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" class="f-soft"/></marker>
+    </defs>
+    <rect x="12" y="14" width="170" height="62" rx="8" class="box"/>
+    <text x="97" y="36" font-size="12.5" text-anchor="middle" class="t-b">Air source</text>
+    <text x="97" y="53" font-size="11" text-anchor="middle" class="t-soft">brake circuit 8–10 bar, or</text>
+    <text x="97" y="68" font-size="11" text-anchor="middle" class="t-soft">12 V compressor + 10 L tank</text>
+    <line x1="97" y1="76" x2="97" y2="97" class="s-ink" stroke-width="1.6" marker-end="url(#f2a)"/>
+    <rect x="12" y="98" width="170" height="52" rx="8" class="box-acc"/>
+    <text x="97" y="120" font-size="12.5" text-anchor="middle" class="t-b">Pressure-protection valve</text>
+    <text x="97" y="138" font-size="11" text-anchor="middle" class="t-soft">shuts below ≈ 6.5 bar</text>
+    <line x1="97" y1="150" x2="97" y2="171" class="s-ink" stroke-width="1.6" marker-end="url(#f2a)"/>
+    <rect x="12" y="172" width="170" height="44" rx="8" class="box"/>
+    <text x="97" y="199" font-size="12.5" text-anchor="middle" class="t-b">Filter + water trap</text>
+    <path d="M182 194 H204 M204 74 V230" class="s-ink" stroke-width="1.6"/>
+    <line x1="204" y1="74" x2="221" y2="74" class="s-ink" stroke-width="1.6" marker-end="url(#f2a)"/>
+    <line x1="204" y1="230" x2="221" y2="230" class="s-ink" stroke-width="1.6" marker-end="url(#f2a)"/>
+    <rect x="222" y="46" width="136" height="56" rx="8" class="box-acc"/>
+    <text x="290" y="69" font-size="12.5" text-anchor="middle" class="t-b">Precision regulator</text>
+    <text x="290" y="87" font-size="11" text-anchor="middle" class="t-soft">0.10 bar · horns</text>
+    <line x1="358" y1="74" x2="379" y2="74" class="s-ink" stroke-width="1.6" marker-end="url(#f2a)"/>
+    <rect x="380" y="46" width="140" height="56" rx="8" class="box"/>
+    <text x="450" y="69" font-size="12.5" text-anchor="middle" class="t-b">6 × horn valve</text>
+    <text x="450" y="87" font-size="11" text-anchor="middle" class="t-soft">3/2, on each head</text>
+    <line x1="520" y1="74" x2="543" y2="74" class="s-ink" stroke-width="1.6" marker-end="url(#f2a)"/>
+    <rect x="544" y="34" width="164" height="80" rx="8" class="box-acc"/>
+    <text x="626" y="58" font-size="12.5" text-anchor="middle" class="t-b">6 horns</text>
+    <text x="626" y="76" font-size="11" text-anchor="middle" class="t-soft">diaphragm head, Ø8 nozzle</text>
+    <text x="626" y="94" font-size="11" text-anchor="middle" class="t-soft">telescoping trumpet</text>
+    <rect x="222" y="202" width="136" height="56" rx="8" class="box"/>
+    <text x="290" y="225" font-size="12.5" text-anchor="middle" class="t-b">Regulator 4–6 bar</text>
+    <text x="290" y="243" font-size="11" text-anchor="middle" class="t-soft">slides</text>
+    <line x1="358" y1="230" x2="379" y2="230" class="s-ink" stroke-width="1.6" marker-end="url(#f2a)"/>
+    <rect x="380" y="202" width="140" height="56" rx="8" class="box"/>
+    <text x="450" y="225" font-size="12.5" text-anchor="middle" class="t-b">6 × slide valve</text>
+    <text x="450" y="243" font-size="11" text-anchor="middle" class="t-soft">5/2, spring return</text>
+    <line x1="520" y1="230" x2="543" y2="230" class="s-ink" stroke-width="1.6" marker-end="url(#f2a)"/>
+    <rect x="544" y="202" width="164" height="56" rx="8" class="box"/>
+    <text x="626" y="225" font-size="12.5" text-anchor="middle" class="t-b">6 slide cylinders</text>
+    <text x="626" y="243" font-size="11" text-anchor="middle" class="t-soft">double-acting, hard stops</text>
+    <line x1="618" y1="200" x2="618" y2="117" class="s-soft" stroke-width="1.6" stroke-dasharray="5 4" marker-start="url(#f2m)" marker-end="url(#f2m)"/>
+    <text x="628" y="154" font-size="11" class="t-soft">rod moves</text>
+    <text x="628" y="168" font-size="11" class="t-soft">the outer tube</text>
+    <rect x="380" y="128" width="140" height="48" rx="8" class="box"/>
+    <text x="450" y="148" font-size="12.5" text-anchor="middle" class="t-b">Controller</text>
+    <text x="450" y="165" font-size="11" text-anchor="middle" class="t-soft">MCU + 12 MOSFETs</text>
+    <line x1="450" y1="128" x2="450" y2="102" class="s-acc" stroke-width="1.8" stroke-dasharray="4 3"/>
+    <line x1="450" y1="176" x2="450" y2="202" class="s-acc" stroke-width="1.8" stroke-dasharray="4 3"/>
+    <text x="372" y="156" font-size="11" text-anchor="end" class="t-soft">12/24 V</text>
+    <line x1="230" y1="284" x2="262" y2="284" class="s-ink" stroke-width="1.6"/>
+    <text x="268" y="288" font-size="11" class="t-soft">air</text>
+    <line x1="310" y1="284" x2="342" y2="284" class="s-acc" stroke-width="1.8" stroke-dasharray="4 3"/>
+    <text x="348" y="288" font-size="11" class="t-soft">valve signals</text>
+    <line x1="446" y1="284" x2="478" y2="284" class="s-soft" stroke-width="1.6" stroke-dasharray="5 4"/>
+    <text x="484" y="288" font-size="11" class="t-soft">mechanical link</text>
+  </svg>
+  </div>
+  <figcaption>Figure 2. The whole machine. Air lines are solid, valve signals dashed in the accent colour, and the mechanical link from each cylinder to its trumpet dashed grey.</figcaption>
+</figure>
+<table>
+  <thead><tr><th>Part</th><th>Qty</th><th>Specification</th><th>Why</th></tr></thead>
+  <tbody>
+    <tr><td>Air source</td><td class="n">1</td><td>Truck brake circuit (8–10 bar), or a 12 V compressor with a 10 L tank, pressure switch and safety valve</td><td>About 10 L of free air per play</td></tr>
+    <tr><td>Pressure-protection valve</td><td class="n">1</td><td>Closes below ≈ 6.5 bar</td><td>The horns can never empty the brake reservoirs</td></tr>
+    <tr><td>Filter and water trap</td><td class="n">1</td><td>With automatic drain</td><td>Keeps water and oil off the diaphragms and valve seats</td></tr>
+    <tr><td>Precision regulator</td><td class="n">1</td><td>0–0.25 bar range, low droop at about 0.5 L/s</td><td>Horn pitch moves about 7 cents per kPa</td></tr>
+    <tr><td>Regulator</td><td class="n">1</td><td>4–6 bar</td><td>Drives the slide cylinders</td></tr>
+    <tr><td>Horn valve</td><td class="n">6</td><td>3/2 normally closed, fast-switching (≤ 5 ms), screwed onto each head</td><td>Vents the head so the note stops in about 6 ms</td></tr>
+    <tr><td>Slide valve</td><td class="n">6</td><td>5/2 single solenoid with spring return, ≤ 15 ms</td><td>Drives each cylinder in both directions</td></tr>
+    <tr><td>Horn head</td><td class="n">6</td><td>Ø8 mm nozzle; diaphragm per the table in section 4</td><td>The reed that turns steady air into sound</td></tr>
+    <tr><td>Telescoping trumpet</td><td class="n">6</td><td>Fixed inner tube with an 8 mm bore; sliding outer tube carrying a small bell</td><td>The air column that sets the pitch</td></tr>
+    <tr><td>Slide cylinder</td><td class="n">6</td><td>Double-acting, 10–12 mm bore, stroke longer than the travel; external adjustable stops with urethane bumpers</td><td>Moves the outer tube between its two lengths</td></tr>
+    <tr><td>Flow controls</td><td class="n">12</td><td>One-way, on both ports of each cylinder</td><td>Set the glide and return speeds</td></tr>
+    <tr><td>Controller</td><td class="n">1</td><td>Microcontroller with 12 outputs, logic-level MOSFETs and flyback diodes, 12/24 V coils</td><td>Plays the sequence on the 166.7 ms grid</td></tr>
+  </tbody>
+</table>
+</section>
+
+<section id="horn">
+<h2><span class="num">3</span>One horn, up close</h2>
+<p>An air-horn head works like a brass player's lips. Air at 0.10 bar fills the chamber and pushes the diaphragm off the end of the nozzle. Air then rushes through the gap, about 0.15 mm at rest, and into the trumpet. The pressure wave runs to the bell, comes back and pushes the diaphragm shut, and the cycle repeats at the trumpet's resonance. A longer air column gives a lower note.</p>
+<figure>
+  <div class="svgbox">
+  <svg viewBox="0 0 720 320" width="720" height="320" role="img" aria-labelledby="f3t f3d">
+    <title id="f3t">Side section of one horn with its telescoping trumpet and slide cylinder</title>
+    <desc id="f3d">From left: a 3/2 horn valve feeds the head's chamber. The diaphragm faces the nozzle across a small gap. The fixed inner tube leaves the head; the outer tube with the bell slides over it on a carriage that runs on a rail. A double-acting cylinder below, fed by a 5/2 slide valve, moves the carriage between a short stop that sets the note and a long stop that sets the scoop depth. A dashed link for option A runs from the outer tube to the diaphragm.</desc>
+    <defs>
+      <marker id="f3a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" class="f-ink"/></marker>
+      <marker id="f3w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" class="f-acc"/></marker>
+    </defs>
+    <!-- horn valve -->
+    <text x="48" y="62" font-size="11" text-anchor="middle" class="t-soft">horn valve</text>
+    <rect x="16" y="72" width="64" height="48" rx="6" class="box"/>
+    <text x="48" y="101" font-size="13" text-anchor="middle" class="t-b">3/2</text>
+    <line x1="2" y1="96" x2="15" y2="96" class="s-ink" stroke-width="1.6"/>
+    <line x1="48" y1="120" x2="48" y2="134" class="s-ink" stroke-width="1.4"/>
+    <text x="48" y="148" font-size="10.5" text-anchor="middle" class="t-soft">vent</text>
+    <line x1="80" y1="96" x2="111" y2="96" class="s-ink" stroke-width="1.6" marker-end="url(#f3a)"/>
+    <!-- head -->
+    <rect x="112" y="40" width="72" height="112" rx="6" class="f-panel s-ink" stroke-width="1.6"/>
+    <rect x="128" y="52" width="44" height="88" rx="3" class="f-accsoft"/>
+    <line x1="124" y1="44" x2="124" y2="148" class="s-acc" stroke-width="4"/>
+    <path d="M134 86 H184 M134 106 H184" class="s-ink" stroke-width="2.4"/>
+    <text x="150" y="34" font-size="11" text-anchor="middle">head</text>
+    <text x="150" y="168" font-size="10.5" text-anchor="middle" class="t-acc">diaphragm</text>
+    <text x="150" y="181" font-size="10.5" text-anchor="middle" class="t-soft">gap ≈ 0.15 mm</text>
+    <!-- inner tube -->
+    <path d="M184 86 H408 M184 106 H408" class="s-ink" stroke-width="2.4"/>
+    <text x="268" y="76" font-size="11" text-anchor="middle">inner tube, fixed · 8 mm bore</text>
+    <!-- outer tube long position -->
+    <rect x="388" y="81" width="212" height="30" rx="2" class="s-ink" stroke-width="2.2"/>
+    <path d="M600 81 Q632 78 660 52 M600 111 Q632 114 660 140" class="s-ink" stroke-width="2.2"/>
+    <text x="494" y="72" font-size="11" text-anchor="middle">outer tube + bell, slides</text>
+    <text x="668" y="100" font-size="11" class="t-soft">bell</text>
+    <!-- carriage and rail -->
+    <rect x="400" y="111" width="10" height="44" class="f-soft"/>
+    <rect x="392" y="155" width="44" height="22" rx="3" class="box"/>
+    <line x1="186" y1="182" x2="690" y2="182" class="s-soft" stroke-width="3"/>
+    <text x="690" y="198" font-size="10.5" text-anchor="end" class="t-soft">rail</text>
+    <rect x="436" y="150" width="9" height="32" class="f-acc"/>
+    <text x="452" y="170" font-size="10.5" class="t-acc">long stop: scoop depth</text>
+    <rect x="193" y="150" width="9" height="32" class="f-acc"/>
+    <text x="196" y="142" font-size="10.5" class="t-acc">short stop: the note</text>
+    <line x1="410" y1="196" x2="214" y2="196" class="s-acc" stroke-width="1.4" marker-end="url(#f3w)"/>
+    <text x="312" y="212" font-size="10.5" text-anchor="middle" class="t-acc">travel = start − tuned length</text>
+    <!-- cylinder -->
+    <rect x="150" y="226" width="200" height="34" rx="4" class="box"/>
+    <rect x="300" y="228" width="8" height="30" class="f-soft"/>
+    <line x1="308" y1="243" x2="414" y2="243" class="s-ink" stroke-width="4"/>
+    <line x1="414" y1="243" x2="414" y2="177" class="s-ink" stroke-width="3"/>
+    <text x="250" y="248" font-size="11" text-anchor="middle">slide cylinder</text>
+    <!-- slide valve -->
+    <text x="48" y="218" font-size="11" text-anchor="middle" class="t-soft">slide valve</text>
+    <rect x="16" y="226" width="64" height="48" rx="6" class="box"/>
+    <text x="48" y="255" font-size="13" text-anchor="middle" class="t-b">5/2</text>
+    <path d="M80 236 H150" class="s-ink" stroke-width="1.6"/>
+    <path d="M80 266 H120 V286 H340 V260" class="s-ink" stroke-width="1.6"/>
+    <line x1="2" y1="250" x2="15" y2="250" class="s-ink" stroke-width="1.6"/>
+    <text x="230" y="302" font-size="10.5" text-anchor="middle" class="t-soft">one-way flow controls on both ports</text>
+    <!-- option A link -->
+    <path d="M405 81 V22 H124 V42" class="s-acc" stroke-width="1.4" stroke-dasharray="6 4"/>
+    <text x="264" y="16" font-size="10.5" text-anchor="middle" class="t-acc">option A only: link tightens the diaphragm as the tube shortens</text>
+  </svg>
+  </div>
+  <figcaption>Figure 3. One horn, schematic and not to scale, shown at its long (resting) position. When the slide valve switches, the cylinder pulls the carriage left to the short stop: the outer tube and bell move left by the travel, and the air column shortens to its tuned length.</figcaption>
+</figure>
+<div class="grid2">
+  <div class="panel">
+    <h3>The trumpet</h3>
+    <p>A fixed inner tube with an 8 mm bore leaves the nozzle. An outer tube with a small bell slides over it on a carriage. The carriage runs on a rail, so the tubes carry no load and only need a close sliding fit, like a trombone slide. Make both tubes about as long as the tuned air column: fully nested at the short stop, overlapping about 10 mm at the long stop. That way one stage stretches to about 1.9× its length.</p>
+  </div>
+  <div class="panel">
+    <h3>The stops</h3>
+    <p>Two adjustable hard stops on the rail define the two lengths the tube ever needs. The short stop is the tuning screw: the note is held while the carriage sits against it, so its pitch does not depend on how fast the slide moved. The long stop sets how low the note starts. Urethane bumpers keep the stops from clicking.</p>
+  </div>
+</div>
+</section>
+
+<section id="six">
+<h2><span class="num">4</span>The six horns</h2>
+<p>These are the values the simulation calibrated for each horn. The tuned length makes the held note land on equal temperament (A4 = 440 Hz). The start length makes the first audible pitch 0.6 × the note, 8.8 semitones low, with the diaphragm loosened as in option A (section 5).</p>
+<table>
+  <thead><tr><th>Note</th><th>Hz</th><th>Notes in the tune</th><th>Tube, tuned</th><th>Tube, start</th><th>Travel</th><th>Diaphragm resonance</th><th>Diaphragm mass per area (≈ steel)</th></tr></thead>
+  <tbody>
+    <tr><td>G5</td><td class="n">784.0</td><td class="n">5</td><td class="n">11.38 cm</td><td class="n">22.03 cm</td><td class="n">10.65 cm</td><td class="n">666 Hz</td><td class="n">3.8 kg/m² (0.49 mm)</td></tr>
+    <tr><td>G#5</td><td class="n">830.6</td><td class="n">5</td><td class="n">10.75 cm</td><td class="n">20.80 cm</td><td class="n">10.05 cm</td><td class="n">706 Hz</td><td class="n">3.4 kg/m² (0.43 mm)</td></tr>
+    <tr><td>A#5</td><td class="n">932.3</td><td class="n">7</td><td class="n">9.59 cm</td><td class="n">18.54 cm</td><td class="n">8.95 cm</td><td class="n">792 Hz</td><td class="n">2.7 kg/m² (0.34 mm)</td></tr>
+    <tr><td>C6</td><td class="n">1046.5</td><td class="n">9</td><td class="n">8.56 cm</td><td class="n">16.52 cm</td><td class="n">7.96 cm</td><td class="n">890 Hz</td><td class="n">2.1 kg/m² (0.27 mm)</td></tr>
+    <tr><td>D6</td><td class="n">1174.7</td><td class="n">5</td><td class="n">7.64 cm</td><td class="n">14.73 cm</td><td class="n">7.09 cm</td><td class="n">998 Hz</td><td class="n">1.7 kg/m² (0.22 mm)</td></tr>
+    <tr><td>D#6</td><td class="n">1244.5</td><td class="n">2</td><td class="n">7.22 cm</td><td class="n">13.91 cm</td><td class="n">6.69 cm</td><td class="n">1058 Hz</td><td class="n">1.5 kg/m² (0.19 mm)</td></tr>
+  </tbody>
+</table>
+<figure>
+  <div class="svgbox">
+<svg viewBox="0 0 720 280" width="720" height="280" role="img" aria-labelledby="f4t f4d">
+<title id="f4t">The six trumpet air columns to scale</title>
+<desc id="f4d">G5: tuned 11.38 cm, start 22.03 cm; G#5: tuned 10.75 cm, start 20.80 cm; A#5: tuned 9.59 cm, start 18.54 cm; C6: tuned 8.56 cm, start 16.52 cm; D6: tuned 7.64 cm, start 14.73 cm; D#6: tuned 7.22 cm, start 13.91 cm.</desc>
+<rect x="118" y="12" width="22" height="12" rx="2" class="f-acc"/>
+<text x="146" y="22" font-size="11" class="t-soft">tuned length (short stop)</text>
+<rect x="318" y="12" width="22" height="12" rx="2" class="f-accsoft s-acc" stroke-width="1.2" stroke-dasharray="3 2"/>
+<text x="346" y="22" font-size="11" class="t-soft">start length (long stop)</text>
+<line x1="118.0" y1="40" x2="118.0" y2="230" class="s-line" stroke-width="1"/>
+<text x="118.0" y="246" font-size="11" text-anchor="middle" class="t-soft">0 cm</text>
+<line x1="228.0" y1="40" x2="228.0" y2="230" class="s-line" stroke-width="1"/>
+<text x="228.0" y="246" font-size="11" text-anchor="middle" class="t-soft">5 cm</text>
+<line x1="338.0" y1="40" x2="338.0" y2="230" class="s-line" stroke-width="1"/>
+<text x="338.0" y="246" font-size="11" text-anchor="middle" class="t-soft">10 cm</text>
+<line x1="448.0" y1="40" x2="448.0" y2="230" class="s-line" stroke-width="1"/>
+<text x="448.0" y="246" font-size="11" text-anchor="middle" class="t-soft">15 cm</text>
+<line x1="558.0" y1="40" x2="558.0" y2="230" class="s-line" stroke-width="1"/>
+<text x="558.0" y="246" font-size="11" text-anchor="middle" class="t-soft">20 cm</text>
+<text x="108" y="61" font-size="12" text-anchor="end"><tspan class="t-b">G5</tspan><tspan class="t-soft"> · 784 Hz</tspan></text>
+<g><title>G5 (784.0 Hz): tuned 11.38 cm, start 22.03 cm, travel 10.65 cm</title><rect x="368.4" y="49" width="234.3" height="16" rx="3" class="f-accsoft s-acc" stroke-width="1.2" stroke-dasharray="3 2"/><rect x="118" y="49" width="248.4" height="16" rx="3" class="f-acc"/></g>
+<text x="610.7" y="61" font-size="11" class="t-soft">11.4 → 22.0 cm</text>
+<text x="108" y="91" font-size="12" text-anchor="end"><tspan class="t-b">G#5</tspan><tspan class="t-soft"> · 831 Hz</tspan></text>
+<g><title>G#5 (830.6 Hz): tuned 10.75 cm, start 20.80 cm, travel 10.05 cm</title><rect x="354.5" y="79" width="221.1" height="16" rx="3" class="f-accsoft s-acc" stroke-width="1.2" stroke-dasharray="3 2"/><rect x="118" y="79" width="234.5" height="16" rx="3" class="f-acc"/></g>
+<text x="583.6" y="91" font-size="11" class="t-soft">10.8 → 20.8 cm</text>
+<text x="108" y="121" font-size="12" text-anchor="end"><tspan class="t-b">A#5</tspan><tspan class="t-soft"> · 932 Hz</tspan></text>
+<g><title>A#5 (932.3 Hz): tuned 9.59 cm, start 18.54 cm, travel 8.95 cm</title><rect x="329.0" y="109" width="196.9" height="16" rx="3" class="f-accsoft s-acc" stroke-width="1.2" stroke-dasharray="3 2"/><rect x="118" y="109" width="209.0" height="16" rx="3" class="f-acc"/></g>
+<text x="533.9" y="121" font-size="11" class="t-soft">9.6 → 18.5 cm</text>
+<text x="108" y="151" font-size="12" text-anchor="end"><tspan class="t-b">C6</tspan><tspan class="t-soft"> · 1047 Hz</tspan></text>
+<g><title>C6 (1046.5 Hz): tuned 8.56 cm, start 16.52 cm, travel 7.96 cm</title><rect x="306.3" y="139" width="175.1" height="16" rx="3" class="f-accsoft s-acc" stroke-width="1.2" stroke-dasharray="3 2"/><rect x="118" y="139" width="186.3" height="16" rx="3" class="f-acc"/></g>
+<text x="489.4" y="151" font-size="11" class="t-soft">8.6 → 16.5 cm</text>
+<text x="108" y="181" font-size="12" text-anchor="end"><tspan class="t-b">D6</tspan><tspan class="t-soft"> · 1175 Hz</tspan></text>
+<g><title>D6 (1174.7 Hz): tuned 7.64 cm, start 14.73 cm, travel 7.09 cm</title><rect x="286.1" y="169" width="156.0" height="16" rx="3" class="f-accsoft s-acc" stroke-width="1.2" stroke-dasharray="3 2"/><rect x="118" y="169" width="166.1" height="16" rx="3" class="f-acc"/></g>
+<text x="450.1" y="181" font-size="11" class="t-soft">7.6 → 14.7 cm</text>
+<text x="108" y="211" font-size="12" text-anchor="end"><tspan class="t-b">D#6</tspan><tspan class="t-soft"> · 1245 Hz</tspan></text>
+<g><title>D#6 (1244.5 Hz): tuned 7.22 cm, start 13.91 cm, travel 6.69 cm</title><rect x="276.8" y="199" width="147.2" height="16" rx="3" class="f-accsoft s-acc" stroke-width="1.2" stroke-dasharray="3 2"/><rect x="118" y="199" width="156.8" height="16" rx="3" class="f-acc"/></g>
+<text x="432.0" y="211" font-size="11" class="t-soft">7.2 → 13.9 cm</text>
+<text x="360.0" y="264" font-size="11" text-anchor="middle" class="t-soft">acoustic length of the air column</text>
+</svg>
+  </div>
+  <figcaption>Figure 4. The six air columns to scale: solid to the tuned length (short stop), outlined out to the start length (long stop). Each start is about 1.94× its tuned length.</figcaption>
+</figure>
+<ul>
+  <li><b>All six diaphragms share</b> a stiffness of 6.7 × 10⁷ Pa per metre of opening, so each opens 0.15 mm at 0.10 bar, and a damping of Q ≈ 5. Their resonance sits at 0.85 × their note.</li>
+  <li><b>The lengths are acoustic</b>: the model's cylinder plus its bell reflection. A real bell and the bore step between the tubes will shift them, so give each stop about ±15 mm of adjustment and tune by ear (section 8).</li>
+  <li><b>A quarter wavelength is shorter than the tuned tube</b>: 10.9 cm for G5 against 11.4 cm. The diaphragm pulls the pitch up, so the tube must be longer to compensate.</li>
+  <li><b>The start lengths are 1.94×</b> the tuned ones, slightly more than one telescope stage reaches. At 1.9× the note starts 8.6 semitones low instead of 8.8; at 1.8×, 7.9 semitones.</li>
+</ul>
+</section>
+
+<section id="scoop">
+<h2><span class="num">5</span>The scoop: what it takes</h2>
+<h3>What the WAV does</h3>
+<p>In the simulated WAV, the horn valve opens and the chamber fills, with a 10 ms time constant. The piston waits 20 ms, until the horn sounds fully, then shortens the tube to its tuned length over 60 ms, fastest at first (a cubic ease-out). The note lands at about 80 ms. Measured from the WAV for G5:</p>
+<table>
+  <thead><tr><th>Time after the valve opens</th><th class="n">12 ms</th><th class="n">20 ms</th><th class="n">30 ms</th><th class="n">40 ms</th><th class="n">60 ms</th><th class="n">80 ms</th></tr></thead>
+  <tbody>
+    <tr><td>Pitch, semitones from the note</td><td class="n">−7.6</td><td class="n">−7.3</td><td class="n">−4.3</td><td class="n">−2.0</td><td class="n">−0.26</td><td class="n">−0.01</td></tr>
+    <tr><td>Level, dB from the held note</td><td class="n">−31</td><td class="n">−9</td><td class="n">−5</td><td class="n">−3</td><td class="n">−1</td><td class="n">0</td></tr>
+  </tbody>
+</table>
+<figure>
+  <div class="svgbox">
+<svg viewBox="0 0 720 372" width="720" height="372" role="img" aria-labelledby="f5t f5d">
+<title id="f5t">One G5 note: valves, tube length and pitch over the first 120 ms</title>
+<desc id="f5d">The horn valve opens at 0 ms. The slide valve opens at 20 ms. The tube shortens from 22.0 to 11.4 cm between 20 and 80 ms. Measured pitch: minus 7.6 semitones at 12 ms, minus 7.3 at 20, minus 4.3 at 30, minus 2.0 at 40, minus 0.26 at 60 and minus 0.01 at 80 ms.</desc>
+<line x1="313.2" y1="16" x2="313.2" y2="318" class="s-soft" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="317.2" y="13" font-size="10.5" class="t-soft">slide starts</text>
+<line x1="547.7" y1="16" x2="547.7" y2="318" class="s-soft" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="551.7" y="13" font-size="10.5" class="t-soft">lands</text>
+<text x="156.0" y="38" font-size="12" text-anchor="end" class="t-b">Horn valve</text>
+<path d="M196.0 42 H235.1 V26 H704.0" class="s-ink" stroke-width="2"/>
+<text x="625.8" y="22" font-size="10.5" class="t-soft">open until 303 ms</text>
+<text x="156.0" y="80" font-size="12" text-anchor="end" class="t-b">Slide valve</text>
+<text x="156.0" y="94" font-size="10.5" text-anchor="end" class="t-soft">20 ms − lag</text>
+<path d="M196.0 84 H313.2 V68 H704.0" class="s-ink" stroke-width="2"/>
+<text x="156.0" y="146" font-size="12" text-anchor="end" class="t-b">Tube length</text>
+<text x="156.0" y="160" font-size="10.5" text-anchor="end" class="t-soft">cm</text>
+<path d="M196.0 116.0 L198.0 116.0 L199.9 116.0 L201.9 116.0 L203.8 116.0 L205.8 116.0 L207.7 116.0 L209.7 116.0 L211.6 116.0 L213.6 116.0 L215.5 116.0 L217.5 116.0 L219.4 116.0 L221.4 116.0 L223.4 116.0 L225.3 116.0 L227.3 116.0 L229.2 116.0 L231.2 116.0 L233.1 116.0 L235.1 116.0 L237.0 116.0 L239.0 116.0 L240.9 116.0 L242.9 116.0 L244.8 116.0 L246.8 116.0 L248.8 116.0 L250.7 116.0 L252.7 116.0 L254.6 116.0 L256.6 116.0 L258.5 116.0 L260.5 116.0 L262.4 116.0 L264.4 116.0 L266.3 116.0 L268.3 116.0 L270.2 116.0 L272.2 116.0 L274.2 116.0 L276.1 116.0 L278.1 116.0 L280.0 116.0 L282.0 116.0 L283.9 116.0 L285.9 116.0 L287.8 116.0 L289.8 116.0 L291.7 116.0 L293.7 116.0 L295.6 116.0 L297.6 116.0 L299.6 116.0 L301.5 116.0 L303.5 116.0 L305.4 116.0 L307.4 116.0 L309.3 116.0 L311.3 116.0 L313.2 116.0 L315.2 119.3 L317.1 122.4 L319.1 125.3 L321.0 128.0 L323.0 130.6 L325.0 133.0 L326.9 135.4 L328.9 137.6 L330.8 139.6 L332.8 141.6 L334.7 143.5 L336.7 145.3 L338.6 147.0 L340.6 148.6 L342.5 150.2 L344.5 151.7 L346.4 153.1 L348.4 154.4 L350.4 155.7 L352.3 156.9 L354.3 158.1 L356.2 159.3 L358.2 160.4 L360.1 161.4 L362.1 162.4 L364.0 163.4 L366.0 164.3 L367.9 165.2 L369.9 166.0 L371.8 166.8 L373.8 167.6 L375.8 168.4 L377.7 169.1 L379.7 169.8 L381.6 170.5 L383.6 171.1 L385.5 171.8 L387.5 172.4 L389.4 172.9 L391.4 173.5 L393.3 174.0 L395.3 174.5 L397.2 175.0 L399.2 175.5 L401.2 176.0 L403.1 176.4 L405.1 176.9 L407.0 177.3 L409.0 177.7 L410.9 178.1 L412.9 178.4 L414.8 178.8 L416.8 179.1 L418.7 179.5 L420.7 179.8 L422.6 180.1 L424.6 180.4 L426.6 180.7 L428.5 180.9 L430.5 181.2 L432.4 181.4 L434.4 181.7 L436.3 181.9 L438.3 182.1 L440.2 182.3 L442.2 182.6 L444.1 182.7 L446.1 182.9 L448.0 183.1 L450.0 183.3 L452.0 183.5 L453.9 183.6 L455.9 183.8 L457.8 183.9 L459.8 184.0 L461.7 184.2 L463.7 184.3 L465.6 184.4 L467.6 184.5 L469.5 184.6 L471.5 184.7 L473.4 184.8 L475.4 184.9 L477.4 185.0 L479.3 185.1 L481.3 185.2 L483.2 185.2 L485.2 185.3 L487.1 185.4 L489.1 185.4 L491.0 185.5 L493.0 185.5 L494.9 185.6 L496.9 185.6 L498.8 185.7 L500.8 185.7 L502.8 185.7 L504.7 185.8 L506.7 185.8 L508.6 185.8 L510.6 185.9 L512.5 185.9 L514.5 185.9 L516.4 185.9 L518.4 185.9 L520.3 185.9 L522.3 186.0 L524.2 186.0 L526.2 186.0 L528.2 186.0 L530.1 186.0 L532.1 186.0 L534.0 186.0 L536.0 186.0 L537.9 186.0 L539.9 186.0 L541.8 186.0 L543.8 186.0 L545.7 186.0 L547.7 186.0 L549.6 186.0 L551.6 186.0 L553.6 186.0 L555.5 186.0 L557.5 186.0 L559.4 186.0 L561.4 186.0 L563.3 186.0 L565.3 186.0 L567.2 186.0 L569.2 186.0 L571.1 186.0 L573.1 186.0 L575.0 186.0 L577.0 186.0 L579.0 186.0 L580.9 186.0 L582.9 186.0 L584.8 186.0 L586.8 186.0 L588.7 186.0 L590.7 186.0 L592.6 186.0 L594.6 186.0 L596.5 186.0 L598.5 186.0 L600.4 186.0 L602.4 186.0 L604.4 186.0 L606.3 186.0 L608.3 186.0 L610.2 186.0 L612.2 186.0 L614.1 186.0 L616.1 186.0 L618.0 186.0 L620.0 186.0 L621.9 186.0 L623.9 186.0 L625.8 186.0 L627.8 186.0 L629.8 186.0 L631.7 186.0 L633.7 186.0 L635.6 186.0 L637.6 186.0 L639.5 186.0 L641.5 186.0 L643.4 186.0 L645.4 186.0 L647.3 186.0 L649.3 186.0 L651.2 186.0 L653.2 186.0 L655.2 186.0 L657.1 186.0 L659.1 186.0 L661.0 186.0 L663.0 186.0 L664.9 186.0 L666.9 186.0 L668.8 186.0 L670.8 186.0 L672.7 186.0 L674.7 186.0 L676.6 186.0 L678.6 186.0 L680.6 186.0 L682.5 186.0 L684.5 186.0 L686.4 186.0 L688.4 186.0 L690.3 186.0 L692.3 186.0 L694.2 186.0 L696.2 186.0 L698.1 186.0 L700.1 186.0 L702.0 186.0 L704.0 186.0" class="s-acc" stroke-width="2.2"/>
+<text x="188.0" y="120.0" font-size="10.5" text-anchor="end" class="t-soft">22.0</text>
+<text x="188.0" y="190.0" font-size="10.5" text-anchor="end" class="t-soft">11.4</text>
+<text x="156.0" y="250" font-size="12" text-anchor="end" class="t-b">Pitch</text>
+<text x="156.0" y="264" font-size="10.5" text-anchor="end" class="t-soft">semitones</text>
+<line x1="196.0" y1="214.0" x2="704.0" y2="214.0" class="s-line" stroke-width="1"/>
+<text x="188.0" y="218.0" font-size="10.5" text-anchor="end" class="t-soft">0</text>
+<line x1="196.0" y1="244.0" x2="704.0" y2="244.0" class="s-line" stroke-width="1"/>
+<text x="188.0" y="248.0" font-size="10.5" text-anchor="end" class="t-soft">−3</text>
+<line x1="196.0" y1="274.0" x2="704.0" y2="274.0" class="s-line" stroke-width="1"/>
+<text x="188.0" y="278.0" font-size="10.5" text-anchor="end" class="t-soft">−6</text>
+<line x1="196.0" y1="304.0" x2="704.0" y2="304.0" class="s-line" stroke-width="1"/>
+<text x="188.0" y="308.0" font-size="10.5" text-anchor="end" class="t-soft">−9</text>
+<path d="M282.0 290.0 L313.2 287.0 L352.3 257.0 L391.4 234.0 L469.5 216.6 L547.7 214.1" class="s-acc" stroke-width="2"/>
+<path d="M547.7 214.0 H704.0" class="s-acc" stroke-width="2"/>
+<g><title>12 ms: -7.60 semitones, -31 dB from the held note</title><circle cx="282.0" cy="290.0" r="12" fill="transparent"/><circle cx="282.0" cy="290.0" r="4.5" class="f-acc" stroke="var(--panel)" stroke-width="2"/></g>
+<g><title>20 ms: -7.30 semitones, -9 dB from the held note</title><circle cx="313.2" cy="287.0" r="12" fill="transparent"/><circle cx="313.2" cy="287.0" r="4.5" class="f-acc" stroke="var(--panel)" stroke-width="2"/></g>
+<g><title>30 ms: -4.30 semitones, -5 dB from the held note</title><circle cx="352.3" cy="257.0" r="12" fill="transparent"/><circle cx="352.3" cy="257.0" r="4.5" class="f-acc" stroke="var(--panel)" stroke-width="2"/></g>
+<g><title>40 ms: -2.00 semitones, -3 dB from the held note</title><circle cx="391.4" cy="234.0" r="12" fill="transparent"/><circle cx="391.4" cy="234.0" r="4.5" class="f-acc" stroke="var(--panel)" stroke-width="2"/></g>
+<g><title>60 ms: -0.26 semitones, -1 dB from the held note</title><circle cx="469.5" cy="216.6" r="12" fill="transparent"/><circle cx="469.5" cy="216.6" r="4.5" class="f-acc" stroke="var(--panel)" stroke-width="2"/></g>
+<g><title>80 ms: -0.01 semitones, +0 dB from the held note</title><circle cx="547.7" cy="214.1" r="12" fill="transparent"/><circle cx="547.7" cy="214.1" r="4.5" class="f-acc" stroke="var(--panel)" stroke-width="2"/></g>
+<text x="290.0" y="308.0" font-size="10.5" class="t-soft" stroke="var(--panel)" stroke-width="5" stroke-linejoin="round" paint-order="stroke">first audible, −31 dB</text>
+<line x1="235.1" y1="318" x2="235.1" y2="323" class="s-soft" stroke-width="1"/>
+<text x="235.1" y="337" font-size="11" text-anchor="middle" class="t-soft">0</text>
+<line x1="313.2" y1="318" x2="313.2" y2="323" class="s-soft" stroke-width="1"/>
+<text x="313.2" y="337" font-size="11" text-anchor="middle" class="t-soft">20</text>
+<line x1="391.4" y1="318" x2="391.4" y2="323" class="s-soft" stroke-width="1"/>
+<text x="391.4" y="337" font-size="11" text-anchor="middle" class="t-soft">40</text>
+<line x1="469.5" y1="318" x2="469.5" y2="323" class="s-soft" stroke-width="1"/>
+<text x="469.5" y="337" font-size="11" text-anchor="middle" class="t-soft">60</text>
+<line x1="547.7" y1="318" x2="547.7" y2="323" class="s-soft" stroke-width="1"/>
+<text x="547.7" y="337" font-size="11" text-anchor="middle" class="t-soft">80</text>
+<line x1="625.8" y1="318" x2="625.8" y2="323" class="s-soft" stroke-width="1"/>
+<text x="625.8" y="337" font-size="11" text-anchor="middle" class="t-soft">100</text>
+<line x1="704.0" y1="318" x2="704.0" y2="323" class="s-soft" stroke-width="1"/>
+<text x="704.0" y="337" font-size="11" text-anchor="middle" class="t-soft">120</text>
+<line x1="196.0" y1="318" x2="704.0" y2="318" class="s-soft" stroke-width="1"/>
+<text x="450.0" y="358" font-size="11" text-anchor="middle" class="t-soft">ms after the horn valve opens</text>
+</svg>
+  </div>
+  <figcaption>Figure 5. One G5 note, valve by valve. The tube follows the WAV's cubic glide from 22.0 to 11.4 cm; the pitch points are measured from the WAV. Hover over a point for its values. The horn valve of an eighth note stays open until 303 ms.</figcaption>
+</figure>
+<h3>What a machine needs</h3>
+<p>The WAV's model changes three things at once during the scoop: tube length, diaphragm tension and chamber pressure. A machine should change as few as possible, so each was tested in the simulator on its own (G5 shown; D#6 behaves the same within 0.1 semitone):</p>
+<table>
+  <thead><tr><th>What changes</th><th>Result in the simulator</th></tr></thead>
+  <tbody>
+    <tr><td>Pressure only: a slow valve, from 2 to 10 kPa</td><td>The pitch rises from 88 cents low to the note. Under one semitone: not a scoop.</td></tr>
+    <tr><td>Tube only, with the table's diaphragm (resonance 0.85 × the note)</td><td>The diaphragm holds the pitch: 1.2× the length gives −1.2 semitones, 1.6× gives −2.3, and from 1.8× the horn is silent.</td></tr>
+    <tr><td>Tube only, with a softer diaphragm (resonance 0.6–0.65 × the note)</td><td>The pitch follows the tube over 6.6–6.9 semitones, from about 1.5× down to 1.0× the diaphragm's resonance. Outside that range the horn is silent.</td></tr>
+    <tr><td>Tube 1.9×, plus diaphragm tension and chamber pressure starting at 0.6× (the WAV)</td><td>The note starts 8.6 semitones low; at 1.94×, 8.8.</td></tr>
+  </tbody>
+</table>
+<div class="grid2">
+  <div class="panel">
+    <h3>Option A: link the diaphragm</h3>
+    <p>This is the WAV, mechanically. Make each diaphragm a thin shim of the table's mass per area, stretched like a drumhead on a tension ring. A lever on the slide carriage tightens it as the tube shortens, like a timpani pedal: from 36 % to 100 % of its final tension, so its resonance rises from 0.6 to 1.0 of its final value. For an even level, the chamber should start at 0.6× its pressure too. Without that, the model's scoop starts 6–7 dB louder than the held note. Result: the full scoop, about 8.6 semitones from a 1.9× tube.</p>
+  </div>
+  <div class="panel">
+    <h3>Option B: a softer diaphragm</h3>
+    <p>Build this one first. Use a fixed diaphragm whose resonance is about two-thirds of its note, so the trumpet, not the diaphragm, decides the pitch. The slide alone then carries about 6 semitones of scoop, and nothing else moves. The top of the horn's range is where it nearly chokes, so the short stop needs care. The simulator has not calibrated option B's lengths: set both stops by ear.</p>
+  </div>
+</div>
+<h3>Speed, shape and repeated notes</h3>
+<ul>
+  <li><b>Speed:</b> a 60 ms glide over 6.7–10.6 cm averages 1.1–1.8 m/s. Keep the moving part light, under about 50 g with thin-wall brass or aluminium. A 10 mm bore at 5 bar gives about 39 N, far more than it needs.</li>
+  <li><b>Shape:</b> a pneumatic slide moves in an S-curve: it speeds up, then cushions. The WAV's glide is fastest at the start. Shape the motion with the flow controls and bumpers, and judge by ear.</li>
+  <li><b>Repeated notes:</b> four places repeat a pitch back to back: G5, C6, A#5 and G#5. There the slide has only the 30 ms gap to travel back 8–11 cm, about 3 m/s, which is at the top of what small pneumatic cylinders do. Drive the return hard, with quick-exhaust valves. If those notes still scoop short, add a second horn for each of the four pitches (10 horns in all) and alternate between them.</li>
+</ul>
+</section>
+
+<section id="air">
+<h2><span class="num">6</span>Air supply</h2>
+<ul>
+  <li><b>On a truck:</b> take air from the brake circuit (8–10 bar) only through a pressure-protection valve, which shuts below about 6.5 bar. Then the horns can never take the air the brakes need.</li>
+  <li><b>Standalone:</b> a 12 V compressor, a 10 L tank, a pressure switch and a safety valve. Between 8 and 6 bar the tank holds about 20 L of usable air: two plays before the compressor must catch up.</li>
+  <li><b>Use per play:</b> each horn passes about 0.5 L/s at 0.10 bar and the valves are open 11.2 s of the 13.3 s, about 6 L. The slides, with 10 mm bores at 5 bar, take about 3 L more. With the hoses, budget about 10 L of free air.</li>
+  <li><b>Horn pressure:</b> 0.10 bar is about what a trumpet player blows. More pressure is louder and sharper: in the model, 20 kPa is 8 dB louder and 51 cents sharp, and at 30 kPa the second harmonic becomes the strongest partial, so the horn sounds brighter. Pick the pressure first, then tune at it.</li>
+  <li><b>Hoses:</b> mount the horn valves on the heads. The hose between valve and head is volume that has to fill and empty with every note.</li>
+</ul>
+</section>
+
+<section id="controller">
+<h2><span class="num">7</span>Controller and timing</h2>
+<p>Any microcontroller with 12 outputs can play the tune: an Arduino Nano or a Raspberry Pi Pico switching logic-level MOSFETs, with a flyback diode across every coil. The timing is a fixed grid:</p>
+<pre><code>sixteenth = 166.7 ms                       (90 BPM)
+for each note (pitch, n) in the sequence:
+    t = 0                horn valve[pitch] on
+    t = 20 ms - lag      slide valve[pitch] on   (lag: that slide's measured delay)
+    t = n x 166.7 - 30   both off                (a sixteenth sounds 136.7 ms)
+    next note at t = n x 166.7
+for each rest (n):       wait n x 166.7 ms
+after the last note:     2 sixteenths of silence (333 ms)</code></pre>
+<p>The lag is how long a slide valve and its cylinder take to start moving, typically 5–15 ms. Measure it once per horn (section 8) and store it per horn, so every slide starts 20 ms after its note does.</p>
+</section>
+
+<section id="tuning">
+<h2><span class="num">8</span>Tuning and commissioning</h2>
+<ol class="steps">
+  <li><b>Set the horn pressure.</b> Set the precision regulator to 0.10 bar, or your chosen pressure, with a gauge at a head while it sounds.</li>
+  <li><b>Tune each note.</b> Pin the carriage at its short stop, sound the horn and move the stop until a tuner reads the note within ±3 cents. Tune at the temperature where the horn will be used: about 3 cents per °C.</li>
+  <li><b>Set the scoop depth.</b> Pin the carriage at its long stop and move the stop until the horn starts as low as you want: 0.6 × the note for the full scoop (G5: 470 Hz), or as low as it still speaks.</li>
+  <li><b>Option A only: set the tension link.</b> At the long stop, adjust the lever until the horn speaks cleanly at the start pitch. At the short stop, recheck the tuning.</li>
+  <li><b>Measure each slide's lag.</b> Record a few notes with a phone at 48 kHz. The lag is the time from the horn's onset to the slide's first pitch movement, minus the firmware's wait. Set the wait to 20 ms minus the lag.</li>
+  <li><b>Set the speeds.</b> Adjust the flow controls until the glide takes about 60 ms and the return finishes inside the 30 ms gap. Check the four repeated notes.</li>
+  <li><b>Play the whole tune.</b> Record it and compare it with the WAV, note by note.</li>
+</ol>
+</section>
+
+<section id="safety">
+<h2><span class="num">9</span>Road rules and safety</h2>
+<div class="panel callout">
+  <ul>
+    <li><b>Loudness:</b> PP 55/2012, Article 69, requires a vehicle horn to be at least 83 dB and at most 118 dB.</li>
+    <li><b>Telolet horns:</b> in March 2024, after a child was killed by a bus at the Merak port access road, the land transport directorate asked bus operators to stop using telolet horns. Following the National Transportation Safety Committee (KNKT), it warned that they can exhaust the air supply and weaken the brakes. Buses fitted with them no longer pass periodic inspection.</li>
+    <li><b>Brakes first:</b> the pressure-protection valve is not optional on a vehicle; it is the exact failure the ministry warned about.</li>
+    <li><b>Compressed air:</b> use rated hoses and fittings, a safety valve on every tank, and release the pressure before working on the machine.</li>
+    <li><b>Hearing:</b> 118 dB at close range harms hearing within seconds. Test with ear protection, away from people.</li>
+  </ul>
+</div>
+</section>
+
+<section id="model">
+<h2><span class="num">10</span>Where the numbers come from</h2>
+<p>The design follows a physical simulation of exactly this machine. The same model renders the tune as a ringtone WAV, so the WAV is what the machine should sound like. Per note it simulates:</p>
+<ul>
+  <li><b>The valve and chamber:</b> the chamber fills exponentially (10 ms) when the valve opens and empties (6 ms) when it closes.</li>
+  <li><b>The diaphragm:</b> a damped mass-spring driven by the difference between chamber and nozzle pressure. The flow through its gap follows Bernoulli and is solved exactly at every sample.</li>
+  <li><b>The trumpet:</b> a digital waveguide with a cubic Lagrange fractional delay. The bell reflects low frequencies (an inverting lowpass at 1.8 × the note) and lets high ones out. The radiated sound is the time derivative of the flow at the bell.</li>
+  <li><b>The slide:</b> the delay shortens during the scoop. In the WAV, diaphragm tension and chamber pressure follow it (option A).</li>
+  <li><b>Calibration:</b> a secant search sets each tube's length until the held pitch matches equal temperament, and each start length until the first audible pitch is 0.6 × the note. The model runs at 96 kHz.</li>
+</ul>
+<p>The values are physically plausible, not measured from a particular horn: 10 kPa, an 8 mm nozzle, and diaphragms equivalent to 0.2–0.5 mm steel. The model says which mechanisms matter and roughly how big things are. The exact lengths come from the tuner, which is why every stop is adjustable.</p>
+</section>
+
+<section id="faq">
+<h2><span class="num">11</span>FAQ</h2>
+<details><summary>What is the "rem truk Sulawesi" sound?</summary>
+<p>A short horn melody shared on TikTok and YouTube as "rem truk Sulawesi": 33 notes at about 90 BPM between C6 and G#6, each note sliding up into pitch. The phrase comes from the song "Mezmar El Asfour" by <a href="https://www.youtube.com/@mostafabaset" rel="external nofollow">Mostafa Baset</a>, which plays it five semitones lower, from G5 to D#6.</p></details>
+<details><summary>How does a musical air horn play a melody?</summary>
+<p>With one trumpet per pitch, each behind its own solenoid valve. A controller opens the valves in sequence. This tune uses six different pitches, so it needs six horns, and only one sounds at a time.</p></details>
+<details><summary>Can an air horn slide into a note like a slide whistle?</summary>
+<p>Yes, if its trumpet changes length while it sounds. In the simulation, a telescoping tube 1.9 times its tuned length starts the note 8.6 semitones low, provided the diaphragm's tension follows the slide. With a softer, fixed diaphragm the slide alone gives about 6 semitones.</p></details>
+<details><summary>Why can't a slowly opening valve make the scoop?</summary>
+<p>Because pressure barely moves a diaphragm horn's pitch. In the model, 2 kPa sounds only 88 cents below 10 kPa, less than a semitone, while the scoop spans almost nine semitones.</p></details>
+<details><summary>How long should an air-horn trumpet be for G5 (784 Hz)?</summary>
+<p>About 11.4 cm of air column in the model, a little longer than the quarter wavelength of 10.9 cm because the diaphragm pulls the pitch up. A real bell shifts this, so make the length adjustable and tune it with a tuner at the working pressure.</p></details>
+<details><summary>What air pressure does a musical air horn need?</summary>
+<p>This design runs the horns at 0.10 bar, about what a trumpet player blows, and the slide cylinders at 4 to 6 bar. Higher horn pressure is louder and sharper: 20 kPa is 8 dB louder and 51 cents sharp in the model, so choose the pressure first and tune at it.</p></details>
+<details><summary>Can I take the air from a truck's brake system?</summary>
+<p>Only through a pressure-protection valve that shuts below about 6.5 bar, so the horns can never use air the brakes need. Indonesia's transport ministry cited exactly this risk in 2024: telolet horns can exhaust the air supply and weaken braking.</p></details>
+<details><summary>Why use 3/2 valves for the horns instead of 2/2 valves?</summary>
+<p>A 3/2 valve vents the horn head when it closes, so the note stops in about 6 ms. A 2/2 valve leaves the air in the hose to bleed out through the horn, and the note droops at the end.</p></details>
+<details><summary>How much air does one play of the tune use?</summary>
+<p>About 10 litres of free air: roughly 6 for the horns at 0.10 bar, 3 for the slide cylinders at 5 bar and the rest in hoses. A 10 litre tank between 8 and 6 bar covers about two plays.</p></details>
+<details><summary>How accurately can a mechanical air horn be tuned?</summary>
+<p>To a few cents. Pitch moves about 3 cents per degree Celsius as the speed of sound changes, and about 7 cents per kPa of horn pressure. All horns drift together with temperature, so the tune stays in tune with itself.</p></details>
+<details><summary>Is a musical air horn legal on Indonesian roads?</summary>
+<p>PP 55/2012 requires a vehicle horn to be between 83 and 118 dB. Since March 2024 the land transport directorate has told bus operators not to use telolet horns, and buses fitted with them fail periodic inspection.</p></details>
+<details><summary>Why is the design based on a simulation?</summary>
+<p>The tune was first rendered as a ringtone WAV by simulating this machine: valve, diaphragm, trumpet, bell and slide. The dimensions and timings come from the same model. Its parameters are plausible rather than measured from a particular horn, so every length is adjustable and tuned by ear.</p></details>
+</section>
+
+<section id="refs">
+<h2><span class="num">12</span>References</h2>
+<ol class="refs">
+  <li>Antara, <a href="https://www.antaranews.com/berita/4017387/ditjen-hubdat-imbau-operator-bus-tak-gunakan-klakson-telolet" rel="external nofollow">Ditjen Hubdat imbau operator bus tak gunakan klakson telolet</a>, 19 March 2024 (PP 55/2012 Article 69 horn limits; the KNKT warning about air supply and brakes).</li>
+  <li>detikOto, <a href="https://oto.detik.com/berita/d-7253123/bus-pakai-klakson-telolet-tidak-akan-lulus-uji-berkala" rel="external nofollow">Bus pakai klakson telolet tidak akan lulus uji berkala</a>, March 2024.</li>
+  <li>J. O. Smith III, <a href="https://ccrma.stanford.edu/~jos/pasp/" rel="external nofollow">Physical Audio Signal Processing</a>, CCRMA, Stanford University (digital waveguides, lip-reed and bell models).</li>
+  <li>N. H. Fletcher, T. D. Rossing, <a href="https://doi.org/10.1007/978-0-387-21603-4" rel="external nofollow">The Physics of Musical Instruments</a>, 2nd ed., Springer, 1998 (lip-driven brass instruments and horns).</li>
+  <li>T. I. Laakso, V. Välimäki, M. Karjalainen, U. K. Laine, <a href="https://doi.org/10.1109/79.482137" rel="external nofollow">Splitting the unit delay</a>, IEEE Signal Processing Magazine 13(1), 1996 (Lagrange fractional delay).</li>
+  <li>A. Farnell, Designing Sound, MIT Press, 2010 (practical synthesis of whistles, horns and machines).</li>
+</ol>
+</section>
+
+<footer>
+  <p>Written by Claude Opus 5.5 for Dawud Tan, from the physical air-horn simulation behind a Galaxy S20 ringtone of the same tune. Published 7 November 2026. The melody excerpt belongs to its composer; the machine design and the simulation results are this page's own.</p>
+</footer>
+
+</main>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://dawud-tan.github.io/rem-truk-sulawesi-air-horn.html#article",
+      "headline": "Rem Truk Sulawesi Air Horn: Six Tuned Trumpets with a Slide-Whistle Scoop",
+      "name": "Rem truk Sulawesi on real air: a six-trumpet air horn whose notes slide in",
+      "description": "A buildable musical air horn for the rem truk Sulawesi tune: six tuned trumpets, sliding tubes for the scoop, valves, air supply and controller timing.",
+      "inLanguage": "en",
+      "datePublished": "2026-11-07T21:01:00+07:00",
+      "dateModified": "2026-11-09T10:35:12+07:00",
+      "author": {
+        "@type": "Person",
+        "name": "Claude Opus 5.5"
+      },
+      "publisher": {
+        "@type": "Person",
+        "name": "Dawud Tan"
+      },
+      "mainEntityOfPage": "https://dawud-tan.github.io/rem-truk-sulawesi-air-horn.html",
+      "proficiencyLevel": "Expert",
+      "articleSection": [
+        "What the horn plays",
+        "The machine at a glance",
+        "One horn, up close",
+        "The six horns",
+        "The scoop: what it takes",
+        "Air supply",
+        "Controller and timing",
+        "Tuning and commissioning",
+        "Road rules and safety",
+        "Where the numbers come from"
+      ],
+      "keywords": "rem truk Sulawesi, klakson rem truk Sulawesi, musical air horn, klakson telolet, air horn design, diaphragm air horn, telescoping trumpet, slide whistle, pitch scoop, glissando, lip reed, 3/2 solenoid valve, 5/2 solenoid valve, pneumatic cylinder hard stop, pressure protection valve, air brake accessory, air horn tuning, trumpet length for a note, Mezmar El Asfour, physical modelling synthesis, digital waveguide, PP 55/2012 klakson 83-118 dB",
+      "about": [
+        {
+          "@type": "Thing",
+          "name": "Air horn"
+        },
+        {
+          "@type": "Thing",
+          "name": "Musical horn"
+        },
+        {
+          "@type": "Thing",
+          "name": "Glissando"
+        },
+        {
+          "@type": "Thing",
+          "name": "Physical modelling synthesis"
+        }
+      ],
+      "mentions": [
+        {
+          "@type": "Thing",
+          "name": "Rem truk Sulawesi"
+        },
+        {
+          "@type": "Thing",
+          "name": "Mezmar El Asfour (Mostafa Baset)"
+        },
+        {
+          "@type": "Thing",
+          "name": "Klakson telolet"
+        },
+        {
+          "@type": "Thing",
+          "name": "Pressure protection valve"
+        },
+        {
+          "@type": "Thing",
+          "name": "Digital waveguide synthesis"
+        },
+        {
+          "@type": "Legislation",
+          "name": "Peraturan Pemerintah Nomor 55 Tahun 2012 tentang Kendaraan"
+        }
+      ]
+    },
+    {
+      "@type": "HowTo",
+      "@id": "https://dawud-tan.github.io/rem-truk-sulawesi-air-horn.html#tuning",
+      "name": "Tune and commission a six-trumpet sliding air horn",
+      "inLanguage": "en",
+      "tool": [
+        {
+          "@type": "HowToTool",
+          "name": "Chromatic tuner"
+        },
+        {
+          "@type": "HowToTool",
+          "name": "Low-pressure gauge, 0-0.25 bar"
+        },
+        {
+          "@type": "HowToTool",
+          "name": "Phone recording at 48 kHz"
+        }
+      ],
+      "supply": [
+        {
+          "@type": "HowToSupply",
+          "name": "Six horn heads with telescoping trumpets on slide cylinders"
+        },
+        {
+          "@type": "HowToSupply",
+          "name": "Compressed air: 0.10 bar for the horns, 4-6 bar for the slides"
+        },
+        {
+          "@type": "HowToSupply",
+          "name": "Controller driving six 3/2 horn valves and six 5/2 slide valves"
+        }
+      ],
+      "step": [
+        {
+          "@type": "HowToStep",
+          "position": 1,
+          "name": "Set the horn pressure",
+          "text": "Set the horn pressure. Set the precision regulator to 0.10 bar, or your chosen pressure, with a gauge at a head while it sounds."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 2,
+          "name": "Tune each note",
+          "text": "Tune each note. Pin the carriage at its short stop, sound the horn and move the stop until a tuner reads the note within ±3 cents. Tune at the temperature where the horn will be used: about 3 cents per °C."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 3,
+          "name": "Set the scoop depth",
+          "text": "Set the scoop depth. Pin the carriage at its long stop and move the stop until the horn starts as low as you want: 0.6 × the note for the full scoop (G5: 470 Hz), or as low as it still speaks."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 4,
+          "name": "Option A only: set the tension link",
+          "text": "Option A only: set the tension link. At the long stop, adjust the lever until the horn speaks cleanly at the start pitch. At the short stop, recheck the tuning."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 5,
+          "name": "Measure each slide's lag",
+          "text": "Measure each slide's lag. Record a few notes with a phone at 48 kHz. The lag is the time from the horn's onset to the slide's first pitch movement, minus the firmware's wait. Set the wait to 20 ms minus the lag."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 6,
+          "name": "Set the speeds",
+          "text": "Set the speeds. Adjust the flow controls until the glide takes about 60 ms and the return finishes inside the 30 ms gap. Check the four repeated notes."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 7,
+          "name": "Play the whole tune",
+          "text": "Play the whole tune. Record it and compare it with the WAV, note by note."
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://dawud-tan.github.io/rem-truk-sulawesi-air-horn.html#faq",
+      "inLanguage": "en",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is the \"rem truk Sulawesi\" sound?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A short horn melody shared on TikTok and YouTube as \"rem truk Sulawesi\": 33 notes at about 90 BPM between C6 and G#6, each note sliding up into pitch. The phrase comes from the song \"Mezmar El Asfour\" by Mostafa Baset, which plays it five semitones lower, from G5 to D#6."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does a musical air horn play a melody?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "With one trumpet per pitch, each behind its own solenoid valve. A controller opens the valves in sequence. This tune uses six different pitches, so it needs six horns, and only one sounds at a time."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can an air horn slide into a note like a slide whistle?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, if its trumpet changes length while it sounds. In the simulation, a telescoping tube 1.9 times its tuned length starts the note 8.6 semitones low, provided the diaphragm's tension follows the slide. With a softer, fixed diaphragm the slide alone gives about 6 semitones."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why can't a slowly opening valve make the scoop?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Because pressure barely moves a diaphragm horn's pitch. In the model, 2 kPa sounds only 88 cents below 10 kPa, less than a semitone, while the scoop spans almost nine semitones."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How long should an air-horn trumpet be for G5 (784 Hz)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "About 11.4 cm of air column in the model, a little longer than the quarter wavelength of 10.9 cm because the diaphragm pulls the pitch up. A real bell shifts this, so make the length adjustable and tune it with a tuner at the working pressure."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What air pressure does a musical air horn need?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "This design runs the horns at 0.10 bar, about what a trumpet player blows, and the slide cylinders at 4 to 6 bar. Higher horn pressure is louder and sharper: 20 kPa is 8 dB louder and 51 cents sharp in the model, so choose the pressure first and tune at it."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I take the air from a truck's brake system?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Only through a pressure-protection valve that shuts below about 6.5 bar, so the horns can never use air the brakes need. Indonesia's transport ministry cited exactly this risk in 2024: telolet horns can exhaust the air supply and weaken braking."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why use 3/2 valves for the horns instead of 2/2 valves?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A 3/2 valve vents the horn head when it closes, so the note stops in about 6 ms. A 2/2 valve leaves the air in the hose to bleed out through the horn, and the note droops at the end."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How much air does one play of the tune use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "About 10 litres of free air: roughly 6 for the horns at 0.10 bar, 3 for the slide cylinders at 5 bar and the rest in hoses. A 10 litre tank between 8 and 6 bar covers about two plays."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How accurately can a mechanical air horn be tuned?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "To a few cents. Pitch moves about 3 cents per degree Celsius as the speed of sound changes, and about 7 cents per kPa of horn pressure. All horns drift together with temperature, so the tune stays in tune with itself."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is a musical air horn legal on Indonesian roads?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "PP 55/2012 requires a vehicle horn to be between 83 and 118 dB. Since March 2024 the land transport directorate has told bus operators not to use telolet horns, and buses fitted with them fail periodic inspection."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why is the design based on a simulation?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The tune was first rendered as a ringtone WAV by simulating this machine: valve, diaphragm, trumpet, bell and slide. The dimensions and timings come from the same model. Its parameters are plausible rather than measured from a particular horn, so every length is adjustable and tuned by ear."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://dawud-tan.github.io/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Rem truk Sulawesi air horn",
+          "item": "https://dawud-tan.github.io/rem-truk-sulawesi-air-horn.html"
+        }
+      ]
+    }
+  ]
+}
+</script>
+<script async src="https://www.instagram.com/embed.js"></script>
+</body>
+</html>
