@@ -28,7 +28,7 @@
     <ul>
       <li>Aplikasi tidak menampilkan iklan, tidak memuat SDK iklan atau analitik, dan tidak memakai ID iklan.</li>
       <li>Aplikasi tidak memiliki akun, login, atau server milik pengembang. Pengembang tidak menerima dan tidak menyimpan data apa pun tentang Anda.</li>
-      <li>Satu-satunya data yang keluar dari ponsel Anda adalah koordinat lokasi, yang dikirim ke layanan Nominatim milik OpenStreetMap untuk mencari nama tempat (lihat bagian 3).</li>
+      <li>Versi dengan data batas wilayah BIG memproses koordinat di ponsel Anda, termasuk saat mencari nama tempat. Bagian 3 menjelaskan cara kerja versi ini dan versi sebelumnya.</li>
     </ul>
   </section>
 
@@ -40,14 +40,15 @@
   </section>
 
   <section>
-    <h2>3. Lokasi yang dikirim ke OpenStreetMap (Nominatim)</h2>
-    <p>Notifikasi adzan menampilkan nama tempat Anda (misalnya nama kelurahan dan kabupaten). Untuk mendapatkan nama itu, aplikasi mengirim koordinat lokasi tersimpan ke <a href="https://nominatim.openstreetmap.org/">Nominatim</a>, layanan pencarian alamat yang dijalankan OpenStreetMap Foundation, melalui sambungan terenkripsi (HTTPS). Permintaan itu berisi lintang, bujur, nama dan versi aplikasi, serta alamat surel pengembang sebagai kontak yang diminta layanan tersebut. Permintaan tidak berisi nama, akun, atau pengenal perangkat Anda; seperti semua sambungan internet, alamat IP Anda terlihat oleh server tujuan.</p>
-    <p>Permintaan dikirim sekali untuk suatu tempat, lalu lagi hanya sesudah Anda berpindah lebih dari sekitar 2 km. Pengembang tidak menerima salinan data itu. Cara OpenStreetMap Foundation menangani data dijelaskan di <a href="https://osmfoundation.org/wiki/Privacy_Policy">kebijakan privasi OSMF</a>. Data nama tempat © kontributor OpenStreetMap.</p>
+    <h2>3. Nama tempat di notifikasi adzan</h2>
+    <p>Versi dengan pencarian luring mencocokkan koordinat dengan data batas desa atau kelurahan yang sudah disertakan di aplikasi. Notifikasi menampilkan nama desa atau kelurahan dan kecamatan. Sumber data batas wilayah ialah <a href="https://geoservices.big.go.id/rbi/rest/services/BATASWILAYAH/BATAS_DESAKEL_AR/MapServer">Badan Informasi Geospasial (BIG)</a>, edisi Juni 2026. BIG tidak menerima koordinat Anda.</p>
+    <p>Versi sebelumnya mengirim koordinat lokasi tersimpan ke <a href="https://nominatim.openstreetmap.org/">Nominatim</a>, layanan pencarian alamat yang dijalankan OpenStreetMap Foundation, melalui sambungan terenkripsi (HTTPS). Permintaan itu berisi lintang, bujur, nama dan versi aplikasi, serta alamat surel pengembang sebagai kontak yang diminta layanan tersebut. Permintaan tidak berisi nama, akun, atau pengenal perangkat Anda; seperti semua sambungan internet, alamat IP Anda terlihat oleh server tujuan.</p>
+    <p>Versi tersebut mengirim permintaan sekali untuk suatu tempat, lalu lagi sesudah Anda berpindah lebih dari sekitar 2 km. Pengembang tidak menerima salinan data itu. Cara OpenStreetMap Foundation menangani data dijelaskan di <a href="https://osmfoundation.org/wiki/Privacy_Policy">kebijakan privasi OSMF</a>. Data nama tempat © kontributor OpenStreetMap.</p>
   </section>
 
   <section>
     <h2>4. Lokasi di latar belakang (pilihan, mati sejak awal)</h2>
-    <p>Bila Anda menyalakan sakelar "Perbarui lokasi sebelum adzan" di menu Izin Aplikasi dan memilih "Izinkan sepanjang waktu", aplikasi mengumpulkan data lokasi untuk menyesuaikan jadwal adzan dengan tempat Anda berada, <strong>bahkan saat aplikasi ditutup atau tidak digunakan</strong>. Caranya: 10 menit sebelum setiap adzan, aplikasi membaca lokasi terakhir yang sudah diketahui ponsel, tanpa menyalakan GPS. Koordinat itu diperlakukan sama seperti di bagian 2 dan 3: disimpan di ponsel, dan dikirim ke Nominatim hanya untuk nama tempat.</p>
+    <p>Bila Anda menyalakan sakelar "Perbarui lokasi sebelum adzan" di menu Izin Aplikasi dan memilih "Izinkan sepanjang waktu", aplikasi mengumpulkan data lokasi untuk menyesuaikan jadwal adzan dengan tempat Anda berada, <strong>bahkan saat aplikasi ditutup atau tidak digunakan</strong>. Caranya: 10 menit sebelum setiap adzan, aplikasi membaca lokasi terakhir yang sudah diketahui ponsel, tanpa menyalakan GPS. Koordinat disimpan di ponsel dan dipakai sesuai bagian 2 dan 3.</p>
     <p>Sebelum izin ini diminta, aplikasi menampilkan penjelasan dan meminta persetujuan Anda. Fitur ini bisa dimatikan kapan saja dari sakelar yang sama, atau dengan mengubah izin lokasi aplikasi di Setelan Android. Tanpa fitur ini, jadwal adzan memakai lokasi saat aplikasi terakhir dibuka.</p>
   </section>
 
@@ -66,7 +67,7 @@
       <li><strong>Notifikasi</strong> dan <strong>tampilan layar penuh</strong>: menampilkan adzan beserta tombol Matikan, termasuk di atas layar kunci.</li>
       <li><strong>Layanan latar depan (pemutaran media)</strong>, <strong>getar</strong>, dan <strong>mencegah ponsel tidur</strong>: membunyikan adzan dan nada pengingat.</li>
       <li><strong>Berjalan saat ponsel dinyalakan</strong>: memasang kembali alarm adzan sesudah ponsel dihidupkan ulang.</li>
-      <li><strong>Internet</strong> dan <strong>status jaringan</strong>: hanya untuk permintaan nama tempat di bagian 3.</li>
+      <li><strong>Internet</strong>: dipakai pada versi sebelumnya untuk permintaan nama tempat yang dijelaskan di bagian 3.</li>
     </ul>
     <p>Aplikasi tidak meminta izin kamera, mikrofon, kontak, atau penyimpanan. Setiap izin dijelaskan di menu Izin Aplikasi, termasuk apa yang terjadi bila ditolak.</p>
   </section>
@@ -89,7 +90,7 @@
 
   <section>
     <h2>1. Summary</h2>
-    <p>The app shows no ads, contains no advertising or analytics SDK and does not use the advertising ID. It has no accounts, no login and no developer-operated server; the developer does not receive or store any data about you. The only data that leaves your device is your location coordinates, sent to OpenStreetMap's Nominatim service to look up a place name (section 3).</p>
+    <p>The app shows no ads, contains no advertising or analytics SDK and does not use the advertising ID. It has no accounts, no login and no developer-operated server; the developer does not receive or store any data about you. The version with BIG boundary data processes location coordinates on your device, including when looking up a place name. Section 3 covers this and the earlier versions.</p>
   </section>
 
   <section>
@@ -98,8 +99,9 @@
   </section>
 
   <section>
-    <h2>3. Location sent to OpenStreetMap (Nominatim)</h2>
-    <p>The adhan notification shows the name of your area. To obtain it, the app sends the saved coordinates over HTTPS to <a href="https://nominatim.openstreetmap.org/">Nominatim</a>, the geocoding service run by the OpenStreetMap Foundation. The request contains latitude, longitude, the app's name and version, and the developer's contact email as that service requires. It contains no name, account or device identifier; as with any internet connection, the server sees your IP address. A request is made once for a place and again only after you have moved more than about 2 km. The developer receives no copy of this data. See the <a href="https://osmfoundation.org/wiki/Privacy_Policy">OSMF privacy policy</a>. Place names © OpenStreetMap contributors.</p>
+    <h2>3. Place names in adhan notifications</h2>
+    <p>The offline version matches your coordinates against the village boundaries bundled in the app. The notification displays the village and district names. Boundary data comes from the June 2026 edition of <a href="https://geoservices.big.go.id/rbi/rest/services/BATASWILAYAH/BATAS_DESAKEL_AR/MapServer">Badan Informasi Geospasial (BIG)</a>, Indonesia’s Geospatial Information Agency. BIG does not receive your coordinates.</p>
+    <p>Earlier versions send the saved coordinates over HTTPS to <a href="https://nominatim.openstreetmap.org/">Nominatim</a>, the geocoding service run by the OpenStreetMap Foundation. The request contains latitude, longitude, the app's name and version, and the developer's contact email as that service requires. It contains no name, account or device identifier; as with any internet connection, the server sees your IP address. A request is made once for a place and again only after you have moved more than about 2 km. The developer receives no copy of this data. See the <a href="https://osmfoundation.org/wiki/Privacy_Policy">OSMF privacy policy</a>. Place names © OpenStreetMap contributors.</p>
   </section>
 
   <section>
@@ -110,13 +112,13 @@
   <section>
     <h2>5. Data kept on your device, permissions, children and contact</h2>
     <p>The last coordinates and place name, adhan settings and the last reading position are stored only in the app's storage on your device. If Android backup is enabled they may be included in the backup to your own Google account, which is handled by Android and Google, not by the developer. You can delete everything by clearing the app's data or uninstalling the app; the developer holds no data to delete.</p>
-    <p>Permissions: location (sections 2 to 4); alarms and reminders, notifications, full-screen display, foreground media-playback service, vibration and wake lock to sound and show the adhan; run at startup to re-arm the alarm after a reboot; internet and network state only for the request in section 3. The app is intended for general users aged 13 and over and is not designed for children. Contact: <a href="mailto:muhammad.dawud91@gmail.com">muhammad.dawud91@gmail.com</a></p>
+    <p>Permissions: location (sections 2 to 4); alarms and reminders, notifications, full-screen display, foreground media-playback service, vibration and wake lock to sound and show the adhan; run at startup to re-arm the alarm after a reboot; internet access in earlier versions for the request in section 3. The app is intended for general users aged 13 and over and is not designed for children. Contact: <a href="mailto:muhammad.dawud91@gmail.com">muhammad.dawud91@gmail.com</a></p>
     <p>If you often miss the adhan, you can request an optional battery optimization exemption under Izin Aplikasi (App permissions). Android stores the choice on your device. You can decline or revoke it in Android battery settings and keep the alarm schedule. This option may increase battery use and does not collect or send additional data.</p>
   </section>
 
   <footer>
     <p><strong>Clear labeling:</strong> This page is the official <em>Privacy Policy</em> for Jadwal Sholat, Kiblat &amp; Quran (package <code>com.quran.kiblat.salat</code>).<br>
-    <strong>Terakhir diperbarui / Last updated:</strong> 27 November 2026.</p>
+    <strong>Terakhir diperbarui / Last updated:</strong> 28 November 2026.</p>
   </footer>
 </body>
 </html>
